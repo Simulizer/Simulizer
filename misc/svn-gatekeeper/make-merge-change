@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script creates a branch off master, then makes changes that require a
+# manual 2-way merge (then automatically resolves the conflict by overwriting
+# the content)
+
+
+# experiment root
+ER="./experiment"
+
+cd "$ER/git_main"
+
+echo "added something else" > another.txt
+git add --all
+git com -m "another added on master"
+
+git branch test
+git checkout test
+echo "added another" > another.txt
+git add --all
+git com -m "another added on test branch"
+
+git checkout master
+
+echo "changed content in something else" > another.txt
+git add --all
+git com -m "another changed on master"
+
+git merge test
+
+echo "merged (overwritten)" > another.txt
+git add --all
+git com -m "merged"
+
+git log --graph

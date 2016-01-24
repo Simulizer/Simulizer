@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# This script creates the directories and repositories required for the experiment
+# the experiment is self contained under the root directory (defined below)
+
+
+# experiment root
+ER="./experiment"
+
+
+# Research
+#
+# https://stackoverflow.com/questions/661018/pushing-an-existing-git-repository-to-svn
+# http://www.kerrybuckley.org/2009/10/06/maintaining-a-read-only-svn-mirror-of-a-git-repository/
+
+
+
+# setup the root directory
+if [ -d "$ER" ]; then
+    echo "experiment directory already exists. Exiting..."
+    exit
+fi
+
+mkdir "$ER"
+cd "$ER"
+
+
+# Setup SVN server (not viewable like a repository)
+# from: https://civicactions.com/blog/2010/may/25/how_set_svn_repository_7_simple_steps
+echo -e "\n# setting up SVN\n\n"
+
+mkdir svn_server
+svnadmin create ./svn_server
+
+F="./svn_server/conf/svnserve.conf"
+echo "anon-access = write"  >> $F
+echo "auth-access = write"  >> $F
+echo "password-db = passwd" >> $F
+
+# a sample user
+echo "user = password" >> ./svn_server/conf/passwd
+
+# run daemon, close existing svn servers
+#killall svnserve
+#svnserve -d --listen-port 9999
+
+
+# svn requires the absolute path for the repo
+SVN_URL="file://$(realpath svn_server)"
+# standard repo layout (with trunk directory) is _required_
+svn mkdir --parents "$SVN_URL/trunk" -m "created trunk"
+
+
+
+# just for viewing. Not involved in the process
+svn checkout "$SVN_URL" svn_repo
+
+
+
+
+# Setup the pretend remote/main git repo
+echo -e "\n# setting up git main\n\n"
+
+mkdir git_main
+cd git_main
+git init
+
+echo "initial text" > a_file.txt
+git add --all
+git com -m "Initial Commit"
+
+cd ..
+
+
+# Setup the gatekeeper
+echo -e "\n# setting up git gatekeeper\n\n"
+
+git svn clone --stdlayout "$SVN_URL" git_gatekeeper
+cd git_gatekeeper
+
+
+git remote add main ../git_main
+
+
+#F=./.git/config
+#echo "[svn-remote \"svn_server\"]"       >> $F
+#echo "    url   = \"file://$REPO_PATH\"" >> $F
+#echo "    fetch = :refs/remotes/git-svn" >> $F
+
+#echo -e "\n# fetching from svn\n\n"
+#git branch svn
+#git checkout svn
+
+#git svn init -s --username user "$SVN_URL"
+#git rebase --onto trunk --root
+
+cd ..
+#./run-gatekeeper-first-time
+
+
+
+
+
+# make changes to the main repo
+cd git_main
+echo "change!" > a_file.txt
+
+git add --all
+git commit -m "made a change"
+cd ..
+

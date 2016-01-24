@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# based on here: https://stackoverflow.com/questions/661018/pushing-an-existing-git-repository-to-svn
+
+cd git_gatekeeper
+
+
+git svn fetch svn
+git pull --rebase main master
+git rebase --onto origin/trunk --root
+
+# while git status has some output (-n: string not null)
+# => there are still problems
+while [ -n "$(git status --porcelain)" ]; do
+    # problems
+    git add --all
+    git rebase --continue
+done
+
+#git checkout master
+#git pull --rebase main master # replay new commits as if they were made here
+#git checkout origin/trunk
+
+#git svn fetch svn # svn is the name in .git/config
+#git reset --hard svn
+#git merge master
+
+git svn dcommit
+
+cd ..
+cd svn_repo
+svn update

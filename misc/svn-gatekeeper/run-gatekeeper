@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+# experiment root
+ER="./experiment"
+
+cd "$ER"
+
+cd git_gatekeeper
+
+
+git pull --rebase main master
+git svn dcommit
+
+cd ..
+cd svn_repo
+svn update
+svn log

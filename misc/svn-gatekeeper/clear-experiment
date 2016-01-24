@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# this script completely removes the files involved in the experiment
+
+
+# experiment root
+ER="./experiment"
+
+rm -rf "$ER"
+
