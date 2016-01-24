@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# based on here: https://stackoverflow.com/questions/661018/pushing-an-existing-git-repository-to-svn
+# experiment root
+ER="./experiment"
+
+cd "$ER"
 
 cd git_gatekeeper
 
