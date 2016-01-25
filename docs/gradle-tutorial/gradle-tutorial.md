@@ -30,7 +30,7 @@ Then you can open a new Gradle project.
 
 Dependencies
 ------------
-In the `build.gradle` file, there is a `repositories` configuration block and a `dependencies` configuration block. In the `repositories` block, you specify where the dependencies will be downloaded from. For example, you could write: 
+At the start of the `build.gradle` file, the line `apply plugin: 'java'` means that your project will be built as a Java project. There is a `repositories` configuration block and a `dependencies` configuration block. In the `repositories` block, you specify where the dependencies will be downloaded from. For example, you could write: 
 ```groovy
 repositories {
   jcenter()
