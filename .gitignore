@@ -2,3 +2,4 @@ misc/svn-gatekeeper/experiment
 /bin
 .project
 .classpath
+.gradle/

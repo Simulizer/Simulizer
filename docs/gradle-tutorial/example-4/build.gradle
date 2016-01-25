@@ -1,0 +1,12 @@
+task one << {
+  println 'one'
+}
+
+task two << {
+  println 'two'
+}
+
+task three << {
+  dependsOn one, two
+  println 'three'
+}
