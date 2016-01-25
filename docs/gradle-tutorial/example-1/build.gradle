@@ -1,1 +1,7 @@
 apply plugin: 'java'
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'example.HelloWorld'
+  }
+}
