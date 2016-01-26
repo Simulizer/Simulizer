@@ -1,5 +1,20 @@
+# ignore whole projects
 misc/svn-gatekeeper/experiment
-/bin
+
+# ignore project files
 .project
+
+# ignore build files
+bin/
+build/
 .classpath
+
+
+# ignore gradle files
 .gradle/
+.gradletasknamecache
+gradle-app.setting
+
+## make sure to include this since jars are normally ignored
+!gradle-wrapper.jar
+
