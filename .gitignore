@@ -1,8 +1,25 @@
 # ignore whole projects
 misc/svn-gatekeeper/experiment
 
-# ignore project files
+# ignore temporary files
+*.swp
+
+
+# ignore IntelliJ project files
+.idea/
+## module library
+*.iml
+## project and library info
+*.ipr
+## personal data such as IDE arrangement
+*.iws
+
+# ignore Eclipse project files
 .project
+.classpath
+.settings/
+
+
 
 # ignore build files
 bin/

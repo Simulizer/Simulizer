@@ -4,6 +4,9 @@ Gradle expresses its build files in Groovy ([Groovy
 tutorial](https://learnxinyminutes.com/docs/groovy/)). This allows you to
 general-purpose programming tasks in your build file.
 
+Read `prototypes/javafx-prototype/build.gradle` for a useful and working example
+(it is well documented)
+
 Install
 -------
 ```
@@ -19,6 +22,12 @@ Start a Project
 ---------------
 Call `gradle init` to initialise a skeleton structure with a few files to get
 started. You could also manually create the `build.gradle` file yourself.
+
+The command also created 'wrappers' for different operating systems. They are
+for the future when new versions of gradle and other dependencies are released,
+the wrapper should still function exactly the same as it downloads the exact
+version it was created with (or at least that is my understanding (Matt))
+
 
 First Project
 ------------
