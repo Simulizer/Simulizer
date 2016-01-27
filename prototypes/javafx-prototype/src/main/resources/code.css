@@ -1,0 +1,22 @@
+
+.plain {
+
+}
+
+.keyword {
+    -fx-fill: blue;
+    -fx-font-weight: bold;
+}
+
+.register {
+    -fx-fill: green;
+}
+
+.constant {
+    -fx-fill: purple;
+}
+
+.comment {
+    -fx-fill: grey;
+}
+

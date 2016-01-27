@@ -16,6 +16,8 @@ apply plugin: 'eclipse'     // able to create Eclipse project files
     or using the wrapper:
         gradlew TASK_NAME
 
+    to run the default tasks, run gradle with no arguments
+
 
 Useful gradle tasks:
 
@@ -77,16 +79,13 @@ dependencies {
         compile 'org.jfxtras:jfxtras-controls:8.0-r4'
         compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
 
-    testCompile 'junit:junit:4.12'
+    // Rich Text FX
+        compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
+
+    // Testing
+        testCompile 'junit:junit:4.12'
 }
 
-sourceSets {
-    test {
-        java {
-            srcDirs = ["test/"]
-        }
-    }
-}
 
 jar {
     manifest {
