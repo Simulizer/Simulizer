@@ -67,7 +67,14 @@ argument
 // ------ Tokens ------
 
 OPCODE
-   : 'add' | 'sub' | 'mult' | 'div' | 'lw' | 'and' | 'or' | 'xor' | 'li'
+   : 'add' | 'addi' | 'sub' | 'subi'
+   | 'mult' | 'div' 
+   | 'lw' | 'li'
+   | 'sw' | 'and' | 'or' | 'xor' | 'nor' 
+   | 'beq' | 'bne' | 'j' | 'jr' | 'jal' | 'not'
+   | 'bgt' | 'blt' | 'bge' | 'ble'
+   | 'blez' | 'bgtz' | 'bnez'
+   | 'bltz' | 'bgez'
    ;
 
 REGISTERID
@@ -83,19 +90,19 @@ REGISTERID
   | 'ra'
   ;
 
-ASSEMBLEROPCODE 
+ASSEMBLEROPCODE
   : 'ORG' | 'EQU' | 'ASC' | 'DS' | 'DFC' | '='
   ;
 
-ANNOTATION 
+ANNOTATION
   : '@' ~ [\r\n]* -> skip
   ;
 
-STRING 
+STRING
   : '"' ~ ["]* '"'
   ;
 
-NAME 
+NAME
   : [a-zA-Z] [a-zA-Z0-9]*
   ;
 
