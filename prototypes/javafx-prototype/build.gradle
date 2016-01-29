@@ -79,6 +79,9 @@ dependencies {
         compile 'org.jfxtras:jfxtras-controls:8.0-r4'
         compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
 
+	// Antlr
+	    compile 'org.antlr:antlr4:4.5.1-1'
+
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
 

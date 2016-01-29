@@ -1,9 +1,10 @@
-package smallmips;
+package antlrprototype;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 
-import smallmips.SmallMipsParser.ProgContext;
+import antlrprototype.SmallMipsParser.ProgContext;
 
 public class Anty {
 
