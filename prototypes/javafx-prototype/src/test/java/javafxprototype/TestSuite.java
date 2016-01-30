@@ -3,11 +3,12 @@ package javafxprototype;
 import junit.framework.*;
 
 public class TestSuite extends TestCase {
-    protected void setUp(){
+	protected void setUp() {
 
-    }
+	}
 
-    public void testThing(){
-        assertTrue(1 == 1);
+	public void testThing() {
+    	int x = 5;
+        assertTrue(x * x == 25);
     }
 }
