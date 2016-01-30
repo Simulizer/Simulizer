@@ -27,6 +27,8 @@ public class Main extends Application {
         launch(args);
     }
 
+    private static final String THEME = "my-theme";
+
     private static final String[] KEYWORDS = new String[]{
         "add", "sub", "li", "bne"
     };
@@ -40,9 +42,10 @@ public class Main extends Application {
 
     private static final String code = "\n" +
         "# this does some nonsense :)\n" +
-        "add $s1, $s2 # try editing!\n"    +
+        "# try editing!\n"    +
+        "add $s0, $s1, $s2\n" +
         "li  $s1, 14\n" +
-        "bne $s1, $s2\n";
+        "bne $s1, $s0 # @test\n";
 
 
     @Override
@@ -50,13 +53,13 @@ public class Main extends Application {
         Pane pane = new Pane();
 
         pane.getStyleClass().add("background");
-        pane.getStylesheets().add("background.css");
+        pane.getStylesheets().add(THEME + "/background.css");
 
         Scene scene = new Scene(pane, 1060, 740);
 
 
         Window wc = new Window("Code View");
-        wc.getStylesheets().add("window.css");
+        wc.getStylesheets().add(THEME + "/window.css");
         wc.setLayoutX(20);
         wc.setLayoutY(20);
         wc.setPrefSize(400, 700);
@@ -68,13 +71,13 @@ public class Main extends Application {
             codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText())));
         codeArea.replaceText(0, 0, code);
 
-        wc.getStylesheets().add("code.css");
+        wc.getStylesheets().add(THEME + "/code.css");
         wc.getContentPane().getChildren().add(codeArea);
 
 
 
         Window wv = new Window("Visualisation");
-        wv.getStylesheets().add("window.css");
+        wv.getStylesheets().add(THEME + "/window.css");
         wv.setLayoutX(440);
         wv.setLayoutY(20);
         wv.setPrefSize(600, 400);
@@ -86,7 +89,7 @@ public class Main extends Application {
 
 
         Window wr = new Window("Registers");
-        wr.getStylesheets().add("window.css");
+        wr.getStylesheets().add(THEME + "/window.css");
         wr.setLayoutX(440);
         wr.setLayoutY(440);
         wr.setPrefSize(600, 280);

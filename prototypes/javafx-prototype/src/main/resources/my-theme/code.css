@@ -16,6 +16,11 @@
     -fx-fill: purple;
 }
 
+
+.annotation {
+    -fx-fill: yellow;
+}
+
 .comment {
     -fx-fill: grey;
 }
