@@ -26,6 +26,9 @@ bin/
 *.class
 build/
 
+# ignore generated source files
+generated/
+
 # ignore gradle files
 .gradle/
 .gradletasknamecache
@@ -34,6 +37,3 @@ gradle-app.setting
 ## make sure to include this since jars are normally ignored
 !gradle-wrapper.jar
 
-# ANTLR files
-SmallMips*.java
-SmallMips*.tokens

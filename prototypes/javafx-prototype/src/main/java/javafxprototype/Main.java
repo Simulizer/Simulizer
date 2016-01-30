@@ -11,8 +11,8 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
 
-import antlrprototype.SmallMipsLexer;
-import antlrprototype.SmallMipsParser;
+import javafxprototype.parser.SmallMipsLexer;
+import javafxprototype.parser.SmallMipsParser;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -67,7 +67,7 @@ public class Main extends Application {
                 .subscribe(change -> codeArea.setStyleSpans(0, computeAntlrHighlighting(codeArea.getText())));
         codeArea.replaceText(0, 0, DEFAULT_CODE);
 
-        wc.getStylesheets().add("code.css");
+        wc.getStylesheets().add(THEME + "/code.css");
         wc.getContentPane().getChildren().add(codeArea);
 
 
