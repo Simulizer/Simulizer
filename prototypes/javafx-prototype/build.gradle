@@ -17,8 +17,12 @@ apply plugin: 'application'
 apply plugin: 'idea'
 
 // able to create Eclipse project files
+//
 // to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
 // will regenerate the project files, re-open eclipse.
+//
+// better option: use the Eclipse plugin: 'Buildship'
+// http://projects.eclipse.org/projects/tools.buildship
 apply plugin: 'eclipse'
 
 
@@ -52,10 +56,10 @@ Project File tasks:
     For modern IntelliJ, import (not open) the gradle project as is
     (it understands gradle)
 
-      task         | plugin  |  description
-    ---------------|---------|------------------------------------------------------
-      eclipse      | eclipse |  creates Eclipse project files
-      cleanEclipse | eclipse |  removes Eclipse project files
+    For eclipse, use the 'Buildship' plugin
+    http://projects.eclipse.org/projects/tools.buildship
+
+    File > Import > Gradle Project
 
 
 Custom tasks:
@@ -107,6 +111,7 @@ sourceSets.main.java.srcDirs += antlrOutput
 generateGrammarSource {
     outputDirectory = file(antlrOutput)
 }
+
 // extends the clean task
 clean {
     delete antlrOutput
