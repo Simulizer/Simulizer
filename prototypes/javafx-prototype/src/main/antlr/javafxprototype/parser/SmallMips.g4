@@ -1,7 +1,7 @@
 grammar SmallMips;
 
 @header {
-    package javafxprototype.parser;
+package javafxprototype.parser;
 }
 
 // ------ Parser Rules ------
@@ -16,14 +16,35 @@ line
    ;
 
 instruction
+  : instruction3
+  | instruction2
+  | instruction3v
+  | instruction2v
+  | instruction0
+  ;
+  
+instruction3
   : opcode3  register ',' register ',' register
-  | opcode2  register ',' register
-  | opcode3v register ',' register ',' NUMBER
-  | opcode2v register ',' NUMBER
+  ;
+
+instruction2
+  : opcode2  register ',' register
+  ;
+
+instruction3v
+  : opcode3v register ',' register ',' NUMBER
+  ;
+
+instruction2v
+  : opcode2v register ',' NUMBER
+  ;
+
+instruction0
+  : opcode0
   ;
 
 opcode
-  : opcode3 | opcode2 | opcode3v | opcode2v
+  : opcode3 | opcode2 | opcode3v | opcode2v | opcode0
   ;
 
 opcode3
@@ -40,6 +61,10 @@ opcode3v
 
 opcode2v
   : OPCODE2V
+  ;
+  
+opcode0
+  : OPCODE0
   ;
 
 register
@@ -66,6 +91,10 @@ OPCODE2V
   : 'li'
   ;
 
+OPCODE0
+  : 'syscall'
+  ;
+
 // http://logos.cs.uic.edu/366/notes/mips%20quick%20tutorial.htm
 // in order of 'register number'. Some names are synonyms.
 REGISTER_ID
@@ -88,7 +117,7 @@ REGISTER
   ;
 
 ANNOTATION
-  : '@' ~ [\r\n]* -> skip
+  : '@' ~ [\r\n]*
   ;
 
 NUMBER

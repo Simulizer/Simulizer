@@ -1,5 +1,3 @@
-main:                 # The label 'main' represents the starting point
-    li  $t2, 25       # Load immediate value (25)
-    lw  $t3, value    # Load the word stored at label 'value'
-    add $t4, $t2, $t3 # Add
-    sub $t5, $t2, $t3 # Subtract
+li $t0, 25        # Load immediate value (25)
+li $t1, 6
+add $t2, $t0, $t1
