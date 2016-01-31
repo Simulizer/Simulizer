@@ -11,6 +11,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
 
+import javafxprototype.antlr.MyTreeListener;
+import javafxprototype.antlr.Register;
 import junit.framework.TestCase;
 
 public class AntlrTests extends TestCase {

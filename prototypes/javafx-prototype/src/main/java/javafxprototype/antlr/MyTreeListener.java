@@ -1,5 +1,6 @@
-package javafxprototype.parser;
+package javafxprototype.antlr;
 
+import javafxprototype.parser.SmallMipsBaseListener;
 import javafxprototype.parser.SmallMipsParser.Instruction2vContext;
 import javafxprototype.parser.SmallMipsParser.Instruction3Context;
 

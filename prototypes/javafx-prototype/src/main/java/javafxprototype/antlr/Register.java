@@ -1,4 +1,4 @@
-package javafxprototype.parser;
+package javafxprototype.antlr;
 
 public class Register {
 	private int value = 0;
