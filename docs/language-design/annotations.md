@@ -41,6 +41,7 @@ Usage: `@declare[type=(list|graph)]{<name> = <value>}`
 - `<value>` specifies the value that will be bound to `<name>`. Graphs can be declared using the `\graph{...}` environment, using [Dot](http://www.graphviz.org/) syntax.
 
 Example: `@declare[type=list]{mylist = [1, 2, 3]}`
+
 Example: 
 ```
 @declare[type=graph]{
