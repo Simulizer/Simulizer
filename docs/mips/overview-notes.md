@@ -151,13 +151,28 @@ hold information needed by instructions at each stage in the pipeline
 - `ALU/MEM` register
 - `MEM/WB` register
 
-## MIPS pipeline ##
+## MIPS simplified pipeline ##
 TODO: research what happens at each stage and write separate notes
 - `IF`: Instruction fetch
 - `ID`: Instruction decode and register fetch
 - `ALU`: ALU Execution
 - `MEM`: Data memory access
 - `WB`: Register write back
+
+## MIPS 8-stage pipeline ##
+TODO: research what happens at each stage and write separate notes
+
+[see R4000 Manual](http://www.ece.mtu.edu/faculty/rmkieckh/cla/4173/MIPS-R04K-uman3.pdf)
+
+- `IF`: Instruction fetch, first half
+- `IS`: Instruction fetch, second half
+- `RF`: Register fetch
+- `EX`: Execution
+- `DF`: Data fetch, first half
+- `DS`: Data fetch, second half
+- `TC`: Tag check
+- `WB`: Register write back
+
 
 ## Flushing the Pipeline ##
 After a jump, everything in the pipeline is invalidated and so is cleared out.
@@ -270,7 +285,7 @@ FR-Type and FI-Type instructions are the corresponding floating point instructio
 ### R-Type ###
 register-type instructions:
 
-\[destination=OP(source_1,\,source_2)\]
+$$destination=OP(source_1,\,source_2)$$
 
 `add $d, $s1, $s2  --encoded-as-->  [opcode][s1][s2][d][shift][function]`
 
@@ -279,14 +294,14 @@ The shift bits are only used for shift/rotate instructions.
 ### I-Type ###
 immediate-type instructions:
 
-\[destination=OP(source_1,\,immediate)\]
+$$destination=OP(source_1,\,immediate)$$
 
 `addi $d, $s1, 42  --encoded-as-->  [opcode][s1][d][immediate]`
 
 ### J-Type ###
 jump-type instructions:
 
-\[Jump(target)\]
+$$Jump(target)$$
 
 `j target         --encoded-as-->  [opcode][target]`
 
