@@ -1,0 +1,188 @@
+// Full user guide available at:
+// https://docs.gradle.org/2.10/userguide/tutorial_java_projects.html
+
+// able to compile java files
+apply plugin: 'java'
+
+// able to create parsers from Antlr grammars.
+// task compileJava automatically depends on generateGrammarSource
+apply plugin: 'antlr'
+
+// able to create executables. Automatically includes the 'distribution' plugin
+apply plugin: 'application'
+
+// able to create IntelliJ project files (not required for modern IntelliJ)
+// to sync with gradle: gradle toolbar (default on the right) and press the
+// refresh icon
+apply plugin: 'idea'
+
+// able to create Eclipse project files
+//
+// to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
+// will regenerate the project files, re-open eclipse.
+//
+// better option: use the Eclipse plugin: 'Buildship'
+// http://projects.eclipse.org/projects/tools.buildship
+apply plugin: 'eclipse'
+
+
+/*
+
+    run a task by running:
+        gradle TASK_NAME
+
+    or using the wrapper:
+        gradlew TASK_NAME
+
+    to run the default tasks, run gradle with no arguments
+
+
+Useful gradle tasks:
+
+      task    | plugin       |     description
+    ----------|--------------|------------------------------------------------------
+      tasks   |              | list available tasks (including custom ones)
+              |              |
+      build   | java         | compiles and checks (tests) the application
+      check   | java         | runs all verification (including the 'test' task)
+      clean   | java         | removes the build directory (safe to do)
+              |              |
+      run     | application  | sets the classpath and runs the application
+      distZip | application  | bundles dependencies and installer into a zip file
+
+
+Project File tasks:
+
+    For modern IntelliJ, import (not open) the gradle project as is
+    (it understands gradle)
+
+    For eclipse, use the 'Buildship' plugin
+    http://projects.eclipse.org/projects/tools.buildship
+
+    File > Import > Gradle Project
+
+
+Custom tasks:
+
+    - deploymentJar     a jar file bundled with all required dependencies
+
+*/
+
+/////////////////////////////////////////////////
+//
+// Basic Build Properties
+//
+/////////////////////////////////////////////////
+
+sourceCompatibility = 1.8   // JVM version to use when compiling
+targetCompatibility = 1.8   // JVM version to build for
+
+defaultTasks 'build', 'run'
+
+
+
+/////////////////////////////////////////////////
+//
+// Project Properties
+//
+/////////////////////////////////////////////////
+
+def name = 'JavaFX Prototype'
+version  = '0.01'
+
+mainClassName = 'javafxprototype.Main'
+
+
+
+/////////////////////////////////////////////////
+//
+// Generated Source Configuration
+//
+/////////////////////////////////////////////////
+
+// where to place generated files such as Antlr parsers
+def generatedOutput = 'src/generated/'
+def antlrOutput     = generatedOutput + 'antlr/'
+
+sourceSets.main.java.srcDirs += antlrOutput
+
+
+// Antlr options
+generateGrammarSource {
+    outputDirectory = file(antlrOutput)
+}
+
+// extends the clean task
+clean {
+    delete antlrOutput
+}
+
+
+
+/////////////////////////////////////////////////
+//
+// Build Configuration
+//
+/////////////////////////////////////////////////
+
+repositories {
+    // not used
+    // jcenter()
+
+    // search for packages here: https://search.maven.org
+    mavenCentral()
+}
+
+
+dependencies {
+    // Antlr
+        // only needs antlr-runtime at runtime
+        compile 'org.antlr:antlr4-runtime:4.5'
+
+        // version for generating parsers during build
+        // task compileJava automatically depends on generateGrammarSource
+        antlr   'org.antlr:antlr4:4.5'
+
+
+    // JFExtras
+        compile 'org.jfxtras:jfxtras-controls:8.0-r4'
+        compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
+
+
+    // Rich Text FX
+        compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
+
+
+    // Testing
+        testCompile 'junit:junit:4.12'
+}
+
+
+
+/////////////////////////////////////////////////
+//
+// Deployment Configuration
+//
+/////////////////////////////////////////////////
+
+jar {
+    manifest {
+        attributes 'Implementation-Title':   name,
+                   'Implementation-Version': version,
+                   'Main-Class':             mainClassName
+    }
+}
+
+
+// bundle a jar with all dependencies
+// modified from:
+// http://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
+task deploymentJar(type: Jar) {
+    with jar
+    manifest.attributes = jar.manifest.attributes
+
+    baseName = project.name + '-bundled-depends'
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
