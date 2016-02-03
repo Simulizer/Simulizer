@@ -87,10 +87,10 @@ defaultTasks 'build', 'run'
 //
 /////////////////////////////////////////////////
 
-def name = 'JavaFX Prototype'
+def name = 'Simulizer'
 version  = '0.01'
 
-mainClassName = 'javafxprototype.Main'
+mainClassName = 'simulizer.Main'
 
 
 
