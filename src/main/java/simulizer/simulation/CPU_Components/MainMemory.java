@@ -129,7 +129,7 @@ public class MainMemory extends Observable {
 	 * 
 	 */
 	public void writeToMem() {
-		// TO IMPLEMENT, NEED TO KNOW INSTRUCTION SET UP FIRST
+		//TO IMPLEMENT, NEED TO KNOW INSTRUCTION SET UP FIRST
 		//possibly second bus required
 	}
 }
