@@ -1,4 +1,4 @@
-package main.java.simulizer.simulation.Data_Representation;
+package simulizer.simulation.Data_Representation;
 
 /**this class will provide information about the registers
  * such as a mapping of register numbers to pseudonyms an vice versa

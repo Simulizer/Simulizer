@@ -1,8 +1,8 @@
-package main.java.simulizer.simulation.CPU_Components;
+package simulizer.simulation.CPU_Components;
 
 import java.util.Observable;
 
-import main.java.simulizer.simulation.Data_Representation.Word;
+import simulizer.simulation.Data_Representation.Word;
 
 /**this class represents the RAM of our simulator
  * it is represented via a large Word array, which will be partitioned

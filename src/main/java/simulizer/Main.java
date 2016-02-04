@@ -1,4 +1,4 @@
-package main.java.simulizer.simulation;
+package simulizer;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

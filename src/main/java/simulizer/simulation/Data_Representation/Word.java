@@ -1,4 +1,4 @@
-package main.java.simulizer.simulation.Data_Representation;
+package simulizer.simulation.Data_Representation;
 
 /**this class represents a single 4-byte word, with appropriate operations
  * included to be carried out on them
