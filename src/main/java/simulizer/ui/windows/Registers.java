@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Registers extends InternalWindow {
@@ -9,8 +10,8 @@ public class Registers extends InternalWindow {
 	}
 
 	@Override
-	public String getWindowTitle() {
-		return "Registers";
+	public String getWindowName() {
+		return WindowManager.REGISTERS;
 	}
 
 

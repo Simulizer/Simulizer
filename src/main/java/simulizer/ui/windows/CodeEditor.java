@@ -1,7 +1,9 @@
 package simulizer.ui.windows;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -9,25 +11,28 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
+
+import com.sun.istack.internal.NotNull;
+
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class CodeEditor extends InternalWindow {
 	//@formatter:off
-	private static final String DEFAULT_CODE = "\n" + 
-								"# this does some nonsense :)\n" + 
-								"# try editing!\n" + 
-								"add $s0, $s1, $s2\n" + 
-								"li  $s1, 14\n" + 
-								"bne $s1, $s0 # @testAnnotation{arg}{arg2}\n";
 	//@formatter:on
-
+	
+	private CodeArea codeArea;
+	private File currentFile = null;
+	private boolean fileEdited = false;
+	
 	public CodeEditor() {
-		CodeArea codeArea = new CodeArea();
+		codeArea = new CodeArea();
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 		codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0, computeAntlrHighlighting(codeArea.getText())));
-		codeArea.replaceText(0, 0, DEFAULT_CODE);
+		codeArea.replaceText("");
+		codeArea.setWrapText(true);
 		getContentPane().getChildren().add(codeArea);
 	}
 
@@ -35,6 +40,38 @@ public class CodeEditor extends InternalWindow {
 	public void setTheme(String theme) {
 		super.setTheme(theme);
 		getStylesheets().add(theme + "/code.css");
+	}
+	
+	public void setText(String text) {
+		codeArea.replaceText(text);
+	}
+	
+	public String getText() {
+		return codeArea.getText();
+	}
+	
+	public File getCurrentFile() {
+		return currentFile;
+	}
+	
+	public void setCurrentFile(File f) {
+		currentFile = f;
+	}
+	
+	public boolean isFileEdited() {
+		return fileEdited;
+	}
+	
+	public void setFileEdited(boolean flag) {
+		fileEdited = flag;
+	}
+	
+	public void updateTitleEditStatus() {
+		String title = getTitle();
+		char lastChar = title.charAt(title.length() - 1);
+
+		title = title.substring(0, lastChar == '*' ? title.length() - 1 : title.length());
+		setTitle(title + (fileEdited ? "*" : ""));
 	}
 
 	/** http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc.richtext.StyleSpansBuilder Throws a big exception when no text is entered (but you can still write in the editor fine, and syntax highlighting still applies)
@@ -91,12 +128,16 @@ public class CodeEditor extends InternalWindow {
 			spansBuilder.add(Collections.singleton(styleClass), stylesize);
 			lastTokenEnd = t.getStopIndex() + 1;
 		}
+		
+		// Make sure there is at least one style added
+		spansBuilder.add(Collections.emptyList(), 0);
+		
 		return spansBuilder.create();
 	}
 
 	@Override
-	public String getWindowTitle() {
-		return "Code Editor";
+	public String getWindowName() {
+		return WindowManager.CODE_EDITOR;
 	}
 
 }

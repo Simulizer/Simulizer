@@ -1,6 +1,8 @@
 package simulizer.ui.windows;
 
 import org.fxmisc.richtext.CodeArea;
+
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow {
@@ -13,8 +15,8 @@ public class Logger extends InternalWindow {
 	}
 
 	@Override
-	public String getWindowTitle() {
-		return "Logger";
+	public String getWindowName() {
+		return WindowManager.LOGGER;
 	}
 
 }
