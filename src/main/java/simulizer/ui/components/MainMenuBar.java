@@ -1,85 +1,134 @@
 package simulizer.ui.components;
 
+import java.io.File;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.ui.WindowManager;
-import simulizer.ui.windows.CPUVisualiser;
+import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CodeEditor;
-import simulizer.ui.windows.Logger;
-import simulizer.ui.windows.Registers;
 
+// Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
 
-	// Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
+	private WindowManager wm;
+
 	public MainMenuBar(WindowManager wm) {
+		this.wm = wm;
+		getMenus().addAll(fileMenu(), viewMenu(), windowsMenu(), debugMenu());
+	}
+
+	private Menu fileMenu() {
 		// | File
 		Menu fileMenu = new Menu("File");
-		MenuItem newItem = new MenuItem("Create New");
-		newItem.setOnAction(e -> wm.newFile());
 
-		MenuItem loadItem = new MenuItem("Load Program");
-		loadItem.setOnAction(e -> wm.loadFile());
+		// | |-- New
+		MenuItem newItem = new MenuItem("New");
+		newItem.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).newFile());
 
-		MenuItem saveItem = new MenuItem("Save Program");
-		saveItem.setOnAction(e -> wm.saveFile());
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem);
+		// | |-- Open
+		MenuItem loadItem = new MenuItem("Open");
+		loadItem.setOnAction(e -> {
+			File f = openFileSelector();
+			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
+		});
 
+		// | |-- Save
+		MenuItem saveItem = new MenuItem("Save");
+		saveItem.setOnAction(e -> {
+			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			if (editor.getCurrentFile() == null) {
+				editor.setCurrentFile(saveFileSelector());
+			}
+			editor.saveFile();
+		});
+
+		// | |-- Save As
+		MenuItem saveAsItem = new MenuItem("Save As...");
+		saveAsItem.setOnAction(e -> {
+			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			File saveFile = saveFileSelector();
+			if (saveFile != null) {
+				editor.setCurrentFile(saveFile);
+				editor.saveFile();
+			}
+		});
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem);
+		return fileMenu;
+	}
+
+	private Menu viewMenu() {
 		// | View
 		Menu viewMenu = new Menu("View");
-		// |-- Layouts
+
+		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
+
+		// | | | -- Default Layout
 		MenuItem defaultLayoutItem = new MenuItem("Default Layout");
 		defaultLayoutItem.setOnAction(e -> wm.defaultLayout());
 
+		// | | | -- Alternative Layout
 		MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
 		alternativeLayoutItem.setOnAction(e -> wm.alternativeLayout());
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem);
-		viewMenu.getItems().add(layoutMenu);
 
-		// |-- Themes
+		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
+
+		// | | | -- Default Theme
 		MenuItem defaultThemeItem = new MenuItem("Default");
 		defaultThemeItem.setOnAction(e -> wm.setTheme("my-theme"));
+
+		// | | | -- Load Theme
 		MenuItem loadThemeItem = new MenuItem("Load Theme...");
 		themeMenu.getItems().addAll(defaultThemeItem, loadThemeItem);
-		viewMenu.getItems().add(themeMenu);
 
-		// | Debug Menu
+		viewMenu.getItems().addAll(layoutMenu, themeMenu);
+		return viewMenu;
+	}
+
+	private Menu windowsMenu() {
+		Menu windowsMenu = new Menu("Add Window");
+		for (WindowEnum wenum : WindowEnum.values()) {
+			MenuItem item = new MenuItem(wenum.toString());
+			item.setOnAction(e -> {
+				InternalWindow w = wenum.createNewWindow();
+				w.setBounds(20, 35, 400, 685);
+				wm.addWindow(w);
+			});
+			windowsMenu.getItems().add(item);
+		}
+		return windowsMenu;
+	}
+
+	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 		MenuItem windowLocation = new MenuItem("Window Locations");
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
 		debugMenu.getItems().addAll(windowLocation);
+		return debugMenu;
+	}
 
-		// | Windows
-		Menu windowsMenu = new Menu("Add Window");
-		MenuItem codeEditorItem = new MenuItem("Code Editor");
-		codeEditorItem.setOnAction(e -> {
-			CodeEditor editor = new CodeEditor();
-			editor.setBounds(20, 35, 400, 685);
-			wm.addWindow(editor);
-		});
-		MenuItem cpuVisualiserItem = new MenuItem("CPU Visualiser");
-		cpuVisualiserItem.setOnAction(e -> {
-			CPUVisualiser cpu = new CPUVisualiser();
-			cpu.setBounds(20, 35, 400, 685);
-			wm.addWindow(cpu);
-		});
-		MenuItem loggerItem = new MenuItem("Logger");
-		loggerItem.setOnAction(e -> {
-			Logger logger = new Logger();
-			logger.setBounds(20, 35, 400, 685);
-			wm.addWindow(logger);
-		});
-		MenuItem registersItem = new MenuItem("Registers");
-		registersItem.setOnAction(e -> {
-			Registers registers = new Registers();
-			registers.setBounds(20, 35, 400, 685);
-			wm.addWindow(registers);
-		});
-		windowsMenu.getItems().addAll(codeEditorItem, cpuVisualiserItem, loggerItem, registersItem);
+	private File saveFileSelector() {
+		final FileChooser fc = new FileChooser();
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.setTitle("Save an assembly file");
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Assembly files *.s", "*.s"));
+		return fc.showSaveDialog(wm.getPrimaryStage());
+	}
 
-		getMenus().addAll(fileMenu, viewMenu, windowsMenu, debugMenu);
+	private File openFileSelector() {
+		// Set the file chooser to open at the user's last directory
+		final FileChooser fc = new FileChooser();
+		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+		fc.setTitle("Open an assembly file");
+		fc.getExtensionFilters().addAll(new ExtensionFilter("Assembly files *.s", "*.s"));
+		return fc.showOpenDialog(wm.getPrimaryStage());
+
 	}
 
 }

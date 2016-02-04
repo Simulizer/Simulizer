@@ -14,6 +14,6 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// Show the main window for now
-		new WindowManager("my-theme", primaryStage);
+		new WindowManager(primaryStage);
 	}
 }

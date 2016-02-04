@@ -5,11 +5,16 @@ import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
 
 public abstract class InternalWindow extends Window {
-	
+
 	public InternalWindow() {
 		setTitle(getWindowName());
 		getRightIcons().add(new MinimizeIcon(this));
-		getRightIcons().add(new CloseIcon(this));
+
+		// TODO: Need to remove from openWindow list when closing
+		CloseIcon close = new CloseIcon(this);
+		getRightIcons().add(close);
+
+		// TODO: Stop Internal Windows covering MainMenuBar
 	}
 
 	/** @return the name of the inner window */
@@ -27,9 +32,5 @@ public abstract class InternalWindow extends Window {
 
 	public void setTheme(String theme) {
 		getStylesheets().add(theme + "/window.css");
-	}
-
-	public void show() {
-		setVisible(true);
 	}
 }

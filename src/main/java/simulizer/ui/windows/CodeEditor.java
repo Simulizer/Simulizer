@@ -1,9 +1,12 @@
 package simulizer.ui.windows;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
@@ -11,9 +14,6 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
-
-import com.sun.istack.internal.NotNull;
-
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
 import simulizer.ui.WindowManager;
@@ -22,11 +22,11 @@ import simulizer.ui.interfaces.InternalWindow;
 public class CodeEditor extends InternalWindow {
 	//@formatter:off
 	//@formatter:on
-	
+
 	private CodeArea codeArea;
 	private File currentFile = null;
 	private boolean fileEdited = false;
-	
+
 	public CodeEditor() {
 		codeArea = new CodeArea();
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -41,31 +41,27 @@ public class CodeEditor extends InternalWindow {
 		super.setTheme(theme);
 		getStylesheets().add(theme + "/code.css");
 	}
-	
+
 	public void setText(String text) {
 		codeArea.replaceText(text);
 	}
-	
+
 	public String getText() {
 		return codeArea.getText();
 	}
-	
+
 	public File getCurrentFile() {
 		return currentFile;
 	}
-	
+
 	public void setCurrentFile(File f) {
 		currentFile = f;
 	}
-	
+
 	public boolean isFileEdited() {
 		return fileEdited;
 	}
-	
-	public void setFileEdited(boolean flag) {
-		fileEdited = flag;
-	}
-	
+
 	public void updateTitleEditStatus() {
 		String title = getTitle();
 		char lastChar = title.charAt(title.length() - 1);
@@ -128,10 +124,10 @@ public class CodeEditor extends InternalWindow {
 			spansBuilder.add(Collections.singleton(styleClass), stylesize);
 			lastTokenEnd = t.getStopIndex() + 1;
 		}
-		
+
 		// Make sure there is at least one style added
 		spansBuilder.add(Collections.emptyList(), 0);
-		
+
 		return spansBuilder.create();
 	}
 
@@ -140,4 +136,55 @@ public class CodeEditor extends InternalWindow {
 		return WindowManager.CODE_EDITOR;
 	}
 
+	public void newFile() {
+		setCurrentFile(null);
+		fileEdited = false;
+		setTitle(WindowManager.CODE_EDITOR + " - New File");
+		setText("");
+	}
+
+	public void loadFile(File selectedFile) {
+		if (selectedFile != null) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile));) {
+				String codeIn = "";
+				String c;
+				boolean first = true;
+				while ((c = reader.readLine()) != null) {
+					if (!first) {
+						codeIn += "\n" + c;
+					} else {
+						codeIn += c;
+						first = false;
+					}
+				}
+
+				// Save the directory the user last opened (for convenience)
+				if (selectedFile.getParent() != null) System.setProperty("user.dir", selectedFile.getParent());
+
+				// Save the destination of the current file
+				setCurrentFile(selectedFile);
+
+				// Show the code in the editor
+				setText(codeIn);
+				fileEdited = false;
+				setTitle(WindowManager.CODE_EDITOR + " - " + selectedFile.getName());
+				updateTitleEditStatus();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	public void saveFile() {
+		if (currentFile != null) {
+			try (PrintWriter writer = new PrintWriter(currentFile);) {
+				writer.print(getText());
+				setTitle(WindowManager.CODE_EDITOR + " - " + currentFile.getName());
+				fileEdited = false;
+				updateTitleEditStatus();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
 }
