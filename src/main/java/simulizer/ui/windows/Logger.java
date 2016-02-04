@@ -1,8 +1,6 @@
 package simulizer.ui.windows;
 
 import org.fxmisc.richtext.CodeArea;
-
-import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow {
@@ -12,11 +10,6 @@ public class Logger extends InternalWindow {
 		codeArea.replaceText(0, 0, "Some Error Message:");
 		codeArea.setEditable(false);
 		getContentPane().getChildren().add(codeArea);
-	}
-
-	@Override
-	public String getWindowName() {
-		return WindowManager.LOGGER;
 	}
 
 }

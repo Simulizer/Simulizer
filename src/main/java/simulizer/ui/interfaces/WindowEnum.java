@@ -1,48 +1,45 @@
 package simulizer.ui.interfaces;
 
-import simulizer.ui.windows.CPUVisualiser;
-import simulizer.ui.windows.CodeEditor;
-import simulizer.ui.windows.Logger;
-import simulizer.ui.windows.Registers;
-
 public enum WindowEnum {
 	CODE_EDITOR("CodeEditor", "Code Editor"), CPU_VISUALISER("CPUVisualiser", "Visualisation"), LOGGER("Logger"), REGISTERS("Registers");
 
-	private String className;
-	private String humanReadable;
+	private final String pkg = "simulizer.ui.windows.";
+	private final String className;
+	private final String defaultTitle;
 
 	private WindowEnum(String className) {
 		this.className = className;
-		this.humanReadable = className;
+		this.defaultTitle = className;
 	}
 
-	private WindowEnum(String className, String humanReadable) {
+	private WindowEnum(String className, String defaultTitle) {
 		this.className = className;
-		this.humanReadable = humanReadable;
+		this.defaultTitle = defaultTitle;
 	}
 
 	public InternalWindow createNewWindow() {
-		switch (this) {
-			case CODE_EDITOR:
-				return new CodeEditor();
-			case CPU_VISUALISER:
-				return new CPUVisualiser();
-			case LOGGER:
-				return new Logger();
-			case REGISTERS:
-				return new Registers();
+		try {
+			return (InternalWindow) Class.forName(pkg + className).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public boolean is(InternalWindow w) {
+	public boolean equals(InternalWindow w) {
 		// Fully Qualified Name
 		String fQN = w.getClass().toString().split(" ")[1];
-		return ("simulizer.ui.windows." + className).equals(fQN);
+		return (pkg + className).equals(fQN);
+	}
+
+	public static WindowEnum toEnum(InternalWindow w) {
+		for (WindowEnum we : WindowEnum.values())
+			if (we.equals(w)) return we;
+		return null;
 	}
 
 	@Override
 	public String toString() {
-		return humanReadable;
+		return defaultTitle;
 	}
 }

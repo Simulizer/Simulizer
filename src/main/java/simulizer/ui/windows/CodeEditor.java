@@ -16,8 +16,8 @@ import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
-import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 
 public class CodeEditor extends InternalWindow {
 	//@formatter:off
@@ -26,6 +26,7 @@ public class CodeEditor extends InternalWindow {
 	private CodeArea codeArea;
 	private File currentFile = null;
 	private boolean fileEdited = false;
+	private final String TITLE = WindowEnum.toEnum(this).toString();
 
 	public CodeEditor() {
 		codeArea = new CodeArea();
@@ -33,6 +34,7 @@ public class CodeEditor extends InternalWindow {
 		codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0, computeAntlrHighlighting(codeArea.getText())));
 		codeArea.replaceText("");
 		codeArea.setWrapText(true);
+		setTitle(TITLE + " - New File");
 		getContentPane().getChildren().add(codeArea);
 	}
 
@@ -131,15 +133,10 @@ public class CodeEditor extends InternalWindow {
 		return spansBuilder.create();
 	}
 
-	@Override
-	public String getWindowName() {
-		return WindowManager.CODE_EDITOR;
-	}
-
 	public void newFile() {
 		setCurrentFile(null);
 		fileEdited = false;
-		setTitle(WindowManager.CODE_EDITOR + " - New File");
+		setTitle(TITLE + " - New File");
 		setText("");
 	}
 
@@ -167,7 +164,7 @@ public class CodeEditor extends InternalWindow {
 				// Show the code in the editor
 				setText(codeIn);
 				fileEdited = false;
-				setTitle(WindowManager.CODE_EDITOR + " - " + selectedFile.getName());
+				setTitle(TITLE + " - " + selectedFile.getName());
 				updateTitleEditStatus();
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -179,7 +176,7 @@ public class CodeEditor extends InternalWindow {
 		if (currentFile != null) {
 			try (PrintWriter writer = new PrintWriter(currentFile);) {
 				writer.print(getText());
-				setTitle(WindowManager.CODE_EDITOR + " - " + currentFile.getName());
+				setTitle(WindowEnum.toEnum(this).toString() + " - " + currentFile.getName());
 				fileEdited = false;
 				updateTitleEditStatus();
 			} catch (IOException ex) {

@@ -9,6 +9,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.layout.Layouts;
 import simulizer.ui.windows.CodeEditor;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -69,11 +70,11 @@ public class MainMenuBar extends MenuBar {
 
 		// | | | -- Default Layout
 		MenuItem defaultLayoutItem = new MenuItem("Default Layout");
-		defaultLayoutItem.setOnAction(e -> wm.defaultLayout());
+		defaultLayoutItem.setOnAction(e -> wm.setLayout(Layouts.original()));
 
 		// | | | -- Alternative Layout
 		MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
-		alternativeLayoutItem.setOnAction(e -> wm.alternativeLayout());
+		alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem);
 
 		// | |-- Themes
@@ -98,7 +99,7 @@ public class MainMenuBar extends MenuBar {
 			item.setOnAction(e -> {
 				InternalWindow w = wenum.createNewWindow();
 				w.setBounds(20, 35, 400, 685);
-				wm.addWindow(w);
+				wm.addWindows(w);
 			});
 			windowsMenu.getItems().add(item);
 		}
@@ -109,7 +110,9 @@ public class MainMenuBar extends MenuBar {
 		Menu debugMenu = new Menu("Debug");
 		MenuItem windowLocation = new MenuItem("Window Locations");
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
-		debugMenu.getItems().addAll(windowLocation);
+		MenuItem delWindows = new MenuItem("Close All Windows");
+		delWindows.setOnAction(e -> wm.closeAll());
+		debugMenu.getItems().addAll(windowLocation, delWindows);
 		return debugMenu;
 	}
 

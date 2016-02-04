@@ -7,7 +7,8 @@ import jfxtras.labs.scene.control.window.Window;
 public abstract class InternalWindow extends Window {
 
 	public InternalWindow() {
-		setTitle(getWindowName());
+		// Sets to default title
+		setTitle(WindowEnum.toEnum(this).toString());
 		getRightIcons().add(new MinimizeIcon(this));
 
 		// TODO: Need to remove from openWindow list when closing
@@ -16,9 +17,6 @@ public abstract class InternalWindow extends Window {
 
 		// TODO: Stop Internal Windows covering MainMenuBar
 	}
-
-	/** @return the name of the inner window */
-	public abstract String getWindowName();
 
 	public void setBounds(double locX, double locY, double sizeX, double sizeY) {
 		setLayoutX(locX);

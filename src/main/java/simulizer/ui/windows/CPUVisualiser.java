@@ -3,7 +3,6 @@ package simulizer.ui.windows;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class CPUVisualiser extends InternalWindow {
@@ -13,11 +12,6 @@ public class CPUVisualiser extends InternalWindow {
 		GraphicsContext ctx = canvas.getGraphicsContext2D();
 		drawVisualisation(ctx);
 		getContentPane().getChildren().add(canvas);
-	}
-
-	@Override
-	public String getWindowName() {
-		return WindowManager.CPU_VISUALISER;
 	}
 
 	private void drawVisualisation(GraphicsContext ctx) {
