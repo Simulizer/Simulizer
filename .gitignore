@@ -37,3 +37,6 @@ gradle-app.setting
 ## make sure to include this since jars are normally ignored
 !gradle-wrapper.jar
 
+# Ignore gradle.properties
+gradle.properties
+*/gradle.properties/*

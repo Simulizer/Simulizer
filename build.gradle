@@ -109,7 +109,7 @@ sourceSets.main.java.srcDirs += antlrOutput
 
 // Antlr options
 generateGrammarSource {
-    outputDirectory = file(antlrOutput)
+    outputDirectory = file(antlrOutput + 'simulizer/parser/')
 }
 
 // extends the clean task
