@@ -1,0 +1,13 @@
+.window {
+    -fx-background-color: linear-gradient(to bottom, #000000 0%,#0000bb 100%);
+    -fx-opacity: 0.8;
+}
+
+.window:hover {
+    -fx-background-color: linear-gradient(to bottom, #dd0000 0%,#0044bb 100%);
+    -fx-opacity: 1;
+}
+
+.window-titlebar {
+    -fx-opacity: 1;
+}

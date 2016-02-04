@@ -16,7 +16,7 @@ public class WindowManager extends Pane {
 	// Stores a list of all open windows
 	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
 	private Pane pane = new Pane();
-	private String theme = "my-theme"; // Default theme
+	private String theme = "themes/default"; // Default theme
 	private Stage primaryStage;
 
 	public WindowManager(Stage primaryStage) {

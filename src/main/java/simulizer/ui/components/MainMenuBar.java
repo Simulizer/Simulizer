@@ -79,14 +79,17 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
+		File folder = new File("themes");
 
-		// | | | -- Default Theme
-		MenuItem defaultThemeItem = new MenuItem("Default");
-		defaultThemeItem.setOnAction(e -> wm.setTheme("my-theme"));
+//		for (File f : folder.listFiles()) {
+//			MenuItem folderThemeItem = new MenuItem(f.getName());
+//			folderThemeItem.setOnAction(e -> wm.setTheme("themes/" + f.getName()));
+//			themeMenu.getItems().addAll(folderThemeItem);
+//		}
 
 		// | | | -- Load Theme
 		MenuItem loadThemeItem = new MenuItem("Load Theme...");
-		themeMenu.getItems().addAll(defaultThemeItem, loadThemeItem);
+		themeMenu.getItems().addAll(loadThemeItem);
 
 		viewMenu.getItems().addAll(layoutMenu, themeMenu);
 		return viewMenu;
