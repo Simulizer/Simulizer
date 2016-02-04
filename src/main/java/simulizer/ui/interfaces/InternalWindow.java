@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import javafx.scene.input.MouseEvent;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
@@ -9,9 +10,22 @@ public abstract class InternalWindow extends Window {
 	public InternalWindow() {
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
-		getRightIcons().add(new MinimizeIcon(this));
 
-		// TODO: Need to remove from openWindow list when closing
+		MinimizeIcon minimize = new MinimizeIcon(this);
+
+		// TODO: Fix VERY HORRIBLE CODE
+		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+			if (getHeight() > 30) {
+				// Minimising
+				setMinHeight(0.0);
+			} else {
+				// Maximising
+				setMinHeight(getMinimalHeight());
+			}
+		});
+
+		getRightIcons().add(minimize);
+
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
 
@@ -26,6 +40,10 @@ public abstract class InternalWindow extends Window {
 
 	public double[] getBounds() {
 		return new double[] { getLayoutX(), getLayoutY(), getBoundsInLocal().getWidth(), getBoundsInLocal().getHeight() };
+	}
+
+	protected double getMinimalHeight() {
+		return 0.0;
 	}
 
 	public void setTheme(String theme) {

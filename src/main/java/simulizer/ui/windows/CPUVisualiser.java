@@ -11,6 +11,7 @@ public class CPUVisualiser extends InternalWindow {
 		Canvas canvas = new Canvas(600, 350);
 		GraphicsContext ctx = canvas.getGraphicsContext2D();
 		drawVisualisation(ctx);
+		//setMinHeight(0.0);
 		getContentPane().getChildren().add(canvas);
 	}
 
@@ -18,5 +19,10 @@ public class CPUVisualiser extends InternalWindow {
 		Image proc = new Image("processor.png");
 		ctx.drawImage(proc, 10, 0, 580, 350);
 
+	}
+	
+	@Override
+	protected double getMinimalHeight() {
+		return 380;
 	}
 }
