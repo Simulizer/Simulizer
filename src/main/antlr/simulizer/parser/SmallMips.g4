@@ -22,7 +22,7 @@ instruction
   | instruction2v
   | instruction0
   ;
-  
+
 instruction3
   : opcode3  register ',' register ',' register
   ;
@@ -62,7 +62,7 @@ opcode3v
 opcode2v
   : OPCODE2V
   ;
-  
+
 opcode0
   : OPCODE0
   ;
