@@ -41,6 +41,7 @@ public class CodeEditor extends InternalWindow {
 	@Override
 	public void setTheme(String theme) {
 		super.setTheme(theme);
+		getStylesheets().clear();
 		getStylesheets().add(theme + "/code.css");
 	}
 

@@ -83,6 +83,7 @@ public class WindowManager extends Pane {
 
 	public void setTheme(String theme) {
 		this.theme = theme;
+		pane.getStylesheets().clear();
 		pane.getStylesheets().add(theme + "/background.css");
 		for (InternalWindow window : openWindows)
 			window.setTheme(theme);

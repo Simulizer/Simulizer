@@ -6,6 +6,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import simulizer.Main;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -79,13 +80,20 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
-		File folder = new File("themes");
-
-//		for (File f : folder.listFiles()) {
-//			MenuItem folderThemeItem = new MenuItem(f.getName());
-//			folderThemeItem.setOnAction(e -> wm.setTheme("themes/" + f.getName()));
-//			themeMenu.getItems().addAll(folderThemeItem);
-//		}
+		File folder = new File(Main.RESOURCES + "/themes/");
+		// Check all folders in the theme folder
+		for (File themeFolder : folder.listFiles()) {
+			if (themeFolder.isDirectory()) {
+				// Check for a theme.json file
+				File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
+				if (themeJSONs.length == 1) {
+					// TODO: Parse the JSON file
+					MenuItem folderThemeItem = new MenuItem(themeFolder.getName());
+					folderThemeItem.setOnAction(e -> wm.setTheme("themes/" + themeFolder.getName()));
+					themeMenu.getItems().addAll(folderThemeItem);
+				}
+			}
+		}
 
 		// | | | -- Load Theme
 		MenuItem loadThemeItem = new MenuItem("Load Theme...");

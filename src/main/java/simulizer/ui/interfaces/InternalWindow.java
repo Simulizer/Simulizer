@@ -29,6 +29,7 @@ public abstract class InternalWindow extends Window {
 	}
 
 	public void setTheme(String theme) {
+		getStylesheets().clear();
 		getStylesheets().add(theme + "/window.css");
 	}
 }

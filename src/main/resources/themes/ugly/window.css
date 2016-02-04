@@ -4,7 +4,7 @@
 }
 
 .window:hover {
-    -fx-background-color: linear-gradient(to bottom, #dd0000 0%,#0044bb 100%);
+    -fx-background-color: red;
     -fx-opacity: 1;
 }
 
