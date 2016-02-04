@@ -82,6 +82,7 @@ public class CodeEditor extends InternalWindow {
 		int lastTokenEnd = 0;
 		ANTLRInputStream input = new ANTLRInputStream(text);
 		SmallMipsLexer lexer = new SmallMipsLexer(input);
+		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		tokens.fill();
 
