@@ -1,7 +1,8 @@
-package simulizer.simulation.CPU_Components;
+package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
-import simulizer.simulation.Data_Representation.Word;
+
+import simulizer.simulation.data.representation.Word;
 
 /** this class represents a generic simplified bus in the cpu
  * @author Charlie Street */

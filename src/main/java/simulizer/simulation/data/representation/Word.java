@@ -1,4 +1,4 @@
-package simulizer.simulation.Data_Representation;
+package simulizer.simulation.data.representation;
 
 /**
  * this class represents a single 4-byte word, with appropriate operations

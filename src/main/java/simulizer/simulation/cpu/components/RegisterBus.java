@@ -1,4 +1,4 @@
-package simulizer.simulation.CPU_Components;
+package simulizer.simulation.cpu.components;
 
 /**
  * this class is necessary for communications to all the register and choosing

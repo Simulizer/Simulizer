@@ -9,7 +9,7 @@ public class Layouts {
 	public static Layout original() {
 		WindowLocation[] defaultLayout = new WindowLocation[3];
 		defaultLayout[0] = new WindowLocation(WindowEnum.CODE_EDITOR, 20, 35, 400, 685);
-		defaultLayout[1] = new WindowLocation(WindowEnum.CPU_VISUALISER, 440, 35, 600, 400);
+		defaultLayout[1] = new WindowLocation(WindowEnum.CPU_VISUALISATION, 440, 35, 600, 400);
 		defaultLayout[2] = new WindowLocation(WindowEnum.REGISTERS, 440, 440, 600, 280);
 		return new Layout(defaultLayout);
 	}
@@ -18,8 +18,15 @@ public class Layouts {
 		WindowLocation[] altLayout = new WindowLocation[4];
 		altLayout[0] = new WindowLocation(WindowEnum.CODE_EDITOR, 5, 35, 1303, 974);
 		altLayout[1] = new WindowLocation(WindowEnum.REGISTERS, 1315, 428, 600, 185);
-		altLayout[2] = new WindowLocation(WindowEnum.CPU_VISUALISER, 1315, 35, 600, 380);
+		altLayout[2] = new WindowLocation(WindowEnum.CPU_VISUALISATION, 1315, 35, 600, 380);
 		altLayout[3] = new WindowLocation(WindowEnum.LOGGER, 1315, 625, 600, 380);
 		return new Layout(altLayout);
+	}
+	
+	public static Layout onlyHighLevel() {
+		WindowLocation[] highLayout = new WindowLocation[1];
+		highLayout[0] = new WindowLocation(WindowEnum.HIGH_LEVEL_VISUALISATION, 20, 100, 1000, 400);
+		
+		return new Layout(highLayout);
 	}
 }

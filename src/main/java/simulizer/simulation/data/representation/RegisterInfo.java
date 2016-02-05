@@ -1,4 +1,4 @@
-package simulizer.simulation.Data_Representation;
+package simulizer.simulation.data.representation;
 
 /** this class will provide information about the registers such as a mapping of register numbers to pseudonyms an vice versa
  * @author Charlie Street */

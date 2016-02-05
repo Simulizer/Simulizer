@@ -1,6 +1,6 @@
-package simulizer.simulation.CPU_Components;
+package simulizer.simulation.cpu.components;
 
-import simulizer.simulation.Data_Representation.Word;
+import simulizer.simulation.data.representation.Word;
 
 /** this class represents a single general purpose register in the CPU
  * @author Charlie Street */

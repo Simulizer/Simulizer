@@ -1,7 +1,8 @@
-package simulizer.simulation.CPU_Components;
+package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
-import simulizer.simulation.Data_Representation.Word;
+
+import simulizer.simulation.data.representation.Word;
 
 /** this class represents the Program Counter, a special register in memory it does almost the same as a normal register, but has
  * different bus connections it also has the ability to increment itself for the next address it should store

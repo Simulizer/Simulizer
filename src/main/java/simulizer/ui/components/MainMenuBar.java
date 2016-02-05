@@ -76,7 +76,12 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Alternative Layout
 		MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
 		alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
-		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem);
+
+		// | | | -- High Level Only Layout
+		MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
+		highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
+		
+		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");

@@ -1,9 +1,9 @@
-package simulizer.simulation.CPU_Components;
+package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
 
-import simulizer.simulation.Data_Representation.RegisterInfo;
-import simulizer.simulation.Data_Representation.Word;
+import simulizer.simulation.data.representation.RegisterInfo;
+import simulizer.simulation.data.representation.Word;
 
 /**this class represents the entire block of general purpose registers
  * there are 32 of these registers

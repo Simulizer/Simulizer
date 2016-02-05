@@ -5,9 +5,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import simulizer.ui.interfaces.InternalWindow;
 
-public class CPUVisualiser extends InternalWindow {
+public class CPUVisualisation extends InternalWindow {
 
-	public CPUVisualiser() {
+	public CPUVisualisation() {
 		Canvas canvas = new Canvas(600, 350);
 		GraphicsContext ctx = canvas.getGraphicsContext2D();
 		drawVisualisation(ctx);
