@@ -151,7 +151,10 @@ dependencies {
 
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-
+        
+    // GSON: JSON Parsing
+    	compile 'com.google.code.gson:gson:2.5'
+   
 
     // Testing
         testCompile 'junit:junit:4.12'

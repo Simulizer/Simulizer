@@ -1,6 +1,13 @@
 package simulizer.ui.components;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -11,6 +18,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layouts;
+import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -80,25 +88,12 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- High Level Only Layout
 		MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
 		highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
-		
+
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
-		File folder = new File(Main.RESOURCES + "/themes/");
-		// Check all folders in the theme folder
-		for (File themeFolder : folder.listFiles()) {
-			if (themeFolder.isDirectory()) {
-				// Check for a theme.json file
-				File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
-				if (themeJSONs.length == 1) {
-					// TODO: Parse the JSON file
-					MenuItem folderThemeItem = new MenuItem(themeFolder.getName());
-					folderThemeItem.setOnAction(e -> wm.setTheme("themes/" + themeFolder.getName()));
-					themeMenu.getItems().addAll(folderThemeItem);
-				}
-			}
-		}
+		
 
 		// | | | -- Load Theme
 		MenuItem loadThemeItem = new MenuItem("Load Theme...");

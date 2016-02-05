@@ -1,5 +1,6 @@
 {
-  "theme-name": "Default",
-  "theme-author": "Matt Broadway",
-  "theme-version": 1.0
+  "name": "Default",
+  "author": "Matt Broadway",
+  "version": 1.0,
+  "description": "This is the default theme"
 }
