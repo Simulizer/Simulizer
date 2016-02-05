@@ -9,7 +9,7 @@ import simulizer.simulation.data.representation.Word;
  * different bus connections it also has the ability to increment itself for the next address it should store
  * @author Charlie Street */
 public class ProgramCounter extends Observable {
-	private final String INCREMENT;// increment amount for the program counter
+	private final Word INCREMENT;// increment amount for the program counter
 	private Word nextAddress;
 	private Bus controlBus;
 	private Bus IRBus;
@@ -22,7 +22,7 @@ public class ProgramCounter extends Observable {
 	 * @param LSBus the bus linking the LS Unit and the program counter */
 	public ProgramCounter(Word nextAddress, Bus controlBus, Bus IRBus, Bus LSBus) {
 		super();
-		this.INCREMENT = BinaryConversions.getBinaryString(4);// 4 in 32 bit binary representation
+		this.INCREMENT = new Word(BinaryConversions.getBinaryString(4));// 4 in 32 bit binary representation
 		this.nextAddress = nextAddress;
 		this.controlBus = controlBus;
 		this.IRBus = IRBus;
@@ -31,7 +31,7 @@ public class ProgramCounter extends Observable {
 
 	/** this method will increment the value of the program counter by the generic increment */
 	public void increment() {
-		// add methods in Word class
+		this.setData(this.getData().add(this.INCREMENT));//adds the increment to the program counter
 		notifyObservers();
 		setChanged();
 	}
@@ -40,7 +40,15 @@ public class ProgramCounter extends Observable {
 	 * @param offset the offset given to the PC */
 	public void addOffset(String offset) {
 
-		// add code here once Word methods implemented
+		String temp = offset;
+		while(temp.length() != 32)//forcing length to 32 bits by padding with zeroes to make life easier
+		{
+			temp = '0' + temp;
+		}
+		
+		Word offsetWord = new Word(temp);
+		this.setData(this.getData().add(offsetWord));//adding the offset
+		
 		this.increment();// even with offset we still have to increment (I think)
 	}
 
