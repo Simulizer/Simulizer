@@ -7,37 +7,56 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-public class Themes {
-
+public class Themes implements Iterable<Theme> {
+	private final String defaultTheme = "Default";
 	private final Path folder;
-	private List<Theme> themes = new ArrayList<Theme>();
+	private Set<Theme> themes = new HashSet<Theme>();
+	private Theme theme = null;
 
 	public Themes(Path folder) {
 		this.folder = folder;
 		fetchThemes();
 	}
 
+	public Themes(String folder) {
+		this.folder = Paths.get(folder);
+		fetchThemes();
+	}
+
 	private void fetchThemes() {
+		themes.clear();
+		Gson g = new Gson();
+
 		// Check all folders in the theme folder
 		for (File themeFolder : folder.toFile().listFiles()) {
 			if (themeFolder.isDirectory()) {
 				// Check for a theme.json file
 				File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
 				if (themeJSONs.length == 1) {
-					// TODO: Parse the JSON file
 					File themeJSON = themeJSONs[0];
-					Gson g = new Gson();
 					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
+						t.location = "themes/" + themeFolder.getName();
 
-						// MenuItem folderThemeItem = new MenuItem(t.name + " (" + t.version + ")");
-						// folderThemeItem.setOnAction(e -> wm.setTheme("themes/" + themeFolder.getName()));
-						// themeMenu.getItems().addAll(folderThemeItem);
+						// @formatter:off
+						try{
+						if ((theme == null && t.getName().equals(defaultTheme)) || 
+							(theme != null && t.getName().equals(theme.getName()))) 
+								theme = t;
+						// @formatter:on
+
+							themes.add(t);
+						} catch (NullPointerException e) {
+							e.printStackTrace();
+						}
+
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -45,4 +64,18 @@ public class Themes {
 			}
 		}
 	}
+
+	@Override
+	public Iterator<Theme> iterator() {
+		return themes.iterator();
+	}
+
+	public Theme getTheme() {
+		return theme;
+	}
+
+	public void setTheme(Theme theme) {
+		this.theme = theme;
+	}
+
 }

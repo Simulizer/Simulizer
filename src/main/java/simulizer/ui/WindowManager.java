@@ -5,18 +5,21 @@ import java.util.List;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import simulizer.Main;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
+import simulizer.ui.theme.Theme;
+import simulizer.ui.theme.Themes;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
 	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
 	private Pane pane = new Pane();
-	private String theme = "themes/default"; // Default theme
+	private Themes themes = new Themes(Main.RESOURCES + "themes/"); // Default theme
 	private Stage primaryStage;
 
 	public WindowManager(Stage primaryStage) {
@@ -24,12 +27,12 @@ public class WindowManager extends Pane {
 	}
 
 	public WindowManager(Stage primaryStage, String theme) {
-		this.theme = theme;
+		this.themes = new Themes(Main.RESOURCES + theme);
 		init(primaryStage, 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		this.theme = theme;
+		this.themes = new Themes(Main.RESOURCES + theme);
 		init(primaryStage, x, y);
 	}
 
@@ -60,7 +63,7 @@ public class WindowManager extends Pane {
 		for (InternalWindow window : windows) {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
-			window.setTheme(theme);
+			window.setTheme(themes.getTheme());
 			pane.getChildren().addAll(window);
 		}
 	}
@@ -86,13 +89,13 @@ public class WindowManager extends Pane {
 		pane.getChildren().addAll(newOpenWindows);
 		openWindows = newOpenWindows;
 
-		setTheme(theme);
+		setTheme(themes.getTheme());
 	}
 
-	public void setTheme(String theme) {
-		this.theme = theme;
+	public void setTheme(Theme theme) {
+		themes.setTheme(theme);
 		pane.getStylesheets().clear();
-		pane.getStylesheets().add(theme + "/background.css");
+		pane.getStylesheets().add(theme.getLocation() + "/background.css");
 		for (InternalWindow window : openWindows)
 			window.setTheme(theme);
 	}
@@ -121,6 +124,10 @@ public class WindowManager extends Pane {
 
 	public Stage getPrimaryStage() {
 		return primaryStage;
+	}
+
+	public Themes getThemes() {
+		return themes;
 	}
 
 }

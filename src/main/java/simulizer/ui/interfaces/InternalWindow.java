@@ -4,6 +4,7 @@ import javafx.scene.input.MouseEvent;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
+import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
 
@@ -46,8 +47,8 @@ public abstract class InternalWindow extends Window {
 		return 0.0;
 	}
 
-	public void setTheme(String theme) {
+	public void setTheme(Theme theme) {
 		getStylesheets().clear();
-		getStylesheets().add(theme + "/window.css");
+		getStylesheets().add(theme.getLocation() + "/window.css");
 	}
 }

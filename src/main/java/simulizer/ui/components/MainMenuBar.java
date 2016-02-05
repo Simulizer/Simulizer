@@ -1,19 +1,11 @@
 package simulizer.ui.components;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import simulizer.Main;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -93,7 +85,11 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
-		
+		for (Theme t : wm.getThemes()) {
+			MenuItem item = new MenuItem(t.getName());
+			item.setOnAction(e -> wm.setTheme(t));
+			themeMenu.getItems().add(item);
+		}
 
 		// | | | -- Load Theme
 		MenuItem loadThemeItem = new MenuItem("Load Theme...");

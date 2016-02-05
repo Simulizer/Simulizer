@@ -18,6 +18,7 @@ import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.theme.Theme;
 
 public class CodeEditor extends InternalWindow {
 	//@formatter:off
@@ -39,10 +40,10 @@ public class CodeEditor extends InternalWindow {
 	}
 
 	@Override
-	public void setTheme(String theme) {
+	public void setTheme(Theme theme) {
 		super.setTheme(theme);
 		getStylesheets().clear();
-		getStylesheets().add(theme + "/code.css");
+		getStylesheets().add(theme.getLocation() + "/code.css");
 	}
 
 	public void setText(String text) {
@@ -73,7 +74,8 @@ public class CodeEditor extends InternalWindow {
 		setTitle(title + (fileEdited ? "*" : ""));
 	}
 
-	/** http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc.richtext.StyleSpansBuilder Throws a big exception when no text is entered (but you can still write in the editor fine, and syntax highlighting still applies)
+	/** http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc.richtext.StyleSpansBuilder Throws a big exception
+	 * when no text is entered (but you can still write in the editor fine, and syntax highlighting still applies)
 	 * @param text the plaintext content of the code editor
 	 * @return the text, now split into sections with attached css classes for styling */
 	private StyleSpans<Collection<String>> computeAntlrHighlighting(String text) {

@@ -10,7 +10,6 @@
 
 .register {
     -fx-fill: green;
-    -fx-font-weight: italic;
 }
 
 .constant {
