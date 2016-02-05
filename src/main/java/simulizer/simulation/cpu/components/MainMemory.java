@@ -2,6 +2,7 @@ package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
 
+import simulizer.simulation.data.representation.BinaryConversions;
 import simulizer.simulation.data.representation.Word;
 
 /**
@@ -15,11 +16,15 @@ import simulizer.simulation.data.representation.Word;
 public class MainMemory extends Observable {
 	private final int MEM_SIZE;// the size of the memory we are allowing
 								// (standard is 4mb worth of words)
+
+	public static boolean zeroInit = true;// to toggle between different
+											// initialisations
+
 	private Word[] RAM;
 	private int codeStart;
 	private int codeEndDataStart;
 	private int dataEndHeapStart;
-	private Bus LSBus;
+	private MemoryBus LSBus;
 
 	/**
 	 * this constructor just intialises the memory and then initialises all
@@ -37,10 +42,16 @@ public class MainMemory extends Observable {
 	 *            the communication between the LSUnit and main memory
 	 */
 	public MainMemory(int codeStart, int codeEndDataStart,
-			int dataEndHeapStart, Bus LSBus) {
+			int dataEndHeapStart, MemoryBus LSBus) {
 		this.MEM_SIZE = 1048576;
 		this.RAM = new Word[this.MEM_SIZE];
-		this.initialiseRAMZeroed();
+
+		if (zeroInit){// enforcing the toggle of initialisations
+			this.initialiseRAMZeroed();
+		} else {
+			this.initialiseRAMDebug();
+		}
+		
 		this.codeStart = codeStart;
 		this.codeEndDataStart = codeEndDataStart;
 		this.dataEndHeapStart = dataEndHeapStart;
@@ -52,7 +63,20 @@ public class MainMemory extends Observable {
 	 */
 	private void initialiseRAMZeroed() {
 		for (int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word();// setting to zeroed word
+			this.RAM[i] = new Word();
+			// setting to zeroed word
+		}
+	}
+
+	/** this method will initialise all of the memory to bytes
+	 * consisting of 0xCC, this should be a lot easier 
+	 * when it comes to debugging code to look inside memory
+	 * 
+	 */
+	private void initialiseRAMDebug() {
+		for(int i = 0; i < this.RAM.length; i++) {
+			this.RAM[i] = new Word("11001100110011001100110011001100");
+			//now obvious to find in memory
 		}
 	}
 
@@ -115,14 +139,19 @@ public class MainMemory extends Observable {
 
 	/**
 	 * this method will take the contents of the LSBus and get the item at that
-	 * address and load it back up
-	 * 
+	 * address and load it back up when sending back, no address will be stored
+	 * so I will set the address to null
 	 */
 	public void readFromMem() {
-		Word address = this.LSBus.getData();
-		int index = (int) address.getLongValue();
+		Word address = this.LSBus.getAddressWord();
+		int index = (int) BinaryConversions.getLongValue(address.getWord());
 		Word retrieved = this.RAM[index];// retrieving information
 		this.LSBus.setData(retrieved);// loading back onto bus
+		this.LSBus.setAddressWord(null);// convention to remove unwanted stuff
+										// being moved
+
+		notifyObservers();
+		setChanged();
 	}
 
 	/**
@@ -130,7 +159,16 @@ public class MainMemory extends Observable {
 	 * 
 	 */
 	public void writeToMem() {
-		//TO IMPLEMENT, NEED TO KNOW INSTRUCTION SET UP FIRST
-		//possibly second bus required
+		Word address = this.LSBus.getAddressWord();// where to store
+		int index = (int) BinaryConversions.getLongValue(address.getWord());
+		Word data = this.LSBus.getData();
+
+		assert (index >= dataEndHeapStart && index < this.MEM_SIZE);
+		// assertion for writing USE FOR TESTING
+		
+		this.RAM[index] = data;// the writing actually happening
+
+		notifyObservers();
+		setChanged();
 	}
 }

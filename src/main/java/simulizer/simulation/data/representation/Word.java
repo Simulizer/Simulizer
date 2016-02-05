@@ -7,7 +7,7 @@ package simulizer.simulation.data.representation;
  * @author Charlie Street
  */
 public class Word {
-	private byte[] word;
+	private String word;
 
 	/**
 	 * constructor just initialises the word field
@@ -17,14 +17,14 @@ public class Word {
 	 * @throws Exception
 	 *             if word of wrong size
 	 */
-	public Word(byte[] word) {
-		assert (word.length == 4);// asserting that the word length is 4
+	public Word(String word) {
+		assert (word.length() == 32);// asserting that the word length is 4
 		this.word = word;
 	}
 
 	/** Separate constructor for initialising to all zeros */
 	public Word() {
-		this.word = new byte[] { 00000000, 00000000, 00000000, 00000000 };
+		this.word = "00000000000000000000000000000000";
 	}
 
 	/**
@@ -32,13 +32,9 @@ public class Word {
 	 * 
 	 * @return the word
 	 */
-	public byte[] getWord() {
+	public String getWord() {
 		return this.word;
 	}
 
-	/** method will get the long equivalent of the word */
-	public long getLongValue() {
-		return 1;// enter code here
-	}
 
 }
