@@ -1,8 +1,10 @@
 package simulizer;
 
 import java.io.File;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
+import simulizer.simulation.data.representation.BinaryConversions;
 import simulizer.ui.WindowManager;
 
 public class Main extends Application {
