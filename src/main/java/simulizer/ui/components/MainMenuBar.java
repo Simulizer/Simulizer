@@ -11,7 +11,6 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
-import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
 
@@ -36,7 +35,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector();
+			File f = openFileSelector(new ExtensionFilter("Assembly files *.s", "*.s"));
 			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
@@ -45,7 +44,7 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
 			if (editor.getCurrentFile() == null) {
-				editor.setCurrentFile(saveFileSelector());
+				editor.setCurrentFile(saveFileSelector(new ExtensionFilter("Assembly files *.s", "*.s")));
 			}
 			editor.saveFile();
 		});
@@ -54,7 +53,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
-			File saveFile = saveFileSelector();
+			File saveFile = saveFileSelector(new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (saveFile != null) {
 				editor.setCurrentFile(saveFile);
 				editor.saveFile();
@@ -76,19 +75,18 @@ public class MainMenuBar extends MenuBar {
 			layoutMenu.getItems().add(item);
 		}
 
-		// // | | | -- Default Layout
-		// MenuItem defaultLayoutItem = new MenuItem("Default Layout");
-		// defaultLayoutItem.setOnAction(e -> wm.setLayout(Layouts.original()));
-		//
-		// // | | | -- Alternative Layout
-		// MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
-		// alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
-		//
-		// // | | | -- High Level Only Layout
-		// MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
-		// highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
-		//
-		// layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
+		// | | | -- Save Layout
+		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
+		saveLayoutItem.setOnAction(e -> {
+			// TODO: Restrict user from changing folder
+			File saveFile = saveFileSelector(new ExtensionFilter("JSON Files *.json", "*.json"));
+			if (saveFile != null) wm.getLayouts().saveLayout(saveFile);
+		});
+
+		// | | | -- Reload Layouts
+		MenuItem reloadLayoutItem = new MenuItem("Refresh Layouts");
+		reloadLayoutItem.setOnAction(e -> wm.getLayouts().reload());
+		layoutMenu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");
@@ -98,15 +96,13 @@ public class MainMenuBar extends MenuBar {
 			themeMenu.getItems().add(item);
 		}
 
-		SeparatorMenuItem separator = new SeparatorMenuItem();
-
-		// | | | -- Load Theme
+		// | | | -- Reload Theme
 		MenuItem reloadThemeItem = new MenuItem("Refresh Themes");
 		reloadThemeItem.setOnAction(e -> {
 			wm.getThemes().reload();
 			wm.setTheme(wm.getThemes().getTheme());
 		});
-		themeMenu.getItems().addAll(separator, reloadThemeItem);
+		themeMenu.getItems().addAll(new SeparatorMenuItem(), reloadThemeItem);
 
 		viewMenu.getItems().addAll(layoutMenu, themeMenu);
 		return viewMenu;
@@ -136,20 +132,20 @@ public class MainMenuBar extends MenuBar {
 		return debugMenu;
 	}
 
-	private File saveFileSelector() {
+	private File saveFileSelector(ExtensionFilter... filter) {
 		final FileChooser fc = new FileChooser();
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
 		fc.setTitle("Save an assembly file");
-		fc.getExtensionFilters().addAll(new ExtensionFilter("Assembly files *.s", "*.s"));
+		fc.getExtensionFilters().addAll(filter);
 		return fc.showSaveDialog(wm.getPrimaryStage());
 	}
 
-	private File openFileSelector() {
+	private File openFileSelector(ExtensionFilter... filter) {
 		// Set the file chooser to open at the user's last directory
 		final FileChooser fc = new FileChooser();
 		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
 		fc.setTitle("Open an assembly file");
-		fc.getExtensionFilters().addAll(new ExtensionFilter("Assembly files *.s", "*.s"));
+		fc.getExtensionFilters().addAll(filter);
 		return fc.showOpenDialog(wm.getPrimaryStage());
 
 	}

@@ -3,14 +3,11 @@ package simulizer.ui.layout;
 import java.util.Iterator;
 
 public class Layout implements Iterable<WindowLocation> {
-	private final String id, name;
+	private final String name;
 	private final double width, height;
 	private final WindowLocation[] windows;
 
-	private int index = 0;
-
-	public Layout(String id, String name, double width, double height, WindowLocation[] windows) {
-		this.id = id;
+	public Layout(String name, double width, double height, WindowLocation[] windows) {
 		this.name = name;
 		this.width = width;
 		this.height = height;
@@ -19,8 +16,8 @@ public class Layout implements Iterable<WindowLocation> {
 
 	@Override
 	public Iterator<WindowLocation> iterator() {
-		index = 0;
 		return new Iterator<WindowLocation>() {
+			private int index = 0;
 
 			@Override
 			public boolean hasNext() {
@@ -33,16 +30,11 @@ public class Layout implements Iterable<WindowLocation> {
 				index++;
 				return out;
 			}
-
 		};
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public double getWidth() {
