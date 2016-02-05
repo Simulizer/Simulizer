@@ -10,6 +10,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.layout.Layout;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
@@ -69,20 +70,25 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
+		for (Layout l : wm.getLayouts()) {
+			MenuItem item = new MenuItem(l.getName());
+			item.setOnAction(e -> wm.setLayout(l));
+			layoutMenu.getItems().add(item);
+		}
 
-		// | | | -- Default Layout
-		MenuItem defaultLayoutItem = new MenuItem("Default Layout");
-		defaultLayoutItem.setOnAction(e -> wm.setLayout(Layouts.original()));
-
-		// | | | -- Alternative Layout
-		MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
-		alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
-
-		// | | | -- High Level Only Layout
-		MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
-		highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
-
-		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
+		// // | | | -- Default Layout
+		// MenuItem defaultLayoutItem = new MenuItem("Default Layout");
+		// defaultLayoutItem.setOnAction(e -> wm.setLayout(Layouts.original()));
+		//
+		// // | | | -- Alternative Layout
+		// MenuItem alternativeLayoutItem = new MenuItem("Alternative Layout");
+		// alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
+		//
+		// // | | | -- High Level Only Layout
+		// MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
+		// highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
+		//
+		// layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 
 		// | |-- Themes
 		Menu themeMenu = new Menu("Themes");

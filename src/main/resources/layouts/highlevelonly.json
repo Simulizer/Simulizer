@@ -1,0 +1,15 @@
+{
+  "id": "high",
+  "name": "Only High Level",
+  "width": 1060,
+  "height": 740,
+  "windows": [
+    {
+      "id": "HIGH_LEVEL_VISUALISATION",
+      "x": 20,
+      "y": 100,
+      "width": 1000,
+      "height": 400
+    }
+  ]
+}

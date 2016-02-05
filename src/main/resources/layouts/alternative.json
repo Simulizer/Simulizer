@@ -1,0 +1,36 @@
+{
+  "id": "alternative",
+  "name": "Alternative Layout",
+  "width": 1920,
+  "height": 1080,
+  "windows": [
+    {
+      "id": "CODE_EDITOR",
+      "x": 5,
+      "y": 35,
+      "width": 1303,
+      "height": 974
+    },
+    {
+      "id": "REGISTERS",
+      "x": 1315,
+      "y": 428,
+      "width": 600,
+      "height": 185
+    },
+    {
+      "id": "CPU_VISUALISATION",
+      "x": 1315,
+      "y": 35,
+      "width": 600,
+      "height": 380
+    },
+    {
+      "id": "LOGGER",
+      "x": 1315,
+      "y": 625,
+      "width": 600,
+      "height": 380
+    }
+  ]
+}

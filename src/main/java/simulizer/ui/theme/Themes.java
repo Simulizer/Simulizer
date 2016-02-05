@@ -44,7 +44,6 @@ public class Themes implements Iterable<Theme> {
 					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
 						t.location = themeFolder.toURI().toString();
-						System.out.println(t.location);
 						// @formatter:off
 						try {
 							// Selects the theme to start with (either default, or last selected) 

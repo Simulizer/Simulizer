@@ -21,6 +21,7 @@ public class WindowManager extends Pane {
 	private Pane pane = new Pane();
 	private Themes themes = new Themes(Main.RESOURCES + "themes/"); // Default theme
 	private Stage primaryStage;
+	private Layouts layouts = new Layouts(Main.RESOURCES + "layouts/");
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, 1060, 740);
@@ -48,9 +49,7 @@ public class WindowManager extends Pane {
 
 		// Resize menubar to window width
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
-
-		setLayout(Layouts.original());
-
+		setTheme(themes.getTheme());
 		primaryStage.show();
 	}
 
@@ -128,5 +127,9 @@ public class WindowManager extends Pane {
 
 	public Themes getThemes() {
 		return themes;
+	}
+
+	public Layouts getLayouts() {
+		return layouts;
 	}
 }
