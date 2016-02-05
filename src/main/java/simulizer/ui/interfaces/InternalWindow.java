@@ -14,7 +14,6 @@ public abstract class InternalWindow extends Window {
 
 		MinimizeIcon minimize = new MinimizeIcon(this);
 
-		// TODO: Fix VERY HORRIBLE CODE
 		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
 			if (getHeight() > 30) {
 				// Minimising
@@ -49,6 +48,6 @@ public abstract class InternalWindow extends Window {
 
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
-		getStylesheets().add(theme.getLocation() + "/window.css");
+		getStylesheets().add(theme.getStyleSheet("window.css"));
 	}
 }

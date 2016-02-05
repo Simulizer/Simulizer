@@ -22,15 +22,15 @@ public class Themes implements Iterable<Theme> {
 
 	public Themes(Path folder) {
 		this.folder = folder;
-		fetchThemes();
+		reload();
 	}
 
 	public Themes(String folder) {
 		this.folder = Paths.get(folder);
-		fetchThemes();
+		reload();
 	}
 
-	private void fetchThemes() {
+	public void reload() {
 		themes.clear();
 		Gson g = new Gson();
 
@@ -43,15 +43,15 @@ public class Themes implements Iterable<Theme> {
 					File themeJSON = themeJSONs[0];
 					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
-						t.location = "themes/" + themeFolder.getName();
-
+						t.location = themeFolder.toURI().toString();
+						System.out.println(t.location);
 						// @formatter:off
-						try{
-						if ((theme == null && t.getName().equals(defaultTheme)) || 
-							(theme != null && t.getName().equals(theme.getName()))) 
-								theme = t;
+						try {
+							// Selects the theme to start with (either default, or last selected) 
+							if ((theme == null && t.getName().equals(defaultTheme)) || 
+								(theme != null && t.getName().equals(theme.getName()))) 
+									theme = t;
 						// @formatter:on
-
 							themes.add(t);
 						} catch (NullPointerException e) {
 							e.printStackTrace();

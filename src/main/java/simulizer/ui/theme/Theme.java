@@ -28,7 +28,7 @@ public class Theme {
 		return version;
 	}
 
-	public String getLocation() {
-		return location;
+	public String getStyleSheet(String styleSheet) {
+		return location + styleSheet;
 	}
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.ui.WindowManager;
@@ -91,9 +92,15 @@ public class MainMenuBar extends MenuBar {
 			themeMenu.getItems().add(item);
 		}
 
+		SeparatorMenuItem separator = new SeparatorMenuItem();
+
 		// | | | -- Load Theme
-		MenuItem loadThemeItem = new MenuItem("Load Theme...");
-		themeMenu.getItems().addAll(loadThemeItem);
+		MenuItem reloadThemeItem = new MenuItem("Refresh Themes");
+		reloadThemeItem.setOnAction(e -> {
+			wm.getThemes().reload();
+			wm.setTheme(wm.getThemes().getTheme());
+		});
+		themeMenu.getItems().addAll(separator, reloadThemeItem);
 
 		viewMenu.getItems().addAll(layoutMenu, themeMenu);
 		return viewMenu;

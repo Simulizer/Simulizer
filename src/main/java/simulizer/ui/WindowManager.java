@@ -95,7 +95,7 @@ public class WindowManager extends Pane {
 	public void setTheme(Theme theme) {
 		themes.setTheme(theme);
 		pane.getStylesheets().clear();
-		pane.getStylesheets().add(theme.getLocation() + "/background.css");
+		pane.getStylesheets().add(theme.getStyleSheet("background.css"));
 		for (InternalWindow window : openWindows)
 			window.setTheme(theme);
 	}
@@ -129,5 +129,4 @@ public class WindowManager extends Pane {
 	public Themes getThemes() {
 		return themes;
 	}
-
 }
