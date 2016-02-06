@@ -136,7 +136,7 @@ public class ALU {
 	private Word shiftLeft(Word toShift, Word shiftNumber)
 	{
 		String toBeShifted = toShift.getWord();
-		int shift = (int)BinaryConversions.getLongValue(shiftNumber.getWord());
+		int shift = (int)BinaryConversions.getUnsignedLongValue(shiftNumber.getWord());
 		
 		for(int i = 0; i < shift; i++)//shifting to the left
 		{
@@ -156,7 +156,7 @@ public class ALU {
 	private Word shiftRight(Word toShift, Word shiftNumber)
 	{
 		String toBeShifted = toShift.getWord();
-		int shift = (int)BinaryConversions.getLongValue(shiftNumber.getWord()) * -1;//making positive 
+		int shift = (int)BinaryConversions.getSignedLongValue(shiftNumber.getWord()) * -1;//making positive 
 		
 		toBeShifted = toBeShifted.substring(0,toBeShifted.length()-shift);//carrying out the shift
 		
@@ -176,7 +176,7 @@ public class ALU {
 	 */
 	public Word shift(Word toShift, Word shiftNumber)
 	{
-		if(BinaryConversions.getLongValue(shiftNumber.getWord()) < 0)//if negative shift right
+		if(BinaryConversions.getSignedLongValue(shiftNumber.getWord()) < 0)//if negative shift right
 		{
 			return shiftRight(toShift,shiftNumber);
 		}
@@ -184,6 +184,17 @@ public class ALU {
 		{
 			return shiftLeft(toShift,shiftNumber);
 		}
+	}
+	
+	/**this function will add two numbers using twos complement
+	 * 
+	 * @param num1 the first number
+	 * @param num2 the second number
+	 * @return the sum of the numbers
+	 */
+	public Word add(Word num1, Word num2)
+	{
+		return num1.add(num2);
 	}
 	
 }

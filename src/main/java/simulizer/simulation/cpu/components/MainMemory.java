@@ -144,7 +144,7 @@ public class MainMemory extends Observable {
 	 */
 	public void readFromMem() {
 		Word address = this.LSBus.getAddressWord();
-		int index = (int) BinaryConversions.getLongValue(address.getWord());
+		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
 		Word retrieved = this.RAM[index];// retrieving information
 		this.LSBus.setData(retrieved);// loading back onto bus
 		this.LSBus.setAddressWord(null);// convention to remove unwanted stuff
@@ -160,7 +160,7 @@ public class MainMemory extends Observable {
 	 */
 	public void writeToMem() {
 		Word address = this.LSBus.getAddressWord();// where to store
-		int index = (int) BinaryConversions.getLongValue(address.getWord());
+		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
 		Word data = this.LSBus.getData();
 
 		assert (index >= dataEndHeapStart && index < this.MEM_SIZE);

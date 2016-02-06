@@ -22,7 +22,7 @@ public class ProgramCounter extends Observable {
 	 * @param LSBus the bus linking the LS Unit and the program counter */
 	public ProgramCounter(Word nextAddress, Bus controlBus, Bus IRBus, Bus LSBus) {
 		super();
-		this.INCREMENT = new Word(BinaryConversions.getBinaryString(4));// 4 in 32 bit binary representation
+		this.INCREMENT = new Word(BinaryConversions.getUnsignedBinaryString(4));// 4 in 32 bit binary representation
 		this.nextAddress = nextAddress;
 		this.controlBus = controlBus;
 		this.IRBus = IRBus;
