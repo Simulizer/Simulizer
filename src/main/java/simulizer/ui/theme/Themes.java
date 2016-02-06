@@ -8,16 +8,16 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 public class Themes implements Iterable<Theme> {
 	private final String defaultTheme = "Default";
 	private final Path folder = Paths.get("themes");
-	private Set<Theme> themes = new HashSet<Theme>();
+	private SortedSet<Theme> themes = new TreeSet<Theme>();
 	private Theme theme = null;
 
 	public Themes() {
@@ -68,12 +68,18 @@ public class Themes implements Iterable<Theme> {
 	}
 
 	public void setTheme(String theme) {
-		for (Theme t : themes)
-			if (t.getName().equals(theme)) this.theme = t;
+		Theme t = find(theme);
+		if (t != null) this.theme = t;
 	}
 
 	public void setTheme(Theme theme) {
 		this.theme = theme;
+	}
+
+	public Theme find(String text) {
+		for (Theme t : themes)
+			if (t.getName().equals(theme)) return t;
+		return null;
 	}
 
 }

@@ -2,5 +2,6 @@
   "name": "Default",
   "author": "Matt Broadway",
   "version": 1.0,
+  "ordering" : 0,
   "description": "This is the default theme"
 }

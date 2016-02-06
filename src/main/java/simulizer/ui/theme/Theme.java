@@ -1,16 +1,10 @@
 package simulizer.ui.theme;
 
-public class Theme {
-	private final String name, author, description;
-	private final double version;
+public class Theme implements Comparable<Theme> {
+	private String name, author, description;
+	private double version;
 	protected String location;
-
-	public Theme(String name, String author, double version, String description) {
-		this.name = name;
-		this.author = author;
-		this.version = version;
-		this.description = description;
-	}
+	private int ordering = Integer.MAX_VALUE;
 
 	public String getName() {
 		return name;
@@ -30,5 +24,16 @@ public class Theme {
 
 	public String getStyleSheet(String styleSheet) {
 		return location + styleSheet;
+	}
+
+	public int getOrdering() {
+		return ordering;
+	}
+
+	@Override
+	public int compareTo(Theme o) {
+		int diff = ordering - o.getOrdering();
+		if (diff != 0) return diff;
+		else return location.compareTo(o.location);
 	}
 }

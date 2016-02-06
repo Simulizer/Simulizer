@@ -33,7 +33,7 @@ public abstract class InternalWindow extends Window {
 		});
 
 		// Adds a small window border
-		setPadding(new Insets(0,2,2,2));
+		setPadding(new Insets(0, 2, 2, 2));
 	}
 
 	public void setBounds(double locX, double locY, double sizeX, double sizeY) {

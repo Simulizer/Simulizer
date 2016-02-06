@@ -69,43 +69,63 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
+		layoutMenu(layoutMenu);
+
+		// | |-- Themes
+		Menu themeMenu = new Menu("Themes");
+		themeMenu(themeMenu);
+
+		viewMenu.getItems().addAll(layoutMenu, themeMenu);
+		return viewMenu;
+	}
+
+	private void layoutMenu(Menu menu) {
+		menu.getItems().clear();
+
 		for (Layout l : wm.getLayouts()) {
 			MenuItem item = new MenuItem(l.getName());
 			item.setOnAction(e -> wm.setLayout(l));
-			layoutMenu.getItems().add(item);
+			menu.getItems().add(item);
 		}
 
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			// TODO: Restrict user from changing folder
 			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
-			if (saveFile != null) wm.getLayouts().saveLayout(saveFile);
+			if (saveFile != null) {
+				wm.getLayouts().saveLayout(saveFile);
+				wm.getLayouts().reload();
+				layoutMenu(menu);
+			}
 		});
 
 		// | | | -- Reload Layouts
 		MenuItem reloadLayoutItem = new MenuItem("Refresh Layouts");
-		reloadLayoutItem.setOnAction(e -> wm.getLayouts().reload());
-		layoutMenu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
+		reloadLayoutItem.setOnAction(e -> {
+			wm.getLayouts().reload();
+			layoutMenu(menu);
+		});
+		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
+	}
 
-		// | |-- Themes
-		Menu themeMenu = new Menu("Themes");
+	private Menu themeMenu(Menu menu) {
+		menu.getItems().clear();
+
 		for (Theme t : wm.getThemes()) {
 			MenuItem item = new MenuItem(t.getName());
 			item.setOnAction(e -> wm.setTheme(t));
-			themeMenu.getItems().add(item);
+			menu.getItems().add(item);
 		}
 
-		// | | | -- Reload Theme
 		MenuItem reloadThemeItem = new MenuItem("Refresh Themes");
 		reloadThemeItem.setOnAction(e -> {
 			wm.getThemes().reload();
+			themeMenu(menu);
 			wm.setTheme(wm.getThemes().getTheme());
 		});
-		themeMenu.getItems().addAll(new SeparatorMenuItem(), reloadThemeItem);
 
-		viewMenu.getItems().addAll(layoutMenu, themeMenu);
-		return viewMenu;
+		menu.getItems().addAll(new SeparatorMenuItem(), reloadThemeItem);
+		return menu;
 	}
 
 	private Menu windowsMenu() {
@@ -113,7 +133,7 @@ public class MainMenuBar extends MenuBar {
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
 			item.setOnAction(e -> {
-				InternalWindow w = wenum.createNewWindow();
+				InternalWindow w = wm.findInternalWindow(wenum);
 				w.setBounds(20, 35, 400, 685);
 				wm.addWindows(w);
 			});

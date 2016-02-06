@@ -14,7 +14,6 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
-import javafx.scene.layout.Border;
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
 import simulizer.ui.interfaces.InternalWindow;
