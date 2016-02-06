@@ -12,24 +12,24 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
 
+		// Adds minimise icon
 		MinimizeIcon minimize = new MinimizeIcon(this);
-
 		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30) {
-				// Minimising
-				setMinHeight(0.0);
-			} else {
-				// Maximising
-				setMinHeight(getMinimalHeight());
-			}
+			if (getHeight() > 30) setMinHeight(0.0); // Minimising
+			else setMinHeight(getMinimalHeight()); // Maximising
 		});
-
 		getRightIcons().add(minimize);
 
+		// Adds close icon
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
 
-		// TODO: Stop Internal Windows covering MainMenuBar
+		// Stops window covering MenuBar
+		layoutYProperty().addListener((observableValue, oldY, newY) -> {
+			if (newY.doubleValue() <= 25) {
+				setLayoutY(25);
+			}
+		});
 	}
 
 	public void setBounds(double locX, double locY, double sizeX, double sizeY) {
