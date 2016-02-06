@@ -20,12 +20,13 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 
 public class Layouts implements Iterable<Layout> {
-	// TODO: Save layout locations
 	// TODO: Find a way to scale to window size
 
 	private final Path folder = Paths.get("layouts");
 	private Set<Layout> layouts = new HashSet<Layout>();
 	private WindowManager wm;
+
+	private static final String DEFAULT_LAYOUT = "default.json";
 
 	public Layouts(WindowManager wm) {
 		this.wm = wm;
@@ -36,6 +37,7 @@ public class Layouts implements Iterable<Layout> {
 		layouts.clear();
 		Gson g = new Gson();
 
+		Layout defaultLayout = null;
 		try {
 			// Check all files in the layouts folder
 			for (Path layout : Files.newDirectoryStream(folder)) {
@@ -43,6 +45,7 @@ public class Layouts implements Iterable<Layout> {
 				if (layout.toFile().isFile()) {
 					try {
 						Layout l = g.fromJson(new JsonReader(Files.newBufferedReader(layout)), Layout.class);
+						if (layout.toFile().getName().equals(DEFAULT_LAYOUT)) defaultLayout = l;
 						layouts.add(l);
 					} catch (JsonIOException | JsonSyntaxException | IOException e) {
 						System.out.println("Invalid File: " + layout.toUri().toString());
@@ -52,6 +55,7 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		if (defaultLayout != null) wm.setLayout(defaultLayout);
 	}
 
 	public void saveLayout(File saveFile) {
