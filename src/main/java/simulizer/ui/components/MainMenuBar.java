@@ -35,7 +35,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector(new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
@@ -44,7 +44,7 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
 			if (editor.getCurrentFile() == null) {
-				editor.setCurrentFile(saveFileSelector(new ExtensionFilter("Assembly files *.s", "*.s")));
+				editor.setCurrentFile(saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
 			}
 			editor.saveFile();
 		});
@@ -53,7 +53,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
-			File saveFile = saveFileSelector(new ExtensionFilter("Assembly files *.s", "*.s"));
+			File saveFile = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (saveFile != null) {
 				editor.setCurrentFile(saveFile);
 				editor.saveFile();
@@ -79,7 +79,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
 			// TODO: Restrict user from changing folder
-			File saveFile = saveFileSelector(new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) wm.getLayouts().saveLayout(saveFile);
 		});
 
@@ -132,19 +132,19 @@ public class MainMenuBar extends MenuBar {
 		return debugMenu;
 	}
 
-	private File saveFileSelector(ExtensionFilter... filter) {
+	private File saveFileSelector(String title, File folder, ExtensionFilter... filter) {
 		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.setTitle("Save an assembly file");
+		fc.setInitialDirectory(folder);
+		fc.setTitle(title);
 		fc.getExtensionFilters().addAll(filter);
 		return fc.showSaveDialog(wm.getPrimaryStage());
 	}
 
-	private File openFileSelector(ExtensionFilter... filter) {
+	private File openFileSelector(String title, File folder, ExtensionFilter... filter) {
 		// Set the file chooser to open at the user's last directory
 		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(new File(System.getProperty("user.dir")));
-		fc.setTitle("Open an assembly file");
+		fc.setInitialDirectory(folder);
+		fc.setTitle(title);
 		fc.getExtensionFilters().addAll(filter);
 		return fc.showOpenDialog(wm.getPrimaryStage());
 

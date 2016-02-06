@@ -39,4 +39,9 @@ gradle-app.setting
 
 # Ignore gradle.properties
 gradle.properties
-*/gradle.properties/*
+*/gradle.properties
+
+# Ignore folders created by application
+code
+layouts
+themes

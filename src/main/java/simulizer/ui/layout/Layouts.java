@@ -23,13 +23,12 @@ public class Layouts implements Iterable<Layout> {
 	// TODO: Save layout locations
 	// TODO: Find a way to scale to window size
 
-	private Path folder;
+	private final Path folder = Paths.get("layouts");
 	private Set<Layout> layouts = new HashSet<Layout>();
 	private WindowManager wm;
 
-	public Layouts(WindowManager wm, String folder) {
+	public Layouts(WindowManager wm) {
 		this.wm = wm;
-		this.folder = Paths.get(folder);
 		reload();
 	}
 

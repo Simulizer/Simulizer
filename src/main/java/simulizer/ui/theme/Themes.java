@@ -16,17 +16,11 @@ import com.google.gson.stream.JsonReader;
 
 public class Themes implements Iterable<Theme> {
 	private final String defaultTheme = "Default";
-	private final Path folder;
+	private final Path folder = Paths.get("themes");
 	private Set<Theme> themes = new HashSet<Theme>();
 	private Theme theme = null;
 
-	public Themes(Path folder) {
-		this.folder = folder;
-		reload();
-	}
-
-	public Themes(String folder) {
-		this.folder = Paths.get(folder);
+	public Themes() {
 		reload();
 	}
 
@@ -71,6 +65,11 @@ public class Themes implements Iterable<Theme> {
 
 	public Theme getTheme() {
 		return theme;
+	}
+
+	public void setTheme(String theme) {
+		for (Theme t : themes)
+			if (t.getName().equals(theme)) this.theme = t;
 	}
 
 	public void setTheme(Theme theme) {

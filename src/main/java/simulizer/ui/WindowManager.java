@@ -5,7 +5,6 @@ import java.util.List;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import simulizer.Main;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -19,28 +18,27 @@ public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
 	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
 	private Pane pane = new Pane();
-	private Themes themes = new Themes(Main.RESOURCES + "themes/"); // Default theme
+	private Themes themes = new Themes();
+	private Layouts layouts = new Layouts(this);
 	private Stage primaryStage;
-	private Layouts layouts = new Layouts(this, Main.RESOURCES + "layouts/");
 
 	public WindowManager(Stage primaryStage) {
-		init(primaryStage, 1060, 740);
+		init(primaryStage, "default", 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme) {
-		this.themes = new Themes(Main.RESOURCES + theme);
-		init(primaryStage, 1060, 740);
+		init(primaryStage, theme, 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		this.themes = new Themes(Main.RESOURCES + theme);
-		init(primaryStage, x, y);
+		init(primaryStage, theme, x, y);
 	}
 
-	private void init(Stage primaryStage, int x, int y) {
+	private void init(Stage primaryStage, String theme, int x, int y) {
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setScene(scene);
+		themes.setTheme(theme);
 		pane.getStyleClass().add("background");
 
 		MainMenuBar bar = new MainMenuBar(this);
