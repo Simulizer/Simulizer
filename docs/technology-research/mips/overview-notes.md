@@ -12,6 +12,7 @@ Features of MIPS32:
 - data types: `.ascii, .asciiz, .byte, .halfword, .word, .space`
     - `.asciiz` is null terminated (z refers to zero)
     - `.space` is reserved empty space
+- big endian (MSB in lowest address within a word)
 
 # Basics #
 - Main Memory: RAM
@@ -151,7 +152,7 @@ hold information needed by instructions at each stage in the pipeline
 - `ALU/MEM` register
 - `MEM/WB` register
 
-## MIPS simplified pipeline ##
+## MIPS R3000 5-stage pipeline ##
 TODO: research what happens at each stage and write separate notes
 - `IF`: Instruction fetch
 - `ID`: Instruction decode and register fetch
@@ -159,7 +160,7 @@ TODO: research what happens at each stage and write separate notes
 - `MEM`: Data memory access
 - `WB`: Register write back
 
-## MIPS 8-stage pipeline ##
+## MIPS R4000 8-stage pipeline ##
 TODO: research what happens at each stage and write separate notes
 
 [see R4000 Manual](http://www.ece.mtu.edu/faculty/rmkieckh/cla/4173/MIPS-R04K-uman3.pdf)
@@ -285,7 +286,7 @@ FR-Type and FI-Type instructions are the corresponding floating point instructio
 ### R-Type ###
 register-type instructions:
 
-$$destination=OP(source_1,\,source_2)$$
+`destination = OP(source1, source2)`
 
 `add $d, $s1, $s2  --encoded-as-->  [opcode][s1][s2][d][shift][function]`
 
@@ -294,14 +295,14 @@ The shift bits are only used for shift/rotate instructions.
 ### I-Type ###
 immediate-type instructions:
 
-$$destination=OP(source_1,\,immediate)$$
+`destination = OP(source1, immediate)`
 
 `addi $d, $s1, 42  --encoded-as-->  [opcode][s1][d][immediate]`
 
 ### J-Type ###
 jump-type instructions:
 
-$$Jump(target)$$
+`Jump(target)`
 
 `j target         --encoded-as-->  [opcode][target]`
 

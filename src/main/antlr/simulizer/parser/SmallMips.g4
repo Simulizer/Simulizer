@@ -1,21 +1,48 @@
 grammar SmallMips;
 
 @header {
-package simulizer.parser;
+    package simulizer.parser;
 }
 
-// ------ Parser Rules ------
+/////////////////////////////////////////////////
+// Notes on Terminology
+/////////////////////////////////////////////////
+//
+// For general instruction set and MIPS terminology:
+// see docs/glossary.md
+//
+//  Lexer:
+//      Recognises words of the language.
+//      Deals with regular grammar.
+//
+//  Parser:
+//      Recognises structure of phrases in the language.
+//      Deals with context-free grammar.
+//
+
+
+/////////////////////////////////////////////////
+// Parser Rules
+/////////////////////////////////////////////////
 
 program
-  : (line? EOL)+
-  ;
+    : (line? EOL)+
+    ;
+
+dataSegment
+    :
+    ;
+
+textSegment
+    :
+    ;
 
 line
-   : instruction COMMENT?
+   : statement COMMENT?
    | COMMENT
    ;
 
-instruction
+statement
   : instruction3
   | instruction2
   | instruction3v
