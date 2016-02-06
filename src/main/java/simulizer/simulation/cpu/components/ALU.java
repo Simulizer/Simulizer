@@ -14,8 +14,19 @@ import simulizer.simulation.data.representation.Word;
  */
 public class ALU extends Observable {
 	
-	private final String TwoThirtyTwo = "4294967296";
+	private final String TwoThirtyTwo = "4294967296";//used to bound numbers
 	private Word temp;//temporary holding cell for transport etc.
+	private RegisterBlock registers;
+	
+	/**constructor initialises all the fields
+	 * 
+	 * @param registers the block of registers being used
+	 */
+	public ALU(RegisterBlock registers)
+	{
+		this.temp = new Word();
+		this.registers = registers;
+	}
 	
 	/**returns the temporary holding value
 	 * this is a replacement for a bus
@@ -33,6 +44,32 @@ public class ALU extends Observable {
 	public synchronized void setData(Word word)
 	{
 		this.temp = word;
+	}
+	
+	/**this method reads from a register at a given index
+	 * 
+	 * @param index the register index to retrieve from
+	 * @return the word located at the register
+	 */
+	public Word readFromRegister(int index)
+	{
+		notifyObservers();
+		setChanged();
+		
+		return this.registers.getRegister(index).getData();
+	}
+	
+	/**this method will write to a register in the block of 
+	 * general purpose registers at the specified index
+	 * @param index the index of the register 
+	 * @param toStore the word to store in said register
+	 */
+	public void writeToRegister(int index, Word toStore)
+	{
+		this.registers.setRegister(index, toStore);
+		
+		notifyObservers();
+		setChanged();
 	}
 	
 	/**this method carries out exclusive or on two words

@@ -137,39 +137,25 @@ public class MainMemory extends Observable {
 	public void setDataEndHeapStart(int dataEndHeapStart) {
 		this.dataEndHeapStart = dataEndHeapStart;
 	}
-
-	/**
-	 * this method will take the contents of the LSUnit and get the item at that
-	 * address and load it back up when sending back, no address will be stored
-	 * so I will set the address to null
-	 */
-	/*public void readFromMem() {
-		Word address = this.LSUnit.getAddressWord();
-		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
-		Word retrieved = this.RAM[index];// retrieving information
-		this.LSUnit.setData(retrieved);// loading back onto bus
-		this.LSUnit.setAddressWord(null);// convention to remove unwanted stuff
-										// being moved
-
-		notifyObservers();
-		setChanged();
-	}*/
-
-	/**
-	 * this method will write to memory, provided it is in a safe area of memory
+	
+	/**returns the word at a given address
 	 * 
+	 * @param index address in integer form
+	 * @return the word at said address
 	 */
-	/*public void writeToMem() {
-		Word address = this.LSUnit.getAddressWord();// where to store
-		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
-		Word data = this.LSUnit.getData();
+	public Word getWord(int index)
+	{
+		return this.RAM[index];
+	}
+	
+	/**sets a word in memory at a given index/address
+	 * 
+	 * @param index the index in memory
+	 * @param toSet the contents to store at said address
+	 */
+	public synchronized void setWord(int index, Word toSet)
+	{
+		this.RAM[index] = toSet;
+	}
 
-		assert (index >= dataEndHeapStart && index < this.MEM_SIZE);
-		// assertion for writing USE FOR TESTING
-		
-		this.RAM[index] = data;// the writing actually happening
-
-		notifyObservers();
-		setChanged();
-	}*/
 }
