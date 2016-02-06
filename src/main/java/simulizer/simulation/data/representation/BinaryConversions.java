@@ -54,7 +54,7 @@ public class BinaryConversions
 	 * @param binString the string to switch
 	 * @return the string with the sign switched
 	 */
-	private static String switchSigns(String binString)
+	public static String switchSigns(String binString)
 	{
 		boolean firstOne = false;
 		String positive = "";

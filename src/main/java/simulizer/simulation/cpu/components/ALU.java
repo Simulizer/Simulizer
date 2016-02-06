@@ -127,6 +127,66 @@ public class ALU {
 		return new Word(result);
 	}
 	
+	/**this function carries out the nand operation on two binary values
+	 * 
+	 * @param firstWord the first value
+	 * @param secondWord the second value
+	 * @return the result of the nand operation in a word
+	 */
+	public Word nand(Word firstWord, Word secondWord)
+	{
+		String firstString = firstWord.getWord();
+		String secondString = secondWord.getWord();
+		String result = "";
+		
+		for(int i = 0; i < firstString.length(); i++)//looping through the strings
+		{
+			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
+			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
+			
+			if(firstChar + secondChar == 2)//1,1
+			{
+				result += '0';
+			}
+			else
+			{
+				result += '1';
+			}
+		}
+
+		return new Word(result);
+	}
+	
+	/** this method carries out the nor operation on two binary values
+	 * 
+	 * @param firstWord the first binary value
+	 * @param secondWord the second binary value
+	 * @return the result of the nor operation on these two words
+	 */
+	public Word nor(Word firstWord, Word secondWord)
+	{
+		String firstString = firstWord.getWord();
+		String secondString = secondWord.getWord();
+		String result = "";
+		
+		for(int i = 0; i < firstString.length(); i++)//looping through the strings
+		{
+			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
+			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
+			
+			if(firstChar + secondChar == 0)//0,0
+			{
+				result += '1';
+			}
+			else
+			{
+				result += '0';
+			}
+		}
+		
+		return new Word(result);
+	}
+	
 	/**this method will shift a word left , i.e get bigger
 	 * 
 	 * @param toShift the word to be shifted
@@ -196,5 +256,54 @@ public class ALU {
 	{
 		return num1.add(num2);
 	}
+	
+	/**this method subtracts one twos complement number
+	 * from the other.This worls by changing the sign of the 
+	 * second number and then adding them
+	 * @param num1 the first number
+	 * @param num2 the number to subtract away from num1
+	 * @return the subtraction of num1 - num2
+	 */
+	public Word sub(Word num1, Word num2)
+	{
+		String secondNum = BinaryConversions.switchSigns(num2.getWord());//switching signs of number 2
+		return add(num1,new Word(secondNum));
+	}
+	
+	/**this method multiplies two 2s complement numbers together
+	 * assuming we ignore any overflow, it seems that
+	 * any actual multiplication algorithms are at lead O(n^2)
+	 * therefore the easiest way I can think of is to convert the two binary values
+	 * to normal integers, multiply them and convert them back
+	 * @param num1 the first number
+	 * @param num2 the second number
+	 * @return the multiplication of the two, ignoring overflow
+	 */
+	public Word mult(Word num1, Word num2)
+	{
+		long firstNumber = BinaryConversions.getSignedLongValue(num1.getWord());//getting the long values
+		long secondNumber = BinaryConversions.getSignedLongValue(num2.getWord());
+		long result = firstNumber * secondNumber;//the result of the multiplication
+		
+		return new Word(BinaryConversions.getSignedBinaryString(result));//converting back to the binary form
+	}
+	
+	/**this method divides two numbers using the same method as mult
+	 * 
+	 * @param num1 the first number
+	 * @param num2 the number to divide by
+	 * @return the division of the two numbers in binary format
+	 */
+	public Word div(Word num1, Word num2)
+	{
+		long firstNumber = BinaryConversions.getSignedLongValue(num1.getWord());//converting the numbers
+		long secondNumber = BinaryConversions.getSignedLongValue(num2.getWord());
+		
+		long result = firstNumber / secondNumber;//result of the integer division
+		
+		return new Word(BinaryConversions.getSignedBinaryString(result));
+	}
+	
+	
 	
 }
