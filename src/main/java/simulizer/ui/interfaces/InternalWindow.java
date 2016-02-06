@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import javafx.geometry.Insets;
 import javafx.scene.input.MouseEvent;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
@@ -30,6 +31,9 @@ public abstract class InternalWindow extends Window {
 				setLayoutY(25);
 			}
 		});
+
+		// Adds a small window border
+		setPadding(new Insets(0,2,2,2));
 	}
 
 	public void setBounds(double locX, double locY, double sizeX, double sizeY) {

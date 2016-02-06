@@ -14,6 +14,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
+import javafx.scene.layout.Border;
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
 import simulizer.ui.interfaces.InternalWindow;
@@ -21,8 +22,6 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
 
 public class CodeEditor extends InternalWindow {
-	//@formatter:off
-	//@formatter:on
 
 	private CodeArea codeArea;
 	private File currentFile = null;
@@ -33,7 +32,6 @@ public class CodeEditor extends InternalWindow {
 		codeArea = new CodeArea();
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 		codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0, computeAntlrHighlighting(codeArea.getText())));
-		codeArea.replaceText("");
 		codeArea.setWrapText(true);
 		setTitle(TITLE + " - New File");
 		getContentPane().getChildren().add(codeArea);
