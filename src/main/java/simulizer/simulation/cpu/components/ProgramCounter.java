@@ -3,7 +3,6 @@ package simulizer.simulation.cpu.components;
 import java.math.BigInteger;
 import java.util.Observable;
 
-import simulizer.simulation.data.representation.BinaryConversions;
 import simulizer.simulation.data.representation.Word;
 
 /** this class represents the Program Counter, a special register in memory it does almost the same as a normal register, but has

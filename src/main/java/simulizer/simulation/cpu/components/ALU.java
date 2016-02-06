@@ -17,15 +17,19 @@ public class ALU extends Observable {
 	private final String TwoThirtyTwo = "4294967296";//used to bound numbers
 	private Word temp;//temporary holding cell for transport etc.
 	private RegisterBlock registers;
+	private ControlUnit controlUnit;
 	
 	/**constructor initialises all the fields
 	 * 
 	 * @param registers the block of registers being used
+	 * @param controlUnit the control unit of the simulated processor
 	 */
-	public ALU(RegisterBlock registers)
+	public ALU(RegisterBlock registers, ControlUnit controlUnit)
 	{
+		super();
 		this.temp = new Word();
 		this.registers = registers;
+		this.controlUnit = controlUnit;
 	}
 	
 	/**returns the temporary holding value
@@ -64,10 +68,30 @@ public class ALU extends Observable {
 	 * @param index the index of the register 
 	 * @param toStore the word to store in said register
 	 */
-	public void writeToRegister(int index, Word toStore)
+	public synchronized void writeToRegister(int index, Word toStore)
 	{
 		this.registers.setRegister(index, toStore);
 		
+		notifyObservers();
+		setChanged();
+	}
+	
+	/**sends something from the ALUs temp data to the control unit
+	 * 
+	 */
+	public void sendControlUnit()
+	{
+		this.controlUnit.setData(this.getData());
+		notifyObservers();
+		setChanged();
+	}
+	
+	/**this method receives some data from the control unit
+	 * it is then stored into the temp field in the ALU
+	 */
+	public void receiveControlUnit()
+	{
+		this.setData(this.controlUnit.getData());
 		notifyObservers();
 		setChanged();
 	}
@@ -259,8 +283,5 @@ public class ALU extends Observable {
 		result = result.mod(new BigInteger(this.TwoThirtyTwo));
 		
 		return new Word(result);
-	}
-	
-	
-	
+	}	
 }

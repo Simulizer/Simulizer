@@ -16,19 +16,23 @@ public class LSUnit extends Observable
 	private RegisterBlock registers;//access to the registers
 	private MainMemory memory;
 	private InstructionRegister instructionRegister;
+	private ControlUnit controlUnit;
 	
 	/**constructor initialises all fields
 	 * 
 	 * @param registers the block of registers in the CPU
 	 * @param memory the RAM used for this simulation
 	 * @param instructionRegister the instruction register used in the simulation
+	 * @param controlUnit the control unit of the CPU
 	 */
-	public LSUnit(RegisterBlock registers, MainMemory memory, InstructionRegister instructionRegister)
+	public LSUnit(RegisterBlock registers, MainMemory memory, InstructionRegister instructionRegister, ControlUnit controlUnit)
 	{
+		super();
 		this.temp = new Word();//initialising to default value
 		this.registers = registers;
 		this.memory = memory;
 		this.instructionRegister = instructionRegister;
+		this.controlUnit = controlUnit;
 	}
 	
 	/**this method will return the temporary holding value in the LSunit
@@ -118,6 +122,28 @@ public class LSUnit extends Observable
 	public void sendInstructionRegister()
 	{
 		this.instructionRegister.setData(this.getData());
+		
+		notifyObservers();
+		setChanged();
+	}
+	
+	/**this method receives data from the control unit and saves it in the
+	 * temporary data of the Load/Store Unit
+	 */
+	public void receiveControlUnit()
+	{
+		this.setData(this.controlUnit.getData());
+		
+		notifyObservers();
+		setChanged();
+	}
+	
+	/**this method sends the contents of temp
+	 * to the control unit
+	 */
+	public void sendControlUnit()
+	{
+		this.controlUnit.setData(this.getData());
 		
 		notifyObservers();
 		setChanged();

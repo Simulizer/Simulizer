@@ -3,7 +3,6 @@ package simulizer.simulation.cpu.components;
 import java.math.BigInteger;
 import java.util.Observable;
 
-import simulizer.simulation.data.representation.BinaryConversions;
 import simulizer.simulation.data.representation.Word;
 
 /**
@@ -22,10 +21,10 @@ public class MainMemory extends Observable {
 											// initialisations
 
 	private Word[] RAM;
+	@SuppressWarnings("unused")
 	private int codeStart;
 	private int codeEndDataStart;
 	private int dataEndHeapStart;
-	private LSUnit LSUnit;
 
 	/**
 	 * this constructor just intialises the memory and then initialises all
@@ -39,11 +38,9 @@ public class MainMemory extends Observable {
 	 * @param dataEndHeapStart
 	 *            the place where the data partition stops and the heap
 	 *            partition begins
-	 * @param LSUnit
-	 *            the communication between the LSUnit and main memory
 	 */
 	public MainMemory(int codeStart, int codeEndDataStart,
-			int dataEndHeapStart, LSUnit LSUnit) {
+			int dataEndHeapStart) {
 		this.MEM_SIZE = 1048576;
 		this.RAM = new Word[this.MEM_SIZE];
 
@@ -56,7 +53,6 @@ public class MainMemory extends Observable {
 		this.codeStart = codeStart;
 		this.codeEndDataStart = codeEndDataStart;
 		this.dataEndHeapStart = dataEndHeapStart;
-		this.LSUnit = LSUnit;
 	}
 
 	/**
