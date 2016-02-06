@@ -1,6 +1,8 @@
 package simulizer.simulation.cpu.components;
 
-import simulizer.simulation.data.representation.BinaryConversions;
+import java.math.BigInteger;
+import java.util.Observable;
+
 import simulizer.simulation.data.representation.Word;
 
 /**this class simulates the Arithemtic and Logic Unit
@@ -10,7 +12,28 @@ import simulizer.simulation.data.representation.Word;
  * @author Charlie Street
  *
  */
-public class ALU {
+public class ALU extends Observable {
+	
+	private final String TwoThirtyTwo = "4294967296";
+	private Word temp;//temporary holding cell for transport etc.
+	
+	/**returns the temporary holding value
+	 * this is a replacement for a bus
+	 * @return the temporary holding value
+	 */
+	public Word getData()
+	{
+		return this.temp;
+	}
+	
+	/**this method sets the temporary holding value for the ALU
+	 * 
+	 * @param word the new word to set the temp holding value too
+	 */
+	public synchronized void setData(Word word)
+	{
+		this.temp = word;
+	}
 	
 	/**this method carries out exclusive or on two words
 	 * 
@@ -20,29 +43,17 @@ public class ALU {
 	 */
 	public Word xor(Word firstWord, Word secondWord)
 	{
-		String firstString = firstWord.getWord();
-		String secondString = secondWord.getWord();
-		String result = "";
+		BigInteger firstInt = firstWord.getWord();
+		BigInteger secondInt = secondWord.getWord();
 		
-		for(int i = 0; i < firstString.length(); i++)//looping through the strings
-		{
-			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
-			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
-			
-			if(firstChar + secondChar == 1)//0,1 or 1,0
-			{
-				result += '1';
-			}
-			else
-			{
-				result += '0';
-			}
-		}
+		BigInteger result = firstInt.xor(secondInt);
 		
+		notifyObservers();
+		setChanged();
 		return new Word(result);
 	}
 	
-	/**carries out inclusive or on two words, pretty much the same as xor with a couple of changes
+	/**carries out inclusive or on two words, pretty much the same as xor
 	 * 
 	 * @param firstWord the first word being used
 	 * @param secondWord the second word being used
@@ -50,25 +61,13 @@ public class ALU {
 	 */
 	public Word or(Word firstWord, Word secondWord)
 	{
-		String firstString = firstWord.getWord();
-		String secondString = secondWord.getWord();
-		String result = "";
+		BigInteger firstInt = firstWord.getWord();
+		BigInteger secondInt = secondWord.getWord();
 		
-		for(int i = 0; i < firstString.length(); i++)//looping through the strings
-		{
-			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
-			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
-			
-			if(firstChar + secondChar == 0)//0,0
-			{
-				result += '0';
-			}
-			else
-			{
-				result += '1';
-			}
-		}
+		BigInteger result = firstInt.or(secondInt);
 		
+		notifyObservers();
+		setChanged();
 		return new Word(result);
 	}
 	
@@ -80,50 +79,27 @@ public class ALU {
 	 */
 	public Word and(Word firstWord, Word secondWord)
 	{
-		String firstString = firstWord.getWord();
-		String secondString = secondWord.getWord();
-		String result = "";
+		BigInteger firstInt = firstWord.getWord();
+		BigInteger secondInt = secondWord.getWord();
 		
-		for(int i = 0; i < firstString.length(); i++)//looping through the strings
-		{
-			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
-			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
-			
-			if(firstChar + secondChar == 2)//1,1
-			{
-				result += '1';
-			}
-			else
-			{
-				result += '0';
-			}
-		}
+		BigInteger result = firstInt.and(secondInt);
 		
+		notifyObservers();
+		setChanged();
 		return new Word(result);
 	}
 	
-	/**this method will negate the bit string of a word
+	/**this method will negate the bits of a word
 	 * 
 	 * @param toNegate the word to be negated
 	 * @return the negated Word
 	 */
 	public Word not(Word toNegate)
 	{
-		String word = toNegate.getWord();
-		String result = "";//where to store the negated string
+		BigInteger result = toNegate.getWord().not();
 		
-		for(int i = 0; i < word.length(); i++)
-		{
-			if(word.charAt(i)=='1')//if 1 then 0
-			{
-				result += '0';
-			}
-			else if(word.charAt(i)=='0')//if 0 then 1
-			{
-				result += '1';
-			}
-		}
-		
+		notifyObservers();
+		setChanged();
 		return new Word(result);
 	}
 	
@@ -135,26 +111,11 @@ public class ALU {
 	 */
 	public Word nand(Word firstWord, Word secondWord)
 	{
-		String firstString = firstWord.getWord();
-		String secondString = secondWord.getWord();
-		String result = "";
-		
-		for(int i = 0; i < firstString.length(); i++)//looping through the strings
-		{
-			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
-			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
-			
-			if(firstChar + secondChar == 2)//1,1
-			{
-				result += '0';
-			}
-			else
-			{
-				result += '1';
-			}
-		}
-
-		return new Word(result);
+		Word and = this.and(firstWord, secondWord);
+		Word result = this.not(and);
+		notifyObservers();
+		setChanged();
+		return result;
 	}
 	
 	/** this method carries out the nor operation on two binary values
@@ -165,67 +126,11 @@ public class ALU {
 	 */
 	public Word nor(Word firstWord, Word secondWord)
 	{
-		String firstString = firstWord.getWord();
-		String secondString = secondWord.getWord();
-		String result = "";
-		
-		for(int i = 0; i < firstString.length(); i++)//looping through the strings
-		{
-			int firstChar = Integer.parseInt(firstString.charAt(i)+"");
-			int secondChar = Integer.parseInt(secondString.charAt(i)+"");
-			
-			if(firstChar + secondChar == 0)//0,0
-			{
-				result += '1';
-			}
-			else
-			{
-				result += '0';
-			}
-		}
-		
-		return new Word(result);
-	}
-	
-	/**this method will shift a word left , i.e get bigger
-	 * 
-	 * @param toShift the word to be shifted
-	 * @param shiftNumber the amount to be shifted by
-	 * @return the shifted word
-	 */
-	private Word shiftLeft(Word toShift, Word shiftNumber)
-	{
-		String toBeShifted = toShift.getWord();
-		int shift = (int)BinaryConversions.getUnsignedLongValue(shiftNumber.getWord());
-		
-		for(int i = 0; i < shift; i++)//shifting to the left
-		{
-			toBeShifted += '0';
-		}
-		
-		toBeShifted = toBeShifted.substring(shift);//taking away the now uneccsary characters
-		
-		return new Word(toBeShifted);
-	}
-	
-	/**this method will shift a word right, i.e get smaller
-	 * @param toShift the word to be shifted
-	 * @param shiftNumber a NEGATIVE shift number
-	 * @return the shifted word
-	 */
-	private Word shiftRight(Word toShift, Word shiftNumber)
-	{
-		String toBeShifted = toShift.getWord();
-		int shift = (int)BinaryConversions.getSignedLongValue(shiftNumber.getWord()) * -1;//making positive 
-		
-		toBeShifted = toBeShifted.substring(0,toBeShifted.length()-shift);//carrying out the shift
-		
-		while(toBeShifted.length() < 32)//adding the padding
-		{
-			toBeShifted = '0' + toBeShifted;
-		}
-		
-		return new Word(toBeShifted);
+		Word or = this.or(firstWord, secondWord);
+		Word result = this.not(or);
+		notifyObservers();
+		setChanged();
+		return result;
 	}
 	
 	/**generic shift, what direction the shift is in depends on the sign of the shift number
@@ -236,59 +141,73 @@ public class ALU {
 	 */
 	public Word shift(Word toShift, Word shiftNumber)
 	{
-		if(BinaryConversions.getSignedLongValue(shiftNumber.getWord()) < 0)//if negative shift right
+		if(shiftNumber.getWord().compareTo(new BigInteger("0")) < 0)//if negative shift right
 		{
-			return shiftRight(toShift,shiftNumber);
+			BigInteger result = toShift.getWord().shiftRight(shiftNumber.getWord().negate().intValue());
+			result = result.mod(new BigInteger(this.TwoThirtyTwo));
+			return new Word(result);
 		}
 		else
 		{
-			return shiftLeft(toShift,shiftNumber);
+			BigInteger result = toShift.getWord().shiftLeft(shiftNumber.getWord().intValue());
+			result = result.mod(new BigInteger(this.TwoThirtyTwo));
+			return new Word(result);
 		}
 	}
 	
 	/**this function will add two numbers using twos complement
-	 * 
+	 * on BigInteger
 	 * @param num1 the first number
 	 * @param num2 the second number
 	 * @return the sum of the numbers
 	 */
 	public Word add(Word num1, Word num2)
 	{
-		return num1.add(num2);
+		notifyObservers();
+		setChanged();
+		
+		BigInteger result = num1.getWord().add(num2.getWord());
+		result = result.mod(new BigInteger(this.TwoThirtyTwo));
+		
+		return new Word(result);
+		
 	}
 	
 	/**this method subtracts one twos complement number
-	 * from the other.This worls by changing the sign of the 
-	 * second number and then adding them
+	 * from the other.The numbers are bigInts
 	 * @param num1 the first number
 	 * @param num2 the number to subtract away from num1
 	 * @return the subtraction of num1 - num2
 	 */
 	public Word sub(Word num1, Word num2)
 	{
-		String secondNum = BinaryConversions.switchSigns(num2.getWord());//switching signs of number 2
-		return add(num1,new Word(secondNum));
+		notifyObservers();
+		setChanged();
+		
+		BigInteger result = num1.getWord().subtract(num2.getWord());
+		result = result.mod(new BigInteger(this.TwoThirtyTwo));
+		
+		return new Word(result);
 	}
 	
 	/**this method multiplies two 2s complement numbers together
-	 * assuming we ignore any overflow, it seems that
-	 * any actual multiplication algorithms are at lead O(n^2)
-	 * therefore the easiest way I can think of is to convert the two binary values
-	 * to normal integers, multiply them and convert them back
+	 * these numbers are represented in big ints
 	 * @param num1 the first number
 	 * @param num2 the second number
 	 * @return the multiplication of the two, ignoring overflow
 	 */
 	public Word mult(Word num1, Word num2)
 	{
-		long firstNumber = BinaryConversions.getSignedLongValue(num1.getWord());//getting the long values
-		long secondNumber = BinaryConversions.getSignedLongValue(num2.getWord());
-		long result = firstNumber * secondNumber;//the result of the multiplication
+		notifyObservers();
+		setChanged();
 		
-		return new Word(BinaryConversions.getSignedBinaryString(result));//converting back to the binary form
+		BigInteger result = num1.getWord().multiply(num2.getWord());
+		result = result.mod(new BigInteger(this.TwoThirtyTwo));
+		
+		return new Word(result);
 	}
 	
-	/**this method divides two numbers using the same method as mult
+	/**this method divides two numbers represented as big integers
 	 * 
 	 * @param num1 the first number
 	 * @param num2 the number to divide by
@@ -296,12 +215,13 @@ public class ALU {
 	 */
 	public Word div(Word num1, Word num2)
 	{
-		long firstNumber = BinaryConversions.getSignedLongValue(num1.getWord());//converting the numbers
-		long secondNumber = BinaryConversions.getSignedLongValue(num2.getWord());
+		notifyObservers();
+		setChanged();
 		
-		long result = firstNumber / secondNumber;//result of the integer division
+		BigInteger result = num1.getWord().divide(num2.getWord());
+		result = result.mod(new BigInteger(this.TwoThirtyTwo));
 		
-		return new Word(BinaryConversions.getSignedBinaryString(result));
+		return new Word(result);
 	}
 	
 	

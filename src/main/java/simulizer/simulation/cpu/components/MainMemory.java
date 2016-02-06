@@ -1,5 +1,6 @@
 package simulizer.simulation.cpu.components;
 
+import java.math.BigInteger;
 import java.util.Observable;
 
 import simulizer.simulation.data.representation.BinaryConversions;
@@ -24,7 +25,7 @@ public class MainMemory extends Observable {
 	private int codeStart;
 	private int codeEndDataStart;
 	private int dataEndHeapStart;
-	private MemoryBus LSBus;
+	private LSUnit LSUnit;
 
 	/**
 	 * this constructor just intialises the memory and then initialises all
@@ -38,11 +39,11 @@ public class MainMemory extends Observable {
 	 * @param dataEndHeapStart
 	 *            the place where the data partition stops and the heap
 	 *            partition begins
-	 * @param LSBus
+	 * @param LSUnit
 	 *            the communication between the LSUnit and main memory
 	 */
 	public MainMemory(int codeStart, int codeEndDataStart,
-			int dataEndHeapStart, MemoryBus LSBus) {
+			int dataEndHeapStart, LSUnit LSUnit) {
 		this.MEM_SIZE = 1048576;
 		this.RAM = new Word[this.MEM_SIZE];
 
@@ -55,7 +56,7 @@ public class MainMemory extends Observable {
 		this.codeStart = codeStart;
 		this.codeEndDataStart = codeEndDataStart;
 		this.dataEndHeapStart = dataEndHeapStart;
-		this.LSBus = LSBus;
+		this.LSUnit = LSUnit;
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class MainMemory extends Observable {
 	 */
 	private void initialiseRAMDebug() {
 		for(int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word("11001100110011001100110011001100");
+			this.RAM[i] = new Word(new BigInteger("3435973836"));
 			//now obvious to find in memory
 		}
 	}
@@ -138,30 +139,30 @@ public class MainMemory extends Observable {
 	}
 
 	/**
-	 * this method will take the contents of the LSBus and get the item at that
+	 * this method will take the contents of the LSUnit and get the item at that
 	 * address and load it back up when sending back, no address will be stored
 	 * so I will set the address to null
 	 */
-	public void readFromMem() {
-		Word address = this.LSBus.getAddressWord();
+	/*public void readFromMem() {
+		Word address = this.LSUnit.getAddressWord();
 		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
 		Word retrieved = this.RAM[index];// retrieving information
-		this.LSBus.setData(retrieved);// loading back onto bus
-		this.LSBus.setAddressWord(null);// convention to remove unwanted stuff
+		this.LSUnit.setData(retrieved);// loading back onto bus
+		this.LSUnit.setAddressWord(null);// convention to remove unwanted stuff
 										// being moved
 
 		notifyObservers();
 		setChanged();
-	}
+	}*/
 
 	/**
 	 * this method will write to memory, provided it is in a safe area of memory
 	 * 
 	 */
-	public void writeToMem() {
-		Word address = this.LSBus.getAddressWord();// where to store
+	/*public void writeToMem() {
+		Word address = this.LSUnit.getAddressWord();// where to store
 		int index = (int) BinaryConversions.getUnsignedLongValue(address.getWord());
-		Word data = this.LSBus.getData();
+		Word data = this.LSUnit.getData();
 
 		assert (index >= dataEndHeapStart && index < this.MEM_SIZE);
 		// assertion for writing USE FOR TESTING
@@ -170,5 +171,5 @@ public class MainMemory extends Observable {
 
 		notifyObservers();
 		setChanged();
-	}
+	}*/
 }
