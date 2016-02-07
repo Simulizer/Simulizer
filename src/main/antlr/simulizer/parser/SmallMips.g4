@@ -9,7 +9,7 @@ grammar SmallMips;
 /////////////////////////////////////////////////
 //
 // For general instruction set and MIPS terminology:
-// see docs/glossary.md
+// see docs/technology-research/mips/overview-notes.md
 //
 //  Lexer:
 //      Recognises words of the language.
@@ -19,108 +19,174 @@ grammar SmallMips;
 //      Recognises structure of phrases in the language.
 //      Deals with context-free grammar.
 //
+// Notes on Antlr
+// - if multiple lexer rules match, the first one is chosen
+// - before parsing, the input must unambiguously be split into lexer tokens
+
+
 
 
 /////////////////////////////////////////////////
-// Parser Rules
+// Parser Rules (grammar / syntax)
 /////////////////////////////////////////////////
 
 program
-    : (line? EOL)+
+    : (dataSegment | textSegment | EOL)* EOF?
     ;
 
 dataSegment
-    :
+    : dataDirective (EOL|line)+
     ;
 
 textSegment
-    :
+    : textDirective (EOL|line)+
     ;
 
+dataDirective
+    : '.' 'data' directiveOperandList?
+    ;
+textDirective
+    : '.' 'text' directiveOperandList?
+    ;
+
+// the first string is parsed as a single line, the second as two
+// add ; # comment
+// add ; sub ; # comment
 line
-   : statement COMMENT?
-   | COMMENT
-   ;
+    : label? directive? statement? ';'? comment? (EOL|';')
+    ;
 
+// label
+label
+    : LABEL_ID ':'
+    ;
+
+// directive
+directive
+    : '.' DIRECTIVE_ID directiveOperandList?
+    ;
+
+directiveOperandList
+    : directiveOperand (',' directiveOperand)*
+    ;
+
+directiveOperand
+    : integer
+    | string
+    | address
+    ;
+
+// statement
 statement
-  : instruction3
-  | instruction2
-  | instruction3v
-  | instruction2v
-  | instruction0
-  ;
+    : instruction operandList?
+    ;
 
-instruction3
-  : opcode3  register ',' register ',' register
-  ;
 
-instruction2
-  : opcode2  register ',' register
-  ;
+operandList
+    : operand (',' operand)*
+    ;
 
-instruction3v
-  : opcode3v register ',' register ',' NUMBER
-  ;
+operand
+    : register    // register value
+    | integer     // literal integer value
+    | address
+    ;
 
-instruction2v
-  : opcode2v register ',' NUMBER
-  ;
+address
+    : registerAddress                  // register addressing: register value as address
+    | integer                          // immediate addressing: will never be matched by operand rule
+    | integer registerAddress          // base-offset addressing: register value +/- offset
+    | LABEL_ID                         // immediate addressing
+    | LABEL_ID SIGN unsignedInteger registerAddress? // immediate addressing with offset
+    ;
 
-instruction0
-  : opcode0
-  ;
+registerAddress
+    : '(' register ')'
+    ;
 
-opcode
-  : opcode3 | opcode2 | opcode3v | opcode2v | opcode0
-  ;
 
-opcode3
-  : OPCODE3
-  ;
+// comment
+comment
+    : COMMENT
+    ;
 
-opcode2
-  : OPCODE2
-  ;
 
-opcode3v
-  : OPCODE3V
-  ;
-
-opcode2v
-  : OPCODE2V
-  ;
-
-opcode0
-  : OPCODE0
-  ;
+// small components
+instruction
+    : INSTRUCTION_ID
+    ;
 
 register
-  : REGISTER
-  ;
+    : '$' REGISTER_ID
+    ;
+
+string
+    : STRING_LITERAL
+    ;
+
+integer
+    : SIGN? denInt
+    | SIGN? hexInt
+    ;
+
+unsignedInteger
+    : denInt
+    | hexInt
+    ;
+denInt
+    : DEN_INT
+    ;
+hexInt
+    : HEX_INT
+    ;
 
 
 
-// ------ Lexer Rules ------
 
-OPCODE3
-  : 'add' | 'sub'
-  ;
+/////////////////////////////////////////////////
+// Lexer Rules (tokens/words)
+/////////////////////////////////////////////////
 
-OPCODE2
-  : 'mult' | 'div'
-  ;
+// instruction
+INSTRUCTION_ID
+    : R_TYPE_INSTRUCTION | I_TYPE_INSTRUCTION
+    | J_TYPE_INSTRUCTION | MISC_INSTRUCTION
+    ;
 
-OPCODE3V
-  : 'addi'
-  ;
+R_TYPE_INSTRUCTION // register-type instruction
+    : 'add' | 'sub'
+    ;
 
-OPCODE2V
-  : 'li'
-  ;
+I_TYPE_INSTRUCTION // immediate-type instruction
+    : 'addi' | 'subi'
+    | 'li'
+    ;
 
-OPCODE0
-  : 'syscall'
-  ;
+J_TYPE_INSTRUCTION // jump-type instruction
+    : 'jal'
+    ;
+
+MISC_INSTRUCTION
+    : 'syscall'
+    ;
+
+
+
+// directive
+DIRECTIVE_ID
+    : 'globl'
+    | 'ascii' | 'asciiz'
+    | 'byte'  | 'half' | 'word'   // 8, 16, 32 bits
+    | 'space'
+    | IGNORED_DIRECTIVE_ID
+    ;
+
+fragment IGNORED_DIRECTIVE_ID
+    : 'align'
+    ;
+
+
+
 
 // http://logos.cs.uic.edu/366/notes/mips%20quick%20tutorial.htm
 // in order of 'register number'. Some names are synonyms.
@@ -139,27 +205,52 @@ REGISTER_ID
   | 'ra'
   ;
 
-REGISTER
-  : '$' REGISTER_ID
-  ;
 
-ANNOTATION
-  : '@' ~ [\r\n]*
-  ;
 
-NUMBER
-  : [0-9]+
-  ;
+
+// unlike SPIM, not allowing dot as a valid character as this might be confusing
+LABEL_ID
+    : [a-zA-Z_][a-zA-Z0-9_]*
+    ;
+
 
 COMMENT
-  : '#' ~ [\r\n]*
-  ;
+    : '#' ~ [\r\n]*
+    ;
+
+
+
+
+
+// from http://stackoverflow.com/a/24559773
+STRING_LITERAL
+    : UNTERMINATED_STRING_LITERAL '"'
+    ;
+UNTERMINATED_STRING_LITERAL
+    : '"' (~["\\\r\n] | '\\' (. | EOF))*
+    ;
+
+
+// denary (base 10) integer with no +/- sign
+DEN_INT
+    : [0-9]+
+    ;
+
+// hex (base 16) integer with no +/- sign
+HEX_INT
+    : '0x' [0-9a-fA-F]+
+    ;
+
+
+SIGN
+    : ('+'|'-')
+    ;
 
 EOL
-   : '\r'? '\n'
-   ;
+    : '\r'? '\n'
+    ;
 
 WS
-   : [ \t] -> skip
-   ;
+    : [ \t] -> skip
+    ;
 
