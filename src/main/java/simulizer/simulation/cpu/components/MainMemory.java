@@ -39,17 +39,16 @@ public class MainMemory extends Observable {
 	 *            the place where the data partition stops and the heap
 	 *            partition begins
 	 */
-	public MainMemory(int codeStart, int codeEndDataStart,
-			int dataEndHeapStart) {
+	public MainMemory(int codeStart, int codeEndDataStart, int dataEndHeapStart) {
 		this.MEM_SIZE = 1048576;
 		this.RAM = new Word[this.MEM_SIZE];
 
-		if (zeroInit){// enforcing the toggle of initialisations
+		if (zeroInit) {// enforcing the toggle of initialisations
 			this.initialiseRAMZeroed();
 		} else {
 			this.initialiseRAMDebug();
 		}
-		
+
 		this.codeStart = codeStart;
 		this.codeEndDataStart = codeEndDataStart;
 		this.dataEndHeapStart = dataEndHeapStart;
@@ -65,15 +64,16 @@ public class MainMemory extends Observable {
 		}
 	}
 
-	/** this method will initialise all of the memory to bytes
-	 * consisting of 0xCC, this should be a lot easier 
-	 * when it comes to debugging code to look inside memory
+	/**
+	 * this method will initialise all of the memory to bytes consisting of
+	 * 0xCC, this should be a lot easier when it comes to debugging code to look
+	 * inside memory
 	 * 
 	 */
 	private void initialiseRAMDebug() {
-		for(int i = 0; i < this.RAM.length; i++) {
+		for (int i = 0; i < this.RAM.length; i++) {
 			this.RAM[i] = new Word(new BigInteger("3435973836"));
-			//now obvious to find in memory
+			// now obvious to find in memory
 		}
 	}
 
@@ -133,24 +133,27 @@ public class MainMemory extends Observable {
 	public void setDataEndHeapStart(int dataEndHeapStart) {
 		this.dataEndHeapStart = dataEndHeapStart;
 	}
-	
-	/**returns the word at a given address
+
+	/**
+	 * returns the word at a given address
 	 * 
-	 * @param index address in integer form
+	 * @param index
+	 *            address in integer form
 	 * @return the word at said address
 	 */
-	public Word getWord(int index)
-	{
+	public Word getWord(int index) {
 		return this.RAM[index];
 	}
-	
-	/**sets a word in memory at a given index/address
+
+	/**
+	 * sets a word in memory at a given index/address
 	 * 
-	 * @param index the index in memory
-	 * @param toSet the contents to store at said address
+	 * @param index
+	 *            the index in memory
+	 * @param toSet
+	 *            the contents to store at said address
 	 */
-	public synchronized void setWord(int index, Word toSet)
-	{
+	public synchronized void setWord(int index, Word toSet) {
 		this.RAM[index] = toSet;
 	}
 
