@@ -1,12 +1,20 @@
 package simulizer.ui.windows;
 
+import javafx.scene.layout.Pane;
 import simulizer.highlevel.visualisation.DataStructureVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class HighLevelVisualisation extends InternalWindow {
 	private DataStructureVisualiser visualiser;
+	private Pane drawingPane;
 	
 	public HighLevelVisualisation() {
+		init();
+	}
+	
+	private void init() {
+		this.drawingPane = new Pane();
+		getChildren().add(drawingPane);
 		
 	}
 	
@@ -18,4 +26,7 @@ public class HighLevelVisualisation extends InternalWindow {
 		return this.visualiser;
 	}
 	
+	public Pane getDrawingPane() {
+		return drawingPane;
+	}
 }

@@ -1,17 +1,21 @@
 package simulizer.ui.components;
 
 import java.io.File;
+
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.Main;
+import simulizer.highlevel.visualisation.ListVisualiser;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.windows.CodeEditor;
+import simulizer.ui.windows.HighLevelVisualisation;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -78,8 +82,17 @@ public class MainMenuBar extends MenuBar {
 		alternativeLayoutItem.setOnAction(e -> wm.setLayout(Layouts.alternative()));
 
 		// | | | -- High Level Only Layout
-		MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
-		highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
+		MenuItem highLevelLayoutItem = new MenuItem("High Level Test");
+		highLevelLayoutItem.setOnAction(e -> {
+			wm.setLayout(Layouts.onlyHighLevel());
+			HighLevelVisualisation hv = (HighLevelVisualisation) wm.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+			ListVisualiser<Integer> lv = new ListVisualiser<>(hv.getDrawingPane(), 1000, 400, null);
+			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
+				int n = Integer.valueOf(f.getCharacter());
+				lv.swap(n % 5, (n+1) % 5);
+				lv.commit();
+			});
+		});
 		
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 

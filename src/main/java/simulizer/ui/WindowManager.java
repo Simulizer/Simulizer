@@ -24,8 +24,7 @@ public class WindowManager extends Pane {
 	}
 
 	public WindowManager(Stage primaryStage, String theme) {
-		this.theme = theme;
-		init(primaryStage, 1060, 740);
+		this(primaryStage, theme, 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme, int x, int y) {
