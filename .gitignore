@@ -41,7 +41,5 @@ gradle-app.setting
 gradle.properties
 */gradle.properties
 
-# Ignore folders created by application
-code
-layouts
-themes
+# Ignore application working directory
+work/

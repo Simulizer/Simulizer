@@ -155,13 +155,13 @@ dependencies {
 
     // Testing
         testCompile 'junit:junit:4.12'
+    
+    mkdir('work')
 }
 
 
 clean{
-    delete "code"
-    delete "layouts"
-    delete "themes"
+    delete "work"
 }
 
 
@@ -170,6 +170,11 @@ clean{
 // Deployment Configuration
 //
 /////////////////////////////////////////////////
+
+run {
+	workingDir = file('work')
+}
+
 
 jar {
     // Include all dependencies in the jar file
