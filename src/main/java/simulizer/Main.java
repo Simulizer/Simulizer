@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -33,20 +36,38 @@ public class Main extends Application {
 		new WindowManager(primaryStage);
 	}
 
-	private void copyResource(String filepath) throws IOException, URISyntaxException {
-		Path file = Paths.get(System.getProperty("user.dir") + File.separator + filepath);
-		Path resources = Paths.get(getResource(filepath));
-		if (!Files.exists(file)) {
-			if (Files.isDirectory(resources)) {
-				Files.createDirectories(file);
-				Files.walkFileTree(resources, new CopyFileVisitor(file));
+	// Thanks to: http://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file#answer-20073154
+	private void copyResource(String relFile) throws IOException, URISyntaxException {
+		Path outsideFolder = Paths.get(System.getProperty("user.dir") + File.separator + relFile);
+		if (!Files.exists(outsideFolder)) {
+			final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+			if (jarFile.isFile()) {
+				// Running in a JAR file
+				final JarFile jar = new JarFile(jarFile);
+				final Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries in jar
+				while (entries.hasMoreElements()) {
+					final JarEntry entry = entries.nextElement();
+					// filter according to the path
+					if (entry.getName().startsWith(relFile + "/")) { 
+						// TODO: Copy files from within the JAR
+						System.out.println(entry.getName());
+					}
+				}
+				jar.close();
 			} else {
-				Files.copy(resources, file);
+				// Running in an IDE
+				Path insideFolder = Paths.get(getResource(relFile));
+				if (Files.isDirectory(insideFolder)) {
+					Files.createDirectories(outsideFolder);
+					Files.walkFileTree(insideFolder, new CopyFileVisitor(outsideFolder));
+				} else {
+					Files.copy(insideFolder, outsideFolder);
+				}
 			}
 		}
 	}
 
 	private URI getResource(String filepath) throws URISyntaxException {
-		return getClass().getClassLoader().getResource(filepath).toURI();
+		return getClass().getResource("/" + filepath).toURI();
 	}
 }
