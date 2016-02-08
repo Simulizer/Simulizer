@@ -19,6 +19,8 @@ misc/svn-gatekeeper/experiment
 .classpath
 .settings/
 
+# ignore R studio history files
+.Rhistory
 
 
 # ignore build files
