@@ -8,7 +8,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.ui.WindowManager;
-import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
@@ -94,7 +93,7 @@ public class MainMenuBar extends MenuBar {
 			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
 				wm.getLayouts().saveLayout(saveFile);
-				wm.getLayouts().reload();
+				wm.getLayouts().reload(false);
 				layoutMenu(menu);
 			}
 		});
@@ -102,7 +101,7 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Reload Layouts
 		MenuItem reloadLayoutItem = new MenuItem("Refresh Layouts");
 		reloadLayoutItem.setOnAction(e -> {
-			wm.getLayouts().reload();
+			wm.getLayouts().reload(false);
 			layoutMenu(menu);
 		});
 		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
@@ -132,11 +131,7 @@ public class MainMenuBar extends MenuBar {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> {
-				InternalWindow w = wm.findInternalWindow(wenum);
-				w.setBounds(20, 35, 400, 685);
-				wm.addWindows(w);
-			});
+			item.setOnAction(e -> wm.findInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
 		return windowsMenu;

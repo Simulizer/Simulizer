@@ -56,7 +56,7 @@ public class WindowManager extends Pane {
 		openWindows.clear();
 	}
 
-	public void addWindows(InternalWindow... windows) {
+	private void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
@@ -65,7 +65,7 @@ public class WindowManager extends Pane {
 		}
 	}
 
-	public void removeWindows(InternalWindow... windows) {
+	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (window.isVisible()) window.close();
 			openWindows.remove(window);

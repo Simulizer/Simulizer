@@ -30,10 +30,10 @@ public class Layouts implements Iterable<Layout> {
 
 	public Layouts(WindowManager wm) {
 		this.wm = wm;
-		reload();
+		reload(true);
 	}
 
-	public void reload() {
+	public void reload(boolean findDefault) {
 		layouts.clear();
 		Gson g = new Gson();
 
@@ -55,7 +55,7 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (defaultLayout != null) wm.setLayout(defaultLayout);
+		if (defaultLayout != null && findDefault) wm.setLayout(defaultLayout);
 	}
 
 	public void saveLayout(File saveFile) {
