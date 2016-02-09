@@ -28,9 +28,9 @@ public class Main extends Application {
 		primaryStage.getIcons().add(new Image(getResource("logo.png").toString()));
 
 		// Copy folders from resources to jar running directory
-		copyResource("code");
-		copyResource("layouts");
-		copyResource("themes");
+		//copyResource("code");
+		//copyResource("layouts");
+		//copyResource("themes");
 
 		// Just show the main window for now
 		new WindowManager(primaryStage);
