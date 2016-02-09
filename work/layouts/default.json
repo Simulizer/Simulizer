@@ -1,0 +1,28 @@
+{
+  "name": "Default Layout",
+  "width": 1060,
+  "height": 740,
+  "windows": [
+    {
+      "id": "CODE_EDITOR",
+      "x": 20,
+      "y": 35,
+      "width": 400,
+      "height": 685
+    },
+    {
+      "id": "CPU_VISUALISATION",
+      "x": 440,
+      "y": 35,
+      "width": 600,
+      "height": 400
+    },
+    {
+      "id": "REGISTERS",
+      "x": 440,
+      "y": 440,
+      "width": 600,
+      "height": 280
+    }
+  ]
+}

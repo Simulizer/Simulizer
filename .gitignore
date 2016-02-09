@@ -41,4 +41,7 @@ gradle-app.setting
 
 # Ignore gradle.properties
 gradle.properties
-*/gradle.properties/*
+*/gradle.properties
+
+# Ignore application working directory
+# work/ # Temporarily allowing work dir until I can copy out of a jar file

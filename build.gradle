@@ -143,20 +143,26 @@ dependencies {
         // task compileJava automatically depends on generateGrammarSource
         antlr   'org.antlr:antlr4:4.5'
 
-
     // JFExtras
         compile 'org.jfxtras:jfxtras-controls:8.0-r4'
         compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
 
-
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-
+        
+    // GSON: JSON Parsing
+    	compile 'com.google.code.gson:gson:2.5'
 
     // Testing
         testCompile 'junit:junit:4.12'
+    
+    mkdir('work')
 }
 
+
+clean{
+    // delete "work" // Disabled until copying out of jar works
+}
 
 
 /////////////////////////////////////////////////
@@ -165,7 +171,15 @@ dependencies {
 //
 /////////////////////////////////////////////////
 
+run {
+	workingDir = file('work')
+}
+
+
 jar {
+    // Include all dependencies in the jar file
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    
     manifest {
         attributes 'Implementation-Title':   name,
                    'Implementation-Version': version,
