@@ -1,6 +1,10 @@
 package simulizer.assembler.spim_compliance;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class InvalidParseTests extends TestCase {
+public class InvalidParseTests {
+    @Test
+    public void testThing() {
+
+    }
 }

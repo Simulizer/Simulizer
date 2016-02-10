@@ -51,6 +51,10 @@ public enum Register {
         return id;
     }
 
+    public String getName() {
+        return this.toString();
+    }
+
     /**
      * get a register from a string, throws NoSuchElementException if no such register
      * @param name the name of the register

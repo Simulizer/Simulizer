@@ -8,7 +8,7 @@ public class StoreProblemLogger extends ProblemLogger {
     private List<Problem> problems;
 
     public StoreProblemLogger() {
-        problems = new ArrayList<Problem>();
+        problems = new ArrayList<>();
     }
 
     public List<Problem> getProblems() {
