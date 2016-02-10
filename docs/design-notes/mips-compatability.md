@@ -136,6 +136,7 @@ These behaviours have been tested to hold in SPIM.
 - Simulizer favours the instruction set supported by SPIM to the official MIPS32
   specification. This is because recent revisions of MIPS32 have removed some
   useful instructions such as `addi`
+- (//TODO: untested) jumping to an address that is not 4-byte aligned will crash.
 
 
 ## Addressing Modes ##

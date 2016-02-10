@@ -5,12 +5,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import simulizer.assembler.extractor.ProgramExtractor;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
-import simulizer.assembler.representation.Label;
-import simulizer.assembler.representation.Program;
-import simulizer.assembler.representation.Statement;
-import simulizer.assembler.representation.Variable;
+import simulizer.assembler.representation.*;
 import simulizer.parser.SmallMipsLexer;
 import simulizer.parser.SmallMipsParser;
+import simulizer.simulation.data.representation.DataConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +43,9 @@ public class Assembler {
 
         p.sourceHash = input.hashCode();
 
-        int address = 0x00400000; // text segment offset
+        Address address = new Address(0x00400000); // text segment offset
+
+        p.textSegmentStart = address;
 
         for(int i = 0; i < extractor.textSegment.size(); i++) {
             Statement s = extractor.textSegment.get(i);
@@ -56,14 +56,18 @@ public class Assembler {
                 }
             }
 
-            p.textSegment.put(i, s);
+            p.textSegment.put(address, s);
             p.lineNumbers.put(address, s.lineNumber);
 
-            address += 4;
+            address = new Address(address.getValue() + 4);
         }
 
 
-        address = 0x10000000; // (static) data segment
+        address = new Address(0x10000000); // (static) data segment
+
+        p.dataSegmentStart = address;
+
+        List<Byte> tmpDataSegment = new ArrayList<>();
 
         for(int i = 0; i < extractor.dataSegment.size(); i++) {
             Variable v = extractor.dataSegment.get(i);
@@ -74,11 +78,26 @@ public class Assembler {
                 }
             }
 
-            p.dataSegment.put(i, v);
+            p.dataSegmentVariables.put(address, v);
+
+            byte[] data = DataConverter.fromVariable(v);
+            assert data.length == v.getSize();
+
+            for(byte b : data) {
+                tmpDataSegment.add(b);
+            }
+
             p.lineNumbers.put(address, v.getLineNumber());
 
-            address += v.getSize();
+            address = new Address(address.getValue() + v.getSize());
         }
+
+        p.dataSegment = new byte[tmpDataSegment.size()];
+        for(int i = 0; i < p.dataSegment.length; i++) {
+            p.dataSegment[i] = tmpDataSegment.get(i);
+        }
+
+        p.dynamicSegmentStart = address;
 
         return p;
     }
