@@ -7,18 +7,25 @@ import java.util.ArrayList;
  * @author Charlie Street
  *
  */
-public class MipsHeap 
+public class DynamicDataSegment 
 {
-	private int endOfHeap;
 	private ArrayList<Byte> heap;
 	
 	/**this constructor just initialises the heap and it's end pointer
 	 * 
 	 */
-	public MipsHeap()
+	public DynamicDataSegment()
 	{
-		this.endOfHeap = 0;//initialising pointer in heap to 0
 		this.heap = new ArrayList<Byte>();
+	}
+	
+	/**returns the current size of the heap
+	 * 
+	 * @return the size of the heap
+	 */
+	public int size()
+	{
+		return this.heap.size();
 	}
 	
 	/**this method will add bytes new bytes onto the heap
@@ -26,16 +33,13 @@ public class MipsHeap
 	 * @param bytes the number of bytes to add to the heap
 	 * @return the pointer to the start of that block
 	 */
-	public int sbrk(int bytes)
+	public void sbrk(int bytes)
 	{
 		for(int i = 0; i < bytes; i++)
 		{
 			this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality
 		}
 		
-		int returnVal = this.endOfHeap;
-		this.endOfHeap += bytes;//incrementing pointer
-		return returnVal;
 	}
 	
 	/**will set a byte at a given position
@@ -45,7 +49,10 @@ public class MipsHeap
 	 */
 	public void setByte(byte toSet, int position)
 	{
-		this.heap.set(position,toSet);
+		if(position < this.heap.size())
+		{
+			this.heap.set(position,toSet);
+		}
 	}
 	
 	/**allows to set multiple bytes in one go on the heap
@@ -57,7 +64,30 @@ public class MipsHeap
 	{
 		for(int i = startPos; i < startPos + toSet.length; i++)
 		{
-			this.heap.set(i, toSet[i-startPos]);
+			if(i < this.heap.size())
+			{
+				this.heap.set(i, toSet[i-startPos]);
+			}
 		}
+	}
+	
+	/**method will get n bytes from the heap 
+	 * 
+	 * @param startPosition the start address in the heap
+	 * @param length the number of bytes to retrieve
+	 * @return the bytes in an array
+	 */
+	public byte[] getBytes(int startPosition, int length)
+	{
+		byte[] result = new byte[length];
+		for(int i = 0; i < length; i++)
+		{
+			if(startPosition+i < this.heap.size())
+			{
+				result[i] = this.heap.get(startPosition+i);
+			}
+		}
+		
+		return result;
 	}
 }

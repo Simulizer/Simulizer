@@ -1,5 +1,6 @@
 package simulizer.simulation.cpu.components;
 
+import java.math.BigInteger;
 import java.util.Observable;
 
 import simulizer.simulation.data.representation.Word;
@@ -87,7 +88,7 @@ public class LSUnit extends Observable
 	{
 		notifyObservers();
 		setChanged();
-		return this.memory.getWord(address);
+		return new Word(new BigInteger(this.memory.readFromMem(address,4)));
 	}
 	
 	/**this method writes to memory from the L/S unit
@@ -97,9 +98,9 @@ public class LSUnit extends Observable
 	 */
 	public synchronized void writeToMemory(int address, Word toStore)
 	{
-		assert (address >= this.memory.getDataEndHeapStart());//for testing, may change
+		//assert (address >= this.memory.getDataEndHeapStart());//for testing, may change
 		
-		this.memory.setWord(address, toStore);
+		this.memory.writeToMem(address, toStore.getWord().toByteArray());
 		
 		notifyObservers();
 		setChanged();
