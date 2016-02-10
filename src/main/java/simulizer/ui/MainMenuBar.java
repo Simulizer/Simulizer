@@ -14,7 +14,7 @@ import simulizer.ui.windows.CodeEditor;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
-
+	public final static int HEIGHT = 25;
 	private WindowManager wm;
 
 	public MainMenuBar(WindowManager wm) {

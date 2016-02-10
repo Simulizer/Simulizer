@@ -12,48 +12,12 @@ import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
 import simulizer.ui.GridBounds;
+import simulizer.ui.MainMenuBar;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window implements Observer {
-
 	private GridBounds grid;
-	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
-		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
-		final Timer timer = new Timer();
-		TimerTask task = null;
-		final long delayTime = 200; // Delay before resize to grid
-
-		@Override
-		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			if (task != null) task.cancel();
-			task = new TimerTask() {
-				@Override
-				public void run() {
-					double[] coords = { getLayoutX(), getLayoutY() - 25, getLayoutX() + getWidth(), getLayoutY() + getHeight() - 25 };
-					coords = grid.moveToGrid(coords);
-					if (coords[2] != getLayoutX() + getWidth()) {
-						System.out.println("Changed Width to: " + (coords[2] - coords[0]));
-						setPrefWidth(coords[2] - coords[0]);
-					}
-					if (coords[3] != getLayoutY() + getHeight() - 25) {
-						System.out.println("Changed Height to: " + (coords[3] - coords[1] + 25));
-						setPrefHeight(coords[3] - coords[1]);
-					}
-					if (coords[0] != getLayoutX()) {
-						System.out.println("Changed X to: " + coords[0]);
-						setLayoutX(coords[0]);
-					}
-					if (coords[1] != getLayoutY() - 25) {
-						System.out.println("Changed Y to: " + (coords[1] + 25));
-						setLayoutY(coords[1] + 25);
-					}
-					task.cancel();
-				}
-			};
-			timer.schedule(task, delayTime);
-		}
-
-	};
+	private double windowWidth = 1060, windowHeight = 740;
 
 	public InternalWindow() {
 		// Sets to default title
@@ -113,8 +77,58 @@ public abstract class InternalWindow extends Window implements Observer {
 	}
 
 	@Override
-	public void update(Observable arg0, Object arg1) {
-		// Main Window Resized
-		System.out.println("Main Window Resized");
+	public void update(Observable arg0, Object obj) {
+		double[] dim = (double[]) obj;
+		if (windowWidth != dim[0]) {
+			double ratio = dim[0] / windowWidth;
+			setLayoutX(getLayoutX() * ratio);
+			setPrefWidth(getWidth() * ratio);
+		}
+		if (windowHeight != dim[1]) {
+			double ratio = dim[1] / windowHeight;
+			setLayoutY(((getLayoutY() - MainMenuBar.HEIGHT) * ratio) + MainMenuBar.HEIGHT);
+			setPrefHeight(getHeight() * ratio);
+		}
+		windowWidth = dim[0];
+		windowHeight = dim[1];
 	}
+
+	/** Snaps InternalWindow to grid when it is resized */
+	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
+		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+		final Timer timer = new Timer();
+		TimerTask task = null;
+		final long delayTime = 200; // Delay before resize to grid
+
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			if (task != null) task.cancel();
+			task = new TimerTask() {
+				@Override
+				public void run() {
+					double[] coords = { getLayoutX(), getLayoutY() - MainMenuBar.HEIGHT, getLayoutX() + getWidth(), getLayoutY() + getHeight() - MainMenuBar.HEIGHT };
+					coords = grid.moveToGrid(coords);
+					if (coords[2] != getLayoutX() + getWidth()) {
+						System.out.println("Changed Width to: " + (coords[2] - coords[0]));
+						setPrefWidth(coords[2] - coords[0]);
+					}
+					if (coords[3] != getLayoutY() + getHeight() - MainMenuBar.HEIGHT) {
+						System.out.println("Changed Height to: " + (coords[3] - coords[1] + MainMenuBar.HEIGHT));
+						setPrefHeight(coords[3] - coords[1]);
+					}
+					if (coords[0] != getLayoutX()) {
+						System.out.println("Changed X to: " + coords[0]);
+						setLayoutX(coords[0]);
+					}
+					if (coords[1] != getLayoutY() - MainMenuBar.HEIGHT) {
+						System.out.println("Changed Y to: " + (coords[1] + MainMenuBar.HEIGHT));
+						setLayoutY(coords[1] + 25);
+					}
+					task.cancel();
+				}
+			};
+			timer.schedule(task, delayTime);
+		}
+
+	};
 }

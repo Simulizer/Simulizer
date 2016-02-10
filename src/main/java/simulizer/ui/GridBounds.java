@@ -6,7 +6,7 @@ public class GridBounds extends Observable {
 
 	private final int hor, ver; // Number of Horizontal and Vertical Lines
 	private double xGap, yGap; // Size of the Main Window
-	private static double minSens = 0; // To account for errors in division
+	private static double minSens = 0.001; // To account for errors in division
 	private double sens;
 
 	/** @param horizontal Number of horizontal lines in the grid
@@ -24,9 +24,8 @@ public class GridBounds extends Observable {
 	public void setWindowSize(double width, double height) {
 		xGap = width / hor;
 		yGap = height / ver;
-		System.out.println(xGap + " " + yGap);
 		setChanged();
-		notifyObservers();
+		notifyObservers(new double[] { width, height });
 	}
 
 	/** Converts a list of coordinates for an InternalWindow so that they line up with the grid

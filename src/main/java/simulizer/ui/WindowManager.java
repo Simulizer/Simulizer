@@ -46,7 +46,7 @@ public class WindowManager extends Pane {
 		setTheme(themes.getTheme());
 
 		// Sets the grid
-		grid = new GridBounds(10, 10, 25);
+		grid = new GridBounds(4, 2, 30);
 		grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25);
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
 		scene.heightProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
@@ -56,9 +56,8 @@ public class WindowManager extends Pane {
 
 		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
-		bar.setMinWidth(1060);
+		bar.prefWidthProperty().bind(primaryStage.widthProperty());
 		pane.getChildren().add(bar);
-		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
 
 		primaryStage.show();
 	}
