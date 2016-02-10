@@ -17,12 +17,12 @@ import simulizer.simulation.data.representation.Word;
  * @author Charlie Street
  */
 public class MainMemory extends Observable {
-	private final int MEM_SIZE;// the size of the memory we are allowing
-								// (standard is 4mb worth of words)
+
 	
+	private Address startOfTextSegment;
 	private Address startOfStaticData;//start of the static data segment
 	private Address startOfDynamicData; //the end of the static data segment
-	private Address endOfMemory;
+	private final Address endOfMemory;
 
 	public static boolean zeroInit = true;// to toggle between different
 											// initialisations
@@ -37,11 +37,11 @@ public class MainMemory extends Observable {
 	 * partitions in it
 	 * 
 	 */
-	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment,Address startOfStaticData, Address startOfDynamicData, Address endOfMemory) {
-		this.MEM_SIZE = 1048576;
+	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData) {
+		this.startOfTextSegment = startTextSegment;
 		this.startOfStaticData = startOfStaticData;
 		this.startOfDynamicData = startOfDynamicData;
-		this.endOfMemory = endOfMemory;
+		this.endOfMemory = new Address(2147483644);
 		
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;

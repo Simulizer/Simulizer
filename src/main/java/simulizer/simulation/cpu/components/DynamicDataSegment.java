@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class DynamicDataSegment 
 {
 	private ArrayList<Byte> heap;
+	private int pointer;
 	
 	/**this constructor just initialises the heap and it's end pointer
 	 * 
@@ -17,6 +18,7 @@ public class DynamicDataSegment
 	public DynamicDataSegment()
 	{
 		this.heap = new ArrayList<Byte>();
+		this.pointer = 0;
 	}
 	
 	/**returns the current size of the heap
@@ -30,16 +32,28 @@ public class DynamicDataSegment
 	
 	/**this method will add bytes new bytes onto the heap
 	 * and return the pointer to the start of that block
+	 * in the negative argument case, it will return the break
 	 * @param bytes the number of bytes to add to the heap
 	 * @return the pointer to the start of that block
 	 */
-	public void sbrk(int bytes)
+	public int sbrk(int bytes)
 	{
-		for(int i = 0; i < bytes; i++)
+		if(bytes < 0)
 		{
-			this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality
+			this.pointer -= bytes;
+			return this.pointer;
 		}
-		
+		else
+		{
+			for(int i = 0; i < bytes; i++)
+			{
+				this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
+			}
+			
+			int result = this.pointer;
+			this.pointer += bytes;//increasing the pointer
+			return result;
+		}
 	}
 	
 	/**will set a byte at a given position
