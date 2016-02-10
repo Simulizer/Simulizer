@@ -20,9 +20,9 @@ public class MainMemory extends Observable {
 	private final int MEM_SIZE;// the size of the memory we are allowing
 								// (standard is 4mb worth of words)
 	
-	private final Address startOfStaticData;//start of the static data segment
-	private final Address endOfStaticData; //the end of the static data segment
-	private final Address endOfMemory;
+	private Address startOfStaticData;//start of the static data segment
+	private Address startOfDynamicData; //the end of the static data segment
+	private Address endOfMemory;
 
 	public static boolean zeroInit = true;// to toggle between different
 											// initialisations
@@ -37,11 +37,11 @@ public class MainMemory extends Observable {
 	 * partitions in it
 	 * 
 	 */
-	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment,) {
+	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment,Address startOfStaticData, Address startOfDynamicData, Address endOfMemory) {
 		this.MEM_SIZE = 1048576;
-		this.startOfStaticData = 268435456;
-		this.endOfStaticData = this.startOfStaticData + staticDataSegment.length;
-		this.endOfMemory = 2147483644;
+		this.startOfStaticData = startOfStaticData;
+		this.startOfDynamicData = startOfDynamicData;
+		this.endOfMemory = endOfMemory;
 		
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;
@@ -85,14 +85,14 @@ public class MainMemory extends Observable {
 	 */
 	public byte[] readFromMem(int address, int length)
 	{
-		if((address >=  this.startOfStaticData && address < this.endOfStaticData))//if in the static data part of memory
+		if((address >=  this.startOfStaticData.getValue() && address < this.startOfDynamicData.getValue()))//if in the static data part of memory
 		{
 			byte[] result = new byte[length];
 			for(int i = 0; i < length; i++)
 			{
-				if(address-this.startOfStaticData+i < this.endOfStaticData)
+				if(address-this.startOfStaticData.getValue()+i < this.startOfDynamicData.getValue())
 				{
-					result[i] = this.staticDataSegment[address-this.startOfStaticData+i];//reading from the static data segment
+					result[i] = this.staticDataSegment[address-this.startOfStaticData.getValue()+i];//reading from the static data segment
 				}
 				else
 				{
@@ -101,9 +101,9 @@ public class MainMemory extends Observable {
 			}
 			return result;
 		}
-		else if(address >= this.endOfStaticData && address <= this.endOfMemory)//if in the dynamic data segment
+		else if(address >= this.startOfDynamicData.getValue() && address <= this.endOfMemory.getValue())//if in the dynamic data segment
 		{
-			int heapVal = address-this.endOfStaticData;
+			int heapVal = address-this.startOfDynamicData.getValue();
 			return this.heap.getBytes(heapVal, length);
 		}
 		else
@@ -119,13 +119,13 @@ public class MainMemory extends Observable {
 	 */
 	public void writeToMem(int address, byte[] toWrite)
 	{
-		if(address >= this.startOfStaticData && address < this.endOfStaticData)//if in static data segment
+		if(address >= this.startOfStaticData.getValue() && address < this.startOfDynamicData.getValue())//if in static data segment
 		{
 			for(int i = 0; i < toWrite.length; i++)
 			{
-				if(address + i < this.endOfStaticData)
+				if(address + i < this.startOfDynamicData.getValue())
 				{
-					this.staticDataSegment[address-this.startOfStaticData + i] = toWrite[i];
+					this.staticDataSegment[address-this.startOfStaticData.getValue() + i] = toWrite[i];
 				}
 				else
 				{
@@ -133,11 +133,11 @@ public class MainMemory extends Observable {
 				}
 			}
 		}
-		else if(address >= this.endOfStaticData && address <= this.endOfMemory)//write to heap
+		else if(address >= this.startOfDynamicData.getValue() && address <= this.endOfMemory.getValue())//write to heap
 		{
-			if(!(address-this.endOfStaticData + toWrite.length > this.heap.size()))
+			if(!(address-this.startOfDynamicData.getValue() + toWrite.length > this.heap.size()))
 			{
-				this.heap.setBytes(toWrite,address-this.endOfStaticData);//writing to the heap
+				this.heap.setBytes(toWrite,address-this.startOfDynamicData.getValue());//writing to the heap
 			}
 			else//this will 
 			{
