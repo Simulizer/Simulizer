@@ -20,9 +20,9 @@ public class MainMemory extends Observable {
 	private final int MEM_SIZE;// the size of the memory we are allowing
 								// (standard is 4mb worth of words)
 	
-	private final int startOfStaticData;//start of the static data segment
-	private final int endOfStaticData; //the end of the static data segment
-	private final int endOfMemory;
+	private final Address startOfStaticData;//start of the static data segment
+	private final Address endOfStaticData; //the end of the static data segment
+	private final Address endOfMemory;
 
 	public static boolean zeroInit = true;// to toggle between different
 											// initialisations
@@ -37,7 +37,7 @@ public class MainMemory extends Observable {
 	 * partitions in it
 	 * 
 	 */
-	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment) {
+	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment,) {
 		this.MEM_SIZE = 1048576;
 		this.startOfStaticData = 268435456;
 		this.endOfStaticData = this.startOfStaticData + staticDataSegment.length;

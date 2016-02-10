@@ -25,6 +25,33 @@ public class InstructionRegister extends Observable {
 		this.lsUnit = lsUnit;
 	}
 
+	/**sets the CU linked to the IR in the CPU
+	 * 
+	 * @param controlUnit the control unit of the CPU
+	 */
+	public void setControlUnit(ControlUnit controlUnit)
+	{
+		this.controlUnit = controlUnit;
+	}
+	
+	/**sets the program counter linked to the IR
+	 * 
+	 * @param programCounter the PC of the CPU
+	 */
+	public void setProgramCounter(ProgramCounter programCounter)
+	{
+		this.programCounter = programCounter;
+	}
+	
+	/**this method will set the LSUnit linked to the IR
+	 * 
+	 * @param LSUnit the LSUnit of the CPU
+	 */
+	public void setLSUnit(LSUnit LSUnit)
+	{
+		this.lsUnit = LSUnit;
+	}
+	
 	/** this method will retrieve the data in the IR
 	 * @return the stored instruction */
 	public Word getData() {

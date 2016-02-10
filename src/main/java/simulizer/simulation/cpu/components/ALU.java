@@ -32,6 +32,23 @@ public class ALU extends Observable {
 		this.controlUnit = controlUnit;
 	}
 	
+	/**this method will set the control unit linked to the ALU
+	 * @param controlUnit the CU linked to the ALU
+	 */
+	public void setControlUnit(ControlUnit controlUnit)
+	{
+		this.controlUnit = controlUnit;
+	}
+	
+	/**this method sets the registers accessed by the alu
+	 * 
+	 * @param registerBlock the GP registers linked to the ALU
+	 */
+	public void setRegisterBlock(RegisterBlock registerBlock)
+	{
+		this.registers = registerBlock;
+	}
+	
 	/**returns the temporary holding value
 	 * this is a replacement for a bus
 	 * @return the temporary holding value

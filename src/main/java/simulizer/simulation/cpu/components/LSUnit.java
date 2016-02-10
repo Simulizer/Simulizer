@@ -36,6 +36,42 @@ public class LSUnit extends Observable
 		this.controlUnit = controlUnit;
 	}
 	
+	/**this method sets the block of registers linked to the LSUnit
+	 * 
+	 * @param registers the block of GP registers
+	 */
+	public void setRegisterBlock(RegisterBlock registers)
+	{
+		this.registers = registers;
+	}
+	
+	/**this method sets the main memory object linked to the LSUnit
+	 * 
+	 * @param memory the RAM of the cpu
+	 */
+	public void setMainMemory(MainMemory memory)
+	{
+		this.memory = memory;
+	}
+	
+	/**this method sets the instruction register linked to the LSUnit
+	 * 
+	 * @param instructionRegister the instruction register object
+	 */
+	public void setInstructionRegister(InstructionRegister instructionRegister)
+	{
+		this.instructionRegister = instructionRegister;
+	}
+	
+	/**this method sets the control unit linked to the LSUnit
+	 * 
+	 * @param controlUnit the controlUnit of the CPU
+	 */
+	public void setControlUnit(ControlUnit controlUnit)
+	{
+		this.controlUnit = controlUnit;
+	}
+	
 	/**this method will return the temporary holding value in the LSunit
 	 * 
 	 * @return the temporary transport holding value

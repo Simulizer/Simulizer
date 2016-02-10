@@ -29,6 +29,33 @@ public class ProgramCounter extends Observable {
 		this.LSUnit = LSUnit;
 	}
 
+	/**this method sets the control unit linked to the PC
+	 * 
+	 * @param controlUnit the control unit object
+	 */
+	public void setControlUnit(ControlUnit controlUnit)
+	{
+		this.controlUnit = controlUnit;
+	}
+	
+	/**method sets the instruction register linked to the PC
+	 * 
+	 * @param IR the IR of the CPU
+	 */
+	public void setInstructionRegister(InstructionRegister IR)
+	{
+		this.IRUnit = IR;
+	}
+	
+	/**method sets the LSUnit linked to the PC
+	 * 
+	 * @param LSUnit the LSUnit of the CPU
+	 */
+	public void setLSUnit(LSUnit LSUnit)
+	{
+		this.LSUnit = LSUnit;
+	}
+	
 	/** this method will increment the value of the program counter by the generic increment */
 	public void increment() {
 		this.setData(this.getData().add(this.INCREMENT));//adds the increment to the program counter

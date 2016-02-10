@@ -159,4 +159,49 @@ public class ControlUnit extends Observable
 		notifyObservers();
 		setChanged();
 	}
+	
+	/**sets the ALU linked to the CU
+	 * 
+	 * @param ALU the ALU object
+	 */
+	public void setALU(ALU ALU)
+	{
+		this.ALU = ALU;
+	}
+	
+	/**sets the LSUnit in the CU
+	 * 
+	 * @param LSUnit the LSUnit obejct
+	 */
+	public void setLSUnit(LSUnit LSUnit)
+	{
+		this.LSUnit = LSUnit;
+	}
+	
+	/**sets the register block linked to the CU
+	 * 
+	 * @param registers the block of registers in the processor
+	 */
+	public void setRegisterBlock(RegisterBlock registers)
+	{
+		this.registers = registers;
+	}
+	
+	/**sets the program counter linked to the CU
+	 * 
+	 * @param PC the PC object being used in the CPU
+	 */
+	public void setProgramCounter(ProgramCounter PC)
+	{
+		this.programCounter = PC;
+	}
+	
+	/**sets the instruction register linked to the CU
+	 * 
+	 * @param IR the instruction register object being used
+	 */
+	public void setInstructionRegister(InstructionRegister IR)
+	{
+		this.instructionRegister = IR;
+	}
 }
