@@ -18,9 +18,9 @@ public class WindowManager extends Pane {
 	private Stage primaryStage;
 	private Pane pane = new Pane();
 
-	private GridBounds grid = new GridBounds(10, 10, 25);
-	private Themes themes = new Themes();
-	private Layouts layouts = new Layouts(this);
+	private GridBounds grid = new GridBounds(4, 3, 5);
+	private Themes themes;
+	private Layouts layouts;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -40,20 +40,25 @@ public class WindowManager extends Pane {
 		primaryStage.setScene(scene);
 		pane.getStyleClass().add("background");
 
+		// Set the theme
+		themes = new Themes();
+		themes.setTheme(theme);
+		setTheme(themes.getTheme());
+
+		// Sets the grid
+		grid = new GridBounds(10, 10, 25);
+		grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25);
+		scene.widthProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
+		scene.heightProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
+
+		// Set the layout
+		layouts = new Layouts(this);
+
 		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
 		bar.setMinWidth(1060);
 		pane.getChildren().add(bar);
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
-
-		// Set the theme
-		themes.setTheme(theme);
-		setTheme(themes.getTheme());
-
-		// Notify GridBounds when MainWindow changes size
-		grid.setWindowSize(scene.getWidth(), scene.getHeight());
-		scene.widthProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
-		scene.heightProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
 
 		primaryStage.show();
 	}
@@ -68,8 +73,8 @@ public class WindowManager extends Pane {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
 			window.setTheme(themes.getTheme());
-			window.setGridBounds(grid);
 			pane.getChildren().addAll(window);
+			window.setGridBounds(grid);
 		}
 	}
 

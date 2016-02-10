@@ -21,7 +21,7 @@ public abstract class InternalWindow extends Window implements Observer {
 		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
 		final Timer timer = new Timer();
 		TimerTask task = null;
-		final long delayTime = 200;
+		final long delayTime = 200; // Delay before resize to grid
 
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -31,10 +31,22 @@ public abstract class InternalWindow extends Window implements Observer {
 				public void run() {
 					double[] coords = { getLayoutX(), getLayoutY() - 25, getLayoutX() + getWidth(), getLayoutY() + getHeight() - 25 };
 					coords = grid.moveToGrid(coords);
-					if (coords[2] - getLayoutX() != getWidth()) setWidth(coords[2] - getLayoutX());
-					if (coords[3] - getLayoutY() != getHeight()) setHeight(coords[3] - getLayoutY() + 25);
-					if (coords[0] != getLayoutX()) setLayoutX(coords[0]);
-					if (coords[1] != getLayoutY()) setLayoutY(coords[1] + 25);
+					if (coords[2] != getLayoutX() + getWidth()) {
+						System.out.println("Changed Width to: " + (coords[2] - coords[0]));
+						setPrefWidth(coords[2] - coords[0]);
+					}
+					if (coords[3] != getLayoutY() + getHeight() - 25) {
+						System.out.println("Changed Height to: " + (coords[3] - coords[1] + 25));
+						setPrefHeight(coords[3] - coords[1]);
+					}
+					if (coords[0] != getLayoutX()) {
+						System.out.println("Changed X to: " + coords[0]);
+						setLayoutX(coords[0]);
+					}
+					if (coords[1] != getLayoutY() - 25) {
+						System.out.println("Changed Y to: " + (coords[1] + 25));
+						setLayoutY(coords[1] + 25);
+					}
 					task.cancel();
 				}
 			};
@@ -66,11 +78,6 @@ public abstract class InternalWindow extends Window implements Observer {
 			}
 		});
 
-		widthProperty().addListener(resizeEvent);
-		heightProperty().addListener(resizeEvent);
-		layoutXProperty().addListener(resizeEvent);
-		layoutYProperty().addListener(resizeEvent);
-
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
 	}
@@ -97,6 +104,12 @@ public abstract class InternalWindow extends Window implements Observer {
 	public void setGridBounds(GridBounds grid) {
 		this.grid = grid;
 		grid.addObserver(this);
+
+		// Listens for Resize/Move Events
+		widthProperty().addListener(resizeEvent);
+		heightProperty().addListener(resizeEvent);
+		layoutXProperty().addListener(resizeEvent);
+		layoutYProperty().addListener(resizeEvent);
 	}
 
 	@Override
