@@ -25,7 +25,7 @@ public class Layouts {
 	
 	public static Layout onlyHighLevel() {
 		WindowLocation[] highLayout = new WindowLocation[1];
-		highLayout[0] = new WindowLocation(WindowEnum.HIGH_LEVEL_VISUALISATION, 20, 100, 1000, 400);
+		highLayout[0] = new WindowLocation(WindowEnum.HIGH_LEVEL_VISUALISATION, 20, 100, 1000, 600);
 		
 		return new Layout(highLayout);
 	}

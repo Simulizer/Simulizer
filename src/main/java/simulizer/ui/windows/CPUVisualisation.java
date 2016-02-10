@@ -28,7 +28,7 @@ public class CPUVisualisation extends InternalWindow {
     @Override
     public void setTheme(String theme) {
         super.setTheme(theme);
-        getStylesheets().clear();
+        getStylesheets().clear(); // Should this be here?
         getStylesheets().add(theme + "/window.css");
         getStylesheets().add(theme + "/cpu.css");
     }

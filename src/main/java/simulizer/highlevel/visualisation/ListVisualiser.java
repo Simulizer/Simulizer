@@ -7,7 +7,6 @@ import javafx.animation.Animation;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -16,6 +15,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+/**
+ * Visualises the sorting of a list
+ * @author Kelsey McKenna
+ *
+ * @param <T> the data type stored in the list
+ */
 public class ListVisualiser<T> extends DataStructureVisualiser {
 	private class Pair {
 		public int a;
@@ -27,18 +32,22 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private List<T> list;
 	private List<Animation> animationBuffer = new ArrayList<>();
 	private List<Pair> swapIndices = new ArrayList<>();
-	private Rectangle[] rectangles = new Rectangle[5];
-
-	private Text[] textBoxes = new Text[5];
+	private Rectangle[] rectangles;
+	private Text[] textLabels;
 
 	private final int X0 = 10;
 	private final int Y0 = 80;
 	private final int SPACING = 10;
 
+	/**
+	 * @param contentPane the pane onto which the visualiser will draw
+	 * @param width the width of the area to draw on
+	 * @param height the height of the area to draw on
+	 * @param list the list to be visualised
+	 */
 	public ListVisualiser(Pane contentPane, int width, int height, List<T> list) {
 		super(contentPane, width, height);
 		this.setList(list);
@@ -46,45 +55,39 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	public void setList(List<T> list) {
 		this.list = list;
+		this.rectangles = new Rectangle[list.size()];
+		this.textLabels = new Text[list.size()];
 
 		initRectsAndBoxes();
 	}
 
-	// Return 5 test rectangles as a list
 	private void initRectsAndBoxes() {
-		Color[] colors = { Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.PINK };
-
-		for (int i = 0; i < colors.length; ++i) {
-			colors[i] = colors[i];
-		}
-
 		Pane contentPane = getDrawingPane();
 		int rectWidth = getRectWidth();
 
 		for (int i = 0; i < rectangles.length; ++i) {
 			rectangles[i] = new Rectangle(getX(i), Y0, rectWidth, rectWidth);
-			rectangles[i].setFill(colors[i]);
-			rectangles[i].setStroke(Color.BLACK);
+			rectangles[i].getStyleClass().add("list-item");
 
-			textBoxes[i] = new Text("" + i);
-			textBoxes[i].setFont(new Font("Arial", 55));
-			textBoxes[i].setTranslateX(getTextX(i));
-			textBoxes[i].setTranslateY(getTextY(i));
+			textLabels[i] = new Text("" + list.get(i));
+			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
+			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateY(getTextY(i));
 
-			contentPane.getChildren().addAll(rectangles[i], textBoxes[i]);
+			contentPane.getChildren().addAll(rectangles[i], textLabels[i]);
 		}
 	}
 
 	private int getX(int rectIndex) {
 		return X0 + rectIndex * (getRectWidth() + SPACING);
 	}
-	
+
 	private int getTextX(int rectIndex) {
-		return (int) (getX(rectIndex) + getRectWidth() / 2 - textBoxes[rectIndex].getBoundsInLocal().getWidth() / 2);
+		return (int) (getX(rectIndex) + getRectWidth() / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2);
 	}
-	
+
 	private int getTextY(int rectIndex) {
-		return (int) (Y0 + getRectWidth() / 2 + textBoxes[rectIndex].getBoundsInLocal().getHeight() / 3);
+		return (int) (Y0 + getRectWidth() / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3);
 	}
 
 	private int getRectWidth() {
@@ -103,9 +106,9 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		Rectangle rect1 = rectangles[i];
 		Rectangle rect2 = rectangles[j];
 
-		Text text1 = textBoxes[i];
-		Text text2 = textBoxes[j];
-		
+		Text text1 = textLabels[i];
+		Text text2 = textLabels[j];
+
 		animationBuffer.add(setupSwap(rect1, getX(i), Y0, rect2, getX(j), Y0));
 		animationBuffer.add(setupSwap2(text1, getTextX(i), Y0, text2, getTextX(j), Y0));
 		swapIndices.add(new Pair(i, j));
@@ -126,13 +129,13 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			Rectangle temp = rectangles[p.a];
 			rectangles[p.a] = rectangles[p.b];
 			rectangles[p.b] = temp;
-			
+
 			// Commenting different parts of the below has strange side-effects
-			Text temp2 = textBoxes[p.a];
-			textBoxes[p.a] = textBoxes[p.b];
-			textBoxes[p.b] = temp2;
+			Text temp2 = textLabels[p.a];
+			textLabels[p.a] = textLabels[p.b];
+			textLabels[p.b] = temp2;
 		}
-		
+
 		swapIndices.clear();
 	}
 
@@ -159,7 +162,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 		return pathTransition;
 	}
-	
+
 	private static ParallelTransition setupSwap2(Text rect1, int x1, int y1, Text rect2, int x2, int y2) {
 		ParallelTransition svar = new ParallelTransition();
 		svar.getChildren().addAll((Animation) getTransition2(rect1, x1, y1, x2, y2));
@@ -173,8 +176,8 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		int height = (int) rect.getBoundsInLocal().getHeight();
 
 		Path path = new Path();
-		path.getElements().add(new MoveTo(x1 + width/2,y1+1.5*height));
-		path.getElements().add(new HLineTo(x2 + width/2));
+		path.getElements().add(new MoveTo(x1 + width / 2, y1 + 1.5 * height));
+		path.getElements().add(new HLineTo(x2 + width / 2));
 		PathTransition pathTransition = new PathTransition();
 		pathTransition.setDuration(Duration.millis(500));
 		pathTransition.setPath(path);

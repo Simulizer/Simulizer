@@ -15,7 +15,6 @@ public class HighLevelVisualisation extends InternalWindow {
 	private void init() {
 		this.drawingPane = new Pane();
 		getChildren().add(drawingPane);
-		
 	}
 	
 	public void setVisualiser(DataStructureVisualiser visualiser) {
@@ -29,4 +28,12 @@ public class HighLevelVisualisation extends InternalWindow {
 	public Pane getDrawingPane() {
 		return drawingPane;
 	}
+	
+	@Override
+	public void setTheme(String theme) {
+		super.setTheme(theme);
+		System.out.println("Adding stylesheet");
+		getStylesheets().add(theme + "/highlevel.css");
+	}
+
 }

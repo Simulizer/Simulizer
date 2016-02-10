@@ -9,7 +9,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.Main;
-import simulizer.highlevel.visualisation.ListVisualiser;
+import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -66,6 +66,16 @@ public class MainMenuBar extends MenuBar {
 		return fileMenu;
 	}
 
+	private class PegWrapper {
+		public int a;
+		public int b;
+
+		public PegWrapper(int a, int b) {
+			this.a = a;
+			this.b = b;
+		}
+	}
+
 	private Menu viewMenu() {
 		// | View
 		Menu viewMenu = new Menu("View");
@@ -86,14 +96,34 @@ public class MainMenuBar extends MenuBar {
 		highLevelLayoutItem.setOnAction(e -> {
 			wm.setLayout(Layouts.onlyHighLevel());
 			HighLevelVisualisation hv = (HighLevelVisualisation) wm.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-			ListVisualiser<Integer> lv = new ListVisualiser<>(hv.getDrawingPane(), 1000, 400, null);
+			// ListVisualiser<Integer> lv = new
+			// ListVisualiser<>(hv.getDrawingPane(), 1000, 400, Arrays.asList(3,
+			// 1, 4, 1, 5));
+			// hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
+			// int n = Integer.valueOf(f.getCharacter());
+			// lv.swap(n % 5, (n+1) % 5);
+			// lv.commit();
+			// });
+
+			PegWrapper p = new PegWrapper(-1,-1);
+			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv.getDrawingPane(), 1000, 400, 0, 4);
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
-				int n = Integer.valueOf(f.getCharacter());
-				lv.swap(n % 5, (n+1) % 5);
-				lv.commit();
+				int val = Integer.valueOf(f.getCharacter());
+
+				if (p.a == -1) p.a = val;
+				else {
+					p.b = val;
+					
+					tv.move(p.a - 1, p.b - 1);
+					tv.commit();
+					
+					p.a = -1;
+					p.b = -1;
+				}
+				
 			});
 		});
-		
+
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 
 		// | |-- Themes
