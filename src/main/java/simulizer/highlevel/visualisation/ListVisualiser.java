@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.animation.Animation;
+import javafx.animation.FillTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -17,9 +19,11 @@ import javafx.util.Duration;
 
 /**
  * Visualises the sorting of a list
+ * 
  * @author Kelsey McKenna
  *
- * @param <T> the data type stored in the list
+ * @param <T>
+ *            the data type stored in the list
  */
 public class ListVisualiser<T> extends DataStructureVisualiser {
 	private class Pair {
@@ -43,10 +47,14 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	private final int SPACING = 10;
 
 	/**
-	 * @param contentPane the pane onto which the visualiser will draw
-	 * @param width the width of the area to draw on
-	 * @param height the height of the area to draw on
-	 * @param list the list to be visualised
+	 * @param contentPane
+	 *            the pane onto which the visualiser will draw
+	 * @param width
+	 *            the width of the area to draw on
+	 * @param height
+	 *            the height of the area to draw on
+	 * @param list
+	 *            the list to be visualised
 	 */
 	public ListVisualiser(Pane contentPane, int width, int height, List<T> list) {
 		super(contentPane, width, height);
@@ -70,7 +78,10 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			rectangles[i].getStyleClass().add("list-item");
 
 			textLabels[i] = new Text("" + list.get(i));
-			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
+			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this
+															// here so that text
+															// size calculations
+															// work.
 			textLabels[i].setTranslateX(getTextX(i));
 			textLabels[i].setTranslateY(getTextY(i));
 
@@ -112,6 +123,28 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		animationBuffer.add(setupSwap(rect1, getX(i), Y0, rect2, getX(j), Y0));
 		animationBuffer.add(setupSwap2(text1, getTextX(i), Y0, text2, getTextX(j), Y0));
 		swapIndices.add(new Pair(i, j));
+	}
+
+	/**
+	 * Emphasises the specified element through an animation. E.g. could
+	 * emphasise the current element being examined in binary search.
+	 * 
+	 * @param i
+	 *            the index of the element to be emphasised
+	 */
+	public void emphasise(int i) {
+		Rectangle rect = rectangles[i];
+		Text text = textLabels[i];
+
+		FillTransition ft = new FillTransition(Duration.millis(300), rect, Color.WHITE, Color.RED);
+		FillTransition tt = new FillTransition(Duration.millis(300), text, Color.BLACK, Color.WHITE);
+		ft.setCycleCount(2);
+		ft.setAutoReverse(true);
+
+		tt.setCycleCount(2);
+		tt.setAutoReverse(true);
+
+		animationBuffer.add(new ParallelTransition(ft, tt));
 	}
 
 	/**
