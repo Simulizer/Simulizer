@@ -28,10 +28,15 @@ public class Main extends Application {
 		primaryStage.getIcons().add(new Image(getResource("logo.png").toString()));
 
 		// Copy folders from resources to jar running directory
-		//copyResource("code");
-		//copyResource("layouts");
-		//copyResource("themes");
+		// copyResource("code");
+		// copyResource("layouts");
+		// copyResource("themes");
 
+		// TODO: Remove this code, simple check for if we are running within the work folder
+		String cwd = System.getProperty("user.dir");
+		if(!cwd.endsWith("work"))
+			System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+		
 		// Just show the main window for now
 		new WindowManager(primaryStage);
 	}
@@ -48,7 +53,7 @@ public class Main extends Application {
 				while (entries.hasMoreElements()) {
 					final JarEntry entry = entries.nextElement();
 					// filter according to the path
-					if (entry.getName().startsWith(relFile + "/")) { 
+					if (entry.getName().startsWith(relFile + "/")) {
 						// TODO: Copy files from within the JAR
 						System.out.println(entry.getName());
 					}
