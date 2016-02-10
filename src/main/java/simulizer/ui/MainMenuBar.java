@@ -1,4 +1,4 @@
-package simulizer.ui.components;
+package simulizer.ui;
 
 import java.io.File;
 import javafx.scene.control.Menu;
@@ -7,7 +7,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;

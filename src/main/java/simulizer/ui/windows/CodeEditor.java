@@ -184,4 +184,5 @@ public class CodeEditor extends InternalWindow {
 			}
 		}
 	}
+
 }

@@ -1,15 +1,7 @@
 package simulizer;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;

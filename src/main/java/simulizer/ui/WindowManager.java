@@ -5,7 +5,6 @@ import java.util.List;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
@@ -15,12 +14,13 @@ import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
 
 public class WindowManager extends Pane {
-	// Stores a list of all open windows (may be already done with jfxtras)
-	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
+	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>(); // Stores a list of all open windows
+	private Stage primaryStage;
 	private Pane pane = new Pane();
+
+	private GridBounds grid = new GridBounds(10, 10, 25);
 	private Themes themes = new Themes();
 	private Layouts layouts = new Layouts(this);
-	private Stage primaryStage;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -38,16 +38,23 @@ public class WindowManager extends Pane {
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setScene(scene);
-		themes.setTheme(theme);
 		pane.getStyleClass().add("background");
 
+		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
 		bar.setMinWidth(1060);
 		pane.getChildren().add(bar);
-
-		// Resize menubar to window width
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
+
+		// Set the theme
+		themes.setTheme(theme);
 		setTheme(themes.getTheme());
+
+		// Notify GridBounds when MainWindow changes size
+		grid.setWindowSize(scene.getWidth(), scene.getHeight());
+		scene.widthProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
+		scene.heightProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
+
 		primaryStage.show();
 	}
 
@@ -61,6 +68,7 @@ public class WindowManager extends Pane {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
 			window.setTheme(themes.getTheme());
+			window.setGridBounds(grid);
 			pane.getChildren().addAll(window);
 		}
 	}
