@@ -78,7 +78,7 @@ public class CodeEditor extends InternalWindow {
 	 * @return the text, now split into sections with attached css classes for styling */
 	private StyleSpans<Collection<String>> computeAntlrHighlighting(String text) {
 		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-
+		/*
 		int lastTokenEnd = 0;
 		ANTLRInputStream input = new ANTLRInputStream(text);
 		SmallMipsLexer lexer = new SmallMipsLexer(input);
@@ -128,6 +128,8 @@ public class CodeEditor extends InternalWindow {
 			spansBuilder.add(Collections.singleton(styleClass), stylesize);
 			lastTokenEnd = t.getStopIndex() + 1;
 		}
+
+		*/
 
 		// Make sure there is at least one style added
 		spansBuilder.add(Collections.emptyList(), 0);

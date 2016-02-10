@@ -30,8 +30,9 @@ grammar SmallMips;
 // Parser Rules (grammar / syntax)
 /////////////////////////////////////////////////
 
+// lines are allowed outside either segment to allow for comments only.
 program
-    : (dataSegment | textSegment | EOL)* EOF?
+    : (dataSegment | textSegment | line)* EOF?
     ;
 
 dataSegment
@@ -58,7 +59,7 @@ line
 
 // label
 label
-    : LABEL_ID ':'
+    : labelID ':'
     ;
 
 // directive
@@ -87,20 +88,20 @@ operandList
     ;
 
 operand
-    : register    // register value
-    | integer     // literal integer value
+    : register // register value
+    | integer  // literal integer value
     | address
     ;
 
 address
-    : registerAddress                  // register addressing: register value as address
-    | integer                          // immediate addressing: will never be matched by operand rule
-    | integer registerAddress          // base-offset addressing: register value +/- offset
-    | LABEL_ID                         // immediate addressing
-    | LABEL_ID SIGN unsignedInteger registerAddress? // immediate addressing with offset
+    : baseAddress                               // register addressing: register value as address
+  //| integer                                   // immediate addressing: will never be matched by operand rule
+    | integer baseAddress                       // base-offset addressing: register value +/- offset
+    | labelID                                   // immediate addressing
+    | labelID SIGN unsignedInteger baseAddress? // immediate addressing with offset
     ;
 
-registerAddress
+baseAddress
     : '(' register ')'
     ;
 
@@ -113,11 +114,18 @@ comment
 
 // small components
 instruction
-    : INSTRUCTION_ID
+    : IDENTIFIER
+    ;
+labelID
+    : IDENTIFIER
     ;
 
 register
-    : '$' REGISTER_ID
+    : '$' registerID
+    ;
+registerID
+    : IDENTIFIER
+    | unsignedInteger
     ;
 
 string
@@ -125,16 +133,15 @@ string
     ;
 
 integer
-    : SIGN? denInt
+    : SIGN? decInt
     | SIGN? hexInt
     ;
-
 unsignedInteger
-    : denInt
+    : decInt
     | hexInt
     ;
-denInt
-    : DEN_INT
+decInt
+    : DEC_INT
     ;
 hexInt
     : HEX_INT
@@ -147,32 +154,8 @@ hexInt
 // Lexer Rules (tokens/words)
 /////////////////////////////////////////////////
 
-// instruction
-INSTRUCTION_ID
-    : R_TYPE_INSTRUCTION | I_TYPE_INSTRUCTION
-    | J_TYPE_INSTRUCTION | MISC_INSTRUCTION
-    ;
-
-R_TYPE_INSTRUCTION // register-type instruction
-    : 'add' | 'sub'
-    ;
-
-I_TYPE_INSTRUCTION // immediate-type instruction
-    : 'addi' | 'subi'
-    | 'li'
-    ;
-
-J_TYPE_INSTRUCTION // jump-type instruction
-    : 'jal'
-    ;
-
-MISC_INSTRUCTION
-    : 'syscall'
-    ;
-
-
-
 // directive
+// matched specifically because no ambiguety due to the preceeding dot
 DIRECTIVE_ID
     : 'globl'
     | 'ascii' | 'asciiz'
@@ -186,39 +169,16 @@ fragment IGNORED_DIRECTIVE_ID
     ;
 
 
-
-
-// http://logos.cs.uic.edu/366/notes/mips%20quick%20tutorial.htm
-// in order of 'register number'. Some names are synonyms.
-REGISTER_ID
-  : 'zero'
-  | 'at'
-  | 'v0' | 'v1'
-  | 'a0' | 'a1' | 'a2' | 'a3'
-  | 't0' | 't1' | 't2' | 't3' | 't4' | 't5' | 't6' | 't7'
-  | 's0' | 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7'
-  | 't8' | 't9'
-  | 'k0' | 'k1'
-  | 'gp'
-  | 'sp'
-  | 's8' | 'fp'
-  | 'ra'
-  ;
-
-
-
-
-// unlike SPIM, not allowing dot as a valid character as this might be confusing
-LABEL_ID
+// generic identifier for labels and instructions
+IDENTIFIER
     : [a-zA-Z_][a-zA-Z0-9_]*
     ;
+
 
 
 COMMENT
     : '#' ~ [\r\n]*
     ;
-
-
 
 
 
@@ -231,12 +191,12 @@ UNTERMINATED_STRING_LITERAL
     ;
 
 
-// denary (base 10) integer with no +/- sign
-DEN_INT
+// decimal (base 10) integer with no +/- sign
+DEC_INT
     : [0-9]+
     ;
 
-// hex (base 16) integer with no +/- sign
+// hexadecimal (base 16) integer with no +/- sign
 HEX_INT
     : '0x' [0-9a-fA-F]+
     ;

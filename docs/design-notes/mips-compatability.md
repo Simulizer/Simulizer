@@ -16,6 +16,11 @@ real thing.
 - [MIPS32 Instruction set v6.04](https://imgtec.com/?do-download=4287)
 - [MicroMIPS32 Microarchitecture Specification v6.0](https://imgtec.com/?do-download=6102)
 
+# Considering To Change #
+- unlimited jump distance
+- ignoring `.align` directive
+- pseudo-ops interpreted as single instructions
+
 
 # Completely Removed Features #
 - coprocessors and related instructions
@@ -28,10 +33,15 @@ real thing.
 
 # Added Features #
 - configurable clock speed
+- jumps may be any distance because they are stored as full 32 bit or 64 bit
+  offsets.
 
 
 # Instruction Set #
 Functional groups as outlined in the microarchitecture spec:
+
+Note: Prioritising the SPIM instruction set over the official MIPS32 spec as
+recent revisions have removed some useful instructions like `addi`.
 
 ## Load and Store ##
 
@@ -95,8 +105,38 @@ Compared to the SPIM simulator, Simulizer only supports these system calls:
 
 # Assembler #
 Compared to the SPIM simulator's assembler.
+
+## Different From SPIM ##
 - macros are not supported
 - linking is not supported. Programs must be self-contained in a single file.
+- pseudo-operations are considered to be single instructions.
+- arguments *must* be separated by a comma whereas SPIM allows these to be omitted.
+- (//TODO: untested) more escaped ascii characters are supported due to Java's
+  handling of the strings. SPIM only supports '\n', '\t' and '\"'
+- (//TODO: untested) Only big endian byte order (SPIM supports both). So `.byte
+  0,1,2,3` produces `lowest address [0, 1, 2, 3] highest address`
+- do not use the `lo` and `hi` registers for storing results of multiplication or division
+
+## Intentionally The Same As SPIM ##
+These behaviours have been tested to hold in SPIM.
+
+- SPIM's OS jumps to the label 'main' so this is always the entry point for the
+  program. Like SPIM this label does not necessarily have to be declared `.globl`
+- label names must be unique
+- The assembler inserts a newline at the end of every program to correctly parse
+  programs that do not end in a newline already.
+- registers must have brackets when doing base/offset addressing even when the
+  offset is zero eg the brackets here are necessary: `lw $a0, ($s0)`.
+- The register must not be bracketed when doing register addressing. eg this is
+  not allowed: `jr ($s0)`
+- register names must be lower case
+- instruction names must be lower case
+- registers may be referred to by either a mnemonic or a number eg `$v0 == $2`
+  Simulizer assigns the same numbers as SPIM does.
+- Simulizer favours the instruction set supported by SPIM to the official MIPS32
+  specification. This is because recent revisions of MIPS32 have removed some
+  useful instructions such as `addi`
+
 
 ## Addressing Modes ##
 Simulizer supports all addressing modes supported by SPIM:
@@ -112,11 +152,13 @@ Simulizer supports all addressing modes supported by SPIM:
 
 ## Directives ##
 - `.data` is the only type of data segment supported (see below)
-- SPIM allows `.word` directives inside the `.text` segment. Simulizer does not allow this.
+- SPIM allows `.word` directives inside the `.text` segment. Simulizer does not
+  allow this.
 
 The following SPIM directives are allowed, but ignored:
 - `.align`
-- `.data <addr>` or `.text <addr>` the address is ignored
+- `.globl`
+- for the directives: `.data <addr>` and `.text <addr>` the addresses are ignored
 
 The following SPIM directives are not supported and will not assemble:
 - `.rdata`, `.sdata`, `.kdata`
@@ -125,4 +167,7 @@ The following SPIM directives are not supported and will not assemble:
 - `.extern`
 - `.ktext`
 - `.set`
+
+
+## Instructions ##
 
