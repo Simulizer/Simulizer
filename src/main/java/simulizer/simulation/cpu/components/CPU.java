@@ -5,8 +5,10 @@ import java.util.Map;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Label;
 import simulizer.assembler.representation.Program;
+import simulizer.assembler.representation.Register;
 import simulizer.assembler.representation.Statement;
 import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.MemoryException;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -17,7 +19,7 @@ import simulizer.simulation.data.representation.Word;
  *  - L/S Unit - Not required (will still be shown in visualisation)
  *  - Registers - array of 4 byte words
  *  - Main Memory - External Memory Object
- * @author Charlie
+ * @author Charlie Street
  *
  */
 public class CPU {
@@ -60,6 +62,8 @@ public class CPU {
 		
 		this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
 		
+		//this.registers[Register.gp.getID()] = dataSegmentStart.getValue() + 32000;//setting global pointer
+		
 		this.ALU = new ALU();//initialising ALU
 	}
 	
@@ -92,6 +96,16 @@ public class CPU {
 		}
 		
 		return null;//THROW ERROR NO MAIN LABEL!!!!!
+	}
+	
+	/**carries out the fetch part of the FDE cycle (non pipelined)
+	 * 
+	 */
+	private void fetch() throws MemoryException
+	{
+		Statement nextInstruction = this.memory.readFromTextSegment(this.programCounter);//retrieving from memory
+		this.instructionRegister = nextInstruction;//set IR
+		this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing the program counter
 	}
 	
 }

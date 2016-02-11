@@ -7,8 +7,12 @@ import java.util.Map;
 
 
 
+
+
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
+import simulizer.simulation.exceptions.HeapException;
+import simulizer.simulation.exceptions.MemoryException;
 
 /**
  * this class represents the RAM of our simulator it is represented via a large
@@ -56,20 +60,20 @@ public class MainMemory {
 	 * @param length the number of bytes to read
 	 * @return those bytes from memory
 	 */
-	public byte[] readFromMem(int address, int length)
+	public byte[] readFromMem(int address, int length) throws MemoryException, HeapException
 	{
-		if((address >=  this.startOfStaticData.getValue() && address < this.startOfDynamicData.getValue()))//if in the static data part of memory
+		if((address >=  this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue() + this.staticDataSegment.length))//if in the static data part of memory
 		{
 			byte[] result = new byte[length];
 			for(int i = 0; i < length; i++)
 			{
-				if(address-this.startOfStaticData.getValue()+i < this.startOfDynamicData.getValue())
+				if(address-this.startOfStaticData.getValue()+i < this.startOfStaticData.getValue() + this.staticDataSegment.length)
 				{
 					result[i] = this.staticDataSegment[address-this.startOfStaticData.getValue()+i];//reading from the static data segment
 				}
 				else
 				{
-					//DO SOMETHING HERE ERROR!!!
+					throw new MemoryException("Reading from invalid area of memory", new Address(address-this.startOfStaticData.getValue()+i));
 				}
 			}
 			return result;
@@ -81,8 +85,7 @@ public class MainMemory {
 		}
 		else
 		{
-			//DO SOMETHING, CANT READ FROM HERE
-			return null;
+			throw new MemoryException("Reading from invalid area of memory",new Address(address));
 		}
 	}
 	
@@ -90,20 +93,22 @@ public class MainMemory {
 	 * it will contain some form of bounds checking but this may be slightly off
 	 * @param address the address to start writing to
 	 * @param toWrite the bytes to write
+	 * @throws MemoryException 
+	 * @throws HeapException 
 	 */
-	public void writeToMem(int address, byte[] toWrite)
+	public void writeToMem(int address, byte[] toWrite) throws MemoryException, HeapException
 	{
-		if(address >= this.startOfStaticData.getValue() && address < this.startOfDynamicData.getValue())//if in static data segment
+		if(address >= this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue()+ this.staticDataSegment.length)//if in static data segment
 		{
 			for(int i = 0; i < toWrite.length; i++)
 			{
-				if(address + i < this.startOfDynamicData.getValue())
+				if(address + i < this.startOfStaticData.getValue()+ this.staticDataSegment.length)
 				{
 					this.staticDataSegment[address-this.startOfStaticData.getValue() + i] = toWrite[i];
 				}
 				else
 				{
-					//REPORT PROBLEM
+					throw new MemoryException("Writing to an invalid area of memory",new Address(address+i));
 				}
 			}
 		}
@@ -113,10 +118,14 @@ public class MainMemory {
 			{
 				this.heap.setBytes(toWrite,address-this.startOfDynamicData.getValue());//writing to the heap
 			}
-			else//this will 
+			else//invalid heap write
 			{
-				//LOG PROBLEM
+				throw new MemoryException("Writing to an invalid area of memory",new Address(address));
 			}
+		}
+		else//invalid memory write
+		{
+			throw new MemoryException("Writing to an invalid area of memory",new Address(address));
 		}
 	}
 	
@@ -125,7 +134,7 @@ public class MainMemory {
 	 * @param address the address to retrieve from
 	 * @return the statement object at that address
 	 */
-	public Statement readFromTextSegment(Address address)
+	public Statement readFromTextSegment(Address address) throws MemoryException
 	{
 		Statement retrieved = this.textSegment.get(address);
 		if(retrieved != null)
@@ -134,8 +143,7 @@ public class MainMemory {
 		}
 		else
 		{
-			return null;
-			//LOG PROBLEM INVALID ADDRESS FOR TEXT SEGEMENT
+			throw new MemoryException("Reading from invalid area of memory",address);
 		}
 	}
 	

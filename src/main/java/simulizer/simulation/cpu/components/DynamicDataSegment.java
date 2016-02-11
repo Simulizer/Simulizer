@@ -3,6 +3,7 @@ package simulizer.simulation.cpu.components;
 import java.util.ArrayList;
 
 import simulizer.assembler.representation.Address;
+import simulizer.simulation.exceptions.HeapException;
 
 /**this class represents the dynamic heap section of the memory 
  * for our simulated Mips processor
@@ -11,6 +12,7 @@ import simulizer.assembler.representation.Address;
  */
 public class DynamicDataSegment 
 {
+	private final int megaByte = 1048576;//restricting heap size
 	private ArrayList<Byte> heap;
 	private Address breakOfHeap;
 	private Address startOfHeap;
@@ -40,8 +42,12 @@ public class DynamicDataSegment
 	 * @param bytes the number of bytes to add to the heap
 	 * @return the pointer to the start of that block
 	 */
-	public Address sbrk(int bytes)
+	public Address sbrk(int bytes) throws HeapException
 	{
+		if(bytes % 4 != 0)//spim only allows sbrk to be called with multiples of 4
+		{
+			throw new HeapException("Sbrk needs to be called with multiples of 4 bytes.", this.breakOfHeap, this.heap.size());
+		}
 		if(bytes < 0)
 		{
 			Address newPointer = new Address(this.breakOfHeap.getValue()- bytes);
@@ -51,7 +57,7 @@ public class DynamicDataSegment
 			}
 			else
 			{
-				//REPORT ERROR INVALID SBRK BEHIND HEAP START
+				throw new HeapException("Can't call sbrk with negative arguments behind the static data segment.",this.breakOfHeap,this.heap.size());
 			}
 			return this.breakOfHeap;
 		}
@@ -59,7 +65,14 @@ public class DynamicDataSegment
 		{
 			for(int i = 0; i < bytes; i++)
 			{
-				this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
+				if(heap.size() < this.megaByte)
+				{
+					this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
+				}
+				else
+				{
+					throw new HeapException("Heap over 1MB in size.",this.breakOfHeap,this.heap.size());
+				}
 			}
 			
 			Address result = this.breakOfHeap;
@@ -73,7 +86,7 @@ public class DynamicDataSegment
 	 * @param toSet the byte to write into the heap
 	 * @param position the position in the heap
 	 */
-	public void setByte(byte toSet, int position)
+	public void setByte(byte toSet, int position) throws HeapException
 	{
 		if(position < this.heap.size())
 		{
@@ -81,7 +94,7 @@ public class DynamicDataSegment
 		}
 		else
 		{
-			//INVALID WRITE OUT OF BOUNDS
+			throw new HeapException("Invalid write on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
 		}
 	}
 	
@@ -90,7 +103,7 @@ public class DynamicDataSegment
 	 * @param toSet the byte[] to set
 	 * @param startPos the start position in the heap
 	 */
-	public void setBytes(byte[] toSet, int startPos)
+	public void setBytes(byte[] toSet, int startPos) throws HeapException
 	{
 		for(int i = startPos; i < startPos + toSet.length; i++)
 		{
@@ -100,7 +113,7 @@ public class DynamicDataSegment
 			}
 			else
 			{
-				//REPORT ERROR INVALID WRITE
+				throw new HeapException("Invalid write on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
 			}
 		}
 	}
@@ -111,7 +124,7 @@ public class DynamicDataSegment
 	 * @param length the number of bytes to retrieve
 	 * @return the bytes in an array
 	 */
-	public byte[] getBytes(int startPosition, int length)
+	public byte[] getBytes(int startPosition, int length) throws HeapException
 	{
 		byte[] result = new byte[length];
 		for(int i = 0; i < length; i++)
@@ -122,7 +135,7 @@ public class DynamicDataSegment
 			}
 			else
 			{
-				//REPORT ERROR INVALID READ
+				throw new HeapException("Invalid read on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
 			}
 		}
 		
