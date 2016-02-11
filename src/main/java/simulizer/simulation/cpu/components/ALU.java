@@ -14,6 +14,9 @@ import simulizer.simulation.exceptions.InstructionException;
  */
 public class ALU {
 	
+	private static byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
+	private static byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
+	
 	/**empty constructor
 	 * 
 	 */
@@ -106,11 +109,21 @@ public class ALU {
 				}
 				return new Word(resultXori);
 			case b:
-				break;
+				return new Word(branchTrue);
 			case beq:
-				break;
+				for(int i = 0; i < firstValue.length; i++) {
+					if(firstValue[i] != secondValue[i]) {
+						return new Word(branchFalse);
+					}
+				}
+				return new Word(branchTrue);//if all bytes equal
 			case bne:
-				break;
+				for(int i = 0; i < firstValue.length; i++) {
+					if(firstValue[i] != secondValue[i]) {//if a difference found
+						return new Word(branchTrue);
+					}
+				}
+				return new Word(branchFalse);//if all bytes equal then false
 			case bgez:
 				break;
 			case bgtz:
