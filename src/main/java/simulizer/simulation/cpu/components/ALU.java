@@ -31,53 +31,80 @@ public class ALU {
 	 */
 	public Word execute(Instruction instruction, Word firstWord, Word secondWord) throws InstructionException
 	{
+		byte[] firstValue = firstWord.getWord();
+		byte[] secondValue = secondWord.getWord();
+		
 		switch(instruction) {//checking each possible instruction
 			case abs:
 				break;
 			case and:
-				break;
+				byte[] resultAnd = new byte[4];
+				for(int i = 0; i < resultAnd.length; i++) {
+					resultAnd[i] = (byte) (firstValue[i] & secondValue[i]);
+				}
+				return new Word(resultAnd);
 			case add:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) + loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) + loadAsSigned(secondValue)));
 			case addu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) + loadAsUnsigned(secondWord.getWord())));
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) + loadAsUnsigned(secondValue)));
 			case addi:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) + loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) + loadAsSigned(secondValue)));
 			case addiu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) + loadAsUnsigned(secondWord.getWord())));
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) + loadAsUnsigned(secondValue)));
 			case sub:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) - loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) - loadAsSigned(secondValue)));
 			case subu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) - loadAsUnsigned(secondWord.getWord())));
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) - loadAsUnsigned(secondValue)));
 			case subi:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) - loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) - loadAsSigned(secondValue)));
 			case subiu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) - loadAsUnsigned(secondWord.getWord())));
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) - loadAsUnsigned(secondValue)));
 			case mul:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) * loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) * loadAsSigned(secondValue)));
 			case mulo:
 				break;
 			case mulou:
 				break;
 			case div:
-				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) / loadAsSigned(secondWord.getWord())));
+				return new Word(serialiseSigned(loadAsSigned(firstValue) / loadAsSigned(secondValue)));
 			case divu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) / loadAsUnsigned(secondWord.getWord())));
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) / loadAsUnsigned(secondValue)));
 			case neg:
 				break;
 			case negu:
 				break;
 			case nor:
-				break;
+				byte[] resultNor = new byte[4];
+				for(int i = 0; i < resultNor.length; i++) {
+					resultNor[i] = (byte) ~(firstValue[i] | secondValue[i]);
+				}
+				return new Word(resultNor);
 			case not:
 				break;
 			case or:
-				break;
+				byte[] resultOr = new byte[4];
+				for(int i = 0; i < resultOr.length; i++) {
+					resultOr[i] = (byte) (firstValue[i] | secondValue[i]);
+				}
+				return new Word(resultOr);
 			case ori:
-				break;
+				byte[] resultOri = new byte[4];
+				for(int i = 0; i < resultOri.length; i++) {
+					resultOri[i] = (byte) (firstValue[i] | secondValue[i]);
+				}
+				return new Word(resultOri);
 			case xor:
-				break;
+				byte[] resultXor = new byte[4];
+				for(int i = 0; i < resultXor.length; i++) {
+					resultXor[i] = (byte) (firstValue[i] ^ secondValue[i]);
+				}
+				return new Word(resultXor);
 			case xori:
-				break;
+				byte[] resultXori = new byte[4];
+				for(int i = 0; i < resultXori.length; i++) {
+					resultXori[i] = (byte) (firstValue[i] ^ secondValue[i]);
+				}
+				return new Word(resultXori);
 			case b:
 				break;
 			case beq:
@@ -95,7 +122,7 @@ public class ALU {
 			case beqz:
 				break;
 			default:
-				throw new InstructionException("Invalid/Unsupoorted Instruction.",instruction);
+				throw new InstructionException("Invalid/Unsupported Instruction.",instruction);
 		}
 		return new Word(new byte[]{0x00,0x00,0x00,0x00});
 	}
