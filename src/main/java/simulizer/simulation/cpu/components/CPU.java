@@ -9,6 +9,7 @@ import simulizer.assembler.representation.Register;
 import simulizer.assembler.representation.Statement;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.MemoryException;
+import simulizer.simulation.exceptions.ProgramException;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -60,9 +61,13 @@ public class CPU {
 		Map<Address,Statement> textSegment = this.program.textSegment;
 		this.memory = new MainMemory(textSegment,staticDataSegment,textSegmentStart,dataSegmentStart,dynamicSegmentStart);
 		
-		this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
+		try {
+			this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
+		} catch(Exception e) {//if entry point load fails
+			//SEND TO LOGGER HERE
+		}
 		
-		//this.registers[Register.gp.getID()] = dataSegmentStart.getValue() + 32000;//setting global pointer
+		this.registers[Register.gp.getID()] = new Word(new byte[]{0x10,0x00,(byte)0x80,0x00});//setting global pointer
 		
 		this.ALU = new ALU();//initialising ALU
 	}
@@ -82,8 +87,9 @@ public class CPU {
 	
 	/**this method will look for the main label and get it's corresponding address
 	 * this is for use with the program counter
+	 * @throws ProgramException thrown if no main label is found
 	 */
-	private Address getEntryPoint()
+	private Address getEntryPoint() throws ProgramException
 	{
 		Map<Label,Address> labels = this.program.labels;//map of labels
 		
@@ -95,7 +101,7 @@ public class CPU {
 			}
 		}
 		
-		return null;//THROW ERROR NO MAIN LABEL!!!!!
+		throw new ProgramException("No main label found.", this.program);
 	}
 	
 	/**carries out the fetch part of the FDE cycle (non pipelined)

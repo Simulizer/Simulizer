@@ -2,6 +2,7 @@ package simulizer.simulation.cpu.components;
 
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.InstructionException;
 
 
 
@@ -26,8 +27,9 @@ public class ALU {
 	 * @param firstWord the first word to work on
 	 * @param secondWord the second word to work on
 	 * @return the result of the operation on the two words
+	 * @throws InstructionException if unsupported instruction attempted
 	 */
-	public Word execute(Instruction instruction, Word firstWord, Word secondWord)
+	public Word execute(Instruction instruction, Word firstWord, Word secondWord) throws InstructionException
 	{
 		switch(instruction) {//checking each possible instruction
 			case abs:
@@ -35,31 +37,31 @@ public class ALU {
 			case and:
 				break;
 			case add:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) + loadAsSigned(secondWord.getWord())));
 			case addu:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) + loadAsUnsigned(secondWord.getWord())));
 			case addi:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) + loadAsSigned(secondWord.getWord())));
 			case addiu:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) + loadAsUnsigned(secondWord.getWord())));
 			case sub:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) - loadAsSigned(secondWord.getWord())));
 			case subu:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) - loadAsUnsigned(secondWord.getWord())));
 			case subi:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) - loadAsSigned(secondWord.getWord())));
 			case subiu:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) - loadAsUnsigned(secondWord.getWord())));
 			case mul:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) * loadAsSigned(secondWord.getWord())));
 			case mulo:
 				break;
 			case mulou:
 				break;
 			case div:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstWord.getWord()) / loadAsSigned(secondWord.getWord())));
 			case divu:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstWord.getWord()) / loadAsUnsigned(secondWord.getWord())));
 			case neg:
 				break;
 			case negu:
@@ -93,10 +95,46 @@ public class ALU {
 			case beqz:
 				break;
 			default:
-				//THROW ERROR INSTRUCTION NOT RECOGNISED/SUPPORTED
-				break;
+				throw new InstructionException("Invalid/Unsupoorted Instruction.",instruction);
 		}
 		return new Word(new byte[]{0x00,0x00,0x00,0x00});
+	}
+
+	/**method takes a byte array and returns it's signed value as a long
+	 * 
+	 * @param word the word to convert
+	 * @return the byte[] converted to a signed long
+	 */
+	private long loadAsSigned(byte[] word) {
+		return 1L;
+	}
+	
+	/**method takes a byte array and returns it's unsigned value as a long
+	 * 
+	 * @param word the word to convert
+	 * @return the byte[] converted to an unsigned long
+	 */
+	private long loadAsUnsigned(byte[] word) {
+		return 1L;
+	}
+	
+	
+	/**this method takes a signed long and converts it to a byte array
+	 * 
+	 * @param value the long to convert
+	 * @return the value as a byte array
+	 */
+	private byte[] serialiseSigned(long value) {
+		return new byte[4];
+	}
+	
+	/**this method takes an unsigned long and converts it to a byte array
+	 * 
+	 * @param value the long to convert
+	 * @return the value as a byte array
+	 */
+	private byte[] serialiseUnsigned(long value) {
+		return new byte[4];
 	}
 	
 }

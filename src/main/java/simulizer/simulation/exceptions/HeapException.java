@@ -9,6 +9,7 @@ import simulizer.assembler.representation.Address;
  */
 public class HeapException extends Exception
 {
+	private static final long serialVersionUID = 1L;
 	private Address breakOfHeap;
 	private int heapSize;
 	

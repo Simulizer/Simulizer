@@ -9,6 +9,8 @@ import simulizer.assembler.representation.Address;
  */
 public class MemoryException extends Exception {
 
+
+	private static final long serialVersionUID = 1L;
 	private Address addressOfError;
 	
 	/**constructor calls super constructor and initialises error address field
