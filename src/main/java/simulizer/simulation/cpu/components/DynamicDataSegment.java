@@ -2,6 +2,8 @@ package simulizer.simulation.cpu.components;
 
 import java.util.ArrayList;
 
+import simulizer.assembler.representation.Address;
+
 /**this class represents the dynamic heap section of the memory 
  * for our simulated Mips processor
  * @author Charlie Street
@@ -10,15 +12,17 @@ import java.util.ArrayList;
 public class DynamicDataSegment 
 {
 	private ArrayList<Byte> heap;
-	private int pointer;
+	private Address pointer;
+	private Address startOfHeap;
 	
 	/**this constructor just initialises the heap and it's end pointer
 	 * 
 	 */
-	public DynamicDataSegment()
+	public DynamicDataSegment(Address startOfHeap)
 	{
 		this.heap = new ArrayList<Byte>();
-		this.pointer = 0;
+		this.pointer = startOfHeap;
+		this.startOfHeap = startOfHeap;
 	}
 	
 	/**returns the current size of the heap
@@ -36,11 +40,19 @@ public class DynamicDataSegment
 	 * @param bytes the number of bytes to add to the heap
 	 * @return the pointer to the start of that block
 	 */
-	public int sbrk(int bytes)
+	public Address sbrk(int bytes)
 	{
 		if(bytes < 0)
 		{
-			this.pointer -= bytes;
+			Address newPointer = new Address(this.pointer.getValue()- bytes);
+			if(newPointer.getValue() >= this.startOfHeap.getValue())//error checking
+			{
+				this.pointer = newPointer;
+			}
+			else
+			{
+				//REPORT ERROR INVALID SBRK BEHIND HEAP START
+			}
 			return this.pointer;
 		}
 		else
@@ -50,8 +62,8 @@ public class DynamicDataSegment
 				this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
 			}
 			
-			int result = this.pointer;
-			this.pointer += bytes;//increasing the pointer
+			Address result = this.pointer;
+			this.pointer = new Address(this.pointer.getValue() + bytes);//increasing the pointer
 			return result;
 		}
 	}
@@ -67,6 +79,10 @@ public class DynamicDataSegment
 		{
 			this.heap.set(position,toSet);
 		}
+		else
+		{
+			//INVALID WRITE OUT OF BOUNDS
+		}
 	}
 	
 	/**allows to set multiple bytes in one go on the heap
@@ -81,6 +97,10 @@ public class DynamicDataSegment
 			if(i < this.heap.size())
 			{
 				this.heap.set(i, toSet[i-startPos]);
+			}
+			else
+			{
+				//REPORT ERROR INVALID WRITE
 			}
 		}
 	}
@@ -99,6 +119,10 @@ public class DynamicDataSegment
 			if(startPosition+i < this.heap.size())
 			{
 				result[i] = this.heap.get(startPosition+i);
+			}
+			else
+			{
+				//REPORT ERROR INVALID READ
 			}
 		}
 		

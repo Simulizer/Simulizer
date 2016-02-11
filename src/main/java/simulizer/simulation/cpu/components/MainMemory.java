@@ -1,8 +1,7 @@
 package simulizer.simulation.cpu.components;
 
-import java.math.BigInteger;
 import java.util.Map;
-import java.util.Observable;
+
 
 
 
@@ -10,7 +9,6 @@ import java.util.Observable;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
-import simulizer.simulation.data.representation.Word;
 
 /**
  * this class represents the RAM of our simulator it is represented via a large
@@ -20,7 +18,7 @@ import simulizer.simulation.data.representation.Word;
  * 
  * @author Charlie Street
  */
-public class MainMemory extends Observable {
+public class MainMemory {
 
 	
 	private Address startOfTextSegment;
@@ -28,8 +26,6 @@ public class MainMemory extends Observable {
 	private Address startOfDynamicData; //the end of the static data segment
 	private final Address endOfMemory;
 
-	public static boolean zeroInit = true;// to toggle between different
-											// initialisations
 	
 	private Map<Address,Statement> textSegment;
 	private byte[] staticDataSegment;
@@ -49,37 +45,10 @@ public class MainMemory extends Observable {
 		
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;
-		this.heap = new DynamicDataSegment();
+		this.heap = new DynamicDataSegment(this.startOfDynamicData);
 		
-		/*if (zeroInit){// enforcing the toggle of initialisations
-			this.initialiseRAMZeroed();
-		} else {
-			this.initialiseRAMDebug();
-		}*/
-		
+	
 	}
-
-	/**
-	 * this method will set the 'RAM' to all zeros i.e empty words
-	 */
-	/*private void initialiseRAMZeroed() {
-		for (int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word();
-			// setting to zeroed word
-		}
-	}*/
-
-	/** this method will initialise all of the memory to bytes
-	 * consisting of 0xCC, this should be a lot easier 
-	 * when it comes to debugging code to look inside memory
-	 * 
-	 */
-	/*private void initialiseRAMDebug() {
-		for(int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word(new BigInteger("3435973836"));
-			//now obvious to find in memory
-		}
-	}*/
 
 	/**this method will read from memory, in the places it is allowed to
 	 * 
@@ -100,7 +69,7 @@ public class MainMemory extends Observable {
 				}
 				else
 				{
-					//DO SOMETHING HERE
+					//DO SOMETHING HERE ERROR!!!
 				}
 			}
 			return result;
@@ -150,6 +119,26 @@ public class MainMemory extends Observable {
 			}
 		}
 	}
+	
+	/**separate method for reading from the text segment of the memory
+	 *  
+	 * @param address the address to retrieve from
+	 * @return the statement object at that address
+	 */
+	public Statement readFromTextSegment(Address address)
+	{
+		Statement retrieved = this.textSegment.get(address);
+		if(retrieved != null)
+		{
+			return retrieved;
+		}
+		else
+		{
+			return null;
+			//LOG PROBLEM INVALID ADDRESS FOR TEXT SEGEMENT
+		}
+	}
+	
 
 
 }
