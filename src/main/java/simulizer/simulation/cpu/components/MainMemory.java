@@ -6,6 +6,10 @@ import java.util.Observable;
 
 
 
+
+
+import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Statement;
 import simulizer.simulation.data.representation.Word;
 
 /**
@@ -27,7 +31,7 @@ public class MainMemory extends Observable {
 	public static boolean zeroInit = true;// to toggle between different
 											// initialisations
 	
-	private Map<Integer,Statement> textSegment;
+	private Map<Address,Statement> textSegment;
 	private byte[] staticDataSegment;
 	private DynamicDataSegment heap;
 	
@@ -37,7 +41,7 @@ public class MainMemory extends Observable {
 	 * partitions in it
 	 * 
 	 */
-	public MainMemory(Map<Integer,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData) {
+	public MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData) {
 		this.startOfTextSegment = startTextSegment;
 		this.startOfStaticData = startOfStaticData;
 		this.startOfDynamicData = startOfDynamicData;
@@ -109,6 +113,7 @@ public class MainMemory extends Observable {
 		else
 		{
 			//DO SOMETHING, CANT READ FROM HERE
+			return null;
 		}
 	}
 	

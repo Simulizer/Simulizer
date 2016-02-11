@@ -2,6 +2,7 @@ package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
 
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 /**this class represents the control unit of the 
@@ -138,24 +139,24 @@ public class ControlUnit extends Observable
 	
 	/**reads a value from one of the registers in the block of general purpose registers
 	 * 
-	 * @param index the index of the register to retrieve
+	 * @param name the name of the register to retrieve
 	 * @return the word stored at that index
 	 */
-	public Word readFromRegister(int index)
+	public Word readFromRegister(Register name)
 	{
 		notifyObservers();
 		setChanged();
-		return this.registers.getRegister(index).getData();
+		return this.registers.getRegister(name).getData();
 	}
 	
 	/**this method will write a word to a specified register in the set 
 	 * of general purpose registers available
-	 * @param index the index of the register to write to
+	 * @param name the name of the register to write to
 	 * @param toStore the word to be stored in the specified register
 	 */
-	public synchronized void writeToRegister(int index, Word toStore)
+	public synchronized void writeToRegister(Register name, Word toStore)
 	{
-		this.registers.setRegister(index, toStore);
+		this.registers.setRegister(name, toStore);
 		notifyObservers();
 		setChanged();
 	}

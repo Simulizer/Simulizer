@@ -2,7 +2,7 @@ package simulizer.simulation.cpu.components;
 
 import java.util.Observable;
 
-import simulizer.simulation.data.representation.RegisterInfo;
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 /**this class represents the entire block of general purpose registers
@@ -12,7 +12,7 @@ import simulizer.simulation.data.representation.Word;
  */
 public class RegisterBlock extends Observable
 {
-	private Register[] registers;
+	private GPRegister[] registers;
 	
 	/**constructor will initialise the buses and call for the registers to be set up
 	 * 
@@ -31,31 +31,38 @@ public class RegisterBlock extends Observable
 	 */
 	private void setUpRegisters()
 	{
-		this.registers = new Register[32];
+		this.registers = new GPRegister[32];
 		for(int i = 0; i < this.registers.length; i++)
 		{
-			this.registers[i] = new Register(RegisterInfo.numberToName(i));//setting up register with appropriate name
+			this.registers[i] = new GPRegister(Register.fromID(i));//setting up register with appropriate name
 		}
 	}
 	
 	/**returns register at specified index
 	 * 
-	 * @param index the block index
+	 * @param name the register to get from
 	 * @return the register at that index
 	 */
-	public Register getRegister(int index)
+	public GPRegister getRegister(Register name)
 	{
-		return this.registers[index];
+		return this.registers[name.getID()];
 	}
 	
 	/**this class sets a selected register to a given word
 	 * 
-	 * @param index the register index
+	 * @param name the register name to write to
 	 * @param word the word to insert into that register
 	 */
-	public void setRegister(int index, Word word)
+	public void setRegister(Register name, Word word)
 	{
-		this.registers[index].setData(word);
+		if(name.getID()!=0)//can't write to register zero
+		{
+			this.registers[name.getID()].setData(word);
+		}
+		else
+		{
+			//LOG PROBLEM
+		}
 	}
 	
 }

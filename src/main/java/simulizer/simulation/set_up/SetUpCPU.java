@@ -3,9 +3,13 @@ package simulizer.simulation.set_up;
 import java.math.BigInteger;
 import java.util.Map;
 
-import com.sun.xml.internal.ws.org.objectweb.asm.Label;
-import com.sun.xml.internal.ws.wsdl.writer.document.http.Address;
 
+
+
+
+import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Label;
+import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.*;
 import simulizer.simulation.data.representation.Word;
 
@@ -66,7 +70,7 @@ public class SetUpCPU
 		{
 			if(entry.getKey().getName().toLowerCase().equals("main"))//if main found
 			{
-				BigInteger address = BigInteger.valueOf(entry.getValue().getValue());//put itinto word format
+				BigInteger address = BigInteger.valueOf(entry.getValue().getValue());//put it into word format
 				return new Word(address);
 			}
 		}

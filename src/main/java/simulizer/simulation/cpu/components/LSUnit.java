@@ -3,6 +3,7 @@ package simulizer.simulation.cpu.components;
 import java.math.BigInteger;
 import java.util.Observable;
 
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 
@@ -92,24 +93,24 @@ public class LSUnit extends Observable
 	
 	/**method reads something from a register
 	 * 
-	 * @param index the register index to select
+	 * @param name the name of the register to read from
 	 * @return the word containing that register value
 	 */
-	public Word readFromRegister(int index)
+	public Word readFromRegister(Register name)
 	{
 		notifyObservers();
 		setChanged();
-		return this.registers.getRegister(index).getData();
+		return this.registers.getRegister(name).getData();
 	}
 	
 	/**method writes to one of the registers
 	 * 
-	 * @param index the register index to write to
+	 * @param name the name of the register to write to
 	 * @param toWrite the word to write to the intended register
 	 */
-	public synchronized void writeToRegister(int index, Word toWrite)
+	public synchronized void writeToRegister(Register name, Word toWrite)
 	{
-		this.registers.setRegister(index, toWrite);
+		this.registers.setRegister(name, toWrite);
 		notifyObservers();
 		setChanged();
 	}

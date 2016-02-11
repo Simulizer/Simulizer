@@ -3,6 +3,7 @@ package simulizer.simulation.cpu.components;
 import java.math.BigInteger;
 import java.util.Observable;
 
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 /**this class simulates the Arithemtic and Logic Unit
@@ -69,25 +70,25 @@ public class ALU extends Observable {
 	
 	/**this method reads from a register at a given index
 	 * 
-	 * @param index the register index to retrieve from
+	 * @param name the name of the register to read from
 	 * @return the word located at the register
 	 */
-	public Word readFromRegister(int index)
+	public Word readFromRegister(Register name)
 	{
 		notifyObservers();
 		setChanged();
 		
-		return this.registers.getRegister(index).getData();
+		return this.registers.getRegister(name).getData();
 	}
 	
 	/**this method will write to a register in the block of 
 	 * general purpose registers at the specified index
-	 * @param index the index of the register 
+	 * @param name the register to write to
 	 * @param toStore the word to store in said register
 	 */
-	public synchronized void writeToRegister(int index, Word toStore)
+	public synchronized void writeToRegister(Register name, Word toStore)
 	{
-		this.registers.setRegister(index, toStore);
+		this.registers.setRegister(name, toStore);
 		
 		notifyObservers();
 		setChanged();

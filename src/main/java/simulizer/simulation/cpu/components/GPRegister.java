@@ -1,17 +1,17 @@
 package simulizer.simulation.cpu.components;
 
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 /** this class represents a single general purpose register in the CPU
  * @author Charlie Street */
-public class Register{
+public class GPRegister{
 	private Word word;
-	private String pseudonym;// register name like $sp, $t0 etc
+	private Register pseudonym;// register name like $sp, $t0 etc
 
 	/** initialising all connections/data associated with the register
 	 * @param pseudonym the pseudonym given to this register */
-	public Register(String pseudonym) {
-		super();
+	public GPRegister(Register pseudonym) {
 		this.word = new Word();// initialising register contents
 		this.pseudonym = pseudonym;
 	}
@@ -31,7 +31,7 @@ public class Register{
 
 	/** returns the registers pseudonym (might not be useful in the slightest)
 	 * @return the registers pseudonym */
-	public String getPseudonym() {
+	public Register getPseudonym() {
 		return this.pseudonym;
 	}
 }
