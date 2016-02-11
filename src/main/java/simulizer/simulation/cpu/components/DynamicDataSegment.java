@@ -12,7 +12,7 @@ import simulizer.assembler.representation.Address;
 public class DynamicDataSegment 
 {
 	private ArrayList<Byte> heap;
-	private Address pointer;
+	private Address breakOfHeap;
 	private Address startOfHeap;
 	
 	/**this constructor just initialises the heap and it's end pointer
@@ -21,7 +21,7 @@ public class DynamicDataSegment
 	public DynamicDataSegment(Address startOfHeap)
 	{
 		this.heap = new ArrayList<Byte>();
-		this.pointer = startOfHeap;
+		this.breakOfHeap = startOfHeap;
 		this.startOfHeap = startOfHeap;
 	}
 	
@@ -44,16 +44,16 @@ public class DynamicDataSegment
 	{
 		if(bytes < 0)
 		{
-			Address newPointer = new Address(this.pointer.getValue()- bytes);
+			Address newPointer = new Address(this.breakOfHeap.getValue()- bytes);
 			if(newPointer.getValue() >= this.startOfHeap.getValue())//error checking
 			{
-				this.pointer = newPointer;
+				this.breakOfHeap = newPointer;
 			}
 			else
 			{
 				//REPORT ERROR INVALID SBRK BEHIND HEAP START
 			}
-			return this.pointer;
+			return this.breakOfHeap;
 		}
 		else
 		{
@@ -62,8 +62,8 @@ public class DynamicDataSegment
 				this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
 			}
 			
-			Address result = this.pointer;
-			this.pointer = new Address(this.pointer.getValue() + bytes);//increasing the pointer
+			Address result = this.breakOfHeap;
+			this.breakOfHeap = new Address(this.breakOfHeap.getValue() + bytes);//increasing the pointer
 			return result;
 		}
 	}

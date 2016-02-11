@@ -1,305 +1,36 @@
 package simulizer.simulation.cpu.components;
 
-import java.math.BigInteger;
-import java.util.Observable;
-
-import simulizer.assembler.representation.Register;
+import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.data.representation.Word;
 
-/**this class simulates the Arithemtic and Logic Unit
- * it contains operations for add, shift, mult
- * div, subtract, xor, or and, not
- * it will also include the immediate operations when appropriate
- * @author Charlie Street
+
+
+/**this class represents the ALU in the CPU
+ * all it is capable of doing is carrying out various operations
+ * and then returning the result
+ * @author Charlie
  *
  */
-public class ALU extends Observable {
+public class ALU {
 	
-	private final String TwoThirtyTwo = "4294967296";//used to bound numbers
-	private Word temp;//temporary holding cell for transport etc.
-	private RegisterBlock registers;
-	private ControlUnit controlUnit;
-	
-	/**constructor initialises all the fields
-	 * 
-	 * @param registers the block of registers being used
-	 * @param controlUnit the control unit of the simulated processor
-	 */
-	public ALU(RegisterBlock registers, ControlUnit controlUnit)
-	{
-		super();
-		this.temp = new Word();
-		this.registers = registers;
-		this.controlUnit = controlUnit;
-	}
-	
-	/**this method will set the control unit linked to the ALU
-	 * @param controlUnit the CU linked to the ALU
-	 */
-	public void setControlUnit(ControlUnit controlUnit)
-	{
-		this.controlUnit = controlUnit;
-	}
-	
-	/**this method sets the registers accessed by the alu
-	 * 
-	 * @param registerBlock the GP registers linked to the ALU
-	 */
-	public void setRegisterBlock(RegisterBlock registerBlock)
-	{
-		this.registers = registerBlock;
-	}
-	
-	/**returns the temporary holding value
-	 * this is a replacement for a bus
-	 * @return the temporary holding value
-	 */
-	public Word getData()
-	{
-		return this.temp;
-	}
-	
-	/**this method sets the temporary holding value for the ALU
-	 * 
-	 * @param word the new word to set the temp holding value too
-	 */
-	public synchronized void setData(Word word)
-	{
-		this.temp = word;
-	}
-	
-	/**this method reads from a register at a given index
-	 * 
-	 * @param name the name of the register to read from
-	 * @return the word located at the register
-	 */
-	public Word readFromRegister(Register name)
-	{
-		notifyObservers();
-		setChanged();
-		
-		return this.registers.getRegister(name).getData();
-	}
-	
-	/**this method will write to a register in the block of 
-	 * general purpose registers at the specified index
-	 * @param name the register to write to
-	 * @param toStore the word to store in said register
-	 */
-	public synchronized void writeToRegister(Register name, Word toStore)
-	{
-		this.registers.setRegister(name, toStore);
-		
-		notifyObservers();
-		setChanged();
-	}
-	
-	/**sends something from the ALUs temp data to the control unit
+	/**empty constructor
 	 * 
 	 */
-	public void sendControlUnit()
-	{
-		this.controlUnit.setData(this.getData());
-		notifyObservers();
-		setChanged();
+	public ALU() {
+		
 	}
 	
-	/**this method receives some data from the control unit
-	 * it is then stored into the temp field in the ALU
-	 */
-	public void receiveControlUnit()
-	{
-		this.setData(this.controlUnit.getData());
-		notifyObservers();
-		setChanged();
-	}
-	
-	/**this method carries out exclusive or on two words
+	/**this method uses a switch statement to execute some operation on two words
 	 * 
-	 * @param firstWord the first word being used
-	 * @param secondWord the second word being used
-	 * @return the exclusive or of these two words
+	 * @param instruction the precise instruction to execute
+	 * @param firstWord the first word to work on
+	 * @param secondWord the second word to work on
+	 * @return the result of the operation on the two words
 	 */
-	public Word xor(Word firstWord, Word secondWord)
+	public Word execute(Instruction instruction, Word firstWord, Word secondWord)
 	{
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
-		
-		BigInteger result = firstInt.xor(secondInt);
-		
-		notifyObservers();
-		setChanged();
-		return new Word(result);
+		//insert massive switch statement here
+		return new Word(new byte[]{0x00,0x00,0x00,0x00});
 	}
 	
-	/**carries out inclusive or on two words, pretty much the same as xor
-	 * 
-	 * @param firstWord the first word being used
-	 * @param secondWord the second word being used
-	 * @return the bitwise or of these two words
-	 */
-	public Word or(Word firstWord, Word secondWord)
-	{
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
-		
-		BigInteger result = firstInt.or(secondInt);
-		
-		notifyObservers();
-		setChanged();
-		return new Word(result);
-	}
-	
-	/**method carries out the and operation on two words
-	 * very similar to or, xor with different conditions
-	 * @param firstWord
-	 * @param secondWord
-	 * @return a word as the result of the and operation
-	 */
-	public Word and(Word firstWord, Word secondWord)
-	{
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
-		
-		BigInteger result = firstInt.and(secondInt);
-		
-		notifyObservers();
-		setChanged();
-		return new Word(result);
-	}
-	
-	/**this method will negate the bits of a word
-	 * 
-	 * @param toNegate the word to be negated
-	 * @return the negated Word
-	 */
-	public Word not(Word toNegate)
-	{
-		BigInteger result = toNegate.getWord().not();
-		
-		notifyObservers();
-		setChanged();
-		return new Word(result);
-	}
-	
-	/**this function carries out the nand operation on two binary values
-	 * 
-	 * @param firstWord the first value
-	 * @param secondWord the second value
-	 * @return the result of the nand operation in a word
-	 */
-	public Word nand(Word firstWord, Word secondWord)
-	{
-		Word and = this.and(firstWord, secondWord);
-		Word result = this.not(and);
-		notifyObservers();
-		setChanged();
-		return result;
-	}
-	
-	/** this method carries out the nor operation on two binary values
-	 * 
-	 * @param firstWord the first binary value
-	 * @param secondWord the second binary value
-	 * @return the result of the nor operation on these two words
-	 */
-	public Word nor(Word firstWord, Word secondWord)
-	{
-		Word or = this.or(firstWord, secondWord);
-		Word result = this.not(or);
-		notifyObservers();
-		setChanged();
-		return result;
-	}
-	
-	/**generic shift, what direction the shift is in depends on the sign of the shift number
-	 * 
-	 * @param toShift the word to be shifted
-	 * @param shiftNumber the shift amount
-	 * @return the word shifted
-	 */
-	public Word shift(Word toShift, Word shiftNumber)
-	{
-		if(shiftNumber.getWord().compareTo(new BigInteger("0")) < 0)//if negative shift right
-		{
-			BigInteger result = toShift.getWord().shiftRight(shiftNumber.getWord().negate().intValue());
-			result = result.mod(new BigInteger(this.TwoThirtyTwo));
-			return new Word(result);
-		}
-		else
-		{
-			BigInteger result = toShift.getWord().shiftLeft(shiftNumber.getWord().intValue());
-			result = result.mod(new BigInteger(this.TwoThirtyTwo));
-			return new Word(result);
-		}
-	}
-	
-	/**this function will add two numbers using twos complement
-	 * on BigInteger
-	 * @param num1 the first number
-	 * @param num2 the second number
-	 * @return the sum of the numbers
-	 */
-	public Word add(Word num1, Word num2)
-	{
-		notifyObservers();
-		setChanged();
-		
-		BigInteger result = num1.getWord().add(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-		
-		return new Word(result);
-		
-	}
-	
-	/**this method subtracts one twos complement number
-	 * from the other.The numbers are bigInts
-	 * @param num1 the first number
-	 * @param num2 the number to subtract away from num1
-	 * @return the subtraction of num1 - num2
-	 */
-	public Word sub(Word num1, Word num2)
-	{
-		notifyObservers();
-		setChanged();
-		
-		BigInteger result = num1.getWord().subtract(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-		
-		return new Word(result);
-	}
-	
-	/**this method multiplies two 2s complement numbers together
-	 * these numbers are represented in big ints
-	 * @param num1 the first number
-	 * @param num2 the second number
-	 * @return the multiplication of the two, ignoring overflow
-	 */
-	public Word mult(Word num1, Word num2)
-	{
-		notifyObservers();
-		setChanged();
-		
-		BigInteger result = num1.getWord().multiply(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-		
-		return new Word(result);
-	}
-	
-	/**this method divides two numbers represented as big integers
-	 * 
-	 * @param num1 the first number
-	 * @param num2 the number to divide by
-	 * @return the division of the two numbers in binary format
-	 */
-	public Word div(Word num1, Word num2)
-	{
-		notifyObservers();
-		setChanged();
-		
-		BigInteger result = num1.getWord().divide(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-		
-		return new Word(result);
-	}	
 }
