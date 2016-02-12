@@ -1,13 +1,22 @@
 package simulizer.simulation.cpu.components;
 
+import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Label;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.Register;
 import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.operand.AddressOperand;
+import simulizer.assembler.representation.operand.IntegerOperand;
+import simulizer.assembler.representation.operand.Operand;
+import simulizer.assembler.representation.operand.OperandFormat;
+import simulizer.assembler.representation.operand.OperandFormat.OperandType;
+import simulizer.assembler.representation.operand.RegisterOperand;
 import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 
@@ -112,6 +121,248 @@ public class CPU {
 		Statement nextInstruction = this.memory.readFromTextSegment(this.programCounter);//retrieving from memory
 		this.instructionRegister = nextInstruction;//set IR
 		this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing the program counter
+	}
+	
+	/**this method carries out the decode of the FDE cycle, it will
+	 * look through the statement object and take the instruction and decode the operands
+	 * @throws DecodeException if something goes wrong during decode
+	 */
+	private void decode() throws DecodeException
+	{
+		Instruction instruction = this.instructionRegister.i;
+		List<Operand> operandList = this.instructionRegister.operandList;//shouldn't ever be more than 3 stored
+		
+		OperandFormat opForm = new OperandFormat();//used for checking operand validity
+		OperandType op1 = operandList.get(0).getOperandFormatType();
+		OperandType op2 = operandList.get(1).getOperandFormatType();
+		OperandType op3 = operandList.get(2).getOperandFormatType();
+		
+		if(operandList.size() > 3)
+		{
+			throw new DecodeException("Too many operands.",operandList.get(0));
+		}
+		
+		if(!opForm.valid(op1,op2,op3))
+		{
+			throw new DecodeException("Not valid set of operands.", operandList.get(0));//if invalid operands given
+		}
+		
+		
+		//separating into different instruction types now
+		if(instruction.getOperandFormat() == OperandFormat.destSrcSrc)//will be r type instruction: 2 src, 1 dest
+		{
+			Optional<Word> dest = Optional.empty();//destination always empty to start
+			Register destinationRegister = operandList.get(0).asRegisterOp().r;//store destination register
+			Optional<Word> src1 = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
+			Optional<Word> src2 = Optional.of(this.decodeRegister(operandList.get(2).asRegisterOp()));
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.destSrcImm)//immediate arithmetic operations
+		{
+			Optional<Word> dest = Optional.empty();
+			Register destinationRegister = operandList.get(0).asRegisterOp().r;
+			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
+			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(2).asIntegerOp()));
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.destSrcImmU)//immediate unsigned arithmetic ops (same as destSrcImm code wise)
+		{
+			Optional<Word> dest = Optional.empty();
+			Register destinationRegister = operandList.get(0).asRegisterOp().r;
+			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
+			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(2).asIntegerOp()));
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.destSrc)//single register ops like neg or abs
+		{
+			Optional<Word> dest = Optional.empty();
+			Register destinationRegister = operandList.get(0).asRegisterOp().r;
+			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
+			Optional<Word> fakeSecondRegister = Optional.empty(); //dummy word to pass into the alu (dealt with in the alu easily)
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.destImm)//instructions such as li
+		{
+			Register destinationRegister = operandList.get(0).asRegisterOp().r;
+			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(1).asIntegerOp()));
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break
+		{
+			//at this time I have absolutely no idea
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.label)//branch, jal, j
+		{
+			Optional<Address> goToAddress = Optional.of(this.decodeAddressOperand(operandList.get(0).asAddressOp()));//where to jump
+			Optional<Address> currentAddress = Optional.empty();//storing current address if needed by jal
+			
+			Integer currentLine  = this.instructionRegister.lineNumber;//line number of current instruction
+			for(Map.Entry<Address,Integer> entry : this.program.lineNumbers.entrySet())//iterating to find current address
+			{
+				if(entry.getValue() == currentLine)//if address found
+				{
+					currentAddress = Optional.of(entry.getKey());//current address for jal
+				}
+			}
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.register)//for jr
+		{
+			Word registerContents = this.decodeRegister(operandList.get(0).asRegisterOp());//getting register contents
+			Optional<Address> registerAddress = Optional.of(new Address((int)loadAsUnsigned(registerContents.getWord())));//put into correct format
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.cmpCmpLabel)//for branch equal etc.
+		{
+			Optional<Word> cmp1 = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//first comparison value
+			Optional<Word> cmp2 = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));//second comparison value
+			Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(operandList.get(2).asAddressOp()));//where to branch to if comparison returns true
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.cmpLabel)//for bltz etc
+		{
+			Optional<Word> cmp = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//value to compare
+			Optional<Word> fakeCmp = Optional.empty();//used to make ALU calculations easier
+			Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));//branch address
+			//put in object here
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.srcAddr)//for store instructions
+		{
+			//need to fill in
+		}
+		else if(instruction.getOperandFormat() == OperandFormat.destAddr)//for move and load
+		{
+			//fill in: I thought move was dest_reg <- src_reg not a label?
+		}
+		else//invalid instruction format
+		{
+			throw new DecodeException("Invalid instruction format.", operandList.get(0));
+		}
+		
+	}
+	
+	/**this method will decode an integer operand into a 4 byte word
+	 * 
+	 * @param operand the operand to decode
+	 * @return the decoded word
+	 * @throws DecodeException if something goes wrong during decode
+	 */
+	private Word decodeIntegerOperand(IntegerOperand operand) throws DecodeException
+	{
+		if(operand.getOperandFormatType() == OperandFormat.OperandType.UNSIGNED_IMMEDIATE)//if unsigned
+		{
+			return new Word(serialiseUnsigned((long)operand.value));
+		}
+		else if(operand.getOperandFormatType() == OperandType.IMMEDIATE)//signed immediate
+		{
+			return new Word(serialiseSigned((long)operand.value));
+		}
+		else
+		{
+			throw new DecodeException("Error decoding integer operand.", operand);
+		}
+	}
+	
+	/**this method will, in particular, decode the address operands
+	 * 
+	 * @param operand the operand to decode
+	 * @return the decoded address in memory
+	 */
+	private Address decodeAddressOperand(AddressOperand operand) throws DecodeException
+	{
+		if(operand.labelOnly())//if the the address is that to a label in code
+		{
+			for(Map.Entry<Label,Address> entry : this.program.labels.entrySet())
+			{
+				if(operand.labelName.get().equals(entry.getKey().getName()))
+				{
+					return entry.getValue();
+				}
+			}
+			throw new DecodeException("Error decoding an Address Operand", operand);
+		}
+		else if(operand.offsetOnly())//if offset only
+		{
+			return new Address(operand.constant.get());
+		}
+		else//base with(out) an offset
+		{
+			Address address = new Address((int) loadAsUnsigned(this.registers[operand.register.get().getID()].getWord()));
+			if(operand.constant.isPresent())//if offset as well
+			{
+				Address off = new Address(operand.constant.get());
+				address = new Address(address.getValue() + off.getValue());
+			}
+			return address;
+		}
+	}
+	
+	/**this method will decode a register operand
+	 * if it is not a destination register then the data will be retrieved, otherwise
+	 * a null Word will be returned
+	 * @param operand the operand to decode
+	 * @return the word of data from the register
+	 * @throws DecodeException if something goes wrong during decode
+	 */
+	private Word decodeRegister(RegisterOperand operand) throws DecodeException
+	{
+		if(operand.getOperandFormatType() == OperandFormat.OperandType.DEST_REGISTER)
+		{
+			return null;//null word
+		}
+		else if(operand.getOperandFormatType() == OperandFormat.OperandType.SRC_REGISTER)
+		{
+			return this.registers[operand.r.getID()];//return the word stored at that register
+		}
+		else if(operand.getOperandFormatType() == OperandFormat.OperandType.TARGET_REGISTER)
+		{
+			return this.registers[operand.r.getID()];//this is probably wrong for now
+		}
+		else if(operand.getOperandFormatType() == OperandFormat.OperandType.REGISTER)//standard register
+		{
+			return this.registers[operand.r.getID()];//return the word stored at that register
+		}
+		else
+		{
+			throw new DecodeException("Error decoding Register.", operand);
+		}
+	}
+	
+	/**method takes a byte array and returns it's signed value as a long
+	 * 
+	 * @param word the word to convert
+	 * @return the byte[] converted to a signed long
+	 */
+	private long loadAsSigned(byte[] word) {
+		return 1L;
+	}
+	
+	/**method takes a byte array and returns it's unsigned value as a long
+	 * 
+	 * @param word the word to convert
+	 * @return the byte[] converted to an unsigned long
+	 */
+	private long loadAsUnsigned(byte[] word) {
+		return 1L;
+	}
+	
+	
+	/**this method takes a signed long and converts it to a byte array
+	 * 
+	 * @param value the long to convert
+	 * @return the value as a byte array
+	 */
+	private byte[] serialiseSigned(long value) {
+		return new byte[4];
+	}
+	
+	/**this method takes an unsigned long and converts it to a byte array
+	 * 
+	 * @param value the long to convert
+	 * @return the value as a byte array
+	 */
+	private byte[] serialiseUnsigned(long value) {
+		return new byte[4];
 	}
 	
 }
