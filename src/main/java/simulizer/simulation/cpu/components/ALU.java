@@ -1,5 +1,7 @@
 package simulizer.simulation.cpu.components;
 
+import java.util.Optional;
+
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.InstructionException;
@@ -32,14 +34,33 @@ public class ALU {
 	 * @return the result of the operation on the two words
 	 * @throws InstructionException if unsupported instruction attempted
 	 */
-	public Word execute(Instruction instruction, Word firstWord, Word secondWord) throws InstructionException
+	public Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord) throws InstructionException
 	{
-		byte[] firstValue = firstWord.getWord();
-		byte[] secondValue = secondWord.getWord();
+		byte[] firstValue;
+		byte[] secondValue;
+		
+		if(firstWord.isPresent())//if a value stored
+		{
+			firstValue = firstWord.get().getWord();
+		}
+		else
+		{
+			throw new InstructionException("No operand given for alu operation", instruction);
+		}
+		
+		if(secondWord.isPresent())//if a value stored
+		{
+			secondValue = secondWord.get().getWord();
+		}
+		else
+		{
+			secondValue = new byte[]{0x00,0x00,0x00,0x00};//this is probably the best workaround in case of something silly
+			//this will either end up returning the original value, or produce undefined behaviour
+		}
 		
 		switch(instruction) {//checking each possible instruction
 			case abs:
-				break;
+				return new Word(serialiseSigned(Math.abs(loadAsSigned(firstValue))));
 			case and:
 				byte[] resultAnd = new byte[4];
 				for(int i = 0; i < resultAnd.length; i++) {
@@ -65,17 +86,17 @@ public class ALU {
 			case mul:
 				return new Word(serialiseSigned(loadAsSigned(firstValue) * loadAsSigned(secondValue)));
 			case mulo:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstValue) * loadAsSigned(secondValue)));//might have to take more into account with overflow
 			case mulou:
-				break;
+				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) * loadAsUnsigned(secondValue)));//might have to take more into account with overflow
 			case div:
 				return new Word(serialiseSigned(loadAsSigned(firstValue) / loadAsSigned(secondValue)));
 			case divu:
 				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) / loadAsUnsigned(secondValue)));
 			case neg:
-				break;
+				return new Word(serialiseSigned(loadAsSigned(firstValue)*-1));
 			case negu:
-				break;
+				return new Word(serialiseUnsigned(loadAsSigned(firstValue)*-1));//is this correct?
 			case nor:
 				byte[] resultNor = new byte[4];
 				for(int i = 0; i < resultNor.length; i++) {
@@ -83,7 +104,11 @@ public class ALU {
 				}
 				return new Word(resultNor);
 			case not:
-				break;
+				byte[] resultNot = new byte[4];
+				for(int i = 0; i < resultNot.length; i++) {
+					resultNot[i] = (byte) ~(firstValue[i]);
+				}
+				return new Word(resultNot);
 			case or:
 				byte[] resultOr = new byte[4];
 				for(int i = 0; i < resultOr.length; i++) {
@@ -125,19 +150,53 @@ public class ALU {
 				}
 				return new Word(branchFalse);//if all bytes equal then false
 			case bgez:
-				break;
+				if(loadAsSigned(firstValue) >= 0)
+				{
+					return new Word(branchTrue);
+				}
+				else
+				{
+					return new Word(branchFalse);
+				}
 			case bgtz:
-				break;
+				if(loadAsSigned(firstValue) > 0)
+				{
+					return new Word(branchTrue);
+				}
+				else
+				{
+					return new Word(branchFalse);
+				}
 			case blez:
-				break;
+				if(loadAsSigned(firstValue) <= 0)
+				{
+					return new Word(branchTrue);
+				}
+				else
+				{
+					return new Word(branchFalse);
+				}
 			case bltz:
-				break;
+				if(loadAsSigned(firstValue) < 0)
+				{
+					return new Word(branchTrue);
+				}
+				else
+				{
+					return new Word(branchFalse);
+				}
 			case beqz:
-				break;
+				if(loadAsSigned(firstValue) > 0)
+				{
+					return new Word(branchTrue);
+				}
+				else
+				{
+					return new Word(branchFalse);
+				}
 			default:
 				throw new InstructionException("Invalid/Unsupported Instruction.",instruction);
 		}
-		return new Word(new byte[]{0x00,0x00,0x00,0x00});
 	}
 
 	/**method takes a byte array and returns it's signed value as a long
