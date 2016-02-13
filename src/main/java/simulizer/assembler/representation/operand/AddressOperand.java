@@ -46,7 +46,7 @@ public class AddressOperand extends Operand {
     public boolean labelOnly() {
         return labelName.isPresent() && !constant.isPresent() && !register.isPresent();
     }
-    public boolean offsetOnly() {
+    public boolean constantOnly() {
         return !labelName.isPresent() && constant.isPresent() && !register.isPresent();
     }
 }

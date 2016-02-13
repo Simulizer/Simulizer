@@ -1,4 +1,4 @@
-grammar SmallMips;
+grammar Simp;
 
 @header {
     package simulizer.parser;
@@ -22,6 +22,8 @@ grammar SmallMips;
 // Notes on Antlr
 // - if multiple lexer rules match, the first one is chosen
 // - before parsing, the input must unambiguously be split into lexer tokens
+// - inside lexer rules, whitespace is still counted, but not inside parser rules
+// - within rules, the first versions of the rule take precedence if the input is ambiguous
 
 
 
@@ -36,18 +38,18 @@ program
     ;
 
 dataSegment
-    : dataDirective (EOL|line)+
+    : dataDirective (EOL|';'|line)+
     ;
 
 textSegment
-    : textDirective (EOL|line)+
+    : textDirective (EOL|';'|line)+
     ;
 
 dataDirective
-    : '.' 'data' directiveOperandList?
+    : '.data' directiveOperandList?
     ;
 textDirective
-    : '.' 'text' directiveOperandList?
+    : '.text' directiveOperandList?
     ;
 
 // the first string is parsed as a single line, the second as two
@@ -62,13 +64,35 @@ label
     : labelID ':'
     ;
 
-// directive
-directive
-    : '.' DIRECTIVE_ID directiveOperandList?
+// attempts the longest rules first if the string is ambiguous
+// mylabel + 10($s0) parses as a single address rather than
+// [mylabel] [+10] [($s0)]
+address
+    : labelID SIGN unsignedInteger baseAddress? // immediate addressing with offset
+    | integer baseAddress                       // base-offset addressing: register value +/- offset
+  //| integer                                   // immediate addressing: will never be matched by operand rule
+    | baseAddress                               // register addressing: register value as address
+    | labelID                                   // immediate addressing
     ;
 
+baseAddress
+    : '(' register ')'
+    ;
+
+
+
+
+// directive
+directive
+    : DIRECTIVE_ID directiveOperandList?
+    ;
+
+// optional commas make the language context-sensitive
+// consider: instruction mylabel + 10
+// `address(mylabel+10)`and `address(mylabel) integer(+10)`
+// are both valid interpretations
 directiveOperandList
-    : directiveOperand (',' directiveOperand)*
+    : directiveOperand (','? directiveOperand)*
     ;
 
 directiveOperand
@@ -79,31 +103,24 @@ directiveOperand
 
 // statement
 statement
-    : instruction operandList?
+    : instruction statementOperandList?
     ;
 
 
-operandList
-    : operand (',' operand)*
+// optional commas make the language context-sensitive
+// consider: instruction mylabel + 10
+// `address(mylabel+10)`and `address(mylabel) integer(+10)`
+// are both valid interpretations
+statementOperandList
+    : statementOperand (','? statementOperand)*
     ;
 
-operand
+statementOperand
     : register // register value
     | integer  // literal integer value
     | address
     ;
 
-address
-    : baseAddress                               // register addressing: register value as address
-  //| integer                                   // immediate addressing: will never be matched by operand rule
-    | integer baseAddress                       // base-offset addressing: register value +/- offset
-    | labelID                                   // immediate addressing
-    | labelID SIGN unsignedInteger baseAddress? // immediate addressing with offset
-    ;
-
-baseAddress
-    : '(' register ')'
-    ;
 
 
 // comment
@@ -121,11 +138,8 @@ labelID
     ;
 
 register
-    : '$' registerID
-    ;
-registerID
-    : IDENTIFIER
-    | unsignedInteger
+    : NAMED_REGISTER
+    | NUMBERED_REGISTER
     ;
 
 string
@@ -157,15 +171,15 @@ hexInt
 // directive
 // matched specifically because no ambiguety due to the preceeding dot
 DIRECTIVE_ID
-    : 'globl'
-    | 'ascii' | 'asciiz'
-    | 'byte'  | 'half' | 'word'   // 8, 16, 32 bits
-    | 'space'
+    : '.globl'
+    | '.ascii' | '.asciiz'
+    | '.byte'  | '.half' | '.word'   // 8, 16, 32 bits
+    | '.space'
     | IGNORED_DIRECTIVE_ID
     ;
 
-fragment IGNORED_DIRECTIVE_ID
-    : 'align'
+IGNORED_DIRECTIVE_ID
+    : '.align'
     ;
 
 
@@ -174,6 +188,14 @@ IDENTIFIER
     : [a-zA-Z_][a-zA-Z0-9_]*
     ;
 
+
+// no whitespace in-between
+NAMED_REGISTER
+    : '$' IDENTIFIER
+    ;
+NUMBERED_REGISTER
+    : '$' DEC_INT
+    ;
 
 
 COMMENT
@@ -192,13 +214,18 @@ UNTERMINATED_STRING_LITERAL
 
 
 // decimal (base 10) integer with no +/- sign
+// leading zeroes are allowed
 DEC_INT
     : [0-9]+
     ;
 
 // hexadecimal (base 16) integer with no +/- sign
 HEX_INT
-    : '0x' [0-9a-fA-F]+
+    : HEX_PREFIX [0-9a-fA-F]+
+    ;
+HEX_PREFIX
+    : '0x'
+    | '0X'
     ;
 
 

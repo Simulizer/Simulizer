@@ -4,7 +4,7 @@ import simulizer.assembler.representation.Register;
 
 public class RegisterOperand extends Operand {
 
-    public Register r;
+    public Register value;
 
     @Override
     public Type getType() {
@@ -21,8 +21,8 @@ public class RegisterOperand extends Operand {
         return this;
     }
 
-    public RegisterOperand(Register r) {
-        this.r = r;
+    public RegisterOperand(Register value) {
+        this.value = value;
     }
 
 }

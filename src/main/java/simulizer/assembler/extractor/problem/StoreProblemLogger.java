@@ -3,6 +3,9 @@ package simulizer.assembler.extractor.problem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A problem logger which stores the encountered problems in a chronological list
+ */
 public class StoreProblemLogger extends ProblemLogger {
 
     private List<Problem> problems;

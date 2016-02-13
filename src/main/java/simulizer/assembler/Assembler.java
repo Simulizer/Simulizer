@@ -6,10 +6,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import simulizer.assembler.extractor.ProgramExtractor;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.*;
-import simulizer.parser.SmallMipsLexer;
-import simulizer.parser.SmallMipsParser;
-import simulizer.simulation.data.representation.DataConverter;
+import simulizer.parser.SimpLexer;
+import simulizer.parser.SimpParser;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +22,11 @@ public class Assembler {
 
         input += '\n'; // to parse correctly, must end with a newline
 
-        SmallMipsLexer lexer = new SmallMipsLexer(new ANTLRInputStream(input));
-        SmallMipsParser parser = new SmallMipsParser(new CommonTokenStream(lexer));
+        SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
+        SimpParser parser = new SimpParser(new CommonTokenStream(lexer));
 
         // try to parse a program from the input
-        SmallMipsParser.ProgramContext tree = parser.program();
+        SimpParser.ProgramContext tree = parser.program();
 
         StoreProblemLogger log = new StoreProblemLogger();
         ProgramExtractor extractor = new ProgramExtractor(log);
@@ -63,8 +64,7 @@ public class Assembler {
         }
 
 
-        address = new Address(0x10000000); // (static) data segment
-
+        address = new Address(0x10010000); // (static) data segment skip over the 64KB .extern segment
         p.dataSegmentStart = address;
 
         List<Byte> tmpDataSegment = new ArrayList<>();
@@ -80,7 +80,7 @@ public class Assembler {
 
             p.dataSegmentVariables.put(address, v);
 
-            byte[] data = DataConverter.fromVariable(v);
+            byte[] data = variableInitialBytes(v);
             assert data.length == v.getSize();
 
             for(byte b : data) {
@@ -97,7 +97,7 @@ public class Assembler {
             p.dataSegment[i] = tmpDataSegment.get(i);
         }
 
-        p.dynamicSegmentStart = address;
+        p.dynamicSegmentStart = new Address(0x10040000); // start of the dynamic data segment
 
         return p;
     }
@@ -117,5 +117,38 @@ public class Assembler {
         }
 
         return rev;
+    }
+
+    private static byte[] variableInitialBytes(Variable v) {
+        if(!v.getInitialValue().isPresent()) {
+            return new byte[v.getSize()];
+        }
+        switch(v.getType()) {
+            case Byte: {
+                int val = v.getInitialValue().get().asIntegerOp().value;
+                return new byte[]{(byte) val};
+            }
+            case Half: {
+                int val = v.getInitialValue().get().asIntegerOp().value;
+                return new byte[]{
+                    (byte)((val >> 8) & 0xFF),
+                    (byte)(val & 0xFF)
+                };
+            }
+            case Word: {
+                int val = v.getInitialValue().get().asIntegerOp().value;
+                return ByteBuffer.allocate(4).putInt(val).array();
+            }
+            case ASCII:
+            case ASCIIZ: {
+                // null terminator was added earlier so these are equivalent
+                String val = v.getInitialValue().get().asStringOp().value;
+                return val.getBytes(Charset.forName("US-ASCII"));
+            }
+            case Space:
+                return new byte[v.getSize()];
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

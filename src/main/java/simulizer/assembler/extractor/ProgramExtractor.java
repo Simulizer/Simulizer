@@ -9,12 +9,12 @@ import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.Variable;
 import simulizer.assembler.representation.operand.*;
-import simulizer.parser.SmallMipsBaseListener;
-import simulizer.parser.SmallMipsParser;
+import simulizer.parser.SimpBaseListener;
+import simulizer.parser.SimpParser;
 
 import java.util.*;
 
-public class ProgramExtractor extends SmallMipsBaseListener {
+public class ProgramExtractor extends SimpBaseListener {
 
     private enum State {
         OUTSIDE,
@@ -55,44 +55,44 @@ public class ProgramExtractor extends SmallMipsBaseListener {
     }
 
     @Override
-    public void enterDataSegment(SmallMipsParser.DataSegmentContext ctx) {
+    public void enterDataSegment(SimpParser.DataSegmentContext ctx) {
         currentState = State.DATA_SEGMENT;
     }
     @Override
-    public void enterTextSegment(SmallMipsParser.TextSegmentContext ctx) {
+    public void enterTextSegment(SimpParser.TextSegmentContext ctx) {
         currentState = State.TEXT_SEGMENT;
     }
 
     @Override
-    public void enterTextDirective(SmallMipsParser.TextDirectiveContext ctx) {
+    public void enterTextDirective(SimpParser.TextDirectiveContext ctx) {
         // ignored other than to log errors
 
         OperandExtractor ext = new OperandExtractor(log);
-        ext.extractDirectiveOperands(ctx.directiveOperandList());
+        List<Operand> operands = ext.extractDirectiveOperands(ctx.directiveOperandList());
 
-        if(ext.operands.size() < 2 &&
-            ext.operands.stream().allMatch(op ->
-                op.getType() == Operand.Type.Address && op.asAddressOp().offsetOnly())) {
+        if(operands.size() < 2 &&
+            operands.stream().allMatch(op ->
+                op.getType() == Operand.Type.Address && op.asAddressOp().constantOnly())) {
             log.logProblem("invalid operand(s) to .text directive. format: .text ADDRESS?", ctx);
         }
 
     }
     @Override
-    public void enterDataDirective(SmallMipsParser.DataDirectiveContext ctx) {
+    public void enterDataDirective(SimpParser.DataDirectiveContext ctx) {
         // ignored other than to log errors
 
         OperandExtractor ext = new OperandExtractor(log);
-        ext.extractDirectiveOperands(ctx.directiveOperandList());
+        List<Operand> operands = ext.extractDirectiveOperands(ctx.directiveOperandList());
 
-        if(ext.operands.size() < 2 &&
-            ext.operands.stream().allMatch(op ->
-                op.getType() == Operand.Type.Address && op.asAddressOp().offsetOnly())) {
+        if(operands.size() < 2 &&
+            operands.stream().allMatch(op ->
+                op.getType() == Operand.Type.Address && op.asAddressOp().constantOnly())) {
             log.logProblem("invalid operand(s) to .data directive. format: .data ADDRESS?", ctx);
         }
     }
 
     @Override
-    public void exitProgram(SmallMipsParser.ProgramContext ctx) {
+    public void exitProgram(SimpParser.ProgramContext ctx) {
         if(!textSegmentLabels.containsKey("main")) {
             log.logProblem("The program has no 'main' label", Problem.NO_LINE_NUM);
         }
@@ -104,7 +104,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
     }
 
     @Override
-    public void enterLabel(SmallMipsParser.LabelContext ctx) {
+    public void enterLabel(SimpParser.LabelContext ctx) {
         String labelName = ctx.labelID().getText();
 
         if(textSegmentLabels.containsKey(labelName) || dataSegmentLabels.containsKey(labelName)) {
@@ -117,17 +117,16 @@ public class ProgramExtractor extends SmallMipsBaseListener {
     }
 
     @Override
-    public void enterDirective(SmallMipsParser.DirectiveContext ctx) {
+    public void enterDirective(SimpParser.DirectiveContext ctx) {
         OperandExtractor ext = new OperandExtractor(log);
-        ext.extractDirectiveOperands(ctx.directiveOperandList());
+        List<Operand> operands = ext.extractDirectiveOperands(ctx.directiveOperandList());
 
         String directive = ctx.DIRECTIVE_ID().getText();
-        List<Operand> operands = ext.operands;
 
 
         if(currentState == State.DATA_SEGMENT) {
             switch(directive) {
-                case "globl":
+                case ".globl":
                     // ignored other than to log errors
                     if(operands.isEmpty() || !operands.stream().allMatch(op ->
                         op.getType() == Operand.Type.Address &&
@@ -135,13 +134,13 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                         log.logProblem("invalid operand(s) to .globl directive. format: .globl LABEL(, LABEL)*", ctx);
                     }
                     break;
-                case "align":
+                case ".align":
                     // ignored other than to log errors
                     if(operands.size() != 1 || operands.get(0).getType() != Operand.Type.Integer) {
                         log.logProblem("invalid operand(s) to .align directive. format: .align INT", ctx);
                     }
                     break;
-                case "ascii":
+                case ".ascii":
                     if(operands.size() != 1 || !operands.stream().allMatch(op -> op.getType() == Operand.Type.String)) {
                         log.logProblem("invalid operand(s) to .ascii directive. format: .ascii STRING", ctx.directiveOperandList());
                     } else {
@@ -150,7 +149,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                             Variable.Type.ASCII, op.asStringOp().value.length(), Optional.of(op), ctx.getStart().getLine()));
                     }
                     break;
-                case "asciiz":
+                case ".asciiz":
                     if(operands.size() != 1 || !operands.stream().allMatch(op -> op.getType() == Operand.Type.String)) {
                         log.logProblem("invalid operand(s) to .asciiz directive. format: .asciiz STRING", ctx.directiveOperandList());
                     } else {
@@ -161,7 +160,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                             Variable.Type.ASCIIZ, op.asStringOp().value.length(), Optional.of(op), ctx.getStart().getLine()));
                     }
                     break;
-                case "byte":
+                case ".byte":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
                         log.logProblem("invalid operand(s) to .byte directive. format: .byte INT(, INT)*", ctx.directiveOperandList());
                     } else {
@@ -171,7 +170,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                         }
                     }
                     break;
-                case "half":
+                case ".half":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
                         log.logProblem("invalid operand(s) to .half directive. format: .half INT(, INT)*", ctx.directiveOperandList());
                     } else {
@@ -181,7 +180,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                         }
                     }
                     break;
-                case "word":
+                case ".word":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
                         log.logProblem("invalid operand(s) to .word directive. format: .word INT(, INT)*", ctx.directiveOperandList());
                     } else {
@@ -192,7 +191,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                     }
                     break;
 
-                case "space":
+                case ".space":
                     if(operands.size() != 1 || operands.get(0).getType() != Operand.Type.Integer) {
                         log.logProblem("invalid operand(s) to .space directive. format: .space INT", ctx.directiveOperandList());
                     } else {
@@ -201,10 +200,13 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                             Variable.Type.Space, op.asIntegerOp().value, Optional.empty(), ctx.getStart().getLine()));
                     }
                     break;
+                default:
+                    log.logParseError("Directive", ctx);
+                    break;
             }
         } else if(currentState == State.TEXT_SEGMENT) {
             // noinspection StatementWithEmptyBody (intellij)
-            if(directive.equals("globl")) {
+            if(directive.equals(".globl")) {
                 // ignore this directive
             } else {
                 log.logProblem("only .globl directives should be placed inside the .text segment", ctx);
@@ -217,7 +219,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
 
 
     @Override
-    public void enterStatement(SmallMipsParser.StatementContext ctx) {
+    public void enterStatement(SimpParser.StatementContext ctx) {
         if(currentState == State.TEXT_SEGMENT) {
 
             String instructionName = ctx.instruction().IDENTIFIER().getText();
@@ -231,14 +233,12 @@ public class ProgramExtractor extends SmallMipsBaseListener {
             }
 
             OperandExtractor ext = new OperandExtractor(log);
-            ext.extractStatementOperands(ctx.operandList());
-
-            List<Operand> operands = ext.operands;
+            List<Operand> operands = ext.extractStatementOperands(ctx.statementOperandList());
 
             int requiredNum = instruction.getOperandFormat().getNumArgs();
             if(operands.size() != requiredNum) {
                 log.logProblem("Wrong number of operands for " +
-                    instructionName + " instruction (" + requiredNum + " required)", ctx.operandList());
+                    instructionName + " instruction (" + requiredNum + " required)", ctx.statementOperandList());
             } else {
                 OperandFormat.OperandType arg1 = operands.size() > 0 ?
                     operands.get(0).getOperandFormatType() : null;
@@ -252,7 +252,7 @@ public class ProgramExtractor extends SmallMipsBaseListener {
                 if(!instruction.getOperandFormat().valid(arg1, arg2, arg3)) {
                     log.logProblem("Operands invalid for " + instructionName +
                         " instruction. Correct format: " + instruction.getOperandFormat().toString(),
-                        ctx.operandList());
+                        ctx.statementOperandList());
                 }
             }
 
