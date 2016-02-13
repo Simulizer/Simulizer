@@ -1,31 +1,5 @@
 // Full user guide available at:
 // https://docs.gradle.org/2.10/userguide/tutorial_java_projects.html
-
-// able to compile java files
-apply plugin: 'java'
-
-// able to create parsers from Antlr grammars.
-// task compileJava automatically depends on generateGrammarSource
-apply plugin: 'antlr'
-
-// able to create executables. Automatically includes the 'distribution' plugin
-apply plugin: 'application'
-
-// able to create IntelliJ project files (not required for modern IntelliJ)
-// to sync with gradle: gradle toolbar (default on the right) and press the
-// refresh icon
-apply plugin: 'idea'
-
-// able to create Eclipse project files
-//
-// to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
-// will regenerate the project files, re-open eclipse.
-//
-// better option: use the Eclipse plugin: 'Buildship'
-// http://projects.eclipse.org/projects/tools.buildship
-apply plugin: 'eclipse'
-
-
 /*
 
     run a task by running:
@@ -68,14 +42,65 @@ Custom tasks:
 
 */
 
+
+
+
+
+/////////////////////////////////////////////////
+//
+// Dependencies for this script
+//
+/////////////////////////////////////////////////
+
+// from https://plugins.gradle.org/
+plugins {
+
+}
+
+
+
+/////////////////////////////////////////////////
+//
+// Built-in Plugins
+//
+/////////////////////////////////////////////////
+
+// able to compile java files
+apply plugin: 'java'
+
+// able to create parsers from Antlr grammars.
+// task compileJava automatically depends on generateGrammarSource
+apply plugin: 'antlr'
+
+// able to create executables. Automatically includes the 'distribution' plugin
+apply plugin: 'application'
+
+// able to create IntelliJ project files (not required for modern IntelliJ)
+// to sync with gradle: gradle toolbar (default on the right) and press the
+// refresh icon
+apply plugin: 'idea'
+
+// able to create Eclipse project files
+//
+// to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
+// will regenerate the project files, re-open eclipse.
+//
+// better option: use the Eclipse plugin: 'Buildship'
+// http://projects.eclipse.org/projects/tools.buildship
+apply plugin: 'eclipse'
+
+
+
 /////////////////////////////////////////////////
 //
 // Basic Build Properties
 //
 /////////////////////////////////////////////////
 
-sourceCompatibility = 1.8   // JVM version to use when compiling
-targetCompatibility = 1.8   // JVM version to build for
+compileJava {
+    sourceCompatibility = 1.8   // JVM version to use when compiling
+    targetCompatibility = 1.8   // JVM version to build for
+}
 
 defaultTasks 'build', 'run'
 
@@ -106,10 +131,12 @@ def antlrOutput     = generatedOutput + 'antlr/'
 
 sourceSets.main.java.srcDirs += antlrOutput
 
-
 // Antlr options
 generateGrammarSource {
     outputDirectory = file(antlrOutput)
+
+    // by deafult only listeners are generated
+    arguments += ['-listener', '-visitor']
 }
 
 // extends the clean task
@@ -140,7 +167,6 @@ dependencies {
         compile 'org.antlr:antlr4-runtime:4.5'
 
         // version for generating parsers during build
-        // task compileJava automatically depends on generateGrammarSource
         antlr   'org.antlr:antlr4:4.5'
 
     // JFExtras
@@ -162,6 +188,29 @@ dependencies {
 
 clean{
     // delete "work" // Disabled until copying out of jar works
+}
+
+
+/////////////////////////////////////////////////
+//
+// Testing Configuration
+//
+/////////////////////////////////////////////////
+
+test {
+    useJUnit {
+        // uncomment if your system does not have Spim installed
+        //excludeCategories 'category.SpimTests'
+
+        // uncomment to exclude any slow tests
+        //excludeCategories 'category.SlowTests'
+
+        // uncomment to only run finished tests
+        //excludeCategories 'category.InProgressTests'
+    }
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
 }
 
 
