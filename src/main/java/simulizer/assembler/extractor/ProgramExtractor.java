@@ -51,6 +51,9 @@ public class ProgramExtractor extends SmallMipsBaseListener {
         Interval i = node.getSourceInterval();
         int rangeStart = i.a;
         int rangeEnd = i.b;
+        
+        System.out.println(rangeEnd - rangeStart);
+        
         log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd);
     }
 
