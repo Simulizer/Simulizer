@@ -58,6 +58,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 */
 	private void initPlatform() {
 		Pane contentPane = getDrawingPane();
+		// Remove any existing items
+		contentPane.getChildren().clear();
 
 		Rectangle base = new Rectangle(80, 500, 840, 35);
 		contentPane.getChildren().addAll(base);
