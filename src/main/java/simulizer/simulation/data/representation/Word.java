@@ -9,7 +9,7 @@ import java.math.BigInteger;
  * @author Charlie Street
  */
 public class Word {
-	private final String modBound = "4294967296";
+	private final String modBound = "" + (1L << 32);
 	private BigInteger word;
 
 	/**
