@@ -9,6 +9,7 @@ public enum AddressMode {
 	RTYPE,//3 registers
 	ITYPE,//2 registers and offset 
 	JTYPE,//1 address
+	SPECIAL,//No Operands
 	OTHER;
 	
 }

@@ -25,6 +25,7 @@ import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.instructions.ITypeInstruction;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.RTypeInstruction;
+import simulizer.simulation.instructions.SpecialInstruction;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -194,9 +195,9 @@ public class CPU {
 			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(1).asIntegerOp()));
 			return null;//FILL IN 
 		}
-		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break
+		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break (break has an op 
 		{
-			return null;//FILL IN//at this time I have absolutely no idea ?
+			return new SpecialInstruction(instruction);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.label)//branch, jal, j
 		{
@@ -246,8 +247,12 @@ public class CPU {
 			Optional<Address> toRetrieve = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));
 			return null;//FILL IN//fill in ?
 		}
-		else//invalid instruction format
+		else//invalid instruction format or BREAK
 		{
+			if(instruction.equals(Instruction.BREAK))
+			{
+				//do some break stuff here
+			}
 			throw new DecodeException("Invalid instruction format.", operandList.get(0));
 		}
 		
@@ -278,6 +283,20 @@ public class CPU {
 				else
 				{
 					this.programCounter = new Address(this.programCounter.getValue() + 4);//increment as normal
+				}
+				break;
+			case SPECIAL:
+				if(instruction.getInstruction().equals(Instruction.syscall))//syscall
+				{
+					//do whatever needs to be done
+				}
+				else if(instruction.getInstruction().equals(Instruction.nop))//no operation
+				{
+					//just do nothing
+				}
+				else
+				{
+					throw new ExecuteException("Error with zero argument instruction", instruction);
 				}
 				break;
 			default:
@@ -325,11 +344,11 @@ public class CPU {
 	 */
 	private Word decodeIntegerOperand(IntegerOperand operand) throws DecodeException
 	{
-		if(operand.getOperandFormatType() == OperandFormat.OperandType.UNSIGNED_IMMEDIATE)//if unsigned
+		if(operand.getOperandFormatType().equals(OperandFormat.OperandType.UNSIGNED_IMMEDIATE))//if unsigned
 		{
 			return new Word(serialiseUnsigned((long)operand.value));
 		}
-		else if(operand.getOperandFormatType() == OperandType.IMMEDIATE)//signed immediate
+		else if(operand.getOperandFormatType().equals(OperandType.IMMEDIATE))//signed immediate
 		{
 			return new Word(serialiseSigned((long)operand.value));
 		}
@@ -382,19 +401,19 @@ public class CPU {
 	 */
 	private Word decodeRegister(RegisterOperand operand) throws DecodeException
 	{
-		if(operand.getOperandFormatType() == OperandFormat.OperandType.DEST_REGISTER)
+		if(operand.getOperandFormatType().equals(OperandFormat.OperandType.DEST_REGISTER))
 		{
 			return null;//null word
 		}
-		else if(operand.getOperandFormatType() == OperandFormat.OperandType.SRC_REGISTER)
+		else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.SRC_REGISTER))
 		{
 			return this.registers[operand.r.getID()];//return the word stored at that register
 		}
-		else if(operand.getOperandFormatType() == OperandFormat.OperandType.TARGET_REGISTER)
+		else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.TARGET_REGISTER))
 		{
 			return this.registers[operand.r.getID()];//this is probably wrong for now
 		}
-		else if(operand.getOperandFormatType() == OperandFormat.OperandType.REGISTER)//standard register
+		else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.REGISTER))//standard register
 		{
 			return this.registers[operand.r.getID()];//return the word stored at that register
 		}
