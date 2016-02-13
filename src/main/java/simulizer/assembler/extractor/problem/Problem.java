@@ -73,4 +73,10 @@ public class Problem {
         rangeStart = i.a;
         rangeEnd = i.b;
     }
+
+	@Override
+	public String toString() {
+		return "Problem [message=\"" + message + "\", lineNum=" + lineNum + ", rangeStart=" + rangeStart + ", rangeEnd=" + rangeEnd + "]";
+	}
+
 }

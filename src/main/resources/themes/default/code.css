@@ -3,9 +3,19 @@
 
 }
 
-.keyword {
+.instruction {
     -fx-fill: blue;
     -fx-font-weight: bold;
+}
+
+.directiveid {
+	-fx-fill: green;
+    -fx-font-weight: bold;
+}
+
+.error {
+	-fx-fill: red;
+	-fx-font-weight: bold;
 }
 
 .register {
