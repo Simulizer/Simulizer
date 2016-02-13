@@ -4,78 +4,96 @@ import java.util.Observable;
 
 import simulizer.simulation.data.representation.Word;
 
-/** this class represents the Instruction Register in our simulation
- * @author Charlie Street */
+/**
+ * this class represents the Instruction Register in our simulation
+ * 
+ * @author Charlie Street
+ */
 public class InstructionRegister extends Observable {
 	private Word currentInstruction;
-	private Bus controlBus;
-	private Bus PCBus;
-	private Bus LSBus;
+	private ControlUnit controlUnit;
+	private ProgramCounter programCounter;
+	private LSUnit lsUnit;
 
-	/** this constructor will initialise all of the Buses and the stored data
-	 * @param controlBus the bus connecting the IR to the Control Unit
-	 * @param PCBus the bus connecting the IR to the Program Counter
-	 * @param LSBus the bus connecting the IR to the Load/Store Unit */
-	public InstructionRegister(Bus controlBus, Bus PCBus, Bus LSBus) {
+	/**
+	 * this constructor will initialise all of the Buses and the stored data
+	 * 
+	 * @param controlUnit
+	 *            the bus connecting the IR to the Control Unit
+	 * @param programCounter
+	 *            the bus connecting the IR to the Program Counter
+	 * @param lsUnit
+	 *            the bus connecting the IR to the Load/Store Unit
+	 */
+	public InstructionRegister(ControlUnit controlUnit, ProgramCounter programCounter, LSUnit lsUnit) {
 		super();
-		this.currentInstruction = new Word();// initialising to all zeros (shouldn't really be used before something is placed
+		this.currentInstruction = new Word();// initialising to all zeros
+												// (shouldn't really be used
+												// before something is placed
 												// into it)
-		this.controlBus = controlBus;
-		this.PCBus = PCBus;
-		this.LSBus = LSBus;
+		this.controlUnit = controlUnit;
+		this.programCounter = programCounter;
+		this.lsUnit = lsUnit;
 	}
 
-	/** this method will retrieve the data in the IR
-	 * @return the stored instruction */
+	/**
+	 * this method will retrieve the data in the IR
+	 * 
+	 * @return the stored instruction
+	 */
 	public Word getData() {
 		return this.currentInstruction;
 	}
 
-	/** sets the instruction stored in the IR
-	 * @param word the new data for the IR */
-	private synchronized void setData(Word word) {
+	/**
+	 * sets the instruction stored in the IR
+	 * 
+	 * @param word
+	 *            the new data for the IR
+	 */
+	public synchronized void setData(Word word) {
 		this.currentInstruction = word;
 	}
 
 	/** retrieves whatever was sent on the control bus */
-	public void retrieveControlBus() {
-		this.setData(this.controlBus.getData());
-		notifyObservers();
+	public void retrievecontrolUnit() {
+		this.setData(this.controlUnit.getData());
 		setChanged();
+		notifyObservers();
 	}
 
 	/** this method sends something onto the control bus */
-	public void sendControlBus() {
-		this.controlBus.setData(this.getData());
-		notifyObservers();
+	public void sendcontrolUnit() {
+		this.controlUnit.setData(this.getData());
 		setChanged();
+		notifyObservers();
 	}
 
-	/** retrieves whatever was stored on the PCBus */
-	public void retrievePCBus() {
-		this.setData(this.PCBus.getData());
-		notifyObservers();
+	/** retrieves whatever was stored on the programCounter */
+	public void retrieveprogramCounter() {
+		this.setData(this.programCounter.getData());
 		setChanged();
+		notifyObservers();
 	}
 
 	/** sends a word onto the PC Bus */
-	public void sendPCBus() {
-		this.PCBus.setData(this.getData());
-		notifyObservers();
+	public void sendprogramCounter() {
+		this.programCounter.setData(this.getData());
 		setChanged();
+		notifyObservers();
 	}
 
 	/** retrieves whatever was stored on the LS bus */
-	public void retrieveLSBus() {
-		this.setData(this.LSBus.getData());
-		notifyObservers();
+	public void retrievelsUnit() {
+		this.setData(this.lsUnit.getData());
 		setChanged();
+		notifyObservers();
 	}
 
-	/** sends a word onto the LSBus */
-	public void sendLSBus() {
-		this.LSBus.setData(this.getData());
-		notifyObservers();
+	/** sends a word onto the lsUnit */
+	public void sendlsUnit() {
+		this.lsUnit.setData(this.getData());
 		setChanged();
+		notifyObservers();
 	}
 }
