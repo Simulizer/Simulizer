@@ -270,7 +270,7 @@ public class CPU {
 				break;
 			case ITYPE:
 				Word branchTest = this.ALU.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
-				if(branchTest.getWord() == ALU.branchTrue)
+				if(equalByteArrays(branchTest.getWord(),ALU.branchTrue))
 				{
 					this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
 					//do i still need to do +4?
@@ -297,6 +297,24 @@ public class CPU {
 		fetch();
 		InstructionFormat instruction = decode();
 		execute(instruction);
+	}
+	
+	/**useful auxillary methods to check if 2 byte arrays equal
+	 * 
+	 * @param arr1 first array
+	 * @param arr2 second array
+	 * @return are they equal?
+	 */
+	private boolean equalByteArrays(byte[] arr1, byte[] arr2)
+	{
+		for(int i = 0; i < arr1.length; i++)
+		{
+			if(arr1[i] != arr2[i])
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**this method will decode an integer operand into a 4 byte word
