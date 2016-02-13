@@ -3,6 +3,7 @@ package simulizer.simulation.cpu.components;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Label;
@@ -17,8 +18,13 @@ import simulizer.assembler.representation.operand.OperandFormat.OperandType;
 import simulizer.assembler.representation.operand.RegisterOperand;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
+import simulizer.simulation.exceptions.ExecuteException;
+import simulizer.simulation.exceptions.InstructionException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
+import simulizer.simulation.instructions.ITypeInstruction;
+import simulizer.simulation.instructions.InstructionFormat;
+import simulizer.simulation.instructions.RTypeInstruction;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -125,9 +131,10 @@ public class CPU {
 	
 	/**this method carries out the decode of the FDE cycle, it will
 	 * look through the statement object and take the instruction and decode the operands
+	 * @return InstructionFormat the instruction ready for execution
 	 * @throws DecodeException if something goes wrong during decode
 	 */
-	private void decode() throws DecodeException
+	private InstructionFormat decode() throws DecodeException
 	{
 		Instruction instruction = this.instructionRegister.i;
 		List<Operand> operandList = this.instructionRegister.operandList;//shouldn't ever be more than 3 stored
@@ -155,7 +162,7 @@ public class CPU {
 			Register destinationRegister = operandList.get(0).asRegisterOp().r;//store destination register
 			Optional<Word> src1 = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
 			Optional<Word> src2 = Optional.of(this.decodeRegister(operandList.get(2).asRegisterOp()));
-			//put in object here
+			return new RTypeInstruction(instruction, dest, destinationRegister, src1, src2);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.destSrcImm)//immediate arithmetic operations
 		{
@@ -163,7 +170,7 @@ public class CPU {
 			Register destinationRegister = operandList.get(0).asRegisterOp().r;
 			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
 			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(2).asIntegerOp()));
-			//put in object here
+			return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, immValue);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.destSrcImmU)//immediate unsigned arithmetic ops (same as destSrcImm code wise)
 		{
@@ -171,25 +178,25 @@ public class CPU {
 			Register destinationRegister = operandList.get(0).asRegisterOp().r;
 			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
 			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(2).asIntegerOp()));
-			//put in object here
+			return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, immValue);
 		}
-		else if(instruction.getOperandFormat() == OperandFormat.destSrc)//single register ops like neg or abs
+		else if(instruction.getOperandFormat() == OperandFormat.destSrc)//single register ops like neg or abs (or move)
 		{
 			Optional<Word> dest = Optional.empty();
 			Register destinationRegister = operandList.get(0).asRegisterOp().r;
 			Optional<Word> srcRegister = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));
 			Optional<Word> fakeSecondRegister = Optional.empty(); //dummy word to pass into the alu (dealt with in the alu easily)
-			//put in object here
+			return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, fakeSecondRegister);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.destImm)//instructions such as li
 		{
 			Register destinationRegister = operandList.get(0).asRegisterOp().r;
 			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(1).asIntegerOp()));
-			//put in object here
+			return null;//FILL IN 
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break
 		{
-			//at this time I have absolutely no idea
+			return null;//FILL IN//at this time I have absolutely no idea ?
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.label)//branch, jal, j
 		{
@@ -204,41 +211,92 @@ public class CPU {
 					currentAddress = Optional.of(entry.getKey());//current address for jal
 				}
 			}
-			//put in object here
+			return null;//FILL IN//put in object here J
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.register)//for jr
 		{
 			Word registerContents = this.decodeRegister(operandList.get(0).asRegisterOp());//getting register contents
 			Optional<Address> registerAddress = Optional.of(new Address((int)loadAsUnsigned(registerContents.getWord())));//put into correct format
-			//put in object here
+			return null;//FILL IN//put in object here J
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.cmpCmpLabel)//for branch equal etc.
 		{
 			Optional<Word> cmp1 = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//first comparison value
 			Optional<Word> cmp2 = Optional.of(this.decodeRegister(operandList.get(1).asRegisterOp()));//second comparison value
 			Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(operandList.get(2).asAddressOp()));//where to branch to if comparison returns true
-			//put in object here
+			return new ITypeInstruction(instruction,cmp1,cmp2,branchAddr);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.cmpLabel)//for bltz etc
 		{
 			Optional<Word> cmp = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//value to compare
 			Optional<Word> fakeCmp = Optional.empty();//used to make ALU calculations easier
 			Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));//branch address
-			//put in object here
+			return new ITypeInstruction(instruction,cmp,fakeCmp,branchAddr);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.srcAddr)//for store instructions
 		{
-			//need to fill in
+			Optional<Word> src = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//word to store
+			Optional<Address> toStore = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));
+			return null;//FILL IN//put in object here ?
 		}
-		else if(instruction.getOperandFormat() == OperandFormat.destAddr)//for move and load
+		else if(instruction.getOperandFormat() == OperandFormat.destAddr)//for load stuff
 		{
-			//fill in: I thought move was dest_reg <- src_reg not a label?
+			Optional<Word> dest = Optional.empty();//where to store retrieved data
+			Register loadInto = operandList.get(0).asRegisterOp().r;//register to store
+			Optional<Address> toRetrieve = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));
+			return null;//FILL IN//fill in ?
 		}
 		else//invalid instruction format
 		{
 			throw new DecodeException("Invalid instruction format.", operandList.get(0));
 		}
 		
+	}
+	
+	/**this method will execute the instruction given to it
+	 * 
+	 * @param instruction instruction set up with all necessary data
+	 * @throws InstructionException if problem during execution
+	 * @throws ExecuteException if problem during execution
+	 */
+	private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException
+	{
+		switch(instruction.mode)//switch based on instruction format
+		{
+			case RTYPE:
+				Word result = this.ALU.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2());
+				this.registers[instruction.asRType().getDestReg().getID()] = result;//storing result
+				this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing PC
+				break;
+			case ITYPE:
+				Word branchTest = this.ALU.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
+				if(branchTest.getWord() == ALU.branchTrue)
+				{
+					this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
+					//do i still need to do +4?
+				}
+				else
+				{
+					this.programCounter = new Address(this.programCounter.getValue() + 4);//increment as normal
+				}
+				break;
+			default:
+				throw new ExecuteException("Error during Execution", instruction);
+		}
+	}
+	
+	/**this method will run a single cycle of the FDE cycle
+	 * @throws MemoryException if problem accessing memory
+	 * @throws DecodeExceptionif error during decode
+	 * @throws InstructionException if error with instruction
+	 * @throws ExecuteException if problem during execution
+	 * 
+	 */
+	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException
+	{
+		fetch();
+		InstructionFormat instruction = decode();
+		execute(instruction);
 	}
 	
 	/**this method will decode an integer operand into a 4 byte word

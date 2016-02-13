@@ -16,8 +16,8 @@ import simulizer.simulation.exceptions.InstructionException;
  */
 public class ALU {
 	
-	private static byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
-	private static byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
+	public static byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
+	public static byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
 	
 	/**empty constructor
 	 * 
@@ -194,6 +194,8 @@ public class ALU {
 				{
 					return new Word(branchFalse);
 				}
+			case move:
+				return new Word(firstValue);
 			default:
 				throw new InstructionException("Invalid/Unsupported Instruction.",instruction);
 		}
