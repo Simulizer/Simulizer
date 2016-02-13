@@ -20,7 +20,7 @@ public class MainMemory extends Observable {
 	public static boolean zeroInit = true;// to toggle between different
 											// initialisations
 
-	private Word[] RAM;
+	private Word[] ram;
 	@SuppressWarnings("unused")
 	private int codeStart;
 	private int codeEndDataStart;
@@ -41,7 +41,7 @@ public class MainMemory extends Observable {
 	 */
 	public MainMemory(int codeStart, int codeEndDataStart, int dataEndHeapStart) {
 		this.MEM_SIZE = 1048576;
-		this.RAM = new Word[this.MEM_SIZE];
+		this.ram = new Word[this.MEM_SIZE];
 
 		if (zeroInit) {// enforcing the toggle of initialisations
 			this.initialiseRAMZeroed();
@@ -58,8 +58,8 @@ public class MainMemory extends Observable {
 	 * this method will set the 'RAM' to all zeros i.e empty words
 	 */
 	private void initialiseRAMZeroed() {
-		for (int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word();
+		for (int i = 0; i < this.ram.length; i++) {
+			this.ram[i] = new Word();
 			// setting to zeroed word
 		}
 	}
@@ -71,8 +71,8 @@ public class MainMemory extends Observable {
 	 * 
 	 */
 	private void initialiseRAMDebug() {
-		for (int i = 0; i < this.RAM.length; i++) {
-			this.RAM[i] = new Word(new BigInteger("3435973836"));
+		for (int i = 0; i < this.ram.length; i++) {
+			this.ram[i] = new Word(new BigInteger("3435973836"));
 			// now obvious to find in memory
 		}
 	}
@@ -142,7 +142,7 @@ public class MainMemory extends Observable {
 	 * @return the word at said address
 	 */
 	public Word getWord(int index) {
-		return this.RAM[index];
+		return this.ram[index];
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class MainMemory extends Observable {
 	 *            the contents to store at said address
 	 */
 	public synchronized void setWord(int index, Word toSet) {
-		this.RAM[index] = toSet;
+		this.ram[index] = toSet;
 	}
 
 }

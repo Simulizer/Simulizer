@@ -12,8 +12,8 @@ import simulizer.simulation.data.representation.Word;
  */
 public class ControlUnit extends Observable {
 	private Word temp;// used for temporary data storage and transport
-	private ALU ALU;// the ALU component of the simulation
-	private LSUnit LSUnit;// the load store unit
+	private ALU alu;// the ALU component of the simulation
+	private LSUnit lsUnit;// the load store unit
 	private RegisterBlock registers;// the general purpose registers
 	private ProgramCounter programCounter;
 	private InstructionRegister instructionRegister;
@@ -22,9 +22,9 @@ public class ControlUnit extends Observable {
 	 * method initialises all components the control unit is linked to in the
 	 * cpu
 	 * 
-	 * @param ALU
+	 * @param alu
 	 *            the arithmetic and logic unit in the CPU
-	 * @param LSUnit
+	 * @param lsUnit
 	 *            the load store unit in the CPU
 	 * @param registers
 	 *            the block of general purpose registers
@@ -33,12 +33,12 @@ public class ControlUnit extends Observable {
 	 * @param instructionRegister
 	 *            the instructionRegister for the cpu
 	 */
-	public ControlUnit(ALU ALU, LSUnit LSUnit, RegisterBlock registers, ProgramCounter programCounter,
+	public ControlUnit(ALU alu, LSUnit lsUnit, RegisterBlock registers, ProgramCounter programCounter,
 			InstructionRegister instructionRegister) {
 		super();
 		this.temp = new Word();
-		this.ALU = ALU;
-		this.LSUnit = LSUnit;
+		this.alu = alu;
+		this.lsUnit = lsUnit;
 		this.registers = registers;
 		this.programCounter = programCounter;
 		this.instructionRegister = instructionRegister;
@@ -69,7 +69,7 @@ public class ControlUnit extends Observable {
 	 * 
 	 */
 	public void sendALU() {
-		this.ALU.setData(this.getData());
+		this.alu.setData(this.getData());
 		setChanged();
 		notifyObservers();
 	}
@@ -79,7 +79,7 @@ public class ControlUnit extends Observable {
 	 * 
 	 */
 	public void receiveALU() {
-		this.setData(this.ALU.getData());
+		this.setData(this.alu.getData());
 		setChanged();
 		notifyObservers();
 	}
@@ -89,7 +89,7 @@ public class ControlUnit extends Observable {
 	 * 
 	 */
 	public void sendLSUnit() {
-		this.LSUnit.setData(this.getData());
+		this.lsUnit.setData(this.getData());
 		setChanged();
 		notifyObservers();
 	}
@@ -99,7 +99,7 @@ public class ControlUnit extends Observable {
 	 * 
 	 */
 	public void receiveLSUnit() {
-		this.setData(this.LSUnit.getData());
+		this.setData(this.lsUnit.getData());
 		setChanged();
 		notifyObservers();
 	}
