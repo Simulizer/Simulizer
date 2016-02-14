@@ -2,8 +2,6 @@ package simulizer.assembler.extractor.problem;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.List;
-
 /**
  * An abstract class for describing objects which may receive and handle
  * problems as they are encountered.

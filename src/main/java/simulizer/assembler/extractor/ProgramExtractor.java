@@ -1,21 +1,25 @@
 package simulizer.assembler.extractor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemLogger;
-import simulizer.assembler.extractor.problem.ValidityListener;
 import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.Variable;
-import simulizer.assembler.representation.operand.*;
+import simulizer.assembler.representation.operand.Operand;
+import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.parser.SimpBaseListener;
 import simulizer.parser.SimpParser;
-
-import java.util.*;
 
 /**
  * extract the required information from a parse tree of a Simp program.

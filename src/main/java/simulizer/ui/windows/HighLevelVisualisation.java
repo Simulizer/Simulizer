@@ -29,11 +29,12 @@ public class HighLevelVisualisation extends InternalWindow {
 		return drawingPane;
 	}
 	
-	@Override
-	public void setTheme(String theme) {
-		super.setTheme(theme);
-		System.out.println("Adding stylesheet");
-		getStylesheets().add(theme + "/highlevel.css");
-	}
+//	TODO Convert this to the new way of setting themes
+//	@Override
+//	public void setTheme(String theme) {
+//		super.setTheme(theme);
+//		System.out.println("Adding stylesheet");
+//		getStylesheets().add(theme + "/highlevel.css");
+//	}
 
 }
