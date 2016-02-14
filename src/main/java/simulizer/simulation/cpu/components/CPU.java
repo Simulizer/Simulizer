@@ -50,6 +50,9 @@ public class CPU {
 	private Word[] registers;
 	private MainMemory memory;
 	private Program program;//all information on how to run the program
+	private Clock clock;//clock cycle for IE cycle
+	private boolean isRunning;//for program status
+	private Address lastAddress;//used to determine end of program
 	
 	/**the constructor will set all the components up
 	 * 
@@ -58,6 +61,24 @@ public class CPU {
 	public CPU(Program program)
 	{
 		this.loadProgram(program);//set up the CPU with the program
+		this.clock = new Clock();
+		this.isRunning = false;
+	}
+	
+	/**this method will set the clock controlling
+	 * the execution cycle to run
+	 */
+	public void startClock()
+	{
+		this.clock.setClockRunning(true);
+	}
+	
+	/**this method will set the clock controlling
+	 * the execution cycle to run
+	 */
+	public void pauseClock()
+	{
+		this.clock.setClockRunning(false);
 	}
 	
 	/**this method is used to set up the cpu whenever a new program is loaded into it
@@ -89,6 +110,7 @@ public class CPU {
 		this.registers[Register.gp.getID()] = new Word(new byte[]{0x10,0x00,(byte)0x80,0x00});//setting global pointer
 		
 		this.ALU = new ALU();//initialising ALU
+		this.getLastAddress();
 	}
 	
 	/**this method resets the registers in the memory
@@ -121,6 +143,24 @@ public class CPU {
 		}
 		
 		throw new ProgramException("No main label found.", this.program);
+	}
+	
+	/**method gets the last address for use of ending the FDE cycle
+	 * 
+	 */
+	private void getLastAddress()
+	{
+		Address maxAddress = new Address(0);//to store max (last)
+		
+		for(Map.Entry<Address, Statement> entry : this.program.textSegment.entrySet())
+		{
+			if(entry.getKey().getValue() >= maxAddress.getValue())//if greater than current last address
+			{
+				maxAddress = entry.getKey();
+			}
+		}
+		
+		this.lastAddress = maxAddress;
 	}
 	
 	/**carries out the fetch part of the FDE cycle (non pipelined)
@@ -281,14 +321,12 @@ public class CPU {
 			case RTYPE:
 				Word result = this.ALU.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2());
 				this.registers[instruction.asRType().getDestReg().getID()] = result;//storing result
-				this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing PC
 				break;
 			case ITYPE:
 				Word branchTest = this.ALU.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
 				if(equalByteArrays(branchTest.getWord(),ALU.branchTrue))
 				{
 					this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
-					//do i still need to do +4?
 				}
 				else
 				{
@@ -357,6 +395,32 @@ public class CPU {
 		fetch();
 		InstructionFormat instruction = decode();
 		execute(instruction);
+		if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached
+		{
+			this.isRunning = false;//stop running
+		}
+	}
+	
+	/**this method will run the program given to the CPU, it will operate under the clock cycle
+	 * 
+	 * @throws MemoryException if problem with memory
+	 * @throws DecodeException if problem during decode
+	 * @throws InstructionException if bad instruction
+	 * @throws ExecuteException if problem suring execution
+	 * @throws HeapException if problem accessing the heap
+	 */
+	public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
+	{
+		this.isRunning = true;
+		while(isRunning)//need something to stop this
+		{
+			this.runSingleCycle();//run one loop of Fetch,Decode,Execute
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				//we want the interruption so do nothing and keep looping
+			}
+		}
 	}
 	
 	/**useful auxillary methods to check if 2 byte arrays equal
@@ -463,6 +527,7 @@ public class CPU {
 			throw new DecodeException("Error decoding Register.", operand);
 		}
 	}
+	
 	
 	/**method takes a byte array and returns it's signed value as a long
 	 * 
