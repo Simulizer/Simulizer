@@ -24,6 +24,7 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.instructions.ITypeInstruction;
 import simulizer.simulation.instructions.InstructionFormat;
+import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
 
@@ -202,23 +203,23 @@ public class CPU {
 		else if(instruction.getOperandFormat() == OperandFormat.label)//branch, jal, j
 		{
 			Optional<Address> goToAddress = Optional.of(this.decodeAddressOperand(operandList.get(0).asAddressOp()));//where to jump
-			Optional<Address> currentAddress = Optional.empty();//storing current address if needed by jal
-			
+			Optional<Word> currentAddress = Optional.empty();//storing current address if needed by jal
 			Integer currentLine  = this.instructionRegister.lineNumber;//line number of current instruction
 			for(Map.Entry<Address,Integer> entry : this.program.lineNumbers.entrySet())//iterating to find current address
 			{
 				if(entry.getValue() == currentLine)//if address found
 				{
-					currentAddress = Optional.of(entry.getKey());//current address for jal
+					currentAddress = Optional.of(new Word(serialiseUnsigned((long)entry.getKey().getValue())));//current address for jal
 				}
 			}
-			return null;//FILL IN//put in object here J
+			return new JTypeInstruction(instruction,goToAddress,currentAddress);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.register)//for jr
 		{
 			Word registerContents = this.decodeRegister(operandList.get(0).asRegisterOp());//getting register contents
 			Optional<Address> registerAddress = Optional.of(new Address((int)loadAsUnsigned(registerContents.getWord())));//put into correct format
-			return null;//FILL IN//put in object here J
+			Optional<Word> fakeCurrentWord = Optional.empty();
+			return new JTypeInstruction(instruction,registerAddress,fakeCurrentWord);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.cmpCmpLabel)//for branch equal etc.
 		{
@@ -299,6 +300,14 @@ public class CPU {
 					throw new ExecuteException("Error with zero argument instruction", instruction);
 				}
 				break;
+			case JTYPE:
+				if(instruction.getInstruction().equals(Instruction.jal))//making sure i put current address in ra
+				{
+					this.registers[Register.ra.getID()] = instruction.asJType().getCurrentAddress().get();
+				}
+				
+				this.programCounter = instruction.asJType().getJumpAddress().get();//loading new address into the PC
+				break;
 			default:
 				throw new ExecuteException("Error during Execution", instruction);
 		}
@@ -306,7 +315,7 @@ public class CPU {
 	
 	/**this method will run a single cycle of the FDE cycle
 	 * @throws MemoryException if problem accessing memory
-	 * @throws DecodeExceptionif error during decode
+	 * @throws DecodeException if error during decode
 	 * @throws InstructionException if error with instruction
 	 * @throws ExecuteException if problem during execution
 	 * 

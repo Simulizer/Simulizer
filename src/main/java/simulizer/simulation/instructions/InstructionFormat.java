@@ -49,4 +49,21 @@ public class InstructionFormat {
 		return (ITypeInstruction)this;
 	}
 	
+	/**carry out cast if we know it's a special instruction
+	 * 
+	 * @return the instruction as a special instruction
+	 */
+	public SpecialInstruction asSpecial()
+	{
+		return (SpecialInstruction)this;
+	}
+	
+	/**carrys out cast if we know it's a j-type instruction
+	 * 
+	 * @return the instruction as a j-type
+	 */
+	public JTypeInstruction asJType()
+	{
+		return (JTypeInstruction)this;
+	}
 }

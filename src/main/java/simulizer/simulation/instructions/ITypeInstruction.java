@@ -27,6 +27,7 @@ public class ITypeInstruction extends InstructionFormat {
 	public ITypeInstruction(Instruction instruction, Optional<Word> cmp1, Optional<Word> cmp2, Optional<Address> branchAddr)
 	{
 		super(instruction);
+		this.mode = AddressMode.ITYPE;
 		this.cmp1 = cmp1;
 		this.cmp2 = cmp2;
 		this.branchAddr = branchAddr;
