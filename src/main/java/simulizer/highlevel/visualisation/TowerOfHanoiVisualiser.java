@@ -172,7 +172,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		path.getElements().add(new VLineTo(y2 + height / 2));
 
 		PathTransition pathTransition = new PathTransition();
-		pathTransition.setDuration(Duration.millis(2000));
+		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
 		pathTransition.setNode(disc);
 		pathTransition.setCycleCount(1);

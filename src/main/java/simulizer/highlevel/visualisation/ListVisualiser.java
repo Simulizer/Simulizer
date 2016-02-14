@@ -172,7 +172,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		swapIndices.clear();
 	}
 
-	private static ParallelTransition setupSwap(Rectangle rect1, int x1, int y1, Rectangle rect2, int x2, int y2) {
+	private ParallelTransition setupSwap(Rectangle rect1, int x1, int y1, Rectangle rect2, int x2, int y2) {
 		ParallelTransition svar = new ParallelTransition();
 		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2));
 		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1));
@@ -180,7 +180,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return svar;
 	}
 
-	private static PathTransition getTransition(Rectangle rect, int x1, int y1, int x2, int y2) {
+	private PathTransition getTransition(Rectangle rect, int x1, int y1, int x2, int y2) {
 		int width = rect.widthProperty().intValue();
 		int height = rect.heightProperty().intValue();
 
@@ -188,7 +188,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		path.getElements().add(new MoveTo(x1 + width / 2, y1 + height / 2));
 		path.getElements().add(new HLineTo(x2 + width / 2));
 		PathTransition pathTransition = new PathTransition();
-		pathTransition.setDuration(Duration.millis(500));
+		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
 		pathTransition.setNode(rect);
 		pathTransition.setCycleCount(1);
@@ -196,7 +196,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return pathTransition;
 	}
 
-	private static ParallelTransition setupSwap2(Text rect1, int x1, int y1, Text rect2, int x2, int y2) {
+	private ParallelTransition setupSwap2(Text rect1, int x1, int y1, Text rect2, int x2, int y2) {
 		ParallelTransition svar = new ParallelTransition();
 		svar.getChildren().addAll((Animation) getTransition2(rect1, x1, y1, x2, y2));
 		svar.getChildren().addAll((Animation) getTransition2(rect2, x2, y2, x1, y1));
@@ -204,7 +204,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return svar;
 	}
 
-	private static PathTransition getTransition2(Text rect, int x1, int y1, int x2, int y2) {
+	private PathTransition getTransition2(Text rect, int x1, int y1, int x2, int y2) {
 		int width = (int) rect.getBoundsInLocal().getWidth();
 		int height = (int) rect.getBoundsInLocal().getHeight();
 
@@ -212,7 +212,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		path.getElements().add(new MoveTo(x1 + width / 2, y1 + 1.5 * height));
 		path.getElements().add(new HLineTo(x2 + width / 2));
 		PathTransition pathTransition = new PathTransition();
-		pathTransition.setDuration(Duration.millis(500));
+		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
 		pathTransition.setNode(rect);
 		pathTransition.setCycleCount(1);

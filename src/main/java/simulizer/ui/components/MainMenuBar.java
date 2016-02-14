@@ -122,6 +122,7 @@ public class MainMenuBar extends MenuBar {
 				}
 				
 			});
+			tv.setRate(2000);
 		});
 
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);

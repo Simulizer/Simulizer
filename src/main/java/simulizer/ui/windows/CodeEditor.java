@@ -7,15 +7,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
-import simulizer.parser.SmallMipsLexer;
-import simulizer.parser.SmallMipsParser;
+
+import simulizer.parser.SimpLexer;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 
@@ -81,53 +81,10 @@ public class CodeEditor extends InternalWindow {
 
 		int lastTokenEnd = 0;
 		ANTLRInputStream input = new ANTLRInputStream(text);
-		SmallMipsLexer lexer = new SmallMipsLexer(input);
+		SimpLexer lexer = new SimpLexer(input);
 		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		tokens.fill();
-
-		// For each token (up to the EOF token)
-		Token t;
-		for (int i = 0; i < tokens.size() && (t = tokens.get(i)).getType() != Token.EOF; i++) {
-			// Find the styleClass
-			String styleClass;
-			switch (t.getType()) {
-				// Comment
-				case SmallMipsLexer.COMMENT:
-					styleClass = "comment";
-					break;
-
-				// Register
-				case SmallMipsLexer.REGISTER:
-					styleClass = "register";
-					break;
-
-				// Number
-				case SmallMipsLexer.NUMBER:
-					styleClass = "constant";
-					break;
-
-				// OP Code
-				case SmallMipsParser.OPCODE2:
-				case SmallMipsParser.OPCODE3:
-				case SmallMipsParser.OPCODE2V:
-				case SmallMipsParser.OPCODE3V:
-					styleClass = "keyword";
-					break;
-
-				// Plain text
-				default:
-					styleClass = "plain";
-					break;
-			}
-
-			// Set the styleClass to the text
-			int spacing = t.getStartIndex() - lastTokenEnd;
-			if (spacing > 0) spansBuilder.add(Collections.emptyList(), spacing);
-			int stylesize = (t.getStopIndex() - t.getStartIndex()) + 1;
-			spansBuilder.add(Collections.singleton(styleClass), stylesize);
-			lastTokenEnd = t.getStopIndex() + 1;
-		}
 
 		// Make sure there is at least one style added
 		spansBuilder.add(Collections.emptyList(), 0);
