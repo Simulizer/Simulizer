@@ -4,6 +4,10 @@ import java.io.*;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * execute spim with a given program and catch the output for analysis
+ * @author mbway
+ */
 public class SpimRunner {
 
     String tmpFilePath;

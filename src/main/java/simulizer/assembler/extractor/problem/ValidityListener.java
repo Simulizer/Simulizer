@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * Given a parse tree, make sure that it does not contain any error nodes
+ * @author mbway
  */
 public class ValidityListener extends SimpBaseListener {
     public boolean valid;

@@ -1,9 +1,12 @@
 package simulizer.assembler.extractor;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.ValidityListener;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.assembler.representation.Statement;
@@ -14,6 +17,11 @@ import simulizer.parser.SimpParser;
 
 import java.util.*;
 
+/**
+ * extract the required information from a parse tree of a Simp program.
+ * the data is gathered into publicly accessible fields.
+ * @author mbway
+ */
 public class ProgramExtractor extends SimpBaseListener {
 
     private enum State {
@@ -27,10 +35,15 @@ public class ProgramExtractor extends SimpBaseListener {
 
     public Map<String, Integer> textSegmentLabels;
     public List<Statement> textSegment;
+
     public Map<String, Integer> dataSegmentLabels;
     public List<Variable> dataSegment;
 
+    /**
+     * keep track of labels that are waiting to be assigned to a line
+     */
     public List<String> outstandingLabels;
+
 
     public ProgramExtractor(ProblemLogger log) {
         currentState = State.OUTSIDE;
@@ -45,16 +58,40 @@ public class ProgramExtractor extends SimpBaseListener {
     }
 
 
+
+    /**
+     * when accessing a sub-rule from a grammar rule, the result may be null
+     * or it may be non-null but with an exception showing the encountered error
+     * @param ctx the context to check
+     * @return whether there was a good parse for the grammar rule
+     */
+    private boolean goodMatch(ParserRuleContext ctx) {
+        return (ctx != null) && (ctx.exception == null);
+    }
+
+    /**
+     * whether a terminal node matches correctly
+     * @param n the terminal node to test validity
+     * @return whether the terminal node parsed correctly
+     */
+    private boolean goodMatch(TerminalNode n) {
+        return n != null && !(n instanceof ErrorNode);
+    }
+
+
+
     @Override
     public void visitErrorNode(ErrorNode node) {
-        int line = node.getSymbol().getLine();
-        Interval i = node.getSourceInterval();
-        int rangeStart = i.a;
-        int rangeEnd = i.b;
+        if(node.getSymbol().getCharPositionInLine() != -1) {
+            int line = node.getSymbol().getLine();
+            Interval i = node.getSourceInterval();
+            int rangeStart = i.a;
+            int rangeEnd = i.b;
 
-        System.out.println(rangeEnd - rangeStart);
-
-        log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd);
+            log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd);
+        } else {
+            log.logProblem("Error node with no position information: \"" + node.getText() + "\"", Problem.NO_LINE_NUM);
+        }
     }
 
     @Override
@@ -66,31 +103,61 @@ public class ProgramExtractor extends SimpBaseListener {
         currentState = State.TEXT_SEGMENT;
     }
 
-    @Override
-    public void enterTextDirective(SimpParser.TextDirectiveContext ctx) {
-        // ignored other than to log errors
 
-        OperandExtractor ext = new OperandExtractor(log);
-        List<Operand> operands = ext.extractDirectiveOperands(ctx.directiveOperandList());
+    /**
+     * check the operands of a .text or .data segment. They are allowed either
+     * no operands, or a single address (which must be a positive integer)
+     * @param ctx the operand list to check
+     * @return whether the operand list meets the criteria
+     */
+    private boolean segmentDirectiveOperandsGood(SimpParser.DirectiveOperandListContext ctx) {
+        if(ctx == null) {
+            // no arguments is fine
+            return true;
+        } else {
+            OperandExtractor ext = new OperandExtractor(log);
+            List<Operand> operands = ext.extractDirectiveOperands(ctx);
 
-        if(operands.size() < 2 &&
-            operands.stream().allMatch(op ->
-                op.getType() == Operand.Type.Address && op.asAddressOp().constantOnly())) {
-            log.logProblem("invalid operand(s) to .text directive. format: .text ADDRESS?", ctx);
+            if(operands.size() != 1) {
+                return false;
+            } else {
+                Operand op = operands.get(0);
+                // should be an address, cannot be a label so must be an integer
+                // integers aren't matched by the address rule, so check for
+                // positive integer
+                if(op.getType() != Operand.Type.Integer || op.asIntegerOp().value <= 0) {
+                    return false;
+                }
+            }
         }
-
+        return true;
     }
+
     @Override
     public void enterDataDirective(SimpParser.DataDirectiveContext ctx) {
         // ignored other than to log errors
 
-        OperandExtractor ext = new OperandExtractor(log);
-        List<Operand> operands = ext.extractDirectiveOperands(ctx.directiveOperandList());
+        if(!goodMatch(ctx)) {
+            log.logParseError("data directive", ctx);
+            return;
+        }
 
-        if(operands.size() < 2 &&
-            operands.stream().allMatch(op ->
-                op.getType() == Operand.Type.Address && op.asAddressOp().constantOnly())) {
+        if(!segmentDirectiveOperandsGood(ctx.directiveOperandList())) {
             log.logProblem("invalid operand(s) to .data directive. format: .data ADDRESS?", ctx);
+        }
+    }
+
+    @Override
+    public void enterTextDirective(SimpParser.TextDirectiveContext ctx) {
+        // ignored other than to log errors
+
+        if(!goodMatch(ctx)) {
+            log.logParseError("text directive", ctx);
+            return;
+        }
+
+        if(!segmentDirectiveOperandsGood(ctx.directiveOperandList())) {
+            log.logProblem("invalid operand(s) to .text directive. format: .text ADDRESS?", ctx);
         }
     }
 
@@ -108,10 +175,20 @@ public class ProgramExtractor extends SimpBaseListener {
 
     @Override
     public void enterLabel(SimpParser.LabelContext ctx) {
+
+        if(!goodMatch(ctx)) {
+            log.logParseError("label", ctx);
+            return;
+        }
+        if(!goodMatch(ctx.labelID())) {
+            log.logParseError("labelID", ctx.labelID());
+            return;
+        }
+
         String labelName = ctx.labelID().getText();
 
         if(textSegmentLabels.containsKey(labelName) || dataSegmentLabels.containsKey(labelName)) {
-            log.logProblem("This label name is taken", ctx);
+            log.logProblem("the label name: \"" + labelName + "\" is taken", ctx);
         } else if(currentState != State.TEXT_SEGMENT && labelName.equals("main")) {
             log.logProblem("The 'main' label must be inside the .text segment", ctx);
         }
@@ -273,6 +350,7 @@ public class ProgramExtractor extends SimpBaseListener {
         for(String labelName : outstandingLabels) {
             textSegmentLabels.put(labelName, index);
         }
+        outstandingLabels.clear();
     }
 
     public void pushVariable(Variable v) {
@@ -281,5 +359,6 @@ public class ProgramExtractor extends SimpBaseListener {
         for(String labelName : outstandingLabels) {
             dataSegmentLabels.put(labelName, index);
         }
+        outstandingLabels.clear();
     }
 }

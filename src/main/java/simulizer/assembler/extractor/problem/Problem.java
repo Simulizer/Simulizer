@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.misc.Interval;
 /**
  * Holds information about problems encountered while parsing source code
  * Including data relevant for locating the errors in the code editor
+ * @author mbway
  */
 public class Problem {
 

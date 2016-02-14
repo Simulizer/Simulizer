@@ -88,8 +88,8 @@ directive
     ;
 
 // optional commas make the language context-sensitive
-// consider: instruction mylabel + 10
-// `address(mylabel+10)`and `address(mylabel) integer(+10)`
+// consider the string: ".directive mylabel + 10"
+// [mylabel+10] and [mylabel] [+10] (where [] denotes a matched address)
 // are both valid interpretations
 directiveOperandList
     : directiveOperand (','? directiveOperand)*
@@ -108,8 +108,8 @@ statement
 
 
 // optional commas make the language context-sensitive
-// consider: instruction mylabel + 10
-// `address(mylabel+10)`and `address(mylabel) integer(+10)`
+// consider the string: "instruction mylabel + 10"
+// [mylabel+10] and [mylabel] [+10] (where [] denotes a matched address)
 // are both valid interpretations
 statementOperandList
     : statementOperand (','? statementOperand)*

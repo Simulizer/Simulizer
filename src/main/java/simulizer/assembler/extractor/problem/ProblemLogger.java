@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * An abstract class for describing objects which may receive and handle
  * problems as they are encountered.
+ * @author mbway
  */
 public abstract class ProblemLogger {
 

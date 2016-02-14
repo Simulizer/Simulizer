@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
+/**
+ * A parser to use with the testing suite, intercepts ANTLR message for
+ * postmortem examination
+ * @author mbway
+ */
 public class Parser {
     public class ANTLRErrorCounter implements ANTLRErrorListener {
 
@@ -53,6 +58,22 @@ public class Parser {
     public Parser() {
         err = new ANTLRErrorCounter();
         used = false;
+    }
+
+    public SimpParser parseWithTrace(String input) {
+        assert !used; // ensure never used twice
+
+        SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(err);
+
+        p = new SimpParser(new CommonTokenStream(lexer));
+        p.setTrace(true);
+        p.removeErrorListeners();
+        p.addErrorListener(err);
+
+        used = true;
+        return p;
     }
 
     public SimpParser parse(String input) {
