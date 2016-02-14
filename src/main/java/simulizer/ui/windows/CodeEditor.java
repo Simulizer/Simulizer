@@ -130,7 +130,7 @@ public class CodeEditor extends InternalWindow {
 	@Override
 	public void setTheme(Theme theme) {
 		super.setTheme(theme);
-		getStylesheets().clear();
+		getStylesheets().clear(); // Should this be here?
 		getStylesheets().add(theme.getStyleSheet("code.css"));
 	}
 
