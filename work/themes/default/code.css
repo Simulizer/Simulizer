@@ -1,20 +1,36 @@
 
 .plain {
-
-}
-
-.instruction {
-    -fx-fill: blue;
-    -fx-font-weight: bold;
+	-fx-fill: black;
 }
 
 .directiveid {
-	-fx-fill: green;
+	-fx-font-weight: bold;
+}
+
+.label {
+	-fx-fill: orange;
+	-fx-font-weight: bold;
+}
+
+.recognised-instruction {
+	-fx-fill: blue;
     -fx-font-weight: bold;
 }
 
-.error {
-	-fx-fill: red;
+.unrecognised-instruction {
+	-fx-fill: blue;
+	-fx-background-color: red;
+}
+
+.data-directive {
+	-fx-font-weight: bold;
+}
+
+.text-directive {
+	-fx-font-weight: bold;
+}
+
+.base-bracket {
 	-fx-font-weight: bold;
 }
 
@@ -25,7 +41,6 @@
 .constant {
     -fx-fill: purple;
 }
-
 
 .annotation {
     -fx-fill: yellow;
