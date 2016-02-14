@@ -23,6 +23,7 @@ import java.util.Optional;
  * A class to extract operands from assembler directives and program statements
  * from Simp source code. The extractor then packages the information into
  * Java objects for use in the simulation.
+ * @author mbway
  */
 public class OperandExtractor {
 

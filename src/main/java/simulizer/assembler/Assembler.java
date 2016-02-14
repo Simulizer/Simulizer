@@ -53,12 +53,12 @@ public class Assembler {
 
             if(reverseTextLabels.containsKey(i)) {
                 for(String labelName : reverseTextLabels.get(i)) {
-                    p.labels.put(new Label(labelName, s.lineNumber, Label.Type.INSTRUCTION), address);
+                    p.labels.put(new Label(labelName, s.getLineNumber(), Label.Type.INSTRUCTION), address);
                 }
             }
 
             p.textSegment.put(address, s);
-            p.lineNumbers.put(address, s.lineNumber);
+            p.lineNumbers.put(address, s.getLineNumber());
 
             address = new Address(address.getValue() + 4);
         }

@@ -4,6 +4,16 @@ import simulizer.assembler.representation.Register;
 
 import java.util.Optional;
 
+/**
+ * store an address operand to either an assembler directive or instruction can
+ * take one of the following forms:
+ *       +/- constant           <-- would be interpreted as an integer instead
+ * label +/- constant
+ *       +/- constant (base register)
+ * label +/- constant (base register)
+ *
+ * @author mbway
+ */
 public class AddressOperand extends Operand {
 
     // either as an base or as the only part
@@ -45,8 +55,5 @@ public class AddressOperand extends Operand {
 
     public boolean labelOnly() {
         return labelName.isPresent() && !constant.isPresent() && !register.isPresent();
-    }
-    public boolean constantOnly() {
-        return !labelName.isPresent() && constant.isPresent() && !register.isPresent();
     }
 }

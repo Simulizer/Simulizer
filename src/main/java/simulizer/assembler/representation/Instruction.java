@@ -4,6 +4,10 @@ import simulizer.assembler.representation.operand.OperandFormat;
 
 import java.util.NoSuchElementException;
 
+/**
+ * supported instructions
+ * @author mbway
+ */
 public enum Instruction {
 
     // information extracted from SPIM's documentation:
@@ -111,7 +115,7 @@ public enum Instruction {
     public static Instruction fromString(String name) {
         try {
             if(name.equals("break")) {
-                return BREAK; // needs to be specially handled because it is a Java keyword
+                return BREAK; // needs to be handled specially because 'break' is a Java keyword
             } else {
                 return valueOf(name);
             }

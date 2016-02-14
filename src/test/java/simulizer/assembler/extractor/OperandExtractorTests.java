@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Optional;
 
 
+/**
+ * Test the OperandExtractor class
+ * @author mbway
+ */
 @Category({UnitTests.class})
 public class OperandExtractorTests {
 
@@ -149,6 +153,9 @@ public class OperandExtractorTests {
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
 
+        assertEquals(0, ex.extractInteger(parse("").integer()));
+        expectBadParse("invalid parse");
+
         assertEquals(0, ex.extractInteger((SimpParser.IntegerContext)
             giveParseException(parse("123").integer())));
         // appears to be a valid parse because the exception was added after
@@ -226,6 +233,9 @@ public class OperandExtractorTests {
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
 
+        assertEquals(0, ex.extractUnsignedInteger(parse("").unsignedInteger()));
+        expectBadParse("invalid parse");
+
         assertEquals(0, ex.extractUnsignedInteger((SimpParser.UnsignedIntegerContext)
             giveParseException(parse("123").unsignedInteger())));
         // appears to be a valid parse because the exception was added after
@@ -263,7 +273,6 @@ public class OperandExtractorTests {
             assertFalse(addr.constant.isPresent());
             assertFalse(addr.register.isPresent());
             assertTrue(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -274,7 +283,6 @@ public class OperandExtractorTests {
             assertTrue(addr.constant.isPresent());
             assertFalse(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -285,7 +293,6 @@ public class OperandExtractorTests {
             assertFalse(addr.constant.isPresent());
             assertTrue(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -296,7 +303,6 @@ public class OperandExtractorTests {
             assertTrue(addr.constant.isPresent());
             assertTrue(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -307,7 +313,6 @@ public class OperandExtractorTests {
             assertTrue(addr.constant.isPresent());
             assertTrue(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
         {
@@ -317,7 +322,6 @@ public class OperandExtractorTests {
             assertTrue(addr.constant.isPresent());
             assertTrue(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -328,7 +332,6 @@ public class OperandExtractorTests {
             assertTrue(addr.constant.isPresent());
             assertTrue(addr.register.isPresent());
             assertFalse(addr.labelOnly());
-            assertFalse(addr.constantOnly());
             expectGood();
         }
 
@@ -338,6 +341,9 @@ public class OperandExtractorTests {
         assertEquals(null, ex.extractAddress(null));
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
+
+        assertEquals(null, ex.extractAddress(parse("").address()));
+        expectBadParse("invalid parse");
 
         assertEquals(null, ex.extractAddress((SimpParser.AddressContext)
             giveParseException(parse("mylabel").address())));
@@ -460,6 +466,9 @@ public class OperandExtractorTests {
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
 
+        assertEquals(null, ex.extractString(parse("").string()));
+        expectBadParse("invalid parse");
+
         assertEquals(null, ex.extractString((SimpParser.StringContext)
             giveParseException(parse("\"abc\"").string())));
         // appears to be a valid parse because the exception was added after
@@ -538,6 +547,12 @@ public class OperandExtractorTests {
         assertEquals(null, ex.extractRegister(null));
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
+
+        assertEquals(null, ex.extractRegister(parse("").register()));
+        expectBadParse("invalid parse");
+
+        assertEquals(null, ex.extractRegister(parse("$").register()));
+        expectBadParse("invalid parse");
 
         assertEquals(null, ex.extractRegister((SimpParser.RegisterContext)
             giveParseException(parse("$s0").register())));
@@ -684,6 +699,9 @@ public class OperandExtractorTests {
         assertTrue(ex.extractDirectiveOperands(null).isEmpty());
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
+
+        assertTrue(ex.extractDirectiveOperands(parse("").directiveOperandList()).isEmpty());
+        expectBadParse("invalid parse");
 
         assertTrue(ex.extractDirectiveOperands((SimpParser.DirectiveOperandListContext)
             giveParseException(parse("123").directiveOperandList()))
@@ -866,6 +884,9 @@ public class OperandExtractorTests {
         assertTrue(ex.extractStatementOperands(null).isEmpty());
         // appears to be a valid parse because the parser was not involved
         expectValidParseButProblem("invalid parse");
+
+        assertTrue(ex.extractStatementOperands(parse("").statementOperandList()).isEmpty());
+        expectBadParse("invalid parse");
 
         assertTrue(ex.extractStatementOperands((SimpParser.StatementOperandListContext)
             giveParseException(parse("123").statementOperandList()))

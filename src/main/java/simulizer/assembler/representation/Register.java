@@ -3,6 +3,10 @@ package simulizer.assembler.representation;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+/**
+ * general purpose registers of a MIPS32 machine
+ * @author mbway
+ */
 public enum Register {
 
     // information extracted from SPIM's documentation:
