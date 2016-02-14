@@ -39,6 +39,16 @@ public class ALU extends ComponentStackPane implements Observer {
 
     }
 
+    public double getShapeHeight(){
+        double rightHeight = height * 0.4;
+        double rightSmallHeight = (height - rightHeight) / 2;
+
+        double gapWidth = height * 0.4;
+        double leftHeight = (height - gapWidth) / 2;
+
+        return (height + (rightHeight + rightSmallHeight)) / 2;
+    }
+
     public void update(Observable obs, Object obj){
 
     }

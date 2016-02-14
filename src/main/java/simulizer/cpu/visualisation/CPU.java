@@ -1,6 +1,7 @@
 package simulizer.cpu.visualisation;
 
 import javafx.scene.Group;
+import javafx.scene.shape.Line;
 import simulizer.cpu.visualisation.components.*;
 import simulizer.ui.windows.CPUVisualisation;
 
@@ -22,16 +23,23 @@ public class CPU {
 
         Group components = new Group();
 
-        ProgramCounter programCounter = new ProgramCounter(0, 0, 40, 100, "PC");
-        InstructionMemory instructionMemory = new InstructionMemory(70, 0, 100, 100, "Instruction Memory");
-        RegisterBlock register = new RegisterBlock(200, 0, 100, 100, "Registers");
-        ALU alu = new ALU(330, 0, 100, 100, "ALU");
-        MainMemory mainMemory = new MainMemory(460, 0, 100, 100, "Data Memory");
+        ProgramCounter programCounter = new ProgramCounter(20, 60, 40, 100, "PC");
+        InstructionMemory instructionMemory = new InstructionMemory(90, 60, 100, 100, "Instruction Memory");
+        RegisterBlock register = new RegisterBlock(220, 60, 100, 100, "Registers");
+        ALU alu = new ALU(350, 60, 100, 100, "ALU");
+        MainMemory mainMemory = new MainMemory(480, 60, 100, 100, "Data Memory");
+
+        Group line = programCounter.connect(controlUnit, true, true);
+        Group line2 = instructionMemory.connect(controlUnit, true, true, -20);
+        Group line3 = instructionMemory.connect(controlUnit, true, false, 20);
+        Group line4 = register.connect(controlUnit, true, true);
+        Group line5 = alu.connect(controlUnit, true, true);
+        Group line6 = mainMemory.connect(controlUnit, true, true);
+
+        Group lines = new Group();
+        lines.getChildren().addAll(line, line2, line3, line4, line5, line6);
 
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter);
-        components.setLayoutX(20);
-        components.setLayoutY(60);
-
-        vis.addAll(controlUnit, components);
+        vis.addAll(controlUnit, components, lines);
     }
 }
