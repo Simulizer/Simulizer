@@ -19,12 +19,14 @@ import simulizer.assembler.representation.operand.RegisterOperand;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.exceptions.ExecuteException;
+import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.InstructionException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.instructions.ITypeInstruction;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
+import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
 
@@ -192,11 +194,13 @@ public class CPU {
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.destImm)//instructions such as li
 		{
-			Register destinationRegister = operandList.get(0).asRegisterOp().r;
+			Optional<Word> destRegister = Optional.empty();
+			Optional<Register> destinationRegister = Optional.of(operandList.get(0).asRegisterOp().r);
+			Optional<Address> memAddress = Optional.empty();
 			Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(operandList.get(1).asIntegerOp()));
-			return null;//FILL IN 
+			return new LSInstruction(instruction,destRegister,destinationRegister,memAddress,immValue);
 		}
-		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break (break has an op 
+		else if(instruction.getOperandFormat() == OperandFormat.noArguments)//syscall, nop, break 
 		{
 			return new SpecialInstruction(instruction);
 		}
@@ -238,15 +242,18 @@ public class CPU {
 		else if(instruction.getOperandFormat() == OperandFormat.srcAddr)//for store instructions
 		{
 			Optional<Word> src = Optional.of(this.decodeRegister(operandList.get(0).asRegisterOp()));//word to store
+			Optional<Register> destReg = Optional.empty();
 			Optional<Address> toStore = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));
-			return null;//FILL IN//put in object here ?
+			Optional<Word> immVal = Optional.empty();
+			return new LSInstruction(instruction,src,destReg,toStore,immVal);
 		}
 		else if(instruction.getOperandFormat() == OperandFormat.destAddr)//for load stuff
 		{
 			Optional<Word> dest = Optional.empty();//where to store retrieved data
-			Register loadInto = operandList.get(0).asRegisterOp().r;//register to store
+			Optional<Register> loadInto = Optional.of(operandList.get(0).asRegisterOp().r);//register to store
 			Optional<Address> toRetrieve = Optional.of(this.decodeAddressOperand(operandList.get(1).asAddressOp()));
-			return null;//FILL IN//fill in ?
+			Optional<Word> immValue = Optional.empty();
+			return new LSInstruction(instruction,dest,loadInto,toRetrieve,immValue);
 		}
 		else//invalid instruction format or BREAK
 		{
@@ -264,8 +271,10 @@ public class CPU {
 	 * @param instruction instruction set up with all necessary data
 	 * @throws InstructionException if problem during execution
 	 * @throws ExecuteException if problem during execution
+	 * @throws HeapException if problem with heap
+	 * @throws MemoryException if problem accessing memory
 	 */
-	private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException
+	private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException
 	{
 		switch(instruction.mode)//switch based on instruction format
 		{
@@ -308,6 +317,28 @@ public class CPU {
 				
 				this.programCounter = instruction.asJType().getJumpAddress().get();//loading new address into the PC
 				break;
+			case LSTYPE:
+				if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destImm))//li
+				{
+					this.registers[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+				}
+				else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr))//load
+				{
+					int retrieveAddress = instruction.asLSType().getMemAddress().get().getValue();
+					int length = 4;//this may be wrong, hence outside, may depend on instruction
+					byte[] read = this.memory.readFromMem(retrieveAddress, length);
+					this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
+				}
+				else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.srcAddr))//store
+				{
+					byte[] toStore = instruction.asLSType().getRegister().get().getWord();//all 4 bytes
+					int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
+					this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+				}
+				else
+				{
+					throw new ExecuteException("Error executing load/store instruction.", instruction);
+				}
 			default:
 				throw new ExecuteException("Error during Execution", instruction);
 		}
@@ -318,9 +349,10 @@ public class CPU {
 	 * @throws DecodeException if error during decode
 	 * @throws InstructionException if error with instruction
 	 * @throws ExecuteException if problem during execution
+	 * @throws HeapException if the heap goes wrong at some point
 	 * 
 	 */
-	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException
+	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
 	{
 		fetch();
 		InstructionFormat instruction = decode();

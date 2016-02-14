@@ -66,4 +66,13 @@ public class InstructionFormat {
 	{
 		return (JTypeInstruction)this;
 	}
+	
+	/**carrys out cast if we know it's an ls instruction
+	 * 
+	 * @return the instruction as ls type
+	 */
+	public LSInstruction asLSType()
+	{
+		return (LSInstruction)this;
+	}
 }

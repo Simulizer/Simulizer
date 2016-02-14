@@ -10,6 +10,6 @@ public enum AddressMode {
 	ITYPE,//2 registers and offset 
 	JTYPE,//1 address
 	SPECIAL,//No Operands
-	OTHER;
+	LSTYPE;//a bit hacky but useful none the less
 	
 }
