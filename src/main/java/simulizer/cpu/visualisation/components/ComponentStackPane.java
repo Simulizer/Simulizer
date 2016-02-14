@@ -1,11 +1,16 @@
 package simulizer.cpu.visualisation.components;
 
 import javafx.animation.FillTransition;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.value.ObservableNumberValue;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape;
@@ -52,41 +57,101 @@ public class ComponentStackPane extends StackPane {
         return width;
     }
 
-    public Group connect(ComponentStackPane shape, boolean top, boolean arrowStart){
-        return connect(shape, top, arrowStart, 0);
+    public Wire horizontalLineTo(ComponentStackPane shape, boolean left, boolean arrowStart, int offset){
+        Polyline line = new Polyline();
+        Polyline arrowHead = new Polyline();
+
+        DoubleBinding xStart = this.layoutXProperty().add(getShapeWidth());
+        DoubleBinding yStart = this.layoutYProperty().add(height / 2).add(offset);
+        DoubleBinding xEnd = shape.layoutXProperty().add(0);
+        DoubleBinding yEnd = this.layoutYProperty().add(height / 2).add(offset);
+
+        if(!left){
+            // Goes from right to left
+            xStart = this.layoutXProperty().add(0);
+            xEnd = shape.layoutXProperty().add(shape.getShapeWidth());
+
+            if(arrowStart) {
+                arrowHead.getPoints().addAll(new Double[]{
+                        xStart.getValue(), yStart.getValue(),
+                        xStart.add(5).getValue(), yStart.add(-5).getValue(),
+                        xStart.add(5).getValue(), yStart.add(5).getValue(),
+                        xStart.getValue(), yStart.getValue()
+                });
+            } else {
+                arrowHead.getPoints().addAll(new Double[]{
+                        xEnd.getValue(), yEnd.getValue(),
+                        xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
+                        xEnd.add(10).getValue(), yEnd.add(10).getValue(),
+                        xEnd.getValue(), yEnd.getValue()
+                });
+            }
+        } else {
+
+            if(arrowStart){
+                arrowHead.getPoints().addAll(new Double[]{
+                        xStart.getValue(), yStart.getValue(),
+                        xStart.add(10).getValue(), yStart.add(-10).getValue(),
+                        xStart.add(10).getValue(), yStart.add(10).getValue(),
+                        xStart.getValue(), yStart.getValue()
+                });
+            } else {
+                arrowHead.getPoints().addAll(new Double[]{
+                        xEnd.getValue(), yEnd.getValue(),
+                        xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
+                        xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
+                        xEnd.getValue(), yEnd.getValue()
+                });
+            }
+
+        }
+
+        arrowHead.getStyleClass().add("cpu-arrowhead");
+        line.getStyleClass().add("cpu-line");
+
+        line.getPoints().addAll(new Double[]{
+                xStart.getValue(), yStart.getValue(),
+                xEnd.getValue(), yEnd.getValue()
+        });
+
+        return new Wire(line, arrowHead);
     }
 
-    public Group connect(ComponentStackPane shape, boolean top, boolean arrowStart, int offset){
-        Group lineAndArrow = new Group();
-        Line line = new Line();
-        line.startXProperty().bind(this.layoutXProperty().add(width / 2).add(offset));
-
+    public Wire vericalLineTo(ComponentStackPane shape, boolean top, boolean arrowStart, int offset){
+        Polyline line = new Polyline();
         Polyline arrowHead = new Polyline();
-        double originX = this.getLayoutX() + (width / 2) + offset;
-        double originY;
-        double destY;
-        if(top){
-            originY = this.getLayoutY() + getShapeHeight();
-            destY = shape.getLayoutY();
-        } else {
-            originY = this.getLayoutY() + getShapeHeight();
-            destY = shape.getLayoutY() + shape.getShapeHeight();
+
+        DoubleBinding xStart = this.layoutXProperty().add(getShapeWidth() / 2).add(offset);
+        DoubleBinding yStart = this.layoutYProperty().add(getShapeHeight());
+        DoubleBinding xEnd = this.layoutXProperty().add(getShapeWidth() / 2).add(offset);
+        DoubleBinding yEnd = shape.layoutYProperty().add(0);
+
+
+        if(!top){
+            //Bottom to top
+            yStart = this.layoutXProperty().add(0);
+            yEnd = shape.layoutYProperty().add(shape.getShapeHeight());
         }
+
+        line.getPoints().addAll(new Double[]{
+                xStart.getValue(), yStart.getValue(),
+                xEnd.getValue(), yEnd.getValue()
+        });
 
         if(arrowStart){
             if(top){
                 arrowHead.getPoints().addAll(new Double[]{
-                        originX, originY,
-                        originX + 10, originY + 10,
-                        originX - 10, originY + 10,
-                        originX, originY
+                        xStart.getValue(), yStart.getValue(),
+                        xStart.add(10).getValue(), yStart.add(10).getValue(),
+                        xStart.add(-10).getValue(), yStart.add(10).getValue(),
+                        xStart.getValue(), yStart.getValue()
                 });
             } else {
                 arrowHead.getPoints().addAll(new Double[]{
-                        originX, originY,
-                        originX - 10, originY - 10,
-                        originX + 10, originY - 10,
-                        originX, originY
+                        xStart.getValue(), yStart.getValue(),
+                        xStart.add(-10).getValue(), yStart.add(-10).getValue(),
+                        xStart.add(10).getValue(), yStart.add(-10).getValue(),
+                        xStart.getValue(), yStart.getValue()
                 });
             }
 
@@ -94,38 +159,25 @@ public class ComponentStackPane extends StackPane {
 
             if(top){
                 arrowHead.getPoints().addAll(new Double[]{
-                        originX, destY,
-                        originX - 10, destY - 10,
-                        originX + 10, destY - 10,
-                        originX, destY
+                        xEnd.getValue(), yEnd.getValue(),
+                        xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
+                        xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
+                        xEnd.getValue(), yEnd.getValue()
                 });
             } else {
                 arrowHead.getPoints().addAll(new Double[]{
-                        originX, destY,
-                        originX + 10, destY + 10,
-                        originX - 10, destY + 10,
-                        originX, destY
+                        xEnd.getValue(), yEnd.getValue(),
+                        xEnd.add(10).getValue(), yEnd.add(10).getValue(),
+                        xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
+                        xEnd.getValue(), yEnd.getValue()
                 });
             }
 
         }
 
-
-
-        line.endXProperty().bind(this.layoutXProperty().add(width / 2).add(offset));
-
-
-        if(top){
-            line.startYProperty().bind(this.layoutYProperty().add(getShapeHeight()));
-            line.endYProperty().bind(shape.layoutYProperty());
-        } else {
-            line.startYProperty().bind(this.layoutYProperty());
-            line.endYProperty().bind(shape.layoutYProperty().add(shape.getShapeHeight()));
-        }
-
-        lineAndArrow.getChildren().addAll(line, arrowHead);
-        arrowHead.setFill(javafx.scene.paint.Paint.valueOf("#000"));
-        return lineAndArrow;
+        arrowHead.getStyleClass().add("cpu-arrowhead");
+        line.getStyleClass().add("cpu-line");
+        return new Wire(line, arrowHead);
     }
 
     public void highlight(int n){
