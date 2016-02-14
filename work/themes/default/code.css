@@ -50,3 +50,8 @@
     -fx-fill: grey;
 }
 
+.error {
+	-fx-fill: red;
+	-fx-font-weight: bold;
+}
+

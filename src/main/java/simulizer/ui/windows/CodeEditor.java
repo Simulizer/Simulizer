@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +58,7 @@ public class CodeEditor extends InternalWindow {
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
-	private List<Problem> problems;
+	private List<Problem> problems = new ArrayList<>(Arrays.asList(new Problem("Dummy message", 1, 0, 5)));
 
 	private final String TITLE = WindowEnum.toEnum(this).toString();
 
@@ -112,6 +114,7 @@ public class CodeEditor extends InternalWindow {
 	}
 
 	/**
+	 * This will not currently work with Problem objects that do not specify rangeStart and rangeEnd
 	 * @param chIdx
 	 *            the index of the character in the code editor
 	 * @return the error message associated with the phrase containing the
@@ -215,7 +218,7 @@ public class CodeEditor extends InternalWindow {
 		SyntaxHighlighter extractor = new SyntaxHighlighter(normalSpansBuilder);
 		ParseTreeWalker.DEFAULT.walk(extractor, tree);
 
-//		// Make sure there is at least one style added
+		// Make sure there is at least one style added
 		normalSpansBuilder.add(Collections.emptyList(), 0);
 
 		// Go through the program again and find the error spots
@@ -228,7 +231,9 @@ public class CodeEditor extends InternalWindow {
 		errorSpansBuilder.add(Collections.emptyList(), 0);
 
 		// Then add error wrappers around the problems
-		this.problems = log.getProblems();
+		this.problems.addAll(log.getProblems()); // debug
+		// this.problems = log.getProblems();    // should be this
+
 		int lastTokenEnd = 0;
 		for (Problem p : this.problems) {
 			System.out.println(p);
@@ -242,7 +247,7 @@ public class CodeEditor extends InternalWindow {
 
 			int styleSize = p.rangeEnd - p.rangeStart + 1;
 			errorSpansBuilder.add(Collections.singleton("error"), styleSize);
-
+			
 			lastTokenEnd = p.rangeEnd + 1;
 		}
 
