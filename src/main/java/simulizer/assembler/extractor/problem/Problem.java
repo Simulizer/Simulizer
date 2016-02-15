@@ -3,27 +3,47 @@ package simulizer.assembler.extractor.problem;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
+/**
+ * Holds information about problems encountered while parsing source code
+ * Including data relevant for locating the errors in the code editor
+ * @author mbway
+ */
 public class Problem {
+
+    /**
+     * A constant denoting a problem with no associated line number
+     */
+    public static final int NO_LINE_NUM = -1;
+
+
+    /**
+     * A human readable description of the problem
+     */
     public String message;
 
-    // if the problem is localised to a line in the source
-    // then this is populated, otherwise -1
+    /**
+     * if the problem is localised to a line in the source then this is
+     * populated, otherwise -1
+     */
     public int lineNum;
-    public static int NO_LINE_NUM = -1;
 
-    // if the problem is localised to a range of characters,
-    // these attributes are populated. If not they are both -1.
-    // The index is absolute to the whole program string.
+
+    /**
+     * if the problem is localised to a range of characters, these attributes
+     * are populated. If not they are both -1.
+     * The index is absolute to the whole program string.
+     * The interval is inclusive at both ends.
+     */
     public int rangeStart;
     public int rangeEnd;
 
+
     /**
-     * this is private because one might forget to give context. If they actually mean to
-     * state the the program has no associated line number, use:
+     * this is private because one might forget to give context. If you actually
+     * mean to state the program has no associated line number, use:
      * new Problem("message", Problem.NO_LINE_NUM);
      */
     private Problem(String message) {
-        this.message = message;
     }
 
     public Problem(String message, int lineNum) {
@@ -54,4 +74,10 @@ public class Problem {
         rangeStart = i.a;
         rangeEnd = i.b;
     }
+
+	@Override
+	public String toString() {
+		return "Problem [message=\"" + message + "\", lineNum=" + lineNum + ", rangeStart=" + rangeStart + ", rangeEnd=" + rangeEnd + "]";
+	}
+
 }

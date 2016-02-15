@@ -15,19 +15,19 @@ import simulizer.simulation.exceptions.InstructionException;
  *
  */
 public class ALU {
-	
+
 	public static byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
 	public static byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
-	
+
 	/**empty constructor
-	 * 
+	 *
 	 */
 	public ALU() {
-		
+
 	}
 	
 	/**this method uses a switch statement to execute some operation on two words
-	 * 
+	 *
 	 * @param instruction the precise instruction to execute
 	 * @param firstWord the first word to work on
 	 * @param secondWord the second word to work on
@@ -38,7 +38,7 @@ public class ALU {
 	{
 		byte[] firstValue;
 		byte[] secondValue;
-		
+
 		if(firstWord.isPresent())//if a value stored
 		{
 			firstValue = firstWord.get().getWord();
@@ -47,7 +47,7 @@ public class ALU {
 		{
 			throw new InstructionException("No operand given for alu operation", instruction);
 		}
-		
+
 		if(secondWord.isPresent())//if a value stored
 		{
 			secondValue = secondWord.get().getWord();
@@ -57,7 +57,7 @@ public class ALU {
 			secondValue = new byte[]{0x00,0x00,0x00,0x00};//this is probably the best workaround in case of something silly
 			//this will either end up returning the original value, or produce undefined behaviour
 		}
-		
+
 		switch(instruction) {//checking each possible instruction
 			case abs:
 				return encodeS(Math.abs(decodeS(firstValue)));
@@ -203,7 +203,7 @@ public class ALU {
 
 	/**
 	 * interpret a byte array as a 4 byte signed integer
-	 * 
+	 *
 	 * @param word the word to interpret
 	 * @return the interpreted value
 	 */
@@ -213,18 +213,18 @@ public class ALU {
 	
 	/**
 	 * interpret a byte array as a 4 byte unsigned integer
-	 * 
+	 *
 	 * @param word the word to interpret
 	 * @return the interpreted value
 	 */
 	private static long decodeU(byte[] word) {
 		return DataConverter.decodeAsUnsigned(word);
 	}
-	
-	
+
+
 	/**
 	 * take a value interpreted as having a sign and encode it as a word
-	 * 
+	 *
 	 * @param value the signed value to encode
 	 * @return the encoded value
 	 */
@@ -241,5 +241,5 @@ public class ALU {
 	private static Word encodeU(long value) {
 		return new Word(DataConverter.encodeAsUnsigned(value));
 	}
-	
+
 }

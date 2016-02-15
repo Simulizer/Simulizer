@@ -1,23 +1,52 @@
 package simulizer.highlevel.visualisation;
 
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Pane;
 
 public abstract class DataStructureVisualiser {
-	private Region region;
+	private Pane drawingPane;
+	private int width;
+	private int height;
+	private int rate = 500;
 	
-	public DataStructureVisualiser() {
-		
+	public DataStructureVisualiser(Pane drawingPane, int width, int height) {
+		this.drawingPane = drawingPane;
+		this.width = width;
+		this.height = height;
+	}
+
+	/**
+	 * @param drawingPane
+	 *            the pane onto which this visualiser should draw
+	 */
+	public void setDrawingPane(Pane drawingPane) {
+		this.drawingPane = drawingPane;
 	}
 	
 	/**
-	 * @param region the region on which this visualiser should draw
+	 * Sets the rate of the animation in milliseconds
+	 * @param rate the rate of the animation
 	 */
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setRate(int rate) {
+		this.rate = rate;
 	}
 	
-	public Region getRegion() {
-		return this.region;
+	/**
+	 * @return the rate of the animation
+	 */
+	public int getRate() {
+		return rate;
 	}
 	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	
+	public Pane getDrawingPane() {
+		return this.drawingPane;
+	}
+
 }

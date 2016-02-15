@@ -4,7 +4,13 @@ import simulizer.assembler.representation.operand.Operand;
 
 import java.util.Optional;
 
+/**
+ * store the information that the assembler needs to setup the variable in the
+ * static data segment.
+ * @author mbway
+ */
 public class Variable {
+
     public enum Type {
         Byte,
         Half,

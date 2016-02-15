@@ -1,0 +1,14 @@
+.cpu-component{
+    -fx-fill: "#fff";
+    -fx-stroke: "#000";
+}
+
+.cpu-component-label{
+    -fx-fill: "#000";
+    -fx-text-alignment: center;
+    -fx-font: "Arial, sans-serif", 18px;
+}
+
+.cpu-component-label.ALU{
+    -fx-text-alignment: "right";
+}

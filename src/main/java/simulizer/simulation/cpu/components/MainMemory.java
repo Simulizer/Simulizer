@@ -24,34 +24,34 @@ import simulizer.simulation.exceptions.MemoryException;
  */
 public class MainMemory {
 
-	
+
 	private Address startOfTextSegment;
 	private Address startOfStaticData;//start of the static data segment
 	private Address startOfDynamicData; //the end of the static data segment
 	private final Address endOfMemory;
 
-	
+
 	private Map<Address,Statement> textSegment;
 	private byte[] staticDataSegment;
 	private DynamicDataSegment heap;
-	
+
 
 	/**
 	 * this constructor just intialises the memory and then initialises all
 	 * partitions in it
-	 * 
+	 *
 	 */
 	public MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData) {
 		this.startOfTextSegment = startTextSegment;
 		this.startOfStaticData = startOfStaticData;
 		this.startOfDynamicData = startOfDynamicData;
 		this.endOfMemory = new Address(2147483644);
-		
+
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;
 		this.heap = new DynamicDataSegment(this.startOfDynamicData);
-		
-	
+
+
 	}
 
 	/**this method will read from memory, in the places it is allowed to
@@ -88,13 +88,13 @@ public class MainMemory {
 			throw new MemoryException("Reading from invalid area of memory",new Address(address));
 		}
 	}
-	
+
 	/**this method will write into memory
 	 * it will contain some form of bounds checking but this may be slightly off
 	 * @param address the address to start writing to
 	 * @param toWrite the bytes to write
-	 * @throws MemoryException 
-	 * @throws HeapException 
+	 * @throws MemoryException
+	 * @throws HeapException
 	 */
 	public void writeToMem(int address, byte[] toWrite) throws MemoryException, HeapException
 	{
@@ -130,7 +130,7 @@ public class MainMemory {
 	}
 	
 	/**separate method for reading from the text segment of the memory
-	 *  
+	 *
 	 * @param address the address to retrieve from
 	 * @return the statement object at that address
 	 */
@@ -146,7 +146,5 @@ public class MainMemory {
 			throw new MemoryException("Reading from invalid area of memory",address);
 		}
 	}
-	
-
 
 }

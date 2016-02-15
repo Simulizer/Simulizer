@@ -1,9 +1,11 @@
 package simulizer.ui.interfaces;
 
+import javafx.geometry.Insets;
 import javafx.scene.input.MouseEvent;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
+import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
 
@@ -11,25 +13,27 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
 
+		// Adds minimise icon
 		MinimizeIcon minimize = new MinimizeIcon(this);
-
-		// TODO: Fix VERY HORRIBLE CODE
 		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30) {
-				// Minimising
-				setMinHeight(0.0);
-			} else {
-				// Maximising
-				setMinHeight(getMinimalHeight());
-			}
+			if (getHeight() > 30) setMinHeight(0.0); // Minimising
+			else setMinHeight(getMinimalHeight()); // Maximising
 		});
-
 		getRightIcons().add(minimize);
 
+		// Adds close icon
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
 
-		// TODO: Stop Internal Windows covering MainMenuBar
+		// Stops window covering MenuBar
+		layoutYProperty().addListener((observableValue, oldY, newY) -> {
+			if (newY.doubleValue() <= 25) {
+				setLayoutY(25);
+			}
+		});
+
+		// Adds a small window border
+		setPadding(new Insets(0, 2, 2, 2));
 	}
 
 	public void setBounds(double locX, double locY, double sizeX, double sizeY) {
@@ -46,8 +50,8 @@ public abstract class InternalWindow extends Window {
 		return 0.0;
 	}
 
-	public void setTheme(String theme) {
+	public void setTheme(Theme theme) {
 		getStylesheets().clear();
-		getStylesheets().add(theme + "/window.css");
+		getStylesheets().add(theme.getStyleSheet("window.css"));
 	}
 }

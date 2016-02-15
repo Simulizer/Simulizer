@@ -1,5 +1,9 @@
 package simulizer.assembler.representation.operand;
 
+/**
+ * store a string operand to an assembler directive
+ * @author mbway
+ */
 public class StringOperand extends Operand {
 
     public String value;

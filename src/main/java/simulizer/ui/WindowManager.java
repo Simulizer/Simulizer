@@ -11,32 +11,34 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
+import simulizer.ui.theme.Theme;
+import simulizer.ui.theme.Themes;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
 	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
 	private Pane pane = new Pane();
-	private String theme = "themes/default"; // Default theme
+	private Themes themes = new Themes();
+	private Layouts layouts = new Layouts(this);
 	private Stage primaryStage;
 
 	public WindowManager(Stage primaryStage) {
-		init(primaryStage, 1060, 740);
+		init(primaryStage, "default", 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme) {
-		this.theme = theme;
-		init(primaryStage, 1060, 740);
+		this(primaryStage, theme, 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		this.theme = theme;
-		init(primaryStage, x, y);
+		init(primaryStage, theme, x, y);
 	}
 
-	private void init(Stage primaryStage, int x, int y) {
+	private void init(Stage primaryStage, String theme, int x, int y) {
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setScene(scene);
+		themes.setTheme(theme);
 		pane.getStyleClass().add("background");
 
 		MainMenuBar bar = new MainMenuBar(this);
@@ -45,9 +47,7 @@ public class WindowManager extends Pane {
 
 		// Resize menubar to window width
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
-
-		setLayout(Layouts.original());
-
+		setTheme(themes.getTheme());
 		primaryStage.show();
 	}
 
@@ -56,16 +56,16 @@ public class WindowManager extends Pane {
 		openWindows.clear();
 	}
 
-	public void addWindows(InternalWindow... windows) {
+	private void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
-			window.setTheme(theme);
+			window.setTheme(themes.getTheme());
 			pane.getChildren().addAll(window);
 		}
 	}
 
-	public void removeWindows(InternalWindow... windows) {
+	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (window.isVisible()) window.close();
 			openWindows.remove(window);
@@ -86,13 +86,13 @@ public class WindowManager extends Pane {
 		pane.getChildren().addAll(newOpenWindows);
 		openWindows = newOpenWindows;
 
-		setTheme(theme);
+		setTheme(themes.getTheme());
 	}
 
-	public void setTheme(String theme) {
-		this.theme = theme;
+	public void setTheme(Theme theme) {
+		themes.setTheme(theme);
 		pane.getStylesheets().clear();
-		pane.getStylesheets().add(theme + "/background.css");
+		pane.getStylesheets().add(theme.getStyleSheet("background.css"));
 		for (InternalWindow window : openWindows)
 			window.setTheme(theme);
 	}
@@ -123,4 +123,19 @@ public class WindowManager extends Pane {
 		return primaryStage;
 	}
 
+	public Themes getThemes() {
+		return themes;
+	}
+
+	public Layouts getLayouts() {
+		return layouts;
+	}
+
+	public List<InternalWindow> getOpenWindows() {
+		return openWindows;
+	}
+
+	public Pane getPane() {
+		return pane;
+	}
 }

@@ -1,0 +1,5 @@
+.list-item {
+	-fx-fill: #FFFFFF;
+	-fx-stroke: #000000;
+	-fx-stroke-width: 3;
+}

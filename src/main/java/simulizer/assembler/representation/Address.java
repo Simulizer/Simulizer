@@ -1,7 +1,8 @@
 package simulizer.assembler.representation;
 
 /**
- * Immutable Address class
+ * immutable memory address
+ * @author mbway
  */
 public class Address {
     private final int value;
