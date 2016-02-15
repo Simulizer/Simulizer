@@ -103,15 +103,15 @@ public class DataConverterTest {
 
         // should work exactly the same as encode as unsigned
 
-        assertEquals(new byte[] {ff, ff, ff, ff}, DataConverter.encodeAsSigned(-1));
-        assertEquals(new byte[] {0, 0, 0, ff}, DataConverter.encodeAsSigned(255));
-        assertEquals(new byte[] {ff, ff, ff, 0}, DataConverter.encodeAsSigned(-256));
+        assertArrayEquals(new byte[] {ff, ff, ff, ff}, DataConverter.encodeAsSigned(-1));
+        assertArrayEquals(new byte[] {0, 0, 0, ff}, DataConverter.encodeAsSigned(255));
+        assertArrayEquals(new byte[] {ff, ff, ff, 0}, DataConverter.encodeAsSigned(-256));
 
-        assertEquals(new byte[] {0, 0, 0, 10}, DataConverter.encodeAsSigned(10));
-        assertEquals(new byte[] {ff, ff, ff, (byte)0xf6}, DataConverter.encodeAsSigned(-10));
+        assertArrayEquals(new byte[] {0, 0, 0, 10}, DataConverter.encodeAsSigned(10));
+        assertArrayEquals(new byte[] {ff, ff, ff, (byte)0xf6}, DataConverter.encodeAsSigned(-10));
 
-        assertEquals(new byte[] {0, 0, ff, ff}, DataConverter.encodeAsSigned(po2(16) - 1));
-        assertEquals(new byte[] {0, 0, ff, (byte)0xfe}, DataConverter.encodeAsSigned(po2(16) - 2));
+        assertArrayEquals(new byte[] {0, 0, ff, ff}, DataConverter.encodeAsSigned(po2(16) - 1));
+        assertArrayEquals(new byte[] {0, 0, ff, (byte)0xfe}, DataConverter.encodeAsSigned(po2(16) - 2));
     }
 
     @Test
@@ -120,15 +120,15 @@ public class DataConverterTest {
 
         // should work exactly the same as encode as signed
 
-        assertEquals(new byte[] {ff, ff, ff, ff}, DataConverter.encodeAsSigned(-1));
-        assertEquals(new byte[] {0, 0, 0, ff}, DataConverter.encodeAsSigned(255));
-        assertEquals(new byte[] {ff, ff, ff, 0}, DataConverter.encodeAsSigned(-256));
+        assertArrayEquals(new byte[] {ff, ff, ff, ff}, DataConverter.encodeAsSigned(-1));
+        assertArrayEquals(new byte[] {0, 0, 0, ff}, DataConverter.encodeAsSigned(255));
+        assertArrayEquals(new byte[] {ff, ff, ff, 0}, DataConverter.encodeAsSigned(-256));
 
-        assertEquals(new byte[] {0, 0, 0, 10}, DataConverter.encodeAsSigned(10));
-        assertEquals(new byte[] {ff, ff, ff, (byte)0xf6}, DataConverter.encodeAsSigned(-10));
+        assertArrayEquals(new byte[] {0, 0, 0, 10}, DataConverter.encodeAsSigned(10));
+        assertArrayEquals(new byte[] {ff, ff, ff, (byte)0xf6}, DataConverter.encodeAsSigned(-10));
 
-        assertEquals(new byte[] {0, 0, ff, ff}, DataConverter.encodeAsSigned(po2(16) - 1));
-        assertEquals(new byte[] {0, 0, ff, (byte)0xfe}, DataConverter.encodeAsSigned(po2(16) - 2));
+        assertArrayEquals(new byte[] {0, 0, ff, ff}, DataConverter.encodeAsSigned(po2(16) - 1));
+        assertArrayEquals(new byte[] {0, 0, ff, (byte)0xfe}, DataConverter.encodeAsSigned(po2(16) - 2));
     }
 
     @Test
