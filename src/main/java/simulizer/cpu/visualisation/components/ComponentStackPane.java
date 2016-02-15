@@ -117,7 +117,7 @@ public class ComponentStackPane extends StackPane {
         return new Wire(line, arrowHead);
     }
 
-    public Wire vericalLineTo(ComponentStackPane shape, boolean top, boolean arrowStart, int offset){
+    public Wire verticalLineTo(ComponentStackPane shape, boolean top, boolean arrowStart, int offset){
         Polyline line = new Polyline();
         Polyline arrowHead = new Polyline();
 
