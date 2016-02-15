@@ -3,9 +3,9 @@ package simulizer.simulation.cpu.components;
 import java.util.Optional;
 
 import simulizer.assembler.representation.Instruction;
+import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.InstructionException;
-
 
 
 /**this class represents the ALU in the CPU
@@ -60,7 +60,7 @@ public class ALU {
 		
 		switch(instruction) {//checking each possible instruction
 			case abs:
-				return new Word(serialiseSigned(Math.abs(loadAsSigned(firstValue))));
+				return encodeS(Math.abs(decodeS(firstValue)));
 			case and:
 				byte[] resultAnd = new byte[4];
 				for(int i = 0; i < resultAnd.length; i++) {
@@ -68,35 +68,35 @@ public class ALU {
 				}
 				return new Word(resultAnd);
 			case add:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) + loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) + decodeS(secondValue));
 			case addu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) + loadAsUnsigned(secondValue)));
+				return encodeU(decodeU(firstValue) + decodeU(secondValue));
 			case addi:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) + loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) + decodeS(secondValue));
 			case addiu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) + loadAsUnsigned(secondValue)));
+				return encodeU(decodeU(firstValue) + decodeU(secondValue));
 			case sub:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) - loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) - decodeS(secondValue));
 			case subu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) - loadAsUnsigned(secondValue)));
+				return encodeU(decodeU(firstValue) - decodeU(secondValue));
 			case subi:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) - loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) - decodeS(secondValue));
 			case subiu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) - loadAsUnsigned(secondValue)));
+				return encodeU(decodeU(firstValue) - decodeU(secondValue));
 			case mul:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) * loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) * decodeS(secondValue));
 			case mulo:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) * loadAsSigned(secondValue)));//might have to take more into account with overflow
+				return encodeS(decodeS(firstValue) * decodeS(secondValue));//might have to take more into account with overflow
 			case mulou:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) * loadAsUnsigned(secondValue)));//might have to take more into account with overflow
+				return encodeU(decodeU(firstValue) * decodeU(secondValue));//might have to take more into account with overflow
 			case div:
-				return new Word(serialiseSigned(loadAsSigned(firstValue) / loadAsSigned(secondValue)));
+				return encodeS(decodeS(firstValue) / decodeS(secondValue));
 			case divu:
-				return new Word(serialiseUnsigned(loadAsUnsigned(firstValue) / loadAsUnsigned(secondValue)));
+				return encodeU(decodeU(firstValue) / decodeU(secondValue));
 			case neg:
-				return new Word(serialiseSigned(loadAsSigned(firstValue)*-1));
+				return encodeS(decodeS(firstValue)*-1);
 			case negu:
-				return new Word(serialiseUnsigned(loadAsSigned(firstValue)*-1));//is this correct?
+				return encodeU(decodeS(firstValue)*-1);//is this correct?
 			case nor:
 				byte[] resultNor = new byte[4];
 				for(int i = 0; i < resultNor.length; i++) {
@@ -150,7 +150,7 @@ public class ALU {
 				}
 				return new Word(branchFalse);//if all bytes equal then false
 			case bgez:
-				if(loadAsSigned(firstValue) >= 0)
+				if(decodeS(firstValue) >= 0)
 				{
 					return new Word(branchTrue);
 				}
@@ -159,7 +159,7 @@ public class ALU {
 					return new Word(branchFalse);
 				}
 			case bgtz:
-				if(loadAsSigned(firstValue) > 0)
+				if(decodeS(firstValue) > 0)
 				{
 					return new Word(branchTrue);
 				}
@@ -168,7 +168,7 @@ public class ALU {
 					return new Word(branchFalse);
 				}
 			case blez:
-				if(loadAsSigned(firstValue) <= 0)
+				if(decodeS(firstValue) <= 0)
 				{
 					return new Word(branchTrue);
 				}
@@ -177,7 +177,7 @@ public class ALU {
 					return new Word(branchFalse);
 				}
 			case bltz:
-				if(loadAsSigned(firstValue) < 0)
+				if(decodeS(firstValue) < 0)
 				{
 					return new Word(branchTrue);
 				}
@@ -186,7 +186,7 @@ public class ALU {
 					return new Word(branchFalse);
 				}
 			case beqz:
-				if(loadAsSigned(firstValue) > 0)
+				if(decodeS(firstValue) > 0)
 				{
 					return new Word(branchTrue);
 				}
@@ -201,41 +201,45 @@ public class ALU {
 		}
 	}
 
-	/**method takes a byte array and returns it's signed value as a long
+	/**
+	 * interpret a byte array as a 4 byte signed integer
 	 * 
-	 * @param word the word to convert
-	 * @return the byte[] converted to a signed long
+	 * @param word the word to interpret
+	 * @return the interpreted value
 	 */
-	private long loadAsSigned(byte[] word) {
-		return 1L;
+	private static long decodeS(byte[] word) {
+		return DataConverter.decodeAsSigned(word);
 	}
 	
-	/**method takes a byte array and returns it's unsigned value as a long
+	/**
+	 * interpret a byte array as a 4 byte unsigned integer
 	 * 
-	 * @param word the word to convert
-	 * @return the byte[] converted to an unsigned long
+	 * @param word the word to interpret
+	 * @return the interpreted value
 	 */
-	private long loadAsUnsigned(byte[] word) {
-		return 1L;
+	private static long decodeU(byte[] word) {
+		return DataConverter.decodeAsUnsigned(word);
 	}
 	
 	
-	/**this method takes a signed long and converts it to a byte array
+	/**
+	 * take a value interpreted as having a sign and encode it as a word
 	 * 
-	 * @param value the long to convert
-	 * @return the value as a byte array
+	 * @param value the signed value to encode
+	 * @return the encoded value
 	 */
-	private byte[] serialiseSigned(long value) {
-		return new byte[4];
+	private static Word encodeS(long value) {
+		return new Word(DataConverter.encodeAsSigned(value));
 	}
 	
-	/**this method takes an unsigned long and converts it to a byte array
-	 * 
-	 * @param value the long to convert
-	 * @return the value as a byte array
+	/**
+	 * take a value interpreted as being unsigned and encode it as a word
+	 *
+	 * @param value the unsigned value to encode
+	 * @return the encoded value
 	 */
-	private byte[] serialiseUnsigned(long value) {
-		return new byte[4];
+	private static Word encodeU(long value) {
+		return new Word(DataConverter.encodeAsUnsigned(value));
 	}
 	
 }
