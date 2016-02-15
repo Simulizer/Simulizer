@@ -61,6 +61,7 @@ public class WindowManager extends Pane {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
 			window.setTheme(theme);
+			window.ready();
 			pane.getChildren().addAll(window);
 		}
 	}
@@ -113,6 +114,7 @@ public class WindowManager extends Pane {
 
 		// Not found -> Create a new one
 		InternalWindow w = window.createNewWindow();
+		w.setWindowManager(this);
 		// TODO: Look for a smarter bounds first (possibly from layout), otherwise maximise the frame
 		w.setBounds(10, 35, pane.getWidth() - 20, pane.getHeight() - 45);
 		addWindows(w);

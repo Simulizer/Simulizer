@@ -4,8 +4,10 @@ import javafx.scene.input.MouseEvent;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
+import simulizer.ui.WindowManager;
 
 public abstract class InternalWindow extends Window {
+	private WindowManager wm;
 
 	public InternalWindow() {
 		// Sets to default title
@@ -46,8 +48,21 @@ public abstract class InternalWindow extends Window {
 		return 0.0;
 	}
 
+	protected final WindowManager getWindowManager() {
+		return wm;
+	}
+
+	public final void setWindowManager(WindowManager wm) {
+		this.wm = wm;
+	}
+
 	public void setTheme(String theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme + "/window.css");
+	}
+
+	/** Called when all internal window stuff is done */
+	public void ready() {
+		// Do nothing
 	}
 }
