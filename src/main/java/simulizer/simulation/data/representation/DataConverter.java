@@ -24,7 +24,9 @@ public class DataConverter {
      * @return the new value with the specified bytes filled
      */
     private static long fillBytes(long val, int startByte, byte[] data) {
-        assert startByte + data.length <= Long.BYTES;
+        assert data.length <= Long.BYTES;
+        // two write into n'th byte, offset = n-1
+        assert startByte < Long.BYTES;
 
         for(int i = 0; i < data.length; i++) {
             // the offset of the byte to write in bits from the least
@@ -130,7 +132,7 @@ public class DataConverter {
         long MSBs = (value >>> 8*4);
 
         // if all the bits are the same then there is no overflow
-        return !((MSBs == 0) || (MSBs == 0xFFFFFFFF));
+        return !((MSBs == 0) || (MSBs == 0xFFFFFFFFL));
     }
 
     /**
