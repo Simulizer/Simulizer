@@ -32,6 +32,52 @@ public class ALUTest {
 		this.alu = new ALU();
 	}
 	
+	/**produces an optional signed word 
+	 * this is the type required by the alu
+	 * @param num the number to convert
+	 * @return number in correct format
+	 */
+	public Optional<Word> signedW(long num)
+	{
+		return Optional.of(new Word(DataConverter.encodeAsSigned(num)));
+	}
+	
+	/**produces an optional unsigned word 
+	 * this is the type required by the alu
+	 * @param num the number to convert
+	 * @return number in correct format
+	 */
+	public Optional<Word> unsignedW(long num)
+	{
+		return Optional.of(new Word(DataConverter.encodeAsUnsigned(num)));
+	}
+	
+	/**executes a given alu operation with data passed in 
+	 * 
+	 * @param instruction the instruction to execute
+	 * @param word1 the first word of data
+	 * @param word2 the second word to execute
+	 * @return the long result
+	 * @throws InstructionException
+	 */
+	public long executeS(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
+	{
+		return DataConverter.decodeAsSigned(this.alu.execute(instruction, word1, word2).getWord());
+	}
+	
+	/**executes a given alu operation with data passed in 
+	 * 
+	 * @param instruction the instruction to execute
+	 * @param word1 the first word of data
+	 * @param word2 the second word to execute
+	 * @return the long result
+	 * @throws InstructionException
+	 */
+	public long executeU(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
+	{
+		return DataConverter.decodeAsUnsigned(this.alu.execute(instruction, word1, word2).getWord());
+	}
+	
 	/**testing all alu operations with 3 cases each
 	 * @throws InstructionException when a bad instruction is used
 	 * 
@@ -40,276 +86,145 @@ public class ALUTest {
 	public void testALUOps() throws InstructionException
 	{
 		{//abs
-			Optional<Word> minusTen = Optional.of(new Word(DataConverter.encodeAsSigned(-10)));
-			Optional<Word> empty = Optional.empty();
-			assertEquals(10,DataConverter.decodeAsSigned(this.alu.execute(Instruction.abs, minusTen, empty).getWord()));
-			
-			Optional<Word> twentySeven = Optional.of(new Word(DataConverter.encodeAsSigned(27)));
-			assertEquals(27,DataConverter.decodeAsSigned(this.alu.execute(Instruction.abs, twentySeven, empty).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.abs, zero, empty).getWord()));
+			assertEquals(10,executeS(Instruction.abs,signedW(-10),Optional.empty()));
+			assertEquals(27,executeS(Instruction.abs,signedW(27),Optional.empty()));
+			assertEquals(0,executeS(Instruction.abs,signedW(0),Optional.empty()));
 		}
 		
 		{//and
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> seventeen = Optional.of(new Word(DataConverter.encodeAsSigned(17)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.and, zero, seventeen).getWord()));
-			
-			Optional<Word> twentyFour = Optional.of(new Word(DataConverter.encodeAsSigned(24)));
-			assertEquals(16,DataConverter.decodeAsSigned(this.alu.execute(Instruction.and, seventeen, twentyFour).getWord()));
-			
-			Optional<Word> minusFive = Optional.of(new Word(DataConverter.encodeAsSigned(-5)));
-			Optional<Word> minusTwo = Optional.of(new Word(DataConverter.encodeAsSigned(-2)));
-			assertEquals(-6,DataConverter.decodeAsSigned(this.alu.execute(Instruction.and, minusFive, minusTwo).getWord()));
+			assertEquals(0,executeS(Instruction.and,signedW(0),signedW(17)));
+			assertEquals(16,executeS(Instruction.and,signedW(17),signedW(24)));
+			assertEquals(-6,executeS(Instruction.and,signedW(-5),signedW(-2)));
 		}
 		
 		{//add
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> seven = Optional.of(new Word(DataConverter.encodeAsSigned(7)));
-			assertEquals(11,DataConverter.decodeAsSigned(this.alu.execute(Instruction.add, four, seven).getWord()));
 			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusTen = Optional.of(new Word(DataConverter.encodeAsSigned(-10)));
-			assertEquals(-14,DataConverter.decodeAsSigned(this.alu.execute(Instruction.add, minusFour, minusTen).getWord()));
-			
-			Optional<Word> minusSeven = Optional.of(new Word(DataConverter.encodeAsSigned(-7)));
-			Optional<Word> six = Optional.of(new Word(DataConverter.encodeAsSigned(6)));
-			assertEquals(-1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.add, minusSeven, six).getWord()));
+			assertEquals(11,executeS(Instruction.add,signedW(4),signedW(7)));
+			assertEquals(-14,executeS(Instruction.add,signedW(-4),signedW(-10)));
+			assertEquals(-1,executeS(Instruction.add,signedW(-7),signedW(6)));
 		}
 		
 		{//addu
-			Optional<Word> twoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31))));
-			Optional<Word> twoThirtyMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31)-1)));
-			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addu,twoThirtyOne,twoThirtyMinusOne).getWord()));
 			
-			Optional<Word> twoThirty = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,30))));
-			assertEquals((long)(Math.pow(2,31)),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addu,twoThirty,twoThirty).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsUnsigned(4)));
-			assertEquals(4,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addu, zero, four).getWord()));
+			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),executeU(Instruction.addu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31)-1)));
+			assertEquals((long)(Math.pow(2,31)),executeU(Instruction.addu,unsignedW((long)Math.pow(2,30)),unsignedW((long)Math.pow(2,30))));
+			assertEquals(4,executeU(Instruction.addu,unsignedW(0),unsignedW(4)));
 		}
 		
 		{//addi (same tests as for add)
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> seven = Optional.of(new Word(DataConverter.encodeAsSigned(7)));
-			assertEquals(11,DataConverter.decodeAsSigned(this.alu.execute(Instruction.addi, four, seven).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusTen = Optional.of(new Word(DataConverter.encodeAsSigned(-10)));
-			assertEquals(-14,DataConverter.decodeAsSigned(this.alu.execute(Instruction.addi, minusFour, minusTen).getWord()));
-			
-			Optional<Word> minusSeven = Optional.of(new Word(DataConverter.encodeAsSigned(-7)));
-			Optional<Word> six = Optional.of(new Word(DataConverter.encodeAsSigned(6)));
-			assertEquals(-1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.addi, minusSeven, six).getWord()));
+			assertEquals(11,executeS(Instruction.addi,signedW(4),signedW(7)));
+			assertEquals(-14,executeS(Instruction.addi,signedW(-4),signedW(-10)));
+			assertEquals(-1,executeS(Instruction.addi,signedW(-7),signedW(6)));
 		}
 		
 		{//addiu
-			Optional<Word> twoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31))));
-			Optional<Word> twoThirtyMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31)-1)));
-			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addiu,twoThirtyOne,twoThirtyMinusOne).getWord()));
-			
-			Optional<Word> twoThirty = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,30))));
-			assertEquals((long)(Math.pow(2,31)),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addiu,twoThirty,twoThirty).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsUnsigned(4)));
-			assertEquals(4,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.addiu, zero, four).getWord()));
+			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),executeU(Instruction.addiu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31)-1)));
+			assertEquals((long)(Math.pow(2,31)),executeU(Instruction.addiu,unsignedW((long)Math.pow(2,30)),unsignedW((long)Math.pow(2,30))));
+			assertEquals(4,executeU(Instruction.addiu,unsignedW(0),unsignedW(4)));
 		}
 		
 		{//sub
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> seven = Optional.of(new Word(DataConverter.encodeAsSigned(7)));
-			assertEquals(-3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.sub, four, seven).getWord()));
-			assertEquals(3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.sub, seven, four).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusTen = Optional.of(new Word(DataConverter.encodeAsSigned(-10)));
-			assertEquals(6,DataConverter.decodeAsSigned(this.alu.execute(Instruction.sub, minusFour, minusTen).getWord()));
+			assertEquals(-3,executeS(Instruction.sub,signedW(4),signedW(7)));
+			assertEquals(3,executeS(Instruction.sub,signedW(7),signedW(4)));
+			assertEquals(6,executeS(Instruction.sub,signedW(-4),signedW(-10)));
 		}
 		
 		{//subu
-			Optional<Word> minusTwoThirtyOneMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned(-1*(long)(Math.pow(2,31)-1))));
-			Optional<Word> twoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31))));
-			assertEquals(-1*(long)(Math.pow(2, 32)-1),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subu, minusTwoThirtyOneMinusOne, twoThirtyOne).getWord()));
-			assertEquals(0,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subu,twoThirtyOne,twoThirtyOne).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> twoThirty = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,30))));
-			assertEquals(-1*(long)Math.pow(2, 30),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subu,zero,twoThirty).getWord()));
+			assertEquals(0,executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31))));
+			assertEquals((long)Math.pow(2,31),executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW(0)));
+			assertEquals((long)Math.pow(2,32)-2,executeU(Instruction.subu,unsignedW((long)Math.pow(2,32)-1),unsignedW(1)));
 		}
 		
 		{//subi
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> seven = Optional.of(new Word(DataConverter.encodeAsSigned(7)));
-			assertEquals(-3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.subi, four, seven).getWord()));
-			assertEquals(3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.subi, seven, four).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusTen = Optional.of(new Word(DataConverter.encodeAsSigned(-10)));
-			assertEquals(6,DataConverter.decodeAsSigned(this.alu.execute(Instruction.subi, minusFour, minusTen).getWord()));
+			assertEquals(-3,executeS(Instruction.subi,signedW(4),signedW(7)));
+			assertEquals(3,executeS(Instruction.subi,signedW(7),signedW(4)));
+			assertEquals(6,executeS(Instruction.subi,signedW(-4),signedW(-10)));
 		}
 		
 		{//subiu
-			Optional<Word> minusTwoThirtyOneMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned(-1*(long)(Math.pow(2,31)-1))));
-			Optional<Word> twoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,31))));
-			assertEquals(-1*(long)(Math.pow(2, 32)-1),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subiu, minusTwoThirtyOneMinusOne, twoThirtyOne).getWord()));
-			assertEquals(0,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subiu,twoThirtyOne,twoThirtyOne).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> twoThirty = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,30))));
-			assertEquals(-1*(long)Math.pow(2, 30),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.subiu,zero,twoThirty).getWord()));
+			assertEquals(0,executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31))));
+			assertEquals((long)Math.pow(2,31),executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW(0)));
+			assertEquals((long)Math.pow(2,32)-2,executeU(Instruction.subu,unsignedW((long)Math.pow(2,32)-1),unsignedW(1)));
 		}
 		
 		{//mul
-			Optional<Word> twoFifteenMinusOne = Optional.of(new Word(DataConverter.encodeAsSigned((long)(Math.pow(2,15)-1))));
-			Optional<Word> twoFifteen = Optional.of(new Word(DataConverter.encodeAsSigned((long)Math.pow(2,15))));
-			assertEquals(1073709056L,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mul, twoFifteenMinusOne, twoFifteen).getWord()));
 			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mul, zero, twoFifteen).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusThree = Optional.of(new Word(DataConverter.encodeAsSigned(-3)));
-			assertEquals(12,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mul, minusFour, minusThree).getWord()));
+			assertEquals(1073709056L,executeS(Instruction.mul,signedW((long)(Math.pow(2,15)-1)),signedW((long)Math.pow(2,15))));
+			assertEquals(0,executeS(Instruction.mul,signedW(0),signedW((long)Math.pow(2,15))));
+			assertEquals(12,executeS(Instruction.mul,signedW(-4),signedW(-3)));
 		}
 		
 		{//mulo (check this one)
-			Optional<Word> twoFifteenMinusOne = Optional.of(new Word(DataConverter.encodeAsSigned((long)(Math.pow(2,15)-1))));
-			Optional<Word> twoFifteen = Optional.of(new Word(DataConverter.encodeAsSigned((long)Math.pow(2,15))));
-			assertEquals(1073709056L,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mulo, twoFifteenMinusOne, twoFifteen).getWord()));
-			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mulo, zero, twoFifteen).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsSigned(-4)));
-			Optional<Word> minusThree = Optional.of(new Word(DataConverter.encodeAsSigned(-3)));
-			assertEquals(12,DataConverter.decodeAsSigned(this.alu.execute(Instruction.mulo, minusFour, minusThree).getWord()));
+			assertEquals(1073709056L,executeS(Instruction.mulo,signedW((long)(Math.pow(2,15)-1)),signedW((long)Math.pow(2,15))));
+			assertEquals(0,executeS(Instruction.mulo,signedW(0),signedW((long)Math.pow(2,15))));
+			assertEquals(12,executeS(Instruction.mulo,signedW(-4),signedW(-3)));
 		}
 		
 		{//mulou
-			Optional<Word> twoSixteenMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)(Math.pow(2,16)-1))));
-			Optional<Word> twoSixteen = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2,16))));
-			assertEquals(4294901760L,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.mulou, twoSixteenMinusOne, twoSixteen).getWord()));
 			
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			assertEquals(0,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.mulou, zero, twoSixteen).getWord()));
-			
-			Optional<Word> minusFour = Optional.of(new Word(DataConverter.encodeAsUnsigned(-4)));
-			Optional<Word> minusThree = Optional.of(new Word(DataConverter.encodeAsUnsigned(-3)));
-			assertEquals(12,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.mulou, minusFour, minusThree).getWord()));
+			assertEquals(4294901760L,executeU(Instruction.mulou,unsignedW((long)(Math.pow(2,16)-1)),unsignedW((long)Math.pow(2,16))));
+			assertEquals(0,executeU(Instruction.mulou,unsignedW(0),unsignedW((long)Math.pow(2,16))));
+			assertEquals(12,executeU(Instruction.mulou,unsignedW(4),unsignedW(3)));
 		}
 		
 		{//div
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.div,zero,four).getWord()));
-			
-			Optional<Word> two = Optional.of(new Word(DataConverter.encodeAsSigned(2)));
-			assertEquals(2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.div,four,two).getWord()));
-			
-			Optional<Word> minusTwo = Optional.of(new Word(DataConverter.encodeAsSigned(-2)));
-			assertEquals(-2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.div,four,minusTwo).getWord()));
+			assertEquals(0,executeS(Instruction.div,signedW(0),signedW(4)));
+			assertEquals(2,executeS(Instruction.div,signedW(4),signedW(2)));
+			assertEquals(-2,executeS(Instruction.div,signedW(4),signedW(-2)));
 		}
 		
 		{//divu
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsUnsigned(4)));
-			assertEquals(0,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.divu,zero,four).getWord()));
-			
-			Optional<Word> twoThirtyTwoMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)(Math.pow(2, 32)-1))));
-			assertEquals(1,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.divu,twoThirtyTwoMinusOne,twoThirtyTwoMinusOne).getWord()));
-			
-			Optional<Word> minusTwoThirtyTwoMinusOne = Optional.of(new Word(DataConverter.encodeAsUnsigned(-1*(long)(Math.pow(2, 32)-1))));
-			assertEquals(-1,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.divu,twoThirtyTwoMinusOne,minusTwoThirtyTwoMinusOne).getWord()));
+			assertEquals(0,executeU(Instruction.divu,unsignedW(0),unsignedW(4)));
+			assertEquals(1,executeU(Instruction.divu,unsignedW((long)(Math.pow(2, 32)-1)),unsignedW((long)(Math.pow(2, 32)-1))));
+			assertEquals(2,executeU(Instruction.divu,unsignedW(4),unsignedW(2)));
 		}
 		
 		{//neg
-			Optional<Word> empty = Optional.empty();
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			Optional<Word> minusOne = Optional.of(new Word(DataConverter.encodeAsSigned(-1)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.neg, zero, empty).getWord()));
-			assertEquals(-1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.neg, one, empty).getWord()));
-			assertEquals(1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.neg, minusOne, empty).getWord()));
+			assertEquals(0,executeS(Instruction.neg,signedW(0),Optional.empty()));
+			assertEquals(-1,executeS(Instruction.neg,signedW(1),Optional.empty()));
+			assertEquals(1,executeS(Instruction.neg,signedW(-1),Optional.empty()));
 		}
 		
 		{//negu
-			Optional<Word> empty = Optional.empty();
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsUnsigned(0)));
-			Optional<Word> twoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned((long)Math.pow(2, 31))));
-			Optional<Word> minusTwoThirtyOne = Optional.of(new Word(DataConverter.encodeAsUnsigned(-1*(long)Math.pow(2, 31))));
-			assertEquals(0,DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.negu, zero, empty).getWord()));
-			assertEquals(-1*(long)Math.pow(2, 31),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.negu, twoThirtyOne, empty).getWord()));
-			assertEquals((long)Math.pow(2, 31),DataConverter.decodeAsUnsigned(this.alu.execute(Instruction.negu, minusTwoThirtyOne, empty).getWord()));
+			assertEquals(0,executeU(Instruction.negu,signedW(0),Optional.empty()));
+			assertEquals((long)Math.pow(2, 30),executeU(Instruction.negu,signedW(-1*(long)Math.pow(2, 30)),Optional.empty()));
+			assertEquals(1,executeU(Instruction.negu,signedW(-1),Optional.empty()));
 		}
 		
 		{//nor
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			assertEquals(-1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.nor,zero,zero).getWord()));
-			
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			assertEquals(-2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.nor,zero,one).getWord()));
-			
-			Optional<Word> minusOne = Optional.of(new Word(DataConverter.encodeAsSigned(-1)));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.nor,minusOne,one).getWord()));
+			assertEquals(-1,executeS(Instruction.nor,signedW(0),signedW(0)));
+			assertEquals(-2,executeS(Instruction.nor,signedW(0),signedW(1)));
+			assertEquals(0,executeS(Instruction.nor,signedW(-1),signedW(1)));
 		}
-		
+		 
 		{//not
-			Optional<Word> empty = Optional.empty();
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> minusOne = Optional.of(new Word(DataConverter.encodeAsSigned(-1)));
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			
-			assertEquals(-1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.not,zero,empty).getWord()));
-			assertEquals(0,DataConverter.decodeAsSigned(this.alu.execute(Instruction.not,minusOne,empty).getWord()));
-			assertEquals(-2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.not,one,empty).getWord()));
+			assertEquals(-1,executeS(Instruction.not,signedW(0),Optional.empty()));
+			assertEquals(0,executeS(Instruction.not,signedW(-1),Optional.empty()));
+			assertEquals(-2,executeS(Instruction.not,signedW(1),Optional.empty()));
 		}
 		
-		{//or
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> sixteen = Optional.of(new Word(DataConverter.encodeAsSigned(16)));
-			
-			assertEquals(1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.or,zero,one).getWord()));
-			assertEquals(5,DataConverter.decodeAsSigned(this.alu.execute(Instruction.or,one,four).getWord()));
-			assertEquals(20,DataConverter.decodeAsSigned(this.alu.execute(Instruction.or,sixteen,four).getWord()));
-			
+		{//or			
+			assertEquals(1,executeS(Instruction.or,signedW(0),signedW(1)));
+			assertEquals(5,executeS(Instruction.or,signedW(1),signedW(4)));
+			assertEquals(20,executeS(Instruction.or,signedW(16),signedW(4)));
 		}
 		
 		{//ori
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> sixteen = Optional.of(new Word(DataConverter.encodeAsSigned(16)));
-			
-			assertEquals(1,DataConverter.decodeAsSigned(this.alu.execute(Instruction.ori,zero,one).getWord()));
-			assertEquals(5,DataConverter.decodeAsSigned(this.alu.execute(Instruction.ori,one,four).getWord()));
-			assertEquals(20,DataConverter.decodeAsSigned(this.alu.execute(Instruction.ori,sixteen,four).getWord()));
+			assertEquals(1,executeS(Instruction.ori,signedW(0),signedW(1)));
+			assertEquals(5,executeS(Instruction.ori,signedW(1),signedW(4)));
+			assertEquals(20,executeS(Instruction.ori,signedW(16),signedW(4)));
 		}
 		
 		{//xor
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			Optional<Word> three = Optional.of(new Word(DataConverter.encodeAsSigned(3)));
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> fourteen = Optional.of(new Word(DataConverter.encodeAsSigned(14)));
-			assertEquals(2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xor,three,one).getWord()));
-			assertEquals(3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xor,three,zero).getWord()));
-			assertEquals(10,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xor,four,fourteen).getWord()));
+			assertEquals(10,executeS(Instruction.xor,signedW(4),signedW(14)));
+			assertEquals(2,executeS(Instruction.xor,signedW(3),signedW(1)));
+			assertEquals(3,executeS(Instruction.xor,signedW(3),signedW(0)));
 		}
 		
 		{//xori
-			Optional<Word> one = Optional.of(new Word(DataConverter.encodeAsSigned(1)));
-			Optional<Word> three = Optional.of(new Word(DataConverter.encodeAsSigned(3)));
-			Optional<Word> zero = Optional.of(new Word(DataConverter.encodeAsSigned(0)));
-			Optional<Word> four = Optional.of(new Word(DataConverter.encodeAsSigned(4)));
-			Optional<Word> fourteen = Optional.of(new Word(DataConverter.encodeAsSigned(14)));
-			assertEquals(2,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xori,three,one).getWord()));
-			assertEquals(3,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xori,three,zero).getWord()));
-			assertEquals(10,DataConverter.decodeAsSigned(this.alu.execute(Instruction.xori,four,fourteen).getWord()));
+			assertEquals(10,executeS(Instruction.xor,signedW(4),signedW(14)));
+			assertEquals(2,executeS(Instruction.xor,signedW(3),signedW(1)));
+			assertEquals(3,executeS(Instruction.xor,signedW(3),signedW(0)));
 		}
 	}
 }
