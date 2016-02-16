@@ -1,0 +1,57 @@
+
+.plain {
+	-fx-fill: black;
+}
+
+.directiveid {
+	-fx-font-weight: bold;
+}
+
+.label {
+	-fx-fill: orange;
+	-fx-font-weight: bold;
+}
+
+.recognised-instruction {
+	-fx-fill: blue;
+    -fx-font-weight: bold;
+}
+
+.unrecognised-instruction {
+	-fx-fill: blue;
+	-fx-background-color: red;
+}
+
+.data-directive {
+	-fx-font-weight: bold;
+}
+
+.text-directive {
+	-fx-font-weight: bold;
+}
+
+.base-bracket {
+	-fx-font-weight: bold;
+}
+
+.register {
+    -fx-fill: green;
+}
+
+.constant {
+    -fx-fill: purple;
+}
+
+.annotation {
+    -fx-fill: yellow;
+}
+
+.comment {
+    -fx-fill: grey;
+}
+
+.error {
+	-fx-fill: red;
+	-fx-font-weight: bold;
+}
+

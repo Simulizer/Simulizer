@@ -1,0 +1,42 @@
+{
+  "name": "Very Visual",
+  "width": 1920.0,
+  "height": 1017.0,
+  "windows": [
+    {
+      "id": "CODE_EDITOR",
+      "x": 1481.0,
+      "y": 28.0,
+      "width": 436.0,
+      "height": 687.0
+    },
+    {
+      "id": "LOGGER",
+      "x": 1483.0,
+      "y": 722.0,
+      "width": 433.0,
+      "height": 285.0
+    },
+    {
+      "id": "CPU_VISUALISATION",
+      "x": 5.0,
+      "y": 31.0,
+      "width": 759.0,
+      "height": 497.0
+    },
+    {
+      "id": "REGISTERS",
+      "x": 6.0,
+      "y": 533.0,
+      "width": 1468.0,
+      "height": 476.0
+    },
+    {
+      "id": "HIGH_LEVEL_VISUALISATION",
+      "x": 772.0,
+      "y": 29.0,
+      "width": 698.0,
+      "height": 496.0
+    }
+  ]
+}

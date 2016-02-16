@@ -4,11 +4,11 @@ import simulizer.ui.interfaces.WindowEnum;
 
 public class WindowLocation {
 
-	private final WindowEnum window;
+	private final WindowEnum id;
 	private final double x, y, width, height;
 
-	public WindowLocation(WindowEnum window, double x, double y, double width, double height) {
-		this.window = window;
+	public WindowLocation(WindowEnum id, double x, double y, double width, double height) {
+		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -17,7 +17,7 @@ public class WindowLocation {
 	}
 
 	public WindowEnum getWindowEnum() {
-		return window;
+		return id;
 	}
 
 	public double getX() {

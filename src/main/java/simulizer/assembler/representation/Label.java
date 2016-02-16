@@ -1,5 +1,10 @@
 package simulizer.assembler.representation;
 
+/**
+ * store the information that the assembler needs to setup the label for use in
+ * the simulator
+ * @author mbway
+ */
 public class Label {
 
     public enum Type {
@@ -29,5 +34,6 @@ public class Label {
     public Type getType() {
         return this.type;
     }
+
 
 }

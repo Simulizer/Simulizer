@@ -1,11 +1,11 @@
 
 .plain {
-
+  -fx-fill: purple;
+  -fx-font-weight: bold;
 }
 
 .keyword {
-    -fx-fill: blue;
-    -fx-font-weight: bold;
+    -fx-fill: yellow;
 }
 
 .register {
@@ -13,15 +13,14 @@
 }
 
 .constant {
-    -fx-fill: purple;
+    -fx-fill: orange;
 }
 
 
 .annotation {
-    -fx-fill: yellow;
+    -fx-fill: silver;
 }
 
 .comment {
     -fx-fill: grey;
 }
-

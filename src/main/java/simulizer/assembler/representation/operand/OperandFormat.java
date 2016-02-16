@@ -2,28 +2,33 @@ package simulizer.assembler.representation.operand;
 
 import java.util.Arrays;
 
+/**
+ * specifies the type of operands that should be accepted for a particular instruction
+ * @author mbway
+ */
 public class OperandFormat {
     public enum OperandType {
         // TYPE (parent) where TYPE should allow the parent
         // eg if any immediate is required, accept unsigned immediate values
+        // eg if destination register is required, accept any register
 
         REGISTER    (null),
-            DEST_REGISTER   (REGISTER),     // register written to
-            SRC_REGISTER    (REGISTER),     // register value read
-            TARGET_REGISTER (REGISTER),     // register value jumped to exactly (not base/offset) or used as branch condition
-        IMMEDIATE   (null),                 // positive or negative immediate integer
-            UNSIGNED_IMMEDIATE (IMMEDIATE), // unsigned immediate integer
-        LABEL       (null),                 // label
-        BASE_OFFSET (null);                 // of the form (regex) `label? (+|-)? offset? ( register )`
+            DEST_REGISTER   (REGISTER),       // register written to
+            SRC_REGISTER    (REGISTER),       // register value read
+            TARGET_REGISTER (REGISTER),       // register value jumped to exactly (not base/offset) or used as branch condition
+        UNSIGNED_IMMEDIATE (null),            // unsigned immediate integer
+            IMMEDIATE   (UNSIGNED_IMMEDIATE), // positive or negative immediate integer
+        LABEL       (null),                   // label
+        BASE_OFFSET (null);                   // of the form (regex) `label? (+|-)? offset? ( register )`
 
-        private OperandType parent;
+        private OperandType shouldAlsoAccept;
 
-        OperandType(OperandType parent) {
-            this.parent = parent;
+        OperandType(OperandType shouldAlsoAccept) {
+            this.shouldAlsoAccept = shouldAlsoAccept;
         }
 
         public boolean accepts(OperandType t) {
-            return this.equals(t) || parent != null && parent.accepts(t);
+            return equals(t) || (shouldAlsoAccept != null && shouldAlsoAccept.accepts(t));
         }
     }
 
@@ -119,13 +124,14 @@ public class OperandFormat {
     public boolean valid(OperandType arg1, OperandType arg2, OperandType arg3) {
         boolean isGood;
 
-        OperandType allowed[][] = new OperandType[][] {allowedPos1, allowedPos3, allowedPos3};
+        OperandType allowed[][] = new OperandType[][] {allowedPos1, allowedPos2, allowedPos3};
         OperandType args[] = new OperandType[] {arg1, arg2, arg3};
 
         for(int i = 0; i < 3; i++) {
             isGood = false;
 
             if(allowed[i].length == 0) {
+                // no arguments allowed in this slot
                 isGood = args[i] == null;
             } else {
                 for(OperandType t : allowed[i]) {

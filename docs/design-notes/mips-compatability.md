@@ -106,16 +106,39 @@ Compared to the SPIM simulator, Simulizer only supports these system calls:
 # Assembler #
 Compared to the SPIM simulator's assembler.
 
+## Syntax Differences ##
+Simulizer supports these escape sequences:
+- `\t`     tab
+- `\n`     newline
+- `\"`     `"`
+- `\\`     `\`
+- `\nnn`   octal ASCII character code (1-3 digits)
+- `\xhh`   hexadecimal ASCII character code (2 digits)
+
+differences:
+- Spim allowed unmatched `\` characters to be treated literally whereas Simulizer
+  requires that they be properly escaped
+- Spim handled octal escape characters incorrectly
+- Spim requires all octal escape sequences to have 3 digits
+- Spim has some bugs regarding escaping (see spim behaviour tests)
+    - SPIM parses `.asciiz "abc\\"` as the string: `abc\"`
+    - SPIM parses `.asciiz "\101"` (effects all codes above `\077`) as the octal
+      code `\011` which is incorrect.
+
 ## Different From SPIM ##
 - macros are not supported
 - linking is not supported. Programs must be self-contained in a single file.
 - pseudo-operations are considered to be single instructions.
 - arguments *must* be separated by a comma whereas SPIM allows these to be omitted.
-- (//TODO: untested) more escaped ascii characters are supported due to Java's
-  handling of the strings. SPIM only supports '\n', '\t' and '\"'
-- (//TODO: untested) Only big endian byte order (SPIM supports both). So `.byte
-  0,1,2,3` produces `lowest address [0, 1, 2, 3] highest address`
+- (//TODO: untested) Only big endian byte order (SPIM supports both). So
+  `.byte 0,1,2,3` produces `lowest address [0, 1, 2, 3] highest address`
 - do not use the `lo` and `hi` registers for storing results of multiplication or division
+- negative arguments to `sbrk` are allowed
+- character literals for initialising `.byte` is not supported
+- when providing integer literals that are too big for the size of the variable,
+  SPIM will silently allow it, while giving incorrect answers. Simulizer
+  instead refuses to proceed.
+- SPIM does not allow a uppercase `0X` to denote a hex number
 
 ## Intentionally The Same As SPIM ##
 These behaviours have been tested to hold in SPIM.
@@ -137,6 +160,8 @@ These behaviours have been tested to hold in SPIM.
   specification. This is because recent revisions of MIPS32 have removed some
   useful instructions such as `addi`
 - (//TODO: untested) jumping to an address that is not 4-byte aligned will crash.
+- arguments to `sbrk` must be a multiple of 4, since the resulting addresses
+  must be 4-byte aligned as per the specification.
 
 
 ## Addressing Modes ##

@@ -1,5 +1,9 @@
 package simulizer.assembler.representation.operand;
 
+/**
+ * store an operand to an assembler directive or instruction
+ * @author mbway
+ */
 public abstract class Operand {
     public enum Type {
         Integer,
