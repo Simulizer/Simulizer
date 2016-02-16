@@ -186,7 +186,7 @@ public class ALU {
                     return new Word(branchFalse);
                 }
             case beqz:
-                if(decodeS(firstValue) > 0)
+                if(decodeS(firstValue) == 0)
                 {
                     return new Word(branchTrue);
                 }
