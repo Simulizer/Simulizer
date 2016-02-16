@@ -226,5 +226,59 @@ public class ALUTest {
 			assertEquals(2,executeS(Instruction.xor,signedW(3),signedW(1)));
 			assertEquals(3,executeS(Instruction.xor,signedW(3),signedW(0)));
 		}
+		
+		{//b
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.b,signedW(0),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.b,signedW(-20),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.b,signedW(20),Optional.empty()));
+		}
+		
+		{//beq
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beq,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.beq,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beq,signedW(0),signedW(-1)));
+		}
+		
+		{//bne
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bne,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bne,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bne,signedW(0),signedW(-1)));
+		}
+		
+		{//bgez (entering random items in second slot to test that it isn't used by the ALU)
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bgez,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bgez,signedW(-1),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bgez,signedW(1),signedW(-1)));
+		}
+		
+		{//bgtz (now with Optional.empty() as second item)
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bgtz,signedW(0),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bgtz,signedW(-1),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bgtz,signedW(1),Optional.empty()));
+		}
+		
+		{//blez 
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.blez,signedW(0),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.blez,signedW(-1),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.blez,signedW(1),Optional.empty()));
+		}
+		
+		{//bltz
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bltz,signedW(0),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bltz,signedW(-1),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bltz,signedW(1),Optional.empty()));
+		}
+		
+		{//beqz
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.beqz,signedW(0),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beqz,signedW(-1),Optional.empty()));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beqz,signedW(1),Optional.empty()));
+		}
+		
+		{//move
+			assertEquals(0, executeS(Instruction.move, signedW(0),signedW(17)));
+			assertEquals(-6, executeS(Instruction.move, signedW(-6),signedW(0)));
+			assertEquals(5, executeS(Instruction.move, signedW(5),Optional.empty()));
+		}	
 	}
 }
