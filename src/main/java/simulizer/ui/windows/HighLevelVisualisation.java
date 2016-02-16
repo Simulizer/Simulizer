@@ -3,6 +3,7 @@ package simulizer.ui.windows;
 import javafx.scene.layout.Pane;
 import simulizer.highlevel.visualisation.DataStructureVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.theme.Theme;
 
 public class HighLevelVisualisation extends InternalWindow {
 	private DataStructureVisualiser visualiser;
@@ -29,12 +30,10 @@ public class HighLevelVisualisation extends InternalWindow {
 		return drawingPane;
 	}
 	
-//	TODO Convert this to the new way of setting themes
-//	@Override
-//	public void setTheme(String theme) {
-//		super.setTheme(theme);
-//		System.out.println("Adding stylesheet");
-//		getStylesheets().add(theme + "/highlevel.css");
-//	}
+	@Override
+	public void setTheme(Theme theme) {
+		super.setTheme(theme);
+		getStylesheets().add(theme.getStyleSheet("highlevel.css"));
+	}
 
 }
