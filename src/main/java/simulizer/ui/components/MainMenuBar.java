@@ -8,7 +8,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.Main;
 import simulizer.ui.WindowManager;
-import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.windows.CodeEditor;
@@ -20,7 +19,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), viewMenu(), windowsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
 	}
 
 	private Menu fileMenu() {
@@ -80,7 +79,7 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- High Level Only Layout
 		MenuItem highLevelLayoutItem = new MenuItem("High Level Only Layout");
 		highLevelLayoutItem.setOnAction(e -> wm.setLayout(Layouts.onlyHighLevel()));
-		
+
 		layoutMenu.getItems().addAll(defaultLayoutItem, alternativeLayoutItem, highLevelLayoutItem);
 
 		// | |-- Themes
@@ -108,15 +107,24 @@ public class MainMenuBar extends MenuBar {
 		return viewMenu;
 	}
 
+	private Menu runMenu() {
+		// To be moved to separate buttons later
+		Menu runMenu = new Menu("Run Code");
+		MenuItem runProgram = new MenuItem("Run Program");
+		runProgram.setOnAction(e -> System.out.println("Does nothing yet"));
+		MenuItem singleStep = new MenuItem("Single Step");
+		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
+		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
+		simplePipeline.setOnAction(e -> System.out.println("Does nothing yet"));
+		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline);
+		return runMenu;
+	}
+
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> {
-				InternalWindow w = wenum.createNewWindow();
-				w.setBounds(20, 35, 400, 685);
-				wm.addWindows(w);
-			});
+			item.setOnAction(e -> wm.findInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
 		return windowsMenu;
@@ -128,7 +136,9 @@ public class MainMenuBar extends MenuBar {
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
-		debugMenu.getItems().addAll(windowLocation, delWindows);
+		MenuItem emphWindow = new MenuItem("Emphisise Window");
+		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow);
 		return debugMenu;
 	}
 

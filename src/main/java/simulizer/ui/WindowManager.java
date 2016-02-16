@@ -61,8 +61,8 @@ public class WindowManager extends Pane {
 			window.setOnCloseAction((e) -> removeWindows(window));
 			openWindows.add(window);
 			window.setTheme(theme);
-			window.ready();
 			pane.getChildren().addAll(window);
+			window.ready();
 		}
 	}
 
