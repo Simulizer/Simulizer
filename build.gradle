@@ -169,20 +169,49 @@ dependencies {
         // version for generating parsers during build
         antlr   'org.antlr:antlr4:4.5'
 
-
     // JFExtras
         compile 'org.jfxtras:jfxtras-controls:8.0-r4'
         compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
 
-
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-
+        
+    // GSON: JSON Parsing
+    	compile 'com.google.code.gson:gson:2.5'
 
     // Testing
         testCompile 'junit:junit:4.12'
+    
+    mkdir('work')
 }
 
+
+clean{
+    // delete "work" // Disabled until copying out of jar works
+}
+
+
+/////////////////////////////////////////////////
+//
+// Testing Configuration
+//
+/////////////////////////////////////////////////
+
+test {
+    useJUnit {
+        // uncomment if your system does not have Spim installed
+        //excludeCategories 'category.SpimTests'
+
+        // uncomment to exclude any slow tests
+        //excludeCategories 'category.SlowTests'
+
+        // uncomment to only run finished tests
+        //excludeCategories 'category.InProgressTests'
+    }
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+}
 
 
 /////////////////////////////////////////////////
@@ -191,7 +220,15 @@ dependencies {
 //
 /////////////////////////////////////////////////
 
+run {
+	workingDir = file('work')
+}
+
+
 jar {
+    // Include all dependencies in the jar file
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    
     manifest {
         attributes 'Implementation-Title':   name,
                    'Implementation-Version': version,

@@ -17,8 +17,8 @@ public class ProgramCounter extends Observable {
 	private final Word INCREMENT;// increment amount for the program counter
 	private Word nextAddress;
 	private ControlUnit controlUnit;
-	private InstructionRegister IRUnit;
-	private LSUnit LSUnit;
+	private InstructionRegister irUnit;
+	private LSUnit lsUnit;
 
 	/**
 	 * initialising all fields of this class
@@ -28,19 +28,19 @@ public class ProgramCounter extends Observable {
 	 *            should be the entry point to start
 	 * @param controlUnit
 	 *            the 'bus' linking the control unit and the program counter
-	 * @param IRUnit
+	 * @param irUnit
 	 *            the 'bus' linking the Instruction Register and the Program
 	 *            Counter
-	 * @param LSUnit
+	 * @param lsUnit
 	 *            the 'bus' linking the LS Unit and the program counter
 	 */
-	public ProgramCounter(Word nextAddress, ControlUnit controlUnit, InstructionRegister IRUnit, LSUnit LSUnit) {
+	public ProgramCounter(Word nextAddress, ControlUnit controlUnit, InstructionRegister irUnit, LSUnit lsUnit) {
 		super();
 		this.INCREMENT = new Word(new BigInteger("4"));// 4 in 32 bit binary representation
 		this.nextAddress = nextAddress;
 		this.controlUnit = controlUnit;
-		this.IRUnit = IRUnit;
-		this.LSUnit = LSUnit;
+		this.irUnit = irUnit;
+		this.lsUnit = lsUnit;
 	}
 
 	/**
@@ -104,28 +104,28 @@ public class ProgramCounter extends Observable {
 	 * connection might actually be redundant?
 	 */
 	public void retrieveIRUnit() {
-		this.setData(this.IRUnit.getData());
+		this.setData(this.irUnit.getData());
 		setChanged();
 		notifyObservers();
 	}
 
 	/** method 'sends' something along the IR Bus */
 	public void sendIRUnit() {
-		this.IRUnit.setData(this.getData());
+		this.irUnit.setData(this.getData());
 		setChanged();
 		notifyObservers();
 	}
 
 	/** method retrieves data from the LS Bus */
 	public void retrieveLSUnit() {
-		this.setData(this.LSUnit.getData());
+		this.setData(this.lsUnit.getData());
 		setChanged();
 		notifyObservers();
 	}
 
 	/** method 'sends' something on to the LSUnit */
 	public void sendLSUnit() {
-		this.LSUnit.setData(this.getData());
+		this.lsUnit.setData(this.getData());
 		setChanged();
 		notifyObservers();
 	}
