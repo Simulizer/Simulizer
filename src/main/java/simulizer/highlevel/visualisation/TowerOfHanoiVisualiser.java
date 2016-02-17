@@ -118,7 +118,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 *            the index of the peg to move the disc to
 	 */
 	public void move(int i, int j) {
-		if (pegs.get(i).size() == 0)
+		if (pegs.get(i).size() == 0 || i == j)
 			return;
 
 		Rectangle disc = pegs.get(i).peek();
