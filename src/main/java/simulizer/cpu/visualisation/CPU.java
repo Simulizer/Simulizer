@@ -55,14 +55,14 @@ public class CPU {
         ir = new GeneralComponent(15, 220, 20, 50, "");
         unknown = new GeneralComponent(60, 210, 40, 40, "+4");
 
-        Wire controlUnitToIr = ir.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPC = programCounter.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPlusFour = unknown.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToIM1 = instructionMemory.vericalLineTo(controlUnit, true, true, -0.1);
-        Wire controlUnitToIM2 = instructionMemory.vericalLineTo(controlUnit, true, false, 0.1);
-        Wire controlUnitToRegisters = register.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToALU = alu.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToDataMemory = mainMemory.vericalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
+        Wire controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
+        Wire controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
+        Wire controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
 
         controlUnitToIM1.animateData(4, true);
 

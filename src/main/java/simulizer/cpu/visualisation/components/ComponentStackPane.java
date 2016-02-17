@@ -63,7 +63,7 @@ public class ComponentStackPane extends StackPane {
         return new Wire(this, shape, Wire.Type.HORIZONTAL, right, arrowStart, offset);
     }
 
-    public Wire vericalLineTo(ComponentStackPane shape, boolean bottom, boolean arrowStart, double offset){
+    public Wire verticalLineTo(ComponentStackPane shape, boolean bottom, boolean arrowStart, double offset){
         return new Wire(this, shape, Wire.Type.VERTICAL, bottom, arrowStart, offset);
     }
 
