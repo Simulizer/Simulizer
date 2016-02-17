@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import simulizer.ui.WindowManager;
@@ -34,9 +35,14 @@ public class Main extends Application {
 
 		// TODO: Remove this code, simple check for if we are running within the work folder
 		String cwd = System.getProperty("user.dir");
-		if(!cwd.endsWith("work"))
-			System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
-		
+		if (!cwd.endsWith("work")) System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+
+		// Close application
+		primaryStage.setOnCloseRequest((t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+
 		// Just show the main window for now
 		new WindowManager(primaryStage);
 	}
