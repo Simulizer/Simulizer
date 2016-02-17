@@ -21,8 +21,9 @@ public class Registers extends InternalWindow {
 			try {
 				Word[] registers = getWindowManager().getRegisters();
 				value = Long.toHexString(DataConverter.decodeAsUnsigned(registers[i].getWord()));
-				while (value.length() < 4)
+				while (value.length() < 8)
 					value = "0" + value;
+				value = "0x" + value;
 			} catch (NullPointerException e) {
 				value = "EMPTY";
 			}
