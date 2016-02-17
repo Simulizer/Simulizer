@@ -1,5 +1,7 @@
 package simulizer.assembler.representation;
 
+import simulizer.simulation.data.representation.Word;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +37,15 @@ public class Program {
     public Map<Address, Integer> lineNumbers;
 
     /**
+     * initial value for the global pointer
+     */
+    public Word initialGP;
+    /**
+     * initial value for the stack pointer
+     */
+    public Word initialSP;
+
+    /**
      * a hash of the source code to determine whether changes have occurred
      */
     public int sourceHash;
@@ -49,6 +60,8 @@ public class Program {
         dynamicSegmentStart = Address.NULL;
         labels = new HashMap<>();
         lineNumbers = new HashMap<>();
+        initialGP = null;
+        initialSP = null;
         sourceHash = -1;
     }
 
