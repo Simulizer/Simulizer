@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +57,7 @@ public class CodeEditor extends InternalWindow {
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
-	private List<Problem> problems;
+	private List<Problem> problems = new ArrayList<>();
 
 	private final String TITLE = WindowEnum.toEnum(this).toString();
 
@@ -71,7 +72,7 @@ public class CodeEditor extends InternalWindow {
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
 		EventStream<?> richChanges = codeArea.richChanges();
-		richChanges.successionEnds(Duration.ofMillis(50)).supplyTask(this::computeAntlrHighlightingAsync).awaitLatest(richChanges).filterMap(t -> {
+		richChanges.successionEnds(Duration.ofMillis(10)).supplyTask(this::computeAntlrHighlightingAsync).awaitLatest(richChanges).filterMap(t -> {
 			if (t.isSuccess()) {
 				return Optional.of(t.get());
 			} else {
@@ -80,14 +81,12 @@ public class CodeEditor extends InternalWindow {
 			}
 		}).subscribe(this::applyHighlighting);
 
-		// codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0,
-		// computeAntlrHighlighting(codeArea.getText())));
 		codeArea.replaceText("");
 		codeArea.setWrapText(true);
 
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/TooltipDemo.java
-		codeArea.setMouseOverTextDelay(Duration.ofSeconds(1));
+		codeArea.setMouseOverTextDelay(Duration.ofMillis(250));
 		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			int chIdx = e.getCharacterIndex();
 			Point2D pos = e.getScreenPosition();
@@ -96,7 +95,8 @@ public class CodeEditor extends InternalWindow {
 			if (errorMessage == null)
 				return;
 
-			tooltipMsg.setText(getErrorMessage(chIdx));
+			tooltipMsg.setText(wrap(getErrorMessage(chIdx), 45));
+			tooltipMsg.setWrapText(true);
 			tooltipPopup.show(codeArea, pos.getX(), pos.getY() + 10);
 		});
 
@@ -111,7 +111,31 @@ public class CodeEditor extends InternalWindow {
 		getContentPane().getChildren().add(codeArea);
 	}
 
+	private String wrap(String text, int width) {
+		String svar = "";
+
+		while (!text.isEmpty()) {
+			text = text.trim();
+
+			String c = text.substring(0, Math.min(width, text.length()));
+
+			if (text.length() >= width && text.charAt(c.length()) != ' ') {
+				int spaceIndex = c.lastIndexOf(' ');
+				if (spaceIndex >= 0) {
+					c = c.substring(0, spaceIndex);
+				}
+			}
+
+			svar += c + "\n";
+			text = text.substring(c.length());
+		}
+
+		return svar;
+	}
+
 	/**
+	 * This will not currently work with Problem objects that do not specify rangeStart and rangeEnd
+	 *
 	 * @param chIdx
 	 *            the index of the character in the code editor
 	 * @return the error message associated with the phrase containing the
@@ -130,7 +154,7 @@ public class CodeEditor extends InternalWindow {
 	@Override
 	public void setTheme(Theme theme) {
 		super.setTheme(theme);
-		getStylesheets().clear();
+		getStylesheets().clear(); // Should this be here?
 		getStylesheets().add(theme.getStyleSheet("code.css"));
 	}
 
@@ -215,20 +239,25 @@ public class CodeEditor extends InternalWindow {
 		SyntaxHighlighter extractor = new SyntaxHighlighter(normalSpansBuilder);
 		ParseTreeWalker.DEFAULT.walk(extractor, tree);
 
-//		// Make sure there is at least one style added
+		// Make sure there is at least one style added
 		normalSpansBuilder.add(Collections.emptyList(), 0);
 
 		// Go through the program again and find the error spots
 		StyleSpansBuilder<Collection<String>> errorSpansBuilder = new StyleSpansBuilder<>();
 		StoreProblemLogger log = new StoreProblemLogger();
 		ProgramExtractor pExtractor = new ProgramExtractor(log);
+
+		lexer.reset();
+		parser.reset();
 		tree = parser.program(); // Reset the tree
 		ParseTreeWalker.DEFAULT.walk(pExtractor, tree);
 
 		errorSpansBuilder.add(Collections.emptyList(), 0);
 
 		// Then add error wrappers around the problems
+		System.out.println("---- Current Problems ----");
 		this.problems = log.getProblems();
+
 		int lastTokenEnd = 0;
 		for (Problem p : this.problems) {
 			System.out.println(p);

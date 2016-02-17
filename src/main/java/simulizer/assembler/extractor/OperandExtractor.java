@@ -1,23 +1,23 @@
 package simulizer.assembler.extractor;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import simulizer.assembler.extractor.problem.ImpossibleSituation;
-import simulizer.assembler.extractor.problem.Problem;
-import simulizer.assembler.extractor.problem.ProblemLogger;
-import simulizer.assembler.extractor.problem.ValidityListener;
-import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.operand.*;
-import simulizer.parser.SimpParser;
-import simulizer.parser.SimpParser;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.ValidityListener;
+import simulizer.assembler.representation.Register;
+import simulizer.assembler.representation.operand.AddressOperand;
+import simulizer.assembler.representation.operand.IntegerOperand;
+import simulizer.assembler.representation.operand.Operand;
+import simulizer.assembler.representation.operand.RegisterOperand;
+import simulizer.assembler.representation.operand.StringOperand;
+import simulizer.parser.SimpParser;
 
 /**
  * A class to extract operands from assembler directives and program statements
