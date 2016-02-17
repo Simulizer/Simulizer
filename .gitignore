@@ -50,3 +50,6 @@ gradle.properties
 
 # Ignore application working directory
 # work/ # Temporarily allowing work dir until I can copy out of a jar file
+
+# Ignore logs
+*.log
