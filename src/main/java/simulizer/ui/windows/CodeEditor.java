@@ -86,7 +86,7 @@ public class CodeEditor extends InternalWindow {
 
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/TooltipDemo.java
-		codeArea.setMouseOverTextDelay(Duration.ofSeconds(1));
+		codeArea.setMouseOverTextDelay(Duration.ofMillis(250));
 		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			int chIdx = e.getCharacterIndex();
 			Point2D pos = e.getScreenPosition();
