@@ -710,4 +710,7 @@ public class CPU {
         return new Word(DataConverter.encodeAsUnsigned(value));
     }
 
+	public Word[] getRegisters() {
+		return registers;
+	}
 }

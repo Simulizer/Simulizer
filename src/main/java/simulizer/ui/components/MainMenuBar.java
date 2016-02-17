@@ -12,14 +12,13 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
-import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
 import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -187,13 +186,7 @@ public class MainMenuBar extends MenuBar {
 			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText());
-			CPU cpu = new CPU(p, new IOConsole());
-			try {
-				System.out.println("START HERE!!!!!!!");
-				cpu.runProgram();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			wm.runProgram(p);
 		});
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
@@ -219,8 +212,11 @@ public class MainMenuBar extends MenuBar {
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
-		MenuItem emphWindow = new MenuItem("Emphisise Window");
-		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
+		MenuItem emphWindow = new MenuItem("Refresh Registers");
+		emphWindow.setOnAction(e -> {
+			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
+			reg.refreshData();
+		});
 		MenuItem lineWrap = new MenuItem("Line Wrap");
 		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
 		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap);

@@ -5,20 +5,23 @@ import static org.junit.Assert.assertEquals;
 import java.util.Optional;
 
 import org.junit.Before;
-
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import category.UnitTests;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.ALU;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.InstructionException;
 
+
 /**tests all ALU operations
  * 
  * @author Charlie Street
- *
+ * 
  */
+@Category({UnitTests.class})
 public class ALUTest {
 
 	private ALU alu;

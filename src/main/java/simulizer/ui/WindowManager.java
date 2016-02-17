@@ -2,9 +2,19 @@ package simulizer.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import simulizer.assembler.representation.Program;
+import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.IOConsole;
+import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.DecodeException;
+import simulizer.simulation.exceptions.ExecuteException;
+import simulizer.simulation.exceptions.HeapException;
+import simulizer.simulation.exceptions.InstructionException;
+import simulizer.simulation.exceptions.MemoryException;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -21,6 +31,7 @@ public class WindowManager extends Pane {
 	private Themes themes = new Themes();
 	private Layouts layouts = new Layouts(this);
 	private Stage primaryStage;
+	private CPU cpu;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -68,7 +79,8 @@ public class WindowManager extends Pane {
 
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
-			if (window.isVisible()) window.close();
+			if (window.isVisible())
+				window.close();
 			openWindows.remove(window);
 		}
 	}
@@ -110,7 +122,8 @@ public class WindowManager extends Pane {
 	public InternalWindow findInternalWindow(WindowEnum window) {
 		// Find existing window
 		for (InternalWindow w : openWindows)
-			if (window.equals(w)) return w;
+			if (window.equals(w))
+				return w;
 
 		// Not found -> Create a new one
 		InternalWindow w = window.createNewWindow();
@@ -139,5 +152,18 @@ public class WindowManager extends Pane {
 
 	public Pane getPane() {
 		return pane;
+	}
+
+	public void runProgram(Program p) {
+		cpu = new CPU(p, new IOConsole());
+		try {
+			cpu.runProgram();
+		} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public Word[] getRegisters() {
+		return cpu.getRegisters();
 	}
 }
