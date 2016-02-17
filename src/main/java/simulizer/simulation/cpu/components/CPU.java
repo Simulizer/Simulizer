@@ -422,10 +422,19 @@ public class CPU {
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr))//load
                 {
+                	
                     int retrieveAddress = instruction.asLSType().getMemAddress().get().getValue();
-                    int length = 4;//this may be wrong, hence outside, may depend on instruction
-                    byte[] read = this.memory.readFromMem(retrieveAddress, length);
-                    this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
+                    if(instruction.getInstruction().equals(Instruction.la))//have to be careful with la
+                	{
+                    	Word address = new Word(DataConverter.encodeAsSigned((long)retrieveAddress));
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = address;
+                	}
+                    else
+                    {
+                    	int length = 4;//this may be wrong, hence outside, may depend on instruction
+                    	byte[] read = this.memory.readFromMem(retrieveAddress, length);
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
+                    }
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.srcAddr))//store
                 {
@@ -462,12 +471,12 @@ public class CPU {
     			String toPrint = "";//initial string
     			byte[] currentByte;
     			int addressPStr = a0;
-    			currentByte = this.memory.readFromMem(a0, 4);//reading in blocks of 4 bytes, i.e 1 character
+    			currentByte = this.memory.readFromMem(a0, 1);//reading in blocks of 4 bytes, i.e 1 character
     			while(DataConverter.decodeAsSigned(currentByte) != 0)//while not at null terminator
     			{
-    				toPrint += (char)DataConverter.decodeAsSigned(currentByte);//converting to char
-    				addressPStr += 4;//incrementing address to next byte
-    				currentByte = this.memory.readFromMem(a0, 4);//next word to read
+    				toPrint += new String(currentByte);//converting to char
+    				addressPStr += 1;//incrementing address to next byte
+    				currentByte = this.memory.readFromMem(addressPStr, 1);//next word to read
     			}
     			this.io.printString(toPrint);
     			break;
@@ -503,7 +512,7 @@ public class CPU {
     			this.pauseClock();//need to change this!!
     			break;
     		case 11://print char
-    			char toPrintChar = (char)a0;//int directly to char
+    			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
     			this.io.printChar(toPrintChar);
     			break;
     		case 12://read char
