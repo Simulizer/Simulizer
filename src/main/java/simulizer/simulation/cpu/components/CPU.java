@@ -437,6 +437,7 @@ public class CPU {
                 {
                     throw new ExecuteException("Error executing load/store instruction.", instruction);
                 }
+                break;
             default:
                 throw new ExecuteException("Error during Execution", instruction);
         }
@@ -549,11 +550,11 @@ public class CPU {
         while(isRunning)//need something to stop this
         {
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute
-            try {
+           /* try {
                 wait();
             } catch (InterruptedException e) {
                 //we want the interruption so do nothing and keep looping
-            }
+            }*/
         }
     }
 

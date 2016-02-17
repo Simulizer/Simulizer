@@ -189,6 +189,7 @@ public class MainMenuBar extends MenuBar {
 			Program p = a.assemble(code.getText());
 			CPU cpu = new CPU(p, new IOConsole());
 			try {
+				System.out.println("START HERE!!!!!!!");
 				cpu.runProgram();
 			} catch (Exception e1) {
 				e1.printStackTrace();
