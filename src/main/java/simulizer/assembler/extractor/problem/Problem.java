@@ -1,7 +1,6 @@
 package simulizer.assembler.extractor.problem;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 
 /**
  * Holds information about problems encountered while parsing source code
@@ -69,10 +68,8 @@ public class Problem {
         this.message = message;
 
         lineNum = ctx.getStart().getLine();
-
-        Interval i = ctx.getSourceInterval();
-        rangeStart = i.a;
-        rangeEnd = i.b;
+        rangeStart = ctx.getStart().getStartIndex();
+        rangeEnd = ctx.getStop().getStopIndex();
     }
 
 	@Override

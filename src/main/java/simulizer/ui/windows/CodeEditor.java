@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +57,7 @@ public class CodeEditor extends InternalWindow {
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
-	private List<Problem> problems = new ArrayList<>(Arrays.asList(new Problem("Dummy message", 1, 0, 5)));
+	private List<Problem> problems = new ArrayList<>();
 
 	private final String TITLE = WindowEnum.toEnum(this).toString();
 
@@ -73,7 +72,7 @@ public class CodeEditor extends InternalWindow {
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
 		EventStream<?> richChanges = codeArea.richChanges();
-		richChanges.successionEnds(Duration.ofMillis(50)).supplyTask(this::computeAntlrHighlightingAsync).awaitLatest(richChanges).filterMap(t -> {
+		richChanges.successionEnds(Duration.ofMillis(10)).supplyTask(this::computeAntlrHighlightingAsync).awaitLatest(richChanges).filterMap(t -> {
 			if (t.isSuccess()) {
 				return Optional.of(t.get());
 			} else {
@@ -82,14 +81,12 @@ public class CodeEditor extends InternalWindow {
 			}
 		}).subscribe(this::applyHighlighting);
 
-		// codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0,
-		// computeAntlrHighlighting(codeArea.getText())));
 		codeArea.replaceText("");
 		codeArea.setWrapText(true);
 
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/TooltipDemo.java
-		codeArea.setMouseOverTextDelay(Duration.ofSeconds(1));
+		codeArea.setMouseOverTextDelay(Duration.ofMillis(250));
 		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			int chIdx = e.getCharacterIndex();
 			Point2D pos = e.getScreenPosition();
@@ -99,6 +96,7 @@ public class CodeEditor extends InternalWindow {
 				return;
 
 			tooltipMsg.setText(getErrorMessage(chIdx));
+			tooltipMsg.setWrapText(true);
 			tooltipPopup.show(codeArea, pos.getX(), pos.getY() + 10);
 		});
 
@@ -115,6 +113,7 @@ public class CodeEditor extends InternalWindow {
 
 	/**
 	 * This will not currently work with Problem objects that do not specify rangeStart and rangeEnd
+	 *
 	 * @param chIdx
 	 *            the index of the character in the code editor
 	 * @return the error message associated with the phrase containing the
@@ -225,14 +224,17 @@ public class CodeEditor extends InternalWindow {
 		StyleSpansBuilder<Collection<String>> errorSpansBuilder = new StyleSpansBuilder<>();
 		StoreProblemLogger log = new StoreProblemLogger();
 		ProgramExtractor pExtractor = new ProgramExtractor(log);
+
+		lexer.reset();
+		parser.reset();
 		tree = parser.program(); // Reset the tree
 		ParseTreeWalker.DEFAULT.walk(pExtractor, tree);
 
 		errorSpansBuilder.add(Collections.emptyList(), 0);
 
 		// Then add error wrappers around the problems
-		this.problems.addAll(log.getProblems()); // debug
-		// this.problems = log.getProblems();    // should be this
+		System.out.println("---- Current Problems ----");
+		this.problems = log.getProblems();
 
 		int lastTokenEnd = 0;
 		for (Problem p : this.problems) {
@@ -247,7 +249,7 @@ public class CodeEditor extends InternalWindow {
 
 			int styleSize = p.rangeEnd - p.rangeStart + 1;
 			errorSpansBuilder.add(Collections.singleton("error"), styleSize);
-			
+
 			lastTokenEnd = p.rangeEnd + 1;
 		}
 
