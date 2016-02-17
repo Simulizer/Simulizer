@@ -315,7 +315,13 @@ public class ProgramExtractor extends SimpBaseListener {
             }
 
             OperandExtractor ext = new OperandExtractor(log);
-            List<Operand> operands = ext.extractStatementOperands(ctx.statementOperandList());
+            SimpParser.StatementOperandListContext ops = ctx.statementOperandList();
+            List<Operand> operands;
+            if(ops != null) {
+                operands = ext.extractStatementOperands(ops);
+            } else {
+                operands = new ArrayList<>();
+            }
 
             int requiredNum = instruction.getOperandFormat().getNumArgs();
             if(operands.size() != requiredNum) {
