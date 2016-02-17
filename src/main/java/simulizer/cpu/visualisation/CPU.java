@@ -39,14 +39,8 @@ public class CPU {
     }
 
     public void drawCPU(){
-        double width = vis.getWindowWidth();
-        double height = vis.getWindowHeight();
-
-        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
-
         Group components = new Group();
-        generalWires = new Group();
-
+        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
         programCounter = new GeneralComponent(20, 60, (width * 0.06), 100, "PC");
         instructionMemory = new GeneralComponent(90, 60, 100, 100, "Instruction Memory");
         register = new GeneralComponent(220, 60, 100, 100, "Registers");
@@ -55,23 +49,21 @@ public class CPU {
         ir = new GeneralComponent(15, 220, 20, 50, "");
         unknown = new GeneralComponent(60, 210, 40, 40, "+4");
 
-        Wire controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
-        Wire controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
-        Wire controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
+        generalWires = new Group();
 
-        controlUnitToIM1.animateData(4, true);
-
-        Wire plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
-        Wire PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
-        Wire aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
-
-        Wire reisterToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
-        Wire reisterToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
+        ConnectorWire controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
+        ConnectorWire controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
+        ConnectorWire controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
+        ConnectorWire PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
+        ConnectorWire aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
+        ConnectorWire registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
+        ConnectorWire registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
 
         memToRes = new CustomWire(580, 80);
         IrTOPC = new CustomWire(15, 230);
@@ -95,8 +87,8 @@ public class CPU {
                 plusFourToIr,
                 PCToIM,
                 aluToMemory,
-                reisterToALU1,
-                reisterToALU2
+                registerToALU1,
+                registerToALU2
         );
 
         Group complexWires = new Group();
@@ -112,10 +104,11 @@ public class CPU {
                 IMToRegister3
         );
 
+        controlUnitToRegisters.animateData(5, true);
+
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
         vis.addAll(controlUnit, components, generalWires, complexWires);
     }
-
 
     public void resizeShapes(){
         double width = vis.getWindowWidth();
@@ -133,7 +126,7 @@ public class CPU {
         ObservableList<Node> wires = generalWires.getChildren();
 
         for(Node wire : wires){
-            ((Wire) wire).updateLine();
+            ((ConnectorWire) wire).updateLine();
         }
 
         memToRes.drawLine(width * 0.96, height * 0.2, new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
@@ -190,7 +183,6 @@ public class CPU {
                 new CustomLine(height * 0.025, CustomLine.Direction.UP),
                 new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
         );
-
 
     }
 }

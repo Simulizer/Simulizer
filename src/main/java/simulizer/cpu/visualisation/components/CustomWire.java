@@ -1,17 +1,11 @@
 package simulizer.cpu.visualisation.components;
 
-import javafx.scene.Group;
 import javafx.scene.shape.Polyline;
 
-public class CustomWire extends Group {
-
-    Polyline line;
-    Polyline arrowHead;
+public class CustomWire extends Wire {
 
     public CustomWire(double xStart, double yStart, CustomLine... customLines){
-
-        line = new Polyline();
-        arrowHead = new Polyline();
+        super(new Polyline(), new Polyline(), Type.CUSTOM);
 
         drawLine(xStart, yStart, customLines);
 
