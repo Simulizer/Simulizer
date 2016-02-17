@@ -1,7 +1,6 @@
 package simulizer.ui.components;
 
 import java.io.File;
-
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -9,7 +8,10 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import simulizer.assembler.Assembler;
+import simulizer.assembler.representation.Program;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
@@ -114,7 +116,7 @@ public class MainMenuBar extends MenuBar {
 			// lv.commit();
 			// });
 
-			PegWrapper p = new PegWrapper(-1,-1);
+			PegWrapper p = new PegWrapper(-1, -1);
 			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv.getDrawingPane(), 1000, 400, 0, 4);
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
 				int val = Integer.valueOf(f.getCharacter());
@@ -122,14 +124,14 @@ public class MainMenuBar extends MenuBar {
 				if (p.a == -1) p.a = val;
 				else {
 					p.b = val;
-					
+
 					tv.move(p.a - 1, p.b - 1);
 					tv.commit();
-					
+
 					p.a = -1;
 					p.b = -1;
 				}
-				
+
 			});
 			tv.setRate(2000);
 		});
@@ -178,7 +180,17 @@ public class MainMenuBar extends MenuBar {
 		// To be moved to separate buttons later
 		Menu runMenu = new Menu("Run Code");
 		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> System.out.println("Does nothing yet"));
+		runProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText());
+			CPU cpu = new CPU(p);
+			try {
+				cpu.runProgram();
+			} catch (Exception e1) {
+				System.out.println("Oops: " + e1.getMessage());
+			}
+		});
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
 		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
