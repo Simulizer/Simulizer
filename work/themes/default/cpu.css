@@ -6,7 +6,7 @@
 .cpu-component-label{
     -fx-fill: "#000";
     -fx-text-alignment: center;
-    -fx-font: "Arial, sans-serif", 18px;
+    -fx-font: 18px "Arial, sans-serif";
 }
 
 .cpu-component-label.ALU{
