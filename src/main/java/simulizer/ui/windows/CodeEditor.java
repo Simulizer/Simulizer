@@ -95,7 +95,7 @@ public class CodeEditor extends InternalWindow {
 			if (errorMessage == null)
 				return;
 
-			tooltipMsg.setText(getErrorMessage(chIdx));
+			tooltipMsg.setText(wrap(getErrorMessage(chIdx), 45));
 			tooltipMsg.setWrapText(true);
 			tooltipPopup.show(codeArea, pos.getX(), pos.getY() + 10);
 		});
@@ -109,6 +109,28 @@ public class CodeEditor extends InternalWindow {
 
 		setTitle(TITLE + " - New File");
 		getContentPane().getChildren().add(codeArea);
+	}
+
+	private String wrap(String text, int width) {
+		String svar = "";
+
+		while (!text.isEmpty()) {
+			text = text.trim();
+
+			String c = text.substring(0, Math.min(width, text.length()));
+
+			if (text.length() >= width && text.charAt(c.length()) != ' ') {
+				int spaceIndex = c.lastIndexOf(' ');
+				if (spaceIndex >= 0) {
+					c = c.substring(0, spaceIndex);
+				}
+			}
+
+			svar += c + "\n";
+			text = text.substring(c.length());
+		}
+
+		return svar;
 	}
 
 	/**
