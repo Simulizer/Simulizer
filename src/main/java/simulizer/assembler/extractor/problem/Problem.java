@@ -67,9 +67,15 @@ public class Problem {
     public Problem(String message, ParserRuleContext ctx) {
         this.message = message;
 
-        lineNum = ctx.getStart().getLine();
-        rangeStart = ctx.getStart().getStartIndex();
-        rangeEnd = ctx.getStop().getStopIndex();
+        if(ctx != null) {
+            lineNum = ctx.getStart().getLine();
+            rangeStart = ctx.getStart().getStartIndex();
+            rangeEnd = ctx.getStop().getStopIndex();
+        } else {
+            lineNum = NO_LINE_NUM;
+            rangeStart = -1;
+            rangeEnd = -1;
+        }
     }
 
 	@Override
