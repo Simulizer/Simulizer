@@ -17,6 +17,7 @@ import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.assembler.representation.operand.OperandFormat.OperandType;
 import simulizer.assembler.representation.operand.RegisterOperand;
+import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
@@ -61,17 +62,20 @@ public class CPU {
 
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
+    
+    private IO io;
 
 
     /**the constructor will set all the components up
      *
      * @param program the program information received from the assembler
      */
-    public CPU(Program program)
+    public CPU(Program program, IO io)
     {
         this.loadProgram(program);//set up the CPU with the program
         this.clock = new Clock();
         this.isRunning = false;
+        this.io = io;
     }
 
     /**this method will set the clock controlling
@@ -451,7 +455,7 @@ public class CPU {
     	switch(v0)
     	{
     		case 1://print int
-    			IO.printInt(a0);//printing to console
+    			this.io.printInt(a0);//printing to console
     			break;
     		case 4://print string
     			String toPrint = "";//initial string
@@ -464,15 +468,15 @@ public class CPU {
     				addressPStr += 4;//incrementing address to next byte
     				currentByte = this.memory.readFromMem(a0, 4);//next word to read
     			}
-    			IO.printString(toPrint);
+    			this.io.printString(toPrint);
     			break;
     		case 5://read int
-    			int read = IO.readInt();//reading in from console
+    			int read = this.io.readInt();//reading in from console
     			Word readAsWord = new Word(DataConverter.encodeAsSigned((long)read));
     			this.registers[Register.v0.getID()] = readAsWord;//storing in v0
     			break;
     		case 8://read string
-    			String readInString = IO.readString();//this string will be cut to maxChars -1 i.e last one will be null terminator
+    			String readInString = this.io.readString();//this string will be cut to maxChars -1 i.e last one will be null terminator
     			int a1 = (int)DataConverter.decodeAsSigned(this.registers[Register.a1.getID()].getWord());//max chars stored here
     			int addressIBuf = a0;//start of input buffer
     			if(readInString.length() >= a1)//truncating string
@@ -499,10 +503,10 @@ public class CPU {
     			break;
     		case 11://print char
     			char toPrintChar = (char)a0;//int directly to char
-    			IO.printChar(toPrintChar);
+    			this.io.printChar(toPrintChar);
     			break;
     		case 12://read char
-    			char readChar = IO.readChar();//from console
+    			char readChar = this.io.readChar();//from console
     			int asInt = (int)readChar;//converting into integer form
     			Word toWord = new Word(DataConverter.encodeAsSigned((long)asInt));//format for register storage
     			this.registers[Register.v0.getID()] = toWord;

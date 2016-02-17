@@ -1,19 +1,19 @@
-package simulizer.simulation.cpu.components;
+package simulizer.simulation.cpu.user_interaction;
 
 import java.util.Scanner;
 
 /**this class is used for all basic I/O functions required by syscall
- * in the simulation
+ * in the simulation (using the console)
  * @author Charlie Street
  *
  */
-public class IO 
+public class IOConsole implements IO
 {
 	/**method prints a string passed to it
 	 * 
 	 * @param str the string to be printed
 	 */
-	public static void printString(String str)
+	public void printString(String str)
 	{
 		System.out.println(str);
 	}
@@ -22,7 +22,7 @@ public class IO
 	 * 
 	 * @param num the number to be printed
 	 */
-	public static void printInt(int num)
+	public void printInt(int num)
 	{
 		System.out.println(num);
 	}
@@ -31,7 +31,7 @@ public class IO
 	 * 
 	 * @param letter the character to be printed
 	 */
-	public static void printChar(char letter)
+	public void printChar(char letter)
 	{
 		System.out.println(letter);
 	}
@@ -40,7 +40,7 @@ public class IO
 	 * 
 	 * @return the string read from the console
 	 */
-	public static String readString()
+	public String readString()
 	{
 		Scanner readStr = new Scanner(System.in);
 		String read = readStr.nextLine();
@@ -52,7 +52,7 @@ public class IO
 	 * 
 	 * @return the integer read from the console
 	 */
-	public static int readInt()
+	public int readInt()
 	{
 		Scanner readInt = new Scanner(System.in);
 		int num = readInt.nextInt();
@@ -64,7 +64,7 @@ public class IO
 	 * 
 	 * @return the character read from the console
 	 */
-	public static char readChar()
+	public char readChar()
 	{
 		Scanner readChar = new Scanner(System.in);
 		char letter = readChar.next().charAt(0);
