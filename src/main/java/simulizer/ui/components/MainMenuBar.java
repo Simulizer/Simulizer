@@ -205,7 +205,9 @@ public class MainMenuBar extends MenuBar {
 		delWindows.setOnAction(e -> wm.closeAll());
 		MenuItem emphWindow = new MenuItem("Emphisise Window");
 		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
-		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow);
+		MenuItem lineWrap = new MenuItem("Line Wrap");
+		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap);
 		return debugMenu;
 	}
 
