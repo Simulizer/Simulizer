@@ -1,12 +1,9 @@
 package simulizer.cpu.visualisation.components;
 
 import javafx.animation.FillTransition;
-import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polyline;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -35,8 +32,8 @@ public class ComponentStackPane extends StackPane {
         this.setLayoutX(x);
         this.setLayoutY(y);
         this.text.setWrappingWidth(width * 0.9);
-        this.shape.getStyleClass().addAll("cpu-component");
-        this.text.getStyleClass().addAll("cpu-component-label");
+        this.shape.getStyleClass().addAll("cpu-component", this.getClass().getSimpleName());
+        this.text.getStyleClass().addAll("cpu-component-label", this.getClass().getSimpleName());
         this.getStyleClass().addAll("cpu-container");
         getChildren().addAll(shape, text);
         setAlignment(shape, Pos.TOP_LEFT);
@@ -59,12 +56,12 @@ public class ComponentStackPane extends StackPane {
         this.height = height;
     }
 
-    public Wire horizontalLineTo(ComponentStackPane shape, boolean right, boolean arrowStart, double offset){
-        return new Wire(this, shape, Wire.Type.HORIZONTAL, right, arrowStart, offset);
+    public ConnectorWire horizontalLineTo(ComponentStackPane shape, boolean right, boolean arrowStart, double offset){
+        return new ConnectorWire(this, shape, ConnectorWire.Type.HORIZONTAL, right, arrowStart, offset);
     }
 
-    public Wire vericalLineTo(ComponentStackPane shape, boolean bottom, boolean arrowStart, double offset){
-        return new Wire(this, shape, Wire.Type.VERTICAL, bottom, arrowStart, offset);
+    public ConnectorWire verticalLineTo(ComponentStackPane shape, boolean bottom, boolean arrowStart, double offset){
+        return new ConnectorWire(this, shape, ConnectorWire.Type.VERTICAL, bottom, arrowStart, offset);
     }
 
     public void highlight(int n){

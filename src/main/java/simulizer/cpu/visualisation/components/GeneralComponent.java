@@ -7,8 +7,6 @@ import java.util.Observer;
 
 public class GeneralComponent extends ComponentStackPane {
 
-    Rectangle shapeCache;
-
     public GeneralComponent(double x, double y, double width, double height, String label){
         super(x, y, width, height, label);
         this.shape = new Rectangle(x, y, width, height);
@@ -28,10 +26,8 @@ public class GeneralComponent extends ComponentStackPane {
 
     public void setAttrs(double x, double y, double width, double height){
         setLayoutX(x);
-        layoutXProperty().set(x);
         shape.setLayoutX(x);
         setLayoutY(y);
-        layoutYProperty().set(y);
         shape.setLayoutY(y);
         setShapeWidth(width);
         setPrefWidth(width);

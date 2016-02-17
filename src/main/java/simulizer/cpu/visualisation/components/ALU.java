@@ -53,7 +53,6 @@ public class ALU extends ComponentStackPane {
 
     public void setShapeWidth(double width){
         this.width = width;
-        text.setWrappingWidth(width * 0.9);
     }
 
     public void setShapeHeight(double height){
@@ -69,6 +68,7 @@ public class ALU extends ComponentStackPane {
         setPrefWidth(width);
         setShapeHeight(height);
         setPrefHeight(height);
+        text.setWrappingWidth(width);
         drawShape(((Polyline) this.shape));
     }
 
