@@ -54,6 +54,14 @@ public class MainMemory {
 
 	}
 
+	/**allows the use of sbrk outside of this memory class
+	 * 
+	 * @return the heap/dynamic data segment
+	 */
+	public DynamicDataSegment getHeap()
+	{
+		return this.heap;
+	}
 	/**this method will read from memory, in the places it is allowed to
 	 * 
 	 * @param address the start address to read from

@@ -17,6 +17,7 @@ import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.assembler.representation.operand.OperandFormat.OperandType;
 import simulizer.assembler.representation.operand.RegisterOperand;
+import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
@@ -61,17 +62,20 @@ public class CPU {
 
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
+    
+    private IO io;
 
 
     /**the constructor will set all the components up
      *
      * @param program the program information received from the assembler
      */
-    public CPU(Program program)
+    public CPU(Program program, IO io)
     {
         this.loadProgram(program);//set up the CPU with the program
         this.clock = new Clock();
         this.isRunning = false;
+        this.io = io;
     }
 
     /**this method will set the clock controlling
@@ -391,7 +395,8 @@ public class CPU {
             case SPECIAL:
                 if(instruction.getInstruction().equals(Instruction.syscall))//syscall
                 {
-                    //do whatever needs to be done
+                    int v0 = (int)DataConverter.decodeAsSigned(this.registers[Register.v0.getID()].getWord());//getting code for syscall
+                    syscall(v0);//carry out specified syscall op
                 }
                 else if(instruction.getInstruction().equals(Instruction.nop))//no operation
                 {
@@ -437,6 +442,80 @@ public class CPU {
         }
     }
 
+    /**will use IO to enable the use of system calls with the user
+     * 
+     * @param v0 the syscall code retrieved from the v0 register
+     * @throws InstructionException if invalid syscall code
+     * @throws HeapException if problem using sbrk like a0 not multiple of 4
+     * @throws MemoryException if problem reading from memory for read string
+     */
+    private void syscall(int v0) throws InstructionException, HeapException, MemoryException
+    {
+    	int a0 = (int)DataConverter.decodeAsSigned(this.registers[Register.a0.getID()].getWord());//getting main argument register
+    	switch(v0)
+    	{
+    		case 1://print int
+    			this.io.printInt(a0);//printing to console
+    			break;
+    		case 4://print string
+    			String toPrint = "";//initial string
+    			byte[] currentByte;
+    			int addressPStr = a0;
+    			currentByte = this.memory.readFromMem(a0, 4);//reading in blocks of 4 bytes, i.e 1 character
+    			while(DataConverter.decodeAsSigned(currentByte) != 0)//while not at null terminator
+    			{
+    				toPrint += (char)DataConverter.decodeAsSigned(currentByte);//converting to char
+    				addressPStr += 4;//incrementing address to next byte
+    				currentByte = this.memory.readFromMem(a0, 4);//next word to read
+    			}
+    			this.io.printString(toPrint);
+    			break;
+    		case 5://read int
+    			int read = this.io.readInt();//reading in from console
+    			Word readAsWord = new Word(DataConverter.encodeAsSigned((long)read));
+    			this.registers[Register.v0.getID()] = readAsWord;//storing in v0
+    			break;
+    		case 8://read string
+    			String readInString = this.io.readString();//this string will be cut to maxChars -1 i.e last one will be null terminator
+    			int a1 = (int)DataConverter.decodeAsSigned(this.registers[Register.a1.getID()].getWord());//max chars stored here
+    			int addressIBuf = a0;//start of input buffer
+    			if(readInString.length() >= a1)//truncating string
+    			{
+    				readInString = readInString.substring(0, a1-1);
+    			}
+    			for(int i = 0; i < readInString.length(); i++)//writing each character to memory
+    			{
+    				int currentChar = readInString.charAt(i);
+    				byte[] toWrite = DataConverter.encodeAsSigned(currentChar);
+    				this.memory.writeToMem(addressIBuf, toWrite);//write into memory
+    				addressIBuf += 4;//moving to next word in memory
+    			}
+    			
+    			byte[] nullTerminator = new byte[]{0x00,0x00,0x00,0x00};//null terminator for string
+    			this.memory.writeToMem(addressIBuf, nullTerminator);//adding terminator signals end of string
+    			break;
+    		case 9://sbrk
+    			Address newBreak = this.memory.getHeap().sbrk(a0);
+    			this.registers[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
+    			break;
+    		case 10://exit program
+    			this.pauseClock();//need to change this!!
+    			break;
+    		case 11://print char
+    			char toPrintChar = (char)a0;//int directly to char
+    			this.io.printChar(toPrintChar);
+    			break;
+    		case 12://read char
+    			char readChar = this.io.readChar();//from console
+    			int asInt = (int)readChar;//converting into integer form
+    			Word toWord = new Word(DataConverter.encodeAsSigned((long)asInt));//format for register storage
+    			this.registers[Register.v0.getID()] = toWord;
+    			break;
+    		default://if invalid syscall code
+    			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
+    	}
+    }
+    
     /**this method will run a single cycle of the FDE cycle
      * @throws MemoryException if problem accessing memory
      * @throws DecodeException if error during decode

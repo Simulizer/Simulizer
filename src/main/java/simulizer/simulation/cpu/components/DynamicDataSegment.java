@@ -67,7 +67,7 @@ public class DynamicDataSegment
 			{
 				if(heap.size() < this.megaByte)
 				{
-					this.heap.add(new Byte(null));//set to a null byte (probably fairly accurate to reality)
+					this.heap.add(new Byte((byte) 0x00));//set to a 0 byte (probably fairly accurate to reality)
 				}
 				else
 				{
