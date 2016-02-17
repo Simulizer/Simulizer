@@ -1,10 +1,12 @@
 package simulizer.assembler.extractor;
 
+import category.UnitTests;
 import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.parser.SimpParser;
@@ -17,6 +19,7 @@ import static org.junit.Assert.*;
  * test the ProgramExtractor class
  * @author mbway
  */
+@Category({UnitTests.class})
 public class ProgramExtractorTests {
 
     @Rule
@@ -149,11 +152,27 @@ public class ProgramExtractorTests {
 
 
     @Test
+    public void testStatements() {
+        // refresh objects
+        log = new StoreProblemLogger();
+
+        // base offset addressing
+        {
+            String p = "sw $s0, 16($s1)";
+            ex = new ProgramExtractor(log);
+            ex.enterTextSegment(null); // pretend inside text segment
+            ex.enterStatement(parse(p).statement());
+            expectGood();
+        }
+    }
+
+    @Test
     public void testWholeParses() {
         // refresh objects
         log = new StoreProblemLogger();
 
-        //TODO multiple data and text segments
+        //TODO: multiple data and text segments
+        //TODO: not recognising syscall as an argument when placed on the last line
 
         {
             String p = "" +
