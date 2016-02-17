@@ -50,7 +50,7 @@ public class DynamicDataSegment
 		}
 		if(bytes < 0)
 		{
-			Address newPointer = new Address(this.breakOfHeap.getValue()- bytes);
+			Address newPointer = new Address(this.breakOfHeap.getValue() +  bytes);
 			if(newPointer.getValue() >= this.startOfHeap.getValue())//error checking
 			{
 				this.breakOfHeap = newPointer;
