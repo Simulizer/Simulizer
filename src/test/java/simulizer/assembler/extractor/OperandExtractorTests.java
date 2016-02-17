@@ -66,6 +66,7 @@ public class OperandExtractorTests {
         log.getProblems().clear();
     }
 
+
     private void extractGoodInteger(int value, String valueString) {
         assertEquals(value, ex.extractInteger(parse(valueString).integer()));
         expectGood();
@@ -482,6 +483,9 @@ public class OperandExtractorTests {
 
         // no ending "
         assertEquals(null, ex.extractString(parse("\"abc").string()));
+        expectBadParse("invalid parse");
+        // no starting "
+        assertEquals(null, ex.extractString(parse("abc\"").string()));
         expectBadParse("invalid parse");
         // ending " on next line
         assertEquals(null, ex.extractString(parse("\"abc\n\"").string()));

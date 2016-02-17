@@ -173,5 +173,12 @@ public class ProgramExtractorTests {
             ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
             expectGood();
         }
+        {
+            String p = "" +
+                ".data; .asciiz \"\\hello\\\"\n.text; main: syscall;";
+            ex = new ProgramExtractor(log);
+            ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+            expectGood();
+        }
     }
 }
