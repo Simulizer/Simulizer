@@ -12,7 +12,7 @@ public class CustomLine {
     double distance;
     Direction direction;
 
-    public CustomLine(int distance, Direction direction){
+    public CustomLine(double distance, Direction direction){
         this.distance = distance;
         this.direction = direction;
     }

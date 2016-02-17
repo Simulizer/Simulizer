@@ -9,6 +9,11 @@
     -fx-stroke: darkred;
 }
 
+.cpu-container{
+    -fx-fill: darkred;
+    -fx-stroke: darkred;
+}
+
 .cpu-arrowhead{
     -fx-fill: "#1e3c72";
     -fx-stroke: "#1e3c72";

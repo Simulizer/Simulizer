@@ -3,19 +3,27 @@ package simulizer.cpu.visualisation.components;
 import javafx.scene.Group;
 import javafx.scene.shape.Polyline;
 
-public class CustomWire extends Wire {
+public class CustomWire extends Group {
 
     Polyline line;
     Polyline arrowHead;
 
     public CustomWire(double xStart, double yStart, CustomLine... customLines){
-        super(new Polyline(), new Polyline());
-
-        setLine(line);
-        setArrowHead(arrowHead);
 
         line = new Polyline();
         arrowHead = new Polyline();
+
+        drawLine(xStart, yStart, customLines);
+
+        arrowHead.getStyleClass().add("cpu-arrowhead");
+        line.getStyleClass().add("cpu-line");
+
+        getChildren().addAll(line, arrowHead);
+    }
+
+    public void drawLine(double xStart, double yStart, CustomLine... customLines){
+        line.getPoints().clear();
+        arrowHead.getPoints().clear();
         line.getPoints().add(xStart);
         line.getPoints().add(yStart);
 
@@ -77,11 +85,6 @@ public class CustomWire extends Wire {
                 });
                 break;
         }
-
-        arrowHead.getStyleClass().add("cpu-arrowhead");
-        line.getStyleClass().add("cpu-line");
-
-        getChildren().addAll(line, arrowHead);
     }
 
 }
