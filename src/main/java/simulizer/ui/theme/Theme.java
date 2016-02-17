@@ -4,6 +4,7 @@ public class Theme implements Comparable<Theme> {
 	private String name, author, description;
 	private double version;
 	protected String location;
+	protected Themes themes;
 	private int ordering = Integer.MAX_VALUE;
 
 	public String getName() {
@@ -23,6 +24,7 @@ public class Theme implements Comparable<Theme> {
 	}
 
 	public String getStyleSheet(String styleSheet) {
+		// TODO: Check StyleSheet exists for theme -> Use default if it does not exist
 		return location + styleSheet;
 	}
 
@@ -33,7 +35,9 @@ public class Theme implements Comparable<Theme> {
 	@Override
 	public int compareTo(Theme o) {
 		int diff = ordering - o.getOrdering();
-		if (diff != 0) return diff;
-		else return location.compareTo(o.location);
+		if (diff != 0)
+			return diff;
+		else
+			return location.compareTo(o.location);
 	}
 }
