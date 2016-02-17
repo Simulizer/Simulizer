@@ -9,7 +9,11 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import simulizer.assembler.Assembler;
+import simulizer.assembler.representation.Program;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
+import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
@@ -24,7 +28,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), viewMenu(), windowsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
 	}
 
 	private Menu fileMenu() {
@@ -114,22 +118,23 @@ public class MainMenuBar extends MenuBar {
 			// lv.commit();
 			// });
 
-			PegWrapper p = new PegWrapper(-1,-1);
+			PegWrapper p = new PegWrapper(-1, -1);
 			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv.getDrawingPane(), 1000, 400, 0, 4);
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
 				int val = Integer.valueOf(f.getCharacter());
 
-				if (p.a == -1) p.a = val;
+				if (p.a == -1)
+					p.a = val;
 				else {
 					p.b = val;
-					
+
 					tv.move(p.a - 1, p.b - 1);
 					tv.commit();
-					
+
 					p.a = -1;
 					p.b = -1;
 				}
-				
+
 			});
 			tv.setRate(2000);
 		});
@@ -174,6 +179,29 @@ public class MainMenuBar extends MenuBar {
 		return menu;
 	}
 
+	private Menu runMenu() {
+		// To be moved to separate buttons later
+		Menu runMenu = new Menu("Run Code");
+		MenuItem runProgram = new MenuItem("Run Program");
+		runProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText());
+			CPU cpu = new CPU(p, new IOConsole());
+			try {
+				cpu.runProgram();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		MenuItem singleStep = new MenuItem("Single Step");
+		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
+		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
+		simplePipeline.setOnAction(e -> System.out.println("Does nothing yet"));
+		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline);
+		return runMenu;
+	}
+
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
@@ -190,7 +218,11 @@ public class MainMenuBar extends MenuBar {
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
-		debugMenu.getItems().addAll(windowLocation, delWindows);
+		MenuItem emphWindow = new MenuItem("Emphisise Window");
+		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
+		MenuItem lineWrap = new MenuItem("Line Wrap");
+		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap);
 		return debugMenu;
 	}
 

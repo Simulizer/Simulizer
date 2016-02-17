@@ -1,15 +1,22 @@
 package simulizer.ui.interfaces;
 
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Duration;
 import jfxtras.labs.scene.control.window.CloseIcon;
 import jfxtras.labs.scene.control.window.MinimizeIcon;
 import jfxtras.labs.scene.control.window.Window;
+import simulizer.ui.WindowManager;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
+	private WindowManager wm;
 
 	public InternalWindow() {
+		setScaleX(0);
+		setScaleY(0);
+
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
 
@@ -50,8 +57,34 @@ public abstract class InternalWindow extends Window {
 		return 0.0;
 	}
 
+	protected final WindowManager getWindowManager() {
+		return wm;
+	}
+
+	public final void setWindowManager(WindowManager wm) {
+		this.wm = wm;
+	}
+
+	public final void emphasise() {
+		ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
+		sc.setToX(1.15);
+		sc.setToY(1.15);
+		sc.setCycleCount(2);
+		sc.setAutoReverse(true);
+		sc.play();
+	}
+
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 	}
+
+	/** Called when all internal window stuff is done */
+	public void ready() {
+		ScaleTransition sc = new ScaleTransition(Duration.millis(200), this);
+		sc.setToX(1);
+		sc.setToY(1);
+		sc.play();
+	}
+
 }

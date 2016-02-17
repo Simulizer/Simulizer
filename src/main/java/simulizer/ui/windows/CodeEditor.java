@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -23,7 +22,6 @@ import org.fxmisc.richtext.MouseOverTextEvent;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
 import org.reactfx.EventStream;
-
 import javafx.concurrent.Task;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
@@ -39,21 +37,15 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
 
-/**
- * Bits of code from
- * https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/
- * main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
- *
- * @author Kelsey McKenna
- *
- */
+/** Bits of code from https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/ main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+ * @author Kelsey McKenna */
 public class CodeEditor extends InternalWindow {
 	// @formatter:off
 	// @formatter:on
 
 	private CodeArea codeArea;
 	private File currentFile = null;
-	private boolean fileEdited = false;
+	private boolean fileEdited = false, codeWrap = true;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
@@ -92,8 +84,7 @@ public class CodeEditor extends InternalWindow {
 			Point2D pos = e.getScreenPosition();
 
 			String errorMessage = getErrorMessage(chIdx);
-			if (errorMessage == null)
-				return;
+			if (errorMessage == null) return;
 
 			tooltipMsg.setText(wrap(getErrorMessage(chIdx), 45));
 			tooltipMsg.setWrapText(true);
@@ -144,8 +135,7 @@ public class CodeEditor extends InternalWindow {
 	 */
 	private String getErrorMessage(int chIdx) {
 		for (Problem problem : problems) {
-			if (problem.rangeStart <= chIdx && chIdx <= problem.rangeEnd)
-				return problem.message;
+			if (problem.rangeStart <= chIdx && chIdx <= problem.rangeEnd) return problem.message;
 		}
 
 		return null;
@@ -186,24 +176,14 @@ public class CodeEditor extends InternalWindow {
 		setTitle(title + (fileEdited ? "*" : ""));
 	}
 
-	/**
-	 * Thanks to:
-	 * https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/
-	 * src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
-	 *
-	 * @param highlighting
-	 */
+	/** Thanks to: https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/ src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+	 * @param highlighting */
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
 		codeArea.setStyleSpans(0, highlighting);
 	}
 
-	/**
-	 * Thanks to:
-	 * https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/
-	 * src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
-	 *
-	 * @return
-	 */
+	/** Thanks to: https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/ src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+	 * @return */
 	private Task<StyleSpans<Collection<String>>> computeAntlrHighlightingAsync() {
 		String text = codeArea.getText();
 		Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
@@ -216,20 +196,12 @@ public class CodeEditor extends InternalWindow {
 		return task;
 	}
 
-	/**
-	 * http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc.
-	 * richtext.StyleSpansBuilder Throws a big exception when no text is entered
-	 * (but you can still write in the editor fine, and syntax highlighting
-	 * still applies)
-	 *
-	 * @param text
-	 *            the plaintext content of the code editor
-	 * @return the text, now split into sections with attached css classes for
-	 *         styling
-	 */
+	/** http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc. richtext.StyleSpansBuilder Throws a big exception when no text is entered (but you can still write in the editor fine, and syntax highlighting still applies)
+	 * @param text the plaintext content of the code editor
+	 * @return the text, now split into sections with attached css classes for styling */
 	private StyleSpans<Collection<String>> computeAntlrHighlighting(String text) {
 		text += "\n"; // new line to make sure the end of the input parses
-						// correctly
+						 // correctly
 
 		SimpLexer lexer = new SimpLexer(new ANTLRInputStream(text));
 		SimpParser parser = new SimpParser(new CommonTokenStream(lexer));
@@ -257,17 +229,14 @@ public class CodeEditor extends InternalWindow {
 		// Then add error wrappers around the problems
 		System.out.println("---- Current Problems ----");
 		this.problems = log.getProblems();
-
 		int lastTokenEnd = 0;
 		for (Problem p : this.problems) {
 			System.out.println(p);
 			// If it is a global error, just show it in the logger or something
-			if (p.rangeStart == -1 && p.rangeEnd == -1 && p.lineNum == Problem.NO_LINE_NUM)
-				continue;
+			if (p.rangeStart == -1 && p.rangeEnd == -1 && p.lineNum == Problem.NO_LINE_NUM) continue;
 
 			int spacing = p.rangeStart - lastTokenEnd;
-			if (spacing > 0)
-				errorSpansBuilder.add(Collections.emptyList(), spacing);
+			if (spacing > 0) errorSpansBuilder.add(Collections.emptyList(), spacing);
 
 			int styleSize = p.rangeEnd - p.rangeStart + 1;
 			errorSpansBuilder.add(Collections.singleton("error"), styleSize);
@@ -301,8 +270,7 @@ public class CodeEditor extends InternalWindow {
 				}
 
 				// Save the directory the user last opened (for convenience)
-				if (selectedFile.getParent() != null)
-					System.setProperty("user.dir", selectedFile.getParent());
+				if (selectedFile.getParent() != null) System.setProperty("user.dir", selectedFile.getParent());
 
 				// Save the destination of the current file
 				setCurrentFile(selectedFile);
@@ -329,5 +297,10 @@ public class CodeEditor extends InternalWindow {
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	public void toggleLineWrap() {
+		codeArea.setWrapText(!codeWrap);
+		codeWrap = !codeWrap;
 	}
 }

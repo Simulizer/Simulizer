@@ -1,12 +1,32 @@
 .cpu-component{
-    -fx-fill: "#fff";
-    -fx-stroke: "#000";
+    -fx-stroke: "#1e3c72";
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.4) , 6,0,1,1 );
+    -fx-fill: radial-gradient(center 50% 50%, radius 140%, #2a5298 5%, #1e3c72 50%);
+}
+
+.cpu-data{
+    -fx-fill: darkred;
+    -fx-stroke: darkred;
+}
+
+.cpu-container{
+    -fx-fill: darkred;
+    -fx-stroke: darkred;
+}
+
+.cpu-arrowhead{
+    -fx-fill: "#1e3c72";
+    -fx-stroke: "#1e3c72";
+}
+
+.cpu-line{
+    -fx-stroke: "#1e3c72";
 }
 
 .cpu-component-label{
-    -fx-fill: "#000";
+    -fx-fill: "#fff";
     -fx-text-alignment: center;
-    -fx-font: "Arial, sans-serif", 18px;
+    -fx-font: 16px "Arial, sans-serif";
 }
 
 .cpu-component-label.ALU{

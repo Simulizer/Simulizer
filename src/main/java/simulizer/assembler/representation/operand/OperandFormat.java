@@ -46,7 +46,7 @@ public class OperandFormat {
         .allowed2(OperandType.LABEL);
 
     public static OperandFormat srcAddr = new OperandFormat()
-        .allowed1(OperandType.DEST_REGISTER)
+        .allowed1(OperandType.SRC_REGISTER)
         .allowed2(OperandType.LABEL, OperandType.BASE_OFFSET);
 
     public static OperandFormat destAddr = new OperandFormat()
