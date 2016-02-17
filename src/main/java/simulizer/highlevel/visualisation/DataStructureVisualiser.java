@@ -7,11 +7,14 @@ public abstract class DataStructureVisualiser {
 	private int width;
 	private int height;
 	private int rate = 500;
-	
+
 	public DataStructureVisualiser(Pane drawingPane, int width, int height) {
 		this.drawingPane = drawingPane;
 		this.width = width;
 		this.height = height;
+
+		// Clear existing content
+		drawingPane.getChildren().clear();
 	}
 
 	/**
@@ -21,7 +24,7 @@ public abstract class DataStructureVisualiser {
 	public void setDrawingPane(Pane drawingPane) {
 		this.drawingPane = drawingPane;
 	}
-	
+
 	/**
 	 * Sets the rate of the animation in milliseconds
 	 * @param rate the rate of the animation
@@ -29,22 +32,22 @@ public abstract class DataStructureVisualiser {
 	public void setRate(int rate) {
 		this.rate = rate;
 	}
-	
+
 	/**
 	 * @return the rate of the animation
 	 */
 	public int getRate() {
 		return rate;
 	}
-	
+
 	public int getWidth() {
 		return width;
 	}
-	
+
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public Pane getDrawingPane() {
 		return this.drawingPane;
 	}

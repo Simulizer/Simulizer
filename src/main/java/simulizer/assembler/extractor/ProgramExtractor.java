@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -88,9 +87,8 @@ public class ProgramExtractor extends SimpBaseListener {
     public void visitErrorNode(ErrorNode node) {
         if(node.getSymbol().getCharPositionInLine() != -1) {
             int line = node.getSymbol().getLine();
-            Interval i = node.getSourceInterval();
-            int rangeStart = i.a;
-            int rangeEnd = i.b;
+            int rangeStart = node.getSymbol().getStartIndex();
+            int rangeEnd = node.getSymbol().getStopIndex();
 
             log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd);
         } else {
@@ -317,7 +315,13 @@ public class ProgramExtractor extends SimpBaseListener {
             }
 
             OperandExtractor ext = new OperandExtractor(log);
-            List<Operand> operands = ext.extractStatementOperands(ctx.statementOperandList());
+            SimpParser.StatementOperandListContext ops = ctx.statementOperandList();
+            List<Operand> operands;
+            if(ops != null) {
+                operands = ext.extractStatementOperands(ops);
+            } else {
+                operands = new ArrayList<>();
+            }
 
             int requiredNum = instruction.getOperandFormat().getNumArgs();
             if(operands.size() != requiredNum) {

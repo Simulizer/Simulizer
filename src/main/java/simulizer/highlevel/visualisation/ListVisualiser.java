@@ -19,7 +19,7 @@ import javafx.util.Duration;
 
 /**
  * Visualises the sorting of a list
- * 
+ *
  * @author Kelsey McKenna
  *
  * @param <T>
@@ -78,10 +78,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			rectangles[i].getStyleClass().add("list-item");
 
 			textLabels[i] = new Text("" + list.get(i));
-			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this
-															// here so that text
-															// size calculations
-															// work.
+			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
 			textLabels[i].setTranslateX(getTextX(i));
 			textLabels[i].setTranslateY(getTextY(i));
 
@@ -102,12 +99,12 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private int getRectWidth() {
-		return (int) ((getWidth() - 2 * X0) / rectangles.length) - SPACING + 1;
+		return (getWidth() - 2 * X0) / rectangles.length - SPACING + 1;
 	}
 
 	/**
 	 * Calculates the animation for swapping the items at the specified indices.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the first element
 	 * @param j
@@ -128,7 +125,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	/**
 	 * Emphasises the specified element through an animation. E.g. could
 	 * emphasise the current element being examined in binary search.
-	 * 
+	 *
 	 * @param i
 	 *            the index of the element to be emphasised
 	 */

@@ -22,7 +22,7 @@ public class SyntaxHighlighter extends SimpBaseListener {
 	@Override
 	public void enterInstruction(SimpParser.InstructionContext ctx) {
 		String styleClass = "";
-		
+
 		try {
 			// See if it exists
 			Instruction.fromString(ctx.getText());
@@ -31,7 +31,7 @@ public class SyntaxHighlighter extends SimpBaseListener {
 		} catch (NoSuchElementException e) {
 			styleClass = "unrecognised";
 		}
-		
+
 		addStyle(styleClass + "-instruction", ctx);
 	}
 
@@ -66,7 +66,7 @@ public class SyntaxHighlighter extends SimpBaseListener {
 		int length = ctx.getChild(0).getText().length();
 		addStyle("data-directive", start, start + length);
 	};
-	
+
 	@Override
 	public void enterTextDirective(SimpParser.TextDirectiveContext ctx) {
 		int start = ctx.getStart().getStartIndex();
@@ -80,24 +80,26 @@ public class SyntaxHighlighter extends SimpBaseListener {
 		int length = ctx.getChild(0).getText().length();
 		addStyle("directiveid", start, start + length);
 	}
-	
-	@Override
-	public void enterBaseAddress(SimpParser.BaseAddressContext ctx) {
-		System.out.println(ctx.getChildCount());
-		int start = ctx.getStart().getStartIndex();
-		addStyle("base-bracket", start, start);
-	}
-	
-	@Override
-	public void exitBaseAddress(SimpParser.BaseAddressContext ctx) {
-		System.out.println(ctx.getChildCount());
-		
-		if (ctx.getChildCount() == 3) {
-			int stop = ctx.getStop().getStopIndex();
-			addStyle("base-bracket", stop, stop);
-		}
-	}
-	
+
+	/*
+	 * @Override
+	 * public void enterBaseAddress(SimpParser.BaseAddressContext ctx) {
+	 * System.out.println(ctx.getChildCount());
+	 * int start = ctx.getStart().getStartIndex();
+	 * addStyle("base-bracket", start, start);
+	 * }
+	 *
+	 * @Override
+	 * public void exitBaseAddress(SimpParser.BaseAddressContext ctx) {
+	 * System.out.println(ctx.getChildCount());
+	 *
+	 * if (ctx.getChildCount() == 3) {
+	 * int stop = ctx.getStop().getStopIndex();
+	 * addStyle("base-bracket", stop, stop);
+	 * }
+	 * }
+	 */
+
 	private void addStyle(String styleClass, ParserRuleContext ctx) {
 		addStyle(styleClass, ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex());
 	}

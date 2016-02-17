@@ -188,7 +188,7 @@ public class MainMenuBar extends MenuBar {
 			try {
 				cpu.runProgram();
 			} catch (Exception e1) {
-				System.out.println("Oops: " + e1.getMessage());
+				e1.printStackTrace();
 			}
 		});
 		MenuItem singleStep = new MenuItem("Single Step");

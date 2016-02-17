@@ -50,6 +50,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		this.numDiscs = numDisks;
 		this.diskHeight = Math.min(50, pegHeight / numDisks);
 		this.diskWidthDelta = Math.min(40, (maxDiskWidth - pegWidth - 10) / (numDisks - 1));
+
 		initPlatform();
 	}
 
@@ -58,8 +59,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 */
 	private void initPlatform() {
 		Pane contentPane = getDrawingPane();
-		// Remove any existing items
-		contentPane.getChildren().clear();
 
 		Rectangle base = new Rectangle(80, 500, 840, 35);
 		contentPane.getChildren().addAll(base);
@@ -112,14 +111,14 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	/**
 	 * Calculates the animation for moving the disk at peg i to peg j. If there
 	 * is no disk on peg i, then it does nothing
-	 * 
+	 *
 	 * @param i
 	 *            the index of the peg to move the disc from
 	 * @param j
 	 *            the index of the peg to move the disc to
 	 */
 	public void move(int i, int j) {
-		if (pegs.get(i).size() == 0)
+		if (pegs.get(i).size() == 0 || i == j)
 			return;
 
 		Rectangle disc = pegs.get(i).peek();
@@ -148,7 +147,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	/**
 	 * Calculates the transition for the given disk from the source to the
 	 * target.
-	 * 
+	 *
 	 * @param disc
 	 *            the disk to be animated
 	 * @param x1

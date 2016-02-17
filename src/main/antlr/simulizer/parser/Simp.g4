@@ -117,8 +117,8 @@ statementOperandList
 
 statementOperand
     : register // register value
-    | integer  // literal integer value
     | address
+    | integer  // literal integer value
     ;
 
 
