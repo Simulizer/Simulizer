@@ -9,10 +9,12 @@ import java.util.Map;
 
 
 
+
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
 import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.MemoryException;
+import simulizer.simulation.exceptions.StackException;
 
 /**
  * this class represents the RAM of our simulator it is represented via a large
@@ -28,12 +30,15 @@ public class MainMemory {
 	private Address startOfTextSegment;
 	private Address startOfStaticData;//start of the static data segment
 	private Address startOfDynamicData; //the end of the static data segment
+	private Address startOfStack;
 	private final Address endOfMemory;
+	private final Address megabyte;
 
 
 	private Map<Address,Statement> textSegment;
 	private byte[] staticDataSegment;
 	private DynamicDataSegment heap;
+	private StackSegment stack;
 
 
 	/**
@@ -41,15 +46,18 @@ public class MainMemory {
 	 * partitions in it
 	 *
 	 */
-	public MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData) {
+	public MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData, Address stackPointer) {
 		this.startOfTextSegment = startTextSegment;
 		this.startOfStaticData = startOfStaticData;
 		this.startOfDynamicData = startOfDynamicData;
+		this.startOfStack = stackPointer;
 		this.endOfMemory = new Address(2147483644);
+		this.megabyte = new Address(1048576);
 
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;
 		this.heap = new DynamicDataSegment(this.startOfDynamicData);
+		this.stack = new StackSegment(this.startOfStack, new Address(this.startOfDynamicData.getValue() + this.megabyte.getValue() + 1));
 
 
 	}
@@ -67,8 +75,9 @@ public class MainMemory {
 	 * @param address the start address to read from
 	 * @param length the number of bytes to read
 	 * @return those bytes from memory
+	 * @throws StackException if invalid use of stack
 	 */
-	public byte[] readFromMem(int address, int length) throws MemoryException, HeapException
+	public byte[] readFromMem(int address, int length) throws MemoryException, HeapException, StackException
 	{
 		if((address >=  this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue() + this.staticDataSegment.length))//if in the static data part of memory
 		{
@@ -86,10 +95,15 @@ public class MainMemory {
 			}
 			return result;
 		}
-		else if(address >= this.startOfDynamicData.getValue() && address <= this.endOfMemory.getValue())//if in the dynamic data segment
+		else if(address >= this.startOfDynamicData.getValue() && address <= this.startOfDynamicData.getValue() + this.megabyte.getValue() )//if in the dynamic data segment
 		{
 			int heapVal = address-this.startOfDynamicData.getValue();
 			return this.heap.getBytes(heapVal, length);
+		}
+		else if(address <= this.startOfStack.getValue() && address > this.startOfDynamicData.getValue() + this.megabyte.getValue())//stack access
+		{
+			int stackVal = this.startOfStack.getValue() - address;//where to start in the stack
+			return this.stack.getBytes(stackVal, length);
 		}
 		else
 		{
@@ -103,8 +117,9 @@ public class MainMemory {
 	 * @param toWrite the bytes to write
 	 * @throws MemoryException
 	 * @throws HeapException
+	 * @throws StackException 
 	 */
-	public void writeToMem(int address, byte[] toWrite) throws MemoryException, HeapException
+	public void writeToMem(int address, byte[] toWrite) throws MemoryException, HeapException, StackException
 	{
 		if(address >= this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue()+ this.staticDataSegment.length)//if in static data segment
 		{
@@ -120,7 +135,7 @@ public class MainMemory {
 				}
 			}
 		}
-		else if(address >= this.startOfDynamicData.getValue() && address <= this.endOfMemory.getValue())//write to heap
+		else if(address >= this.startOfDynamicData.getValue() && address <= this.startOfDynamicData.getValue() + this.megabyte.getValue() + 1)//write to heap
 		{
 			if(!(address-this.startOfDynamicData.getValue() + toWrite.length > this.heap.size()))
 			{
@@ -129,6 +144,17 @@ public class MainMemory {
 			else//invalid heap write
 			{
 				throw new MemoryException("Writing to an invalid area of memory",new Address(address));
+			}
+		}
+		else if(address <= this.startOfStack.getValue() && address > this.startOfDynamicData.getValue() + this.megabyte.getValue())//stack write
+		{
+			if(!(false))//this.startOfStack.getValue() - address > this.stack.size()))
+			{
+				this.stack.setBytes(this.startOfStack.getValue()-address, toWrite);//writing to the stack
+			}
+			else
+			{
+				throw new MemoryException("Writing to an invalid area of memory", new Address(address));
 			}
 		}
 		else//invalid memory write

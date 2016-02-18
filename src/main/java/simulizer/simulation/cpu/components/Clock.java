@@ -7,7 +7,7 @@ package simulizer.simulation.cpu.components;
  */
 public class Clock extends Thread {
 
-	public static long ClockSpeedMillis = 100;//clock speed in milliseconds
+	public static long ClockSpeedMillis = 10;//clock speed in milliseconds
 	
 	private boolean isRunning;//determine if still running
 	private CPU cpu;//cpu object being run

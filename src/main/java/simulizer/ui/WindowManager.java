@@ -15,6 +15,7 @@ import simulizer.simulation.exceptions.ExecuteException;
 import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.InstructionException;
 import simulizer.simulation.exceptions.MemoryException;
+import simulizer.simulation.exceptions.StackException;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -158,7 +159,7 @@ public class WindowManager extends Pane {
 		cpu = new CPU(p, new IOConsole());
 		try {
 			cpu.runProgram();
-		} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException e) {
+		} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
 			e.printStackTrace();
 		}
 	}
