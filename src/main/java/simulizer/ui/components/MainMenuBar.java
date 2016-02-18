@@ -182,6 +182,7 @@ public class MainMenuBar extends MenuBar {
 	private Menu runMenu() {
 		// To be moved to separate buttons later
 		Menu runMenu = new Menu("Run Code");
+
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
 			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
@@ -190,11 +191,17 @@ public class MainMenuBar extends MenuBar {
 			Program p = a.assemble(code.getText(), log);
 			wm.runProgram(p);
 		});
+
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
+
 		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
 		simplePipeline.setOnAction(e -> System.out.println("Does nothing yet"));
-		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline);
+
+		MenuItem stop = new MenuItem("Stop Simulation");
+		stop.setOnAction(e -> wm.stopCPU());
+
+		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline, stop);
 		return runMenu;
 	}
 

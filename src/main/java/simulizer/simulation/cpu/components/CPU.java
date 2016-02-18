@@ -75,7 +75,7 @@ public class CPU {
     {
         listeners = new ArrayList<>();
         this.loadProgram(program);//set up the CPU with the program
-        this.clock = new Clock(this);
+        this.clock = new Clock(100);
         this.isRunning = false;
         this.io = io;
     }
@@ -85,9 +85,11 @@ public class CPU {
      */
     public void startClock()
     {
-    	this.clock = new Clock(this);//resetting clock
-    	this.clock.setClockRunning(true);
-    	this.clock.start();//start the clock!
+        clock.reset();
+        clock.startRunning();
+        if(!clock.isAlive()) {
+            clock.start();//start the clock thread
+        }
     }
 
     /**this method will set the clock controlling
@@ -95,7 +97,25 @@ public class CPU {
      */
     public void pauseClock()
     {
-        this.clock.setClockRunning(false);
+        if(clock != null) {
+            clock.stopRunning();
+        }
+    }
+
+    public void setClockSpeed(int tickMillis) {
+        clock.tickMillis = tickMillis;
+    }
+
+    public void stopRunning() {
+        isRunning = false;
+        if(clock != null) {
+            pauseClock();
+            try {
+                clock.join(); // stop the clock thread
+            } catch(InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -597,7 +617,7 @@ public class CPU {
             }
         }
         System.out.println("---- Program Execution Ended ----");
-        this.pauseClock();//stop the clock
+        stopRunning();
     }
 
     /**useful auxiliary methods to check if 2 byte arrays equal

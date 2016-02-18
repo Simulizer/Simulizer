@@ -1,7 +1,6 @@
 package simulizer.simulation.cpu.components;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.Lock;
 
 /**thread for the clock keeping time of the IE cycle
  * 
@@ -10,21 +9,27 @@ import java.util.concurrent.locks.Lock;
  */
 public class Clock extends Thread {
 
-	public static long ClockSpeedMillis = 100;//clock speed in milliseconds
-	
+	public int tickMillis;// time for a single clock tick
+
 	private boolean isRunning;//determine if still running
 	private long ticks;
-	private CPU cpu;//cpu object being run
 	CountDownLatch latch;
+	int waitForCount; // the number of threads waiting on the latch
 	
 	/**constructor sets up field
-	 * @param cpu the cpu being run
 	 */
-	public Clock(CPU cpu)
+	public Clock(int tickMillis)
 	{
+		this.tickMillis = tickMillis;
 		this.isRunning = false;//not running on initial creation
 		ticks = 0;
-		this.cpu = cpu;
+		waitForCount = 2;
+	}
+
+	public void reset() {
+		isRunning = false;
+		ticks = 0;
+		latch = null;
 	}
 
 	private synchronized void incrementTicks()  {
@@ -35,44 +40,57 @@ public class Clock extends Thread {
 	}
 
 	public void waitForNextTick() throws InterruptedException {
-		latch.countDown();
-		latch.await();
+		if(latch != null) {
+			latch.countDown();
+			latch.await();
+		}
 	}
 
 
-	
+	public void startRunning() {
+		isRunning = true;
+	}
+
+	public void stopRunning() {
+		isRunning = false;
+
+		for(int i = 0; i < waitForCount; i++) {
+			// may become null while doing this
+			if(latch != null) {
+				latch.countDown();
+			}
+		}
+
+		latch = null;
+
+	}
+
 	/**run method will run the loop of the clock
 	 * 
 	 */
 	public void run()
 	{
-		while(isRunning)
-		{
-			try {
+		long lastTickStart;
+		long overshoot = 0;
+		try {
+			while(isRunning)
+			{
 				// 1 for cpu, 1 for the clock.
 				// all must be waiting before the clock advances
-				latch = new CountDownLatch(2);
-				Thread.sleep(ClockSpeedMillis);
+				latch = new CountDownLatch(waitForCount);
+				lastTickStart = System.currentTimeMillis();
+				Thread.sleep(Math.max(tickMillis - overshoot, 0));
 
-				latch.countDown();
-				latch.await(); // wait for all things to finish their cycle
+				// wait for all others to finish
+				waitForNextTick();
+
+				overshoot = System.currentTimeMillis() - lastTickStart - tickMillis;
 
 				incrementTicks();
-			} catch (InterruptedException e) {
-				//this shouldn't happen, only two threads where nothing will interrupt the clock
-				System.out.println("Clock has been interrupted");
-				e.printStackTrace();
 			}
+		} catch (InterruptedException ignored) {
+
 		}
-	}
-	
-	/**this method sets the clock's running state
-	 * 
-	 * @param runningState the running state of the clock
-	 */
-	public synchronized void setClockRunning(boolean runningState)
-	{
-		this.isRunning = runningState;
 	}
 	
 }
