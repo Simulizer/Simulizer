@@ -7,16 +7,18 @@ package simulizer.simulation.cpu.components;
  */
 public class Clock extends Thread {
 
-	public static long ClockSpeedMillis = 100;//clock speed in milliseconds
+	public static long ClockSpeedMillis = 1000;//clock speed in milliseconds
 	
 	private boolean isRunning;//determine if still running
+	private CPU cpu;//cpu object being run
 	
 	/**constructor sets up field
-	 * 
+	 * @param cpu the cpu being run
 	 */
-	public Clock()
+	public Clock(CPU cpu)
 	{
 		this.isRunning = false;//not running on initial creation
+		this.cpu = cpu;
 	}
 	
 	/**run method will run the loop of the clock
@@ -26,7 +28,7 @@ public class Clock extends Thread {
 	{
 		while(isRunning)
 		{
-			notifyAll();//notify all threads 
+			this.cpu.setWait(false);//allowing continuation
 			try {
 				Thread.sleep(ClockSpeedMillis);
 			} catch (InterruptedException e) {//this shouldn't happen, only two threads where nothing will interrupt the clock
