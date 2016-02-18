@@ -32,7 +32,7 @@ public class Main extends Application {
 		});
 
 		// Just show the main window for now
-		new WindowManager(primaryStage, "default_projector", 1024, 705);
+		new WindowManager(primaryStage, "default", 1024, 705);
 	}
 
 	private URI getResource(String filepath) throws URISyntaxException {
