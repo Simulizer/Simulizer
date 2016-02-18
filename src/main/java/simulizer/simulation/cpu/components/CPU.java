@@ -393,10 +393,6 @@ public class CPU {
                 {
                     this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
                 }
-                else
-                {
-                    this.programCounter = new Address(this.programCounter.getValue() + 4);//increment as normal
-                }
                 break;
             case SPECIAL:
                 if(instruction.getInstruction().equals(Instruction.syscall))//syscall
