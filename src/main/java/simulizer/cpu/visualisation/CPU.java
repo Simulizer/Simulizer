@@ -1,24 +1,17 @@
 package simulizer.cpu.visualisation;
 
-import javafx.animation.FillTransition;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.util.Duration;
-import simulizer.cpu.visualisation.components.*;
-import simulizer.ui.interfaces.InternalWindow;
+import simulizer.cpu.visualisation.components.ALU;
+import simulizer.cpu.visualisation.components.ConnectorWire;
+import simulizer.cpu.visualisation.components.CustomLine;
+import simulizer.cpu.visualisation.components.CustomWire;
+import simulizer.cpu.visualisation.components.GeneralComponent;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class CPU {
 
@@ -132,36 +125,7 @@ public class CPU {
 
                 if( x > xMin && x < xMax && y > yMin && y < yMax){
                     // In register box, highlight register window somehow?
-                    System.out.println("in register");
-                    InternalWindow window = vis.getMainWindowManager().findInternalWindow(WindowEnum.REGISTERS);
-
-
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        window.getStyleClass().add("highlighting");
-                                    }
-                                });
-
-                                try {
-                                    Thread.sleep(1500);
-                                } catch(InterruptedException e){
-                                    System.out.println(e.getMessage());
-                                }
-
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        window.getStyleClass().remove("highlighting");
-                                    }
-                                });
-                        }
-                    }).start();
-
+                    vis.getMainWindowManager().findInternalWindow(WindowEnum.REGISTERS).emphasise();
                 }
             }
         });

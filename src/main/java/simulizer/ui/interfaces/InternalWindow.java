@@ -23,8 +23,10 @@ public abstract class InternalWindow extends Window {
 		// Adds minimise icon
 		MinimizeIcon minimize = new MinimizeIcon(this);
 		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30) setMinHeight(0.0); // Minimising
-			else setMinHeight(getMinimalHeight()); // Maximising
+			if (getHeight() > 30)
+				setMinHeight(0.0); // Minimising
+			else
+				setMinHeight(getMinimalHeight()); // Maximising
 		});
 		getRightIcons().add(minimize);
 
@@ -66,12 +68,18 @@ public abstract class InternalWindow extends Window {
 	}
 
 	public final void emphasise() {
-		ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
-		sc.setToX(1.15);
-		sc.setToY(1.15);
-		sc.setCycleCount(2);
-		sc.setAutoReverse(true);
-		sc.play();
+		// Ignore if window is just being opened
+		if (getScaleX() == 1 && getScaleY() == 1) { 
+			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
+			sc.setToX(1.15);
+			sc.setToY(1.15);
+			sc.setCycleCount(2);
+			sc.setAutoReverse(true);
+			getStyleClass().add("highlighting");
+			sc.setOnFinished((e) -> getStyleClass().remove("highlighting"));
+			sc.play();
+			toFront();
+		} 
 	}
 
 	public void setTheme(Theme theme) {
