@@ -65,9 +65,6 @@ public class CodeEditor extends InternalWindow {
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
 	private List<Problem> problems = new ArrayList<>();
-
-	private StyleSpans<Collection<String>> normalHighlighting =
-		new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), 0).create();
 	private StyleSpans<Collection<String>> errorHighlighting =
 		new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), 0).create();
 
@@ -107,15 +104,15 @@ public class CodeEditor extends InternalWindow {
 		// Thanks to:
 		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
 		EventStream<?> plainTextChanges = codeArea.plainTextChanges();
-		plainTextChanges.successionEnds(Duration.ofMillis(1000)).supplyTask(this::computeErrorHighlightingAsync).awaitLatest(plainTextChanges)
-			.filterMap(t -> {
+		plainTextChanges.successionEnds(Duration.ofMillis(1000)).supplyTask(this::computeErrorHighlightingAsync)
+			.awaitLatest(plainTextChanges).filterMap(t -> {
 				if (t.isSuccess()) {
 					return Optional.of(t.get());
 				} else {
 					t.getFailure().printStackTrace();
 					return Optional.empty();
 				}
-			}).subscribe(this::applyErrorHighlighting);
+			}).subscribe(this::applyAndSaveErrorHighlighting);
 
 		// Update regex highlighting and edit status on key press
 		codeArea.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
@@ -260,21 +257,14 @@ public class CodeEditor extends InternalWindow {
 	 *
 	 * Applies the specified highlighting to the text in the code editor
 	 *
-	 * @param highlighting
+	 * @param errorHighlighting
 	 */
-	private void applyErrorHighlighting(StyleSpans<Collection<String>> highlighting) {
-		codeArea.setStyleSpans(0, highlighting);
-		errorHighlighting = highlighting;
+	private void applyAndSaveErrorHighlighting(StyleSpans<Collection<String>> errorHighlighting) {
+		this.errorHighlighting = errorHighlighting;
+		codeArea.setStyleSpans(0, errorHighlighting);
 
+		// After updating the error highlighting, tell the regex highlighting to update
 		updateRegexHighlighting();
-	}
-
-	private void addBoth() {
-		codeArea.setStyleSpans(0, normalHighlighting.overlay(errorHighlighting, (normal, error) -> {
-			List<String> svar = new ArrayList<>(normal);
-			svar.addAll(error);
-			return svar;
-		}));
 	}
 
 	/**
@@ -296,8 +286,8 @@ public class CodeEditor extends InternalWindow {
 			int mEnd = matcher.end();
 			int cPosition = codeArea.getCaretPosition();
 
-			if ((getErrorMessage(mStart) != null || getErrorMessage(mEnd) != null)
-				&& (cPosition < mStart || cPosition > mEnd)) continue;
+			// Don't override error messages, unless the caret is over an error block
+			if ((cPosition < mStart || cPosition > mEnd) && (getErrorMessage(mStart) != null || getErrorMessage(mEnd) != null)) continue;
 
 			String styleClass = matcher.group("LABEL") != null ? "label"
 				: matcher.group("KEYWORD") != null ? "recognised-instruction"
@@ -319,9 +309,13 @@ public class CodeEditor extends InternalWindow {
 		}
 
 		spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
-		normalHighlighting = spansBuilder.create();
 
-		addBoth();
+		// Add the regex highlighting to the error highlighting
+		codeArea.setStyleSpans(0, spansBuilder.create().overlay(errorHighlighting, (normal, error) -> {
+			List<String> svar = new ArrayList<>(normal);
+			svar.addAll(error);
+			return svar;
+		}));
 	}
 
 	/**
