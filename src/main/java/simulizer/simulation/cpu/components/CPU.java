@@ -1,5 +1,6 @@
 package simulizer.simulation.cpu.components;
 
+import java.util.Date;
 import java.util.*;
 
 import simulizer.assembler.representation.Address;
@@ -64,6 +65,7 @@ public class CPU {
     private Address lastAddress;//used to determine end of program
     
     private IO io;
+    private boolean wait;//for clock access
 
 
     /**the constructor will set all the components up
@@ -73,10 +75,11 @@ public class CPU {
     public CPU(Program program, IO io)
     {
         listeners = new ArrayList<>();
-        loadProgram(program);//set up the CPU with the program
-        clock = new Clock();
-        isRunning = false;
+        this.loadProgram(program);//set up the CPU with the program
+        this.clock = new Clock(this);
+        this.isRunning = false;
         this.io = io;
+        this.wait = false;
     }
 
     /**this method will set the clock controlling
@@ -84,7 +87,9 @@ public class CPU {
      */
     public void startClock()
     {
-        this.clock.setClockRunning(true);
+    	this.clock = new Clock(this);//resetting clock
+    	this.clock.setClockRunning(true);
+    	this.clock.start();//start the clock!
     }
 
     /**this method will set the clock controlling
@@ -155,7 +160,8 @@ public class CPU {
             //SEND TO LOGGER HERE
         }
 
-        this.registers[Register.gp.getID()] = new Word(new byte[]{0x10,0x00,(byte)0x80,0x00});//setting global pointer
+        this.registers[Register.gp.getID()] = this.program.initialGP;//setting global pointer
+        this.registers[Register.sp.getID()] = this.program.initialSP;//setting up stack pointer
 
         this.Alu = new ALU();//initialising Alu
         this.getLastAddress();
@@ -414,10 +420,6 @@ public class CPU {
                 {
                     this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
                 }
-                else
-                {
-                    this.programCounter = new Address(this.programCounter.getValue() + 4);//increment as normal
-                }
                 break;
             case SPECIAL:
                 if(instruction.getInstruction().equals(Instruction.syscall))//syscall
@@ -536,7 +538,9 @@ public class CPU {
     			this.registers[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
     			break;
     		case 10://exit program
-    			this.pauseClock();//need to change this!!
+    			this.pauseClock();//probably reasonable for now
+    			this.isRunning = false;//stop execution all together
+    			this.setWait(false);//stop all waiting if trapped
     			break;
     		case 11://print char
     			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
@@ -582,16 +586,24 @@ public class CPU {
      */
     public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
     {
+    	this.startClock();
         this.isRunning = true;
         while(isRunning)//need something to stop this
         {
+        	this.setWait(true);
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute
-           /* try {
-                wait();
-            } catch (InterruptedException e) {
-                //we want the interruption so do nothing and keep looping
-            }*/
+            while(this.wait){}
         }
+        this.pauseClock();//stop the clock
+    }
+
+    /**setting the wait on the instruction cycle
+     *
+     * @param wait whether IE cycle should wait or not
+     */
+    public synchronized void setWait(boolean wait)
+    {
+    	this.wait = wait;
     }
 
     /**useful auxiliary methods to check if 2 byte arrays equal

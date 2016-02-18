@@ -81,6 +81,23 @@ public class SpimBehaviour {
     }
 
     @Test
+    public void testRegisterValues() {
+
+        // initial stack pointer
+        {
+            String p = "" +
+                ".text\n" +
+                "main: li $v0, 1\n" +
+                "move $a0, $sp\n" +
+                "syscall\n" +
+                "li $v0, 10; syscall";
+            SpimRunner spim = new SpimRunner();
+            String output = spim.runSpim(p, "");
+            assertEquals(0x7ffff3c8, Integer.parseInt(output));
+        }
+    }
+
+    @Test
     public void testStringLiterals() {
         // octal codes correct for small numbers
         // octal escape sequences
