@@ -65,7 +65,6 @@ public class CPU {
     private Address lastAddress;//used to determine end of program
     
     private IO io;
-    private boolean wait;//for clock access
 
 
     /**the constructor will set all the components up
@@ -79,7 +78,6 @@ public class CPU {
         this.clock = new Clock(this);
         this.isRunning = false;
         this.io = io;
-        this.wait = false;
     }
 
     /**this method will set the clock controlling
@@ -175,8 +173,7 @@ public class CPU {
         this.registers = new Word[32];
         for(int i = 0; i < this.registers.length; i++)
         {
-            byte[] word = new byte[]{0x00,0x00,0x00,0x00};//initially setting to 0
-            this.registers[i] = new Word(word);
+            this.registers[i] = new Word(DataConverter.encodeAsUnsigned(0));
         }
     }
 
@@ -540,7 +537,6 @@ public class CPU {
     		case 10://exit program
     			this.pauseClock();//probably reasonable for now
     			this.isRunning = false;//stop execution all together
-    			this.setWait(false);//stop all waiting if trapped
     			break;
     		case 11://print char
     			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
@@ -587,23 +583,21 @@ public class CPU {
     public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
     {
     	this.startClock();
+        System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         while(isRunning)//need something to stop this
         {
-        	this.setWait(true);
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute
-            while(this.wait){}
+            try {
+                if(isRunning) {
+                    clock.waitForNextTick();
+                }
+            } catch(InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+        System.out.println("---- Program Execution Ended ----");
         this.pauseClock();//stop the clock
-    }
-
-    /**setting the wait on the instruction cycle
-     *
-     * @param wait whether IE cycle should wait or not
-     */
-    public synchronized void setWait(boolean wait)
-    {
-    	this.wait = wait;
     }
 
     /**useful auxiliary methods to check if 2 byte arrays equal
