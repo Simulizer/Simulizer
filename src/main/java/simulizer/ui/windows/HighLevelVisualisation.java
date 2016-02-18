@@ -12,7 +12,7 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	private void init() {
 		this.drawingPane = new Pane();
-		visualiser = new TowerOfHanoiVisualiser(drawingPane, (int) getWidth(), (int) getHeight(), 0, 5);
+		visualiser = new TowerOfHanoiVisualiser(drawingPane, (int) getWidth(), (int) getHeight(), 0, 100);
 		getChildren().add(drawingPane);
 	}
 

@@ -8,7 +8,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.exceptions.ExecuteException;
@@ -23,6 +22,7 @@ import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.Logger;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
@@ -155,7 +155,7 @@ public class WindowManager extends Pane {
 	}
 
 	public void runProgram(Program p) {
-		cpu = new CPU(p, new IOConsole());
+		cpu = new CPU(p, (Logger) findInternalWindow(WindowEnum.LOGGER));
 		try {
 			cpu.runProgram();
 		} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException e) {
