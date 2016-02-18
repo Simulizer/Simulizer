@@ -10,6 +10,8 @@ import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.*;
 import simulizer.parser.SimpLexer;
 import simulizer.parser.SimpParser;
+import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.data.representation.Word;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -110,6 +112,10 @@ public class Assembler {
         }
 
         p.dynamicSegmentStart = new Address(0x10040000); // start of the dynamic data segment
+
+        p.initialGP = new Word(DataConverter.encodeAsUnsigned(0x10008000));
+        // found by examining spim
+        p.initialSP = new Word(DataConverter.encodeAsUnsigned(0x7ffff3c8));
 
         return p;
     }
