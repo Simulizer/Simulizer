@@ -60,7 +60,7 @@ public class CodeEditor extends InternalWindow {
 
 	private CodeArea codeArea;
 	private File currentFile = null;
-	private boolean fileEdited = false, codeWrap = true;
+	private boolean fileEdited = false, lineWrap = true;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
 	private Label tooltipMsg = new Label();
@@ -147,6 +147,107 @@ public class CodeEditor extends InternalWindow {
 		getContentPane().getChildren().add(codeArea);
 	}
 
+	// -- Getters, setters, and public void methods
+
+	public void setText(String text) {
+		codeArea.replaceText(text);
+	}
+
+	public String getText() {
+		return codeArea.getText();
+	}
+
+	public File getCurrentFile() {
+		return currentFile;
+	}
+
+	public void setCurrentFile(File f) {
+		currentFile = f;
+	}
+
+	public boolean isFileEdited() {
+		return fileEdited;
+	}
+
+	public void updateTitleEditStatus() {
+		String title = getTitle();
+		char lastChar = title.charAt(title.length() - 1);
+
+		title = title.substring(0, lastChar == '*' ? title.length() - 1 : title.length());
+		setTitle(title + (fileEdited ? "*" : ""));
+	}
+
+	public boolean getLineWrap() {
+		return lineWrap;
+	}
+
+	public void newFile() {
+		setCurrentFile(null);
+		fileEdited = false;
+		setTitle(TITLE + " - New File");
+		setText("");
+	}
+
+	public void loadFile(File selectedFile) {
+		if (selectedFile != null) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile));) {
+				String codeIn = "";
+				String c;
+				boolean first = true;
+				while ((c = reader.readLine()) != null) {
+					if (!first) {
+						codeIn += "\n" + c;
+					} else {
+						codeIn += c;
+						first = false;
+					}
+				}
+
+				// Save the directory the user last opened (for convenience)
+				if (selectedFile.getParent() != null) System.setProperty("user.dir", selectedFile.getParent());
+
+				// Save the destination of the current file
+				setCurrentFile(selectedFile);
+
+				// Show the code in the editor
+				setText(codeIn);
+				fileEdited = false;
+				setTitle(TITLE + " - " + selectedFile.getName());
+				updateTitleEditStatus();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	public void saveFile() {
+		if (currentFile != null) {
+			try (PrintWriter writer = new PrintWriter(currentFile);) {
+				writer.print(getText());
+				setTitle(WindowEnum.toEnum(this).toString() + " - " + currentFile.getName());
+				fileEdited = false;
+				updateTitleEditStatus();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	public void toggleLineWrap() {
+		codeArea.setWrapText(!lineWrap);
+		lineWrap = !lineWrap;
+	}
+
+	@Override
+	public void setTheme(Theme theme) {
+		super.setTheme(theme);
+		getStylesheets().clear(); // Should this be here?
+		getStylesheets().add(theme.getStyleSheet("code.css"));
+	}
+
+
+	// -- Helper methods for syntax highlighting tokens
+
 	private static String[] getRegisterNames() {
 		List<String> tempList = new ArrayList<>();
 
@@ -216,56 +317,7 @@ public class CodeEditor extends InternalWindow {
 		return null;
 	}
 
-	@Override
-	public void setTheme(Theme theme) {
-		super.setTheme(theme);
-		getStylesheets().clear(); // Should this be here?
-		getStylesheets().add(theme.getStyleSheet("code.css"));
-	}
-
-	public void setText(String text) {
-		codeArea.replaceText(text);
-	}
-
-	public String getText() {
-		return codeArea.getText();
-	}
-
-	public File getCurrentFile() {
-		return currentFile;
-	}
-
-	public void setCurrentFile(File f) {
-		currentFile = f;
-	}
-
-	public boolean isFileEdited() {
-		return fileEdited;
-	}
-
-	public void updateTitleEditStatus() {
-		String title = getTitle();
-		char lastChar = title.charAt(title.length() - 1);
-
-		title = title.substring(0, lastChar == '*' ? title.length() - 1 : title.length());
-		setTitle(title + (fileEdited ? "*" : ""));
-	}
-
-	/**
-	 * Thanks to: https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/
-	 * src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
-	 *
-	 * Applies the specified highlighting to the text in the code editor
-	 *
-	 * @param errorHighlighting
-	 */
-	private void applyAndSaveErrorHighlighting(StyleSpans<Collection<String>> errorHighlighting) {
-		this.errorHighlighting = errorHighlighting;
-		codeArea.setStyleSpans(0, errorHighlighting);
-
-		// After updating the error highlighting, tell the regex highlighting to update
-		updateRegexHighlighting();
-	}
+	// -- Updating syntax highlighting
 
 	/**
 	 * Thanks to: https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/
@@ -316,6 +368,22 @@ public class CodeEditor extends InternalWindow {
 			svar.addAll(error);
 			return svar;
 		}));
+	}
+
+	/**
+	 * Thanks to: https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/
+	 * src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+	 *
+	 * Applies the specified highlighting to the text in the code editor
+	 *
+	 * @param errorHighlighting
+	 */
+	private void applyAndSaveErrorHighlighting(StyleSpans<Collection<String>> errorHighlighting) {
+		this.errorHighlighting = errorHighlighting;
+		codeArea.setStyleSpans(0, errorHighlighting);
+
+		// After updating the error highlighting, tell the regex highlighting to update
+		updateRegexHighlighting();
 	}
 
 	/**
@@ -386,60 +454,5 @@ public class CodeEditor extends InternalWindow {
 		return errorSpansBuilder.create();
 	}
 
-	public void newFile() {
-		setCurrentFile(null);
-		fileEdited = false;
-		setTitle(TITLE + " - New File");
-		setText("");
-	}
 
-	public void loadFile(File selectedFile) {
-		if (selectedFile != null) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(selectedFile));) {
-				String codeIn = "";
-				String c;
-				boolean first = true;
-				while ((c = reader.readLine()) != null) {
-					if (!first) {
-						codeIn += "\n" + c;
-					} else {
-						codeIn += c;
-						first = false;
-					}
-				}
-
-				// Save the directory the user last opened (for convenience)
-				if (selectedFile.getParent() != null) System.setProperty("user.dir", selectedFile.getParent());
-
-				// Save the destination of the current file
-				setCurrentFile(selectedFile);
-
-				// Show the code in the editor
-				setText(codeIn);
-				fileEdited = false;
-				setTitle(TITLE + " - " + selectedFile.getName());
-				updateTitleEditStatus();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}
-
-	public void saveFile() {
-		if (currentFile != null) {
-			try (PrintWriter writer = new PrintWriter(currentFile);) {
-				writer.print(getText());
-				setTitle(WindowEnum.toEnum(this).toString() + " - " + currentFile.getName());
-				fileEdited = false;
-				updateTitleEditStatus();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}
-
-	public void toggleLineWrap() {
-		codeArea.setWrapText(!codeWrap);
-		codeWrap = !codeWrap;
-	}
 }

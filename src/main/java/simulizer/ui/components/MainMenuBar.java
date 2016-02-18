@@ -1,6 +1,10 @@
 package simulizer.ui.components;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -52,7 +56,8 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
 			if (editor.getCurrentFile() == null) {
-				editor.setCurrentFile(saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
+				editor.setCurrentFile(
+					saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
 			}
 			editor.saveFile();
 		});
@@ -124,7 +129,8 @@ public class MainMenuBar extends MenuBar {
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
 				int val = Integer.valueOf(f.getCharacter());
 
-				if (p.a == -1) p.a = val;
+				if (p.a == -1)
+					p.a = val;
 				else {
 					p.b = val;
 
@@ -230,7 +236,8 @@ public class MainMenuBar extends MenuBar {
 			reg.refreshData();
 		});
 
-		MenuItem lineWrap = new MenuItem("Line Wrap");
+		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
+		lineWrap.setSelected(((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).getLineWrap());
 		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
@@ -239,11 +246,11 @@ public class MainMenuBar extends MenuBar {
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText(), null);
 			String outputFilename = "program-dump.txt";
-			if(p == null) {
+			if (p == null) {
 				try {
 					PrintWriter out = new PrintWriter(outputFilename);
 					out.println("null");
-				} catch(IOException e1) {
+				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			} else {
