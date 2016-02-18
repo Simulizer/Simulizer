@@ -3,12 +3,7 @@ package simulizer.simulation.cpu.components;
 import java.util.Date;
 import java.util.*;
 
-import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.Label;
-import simulizer.assembler.representation.Program;
-import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
@@ -60,6 +55,8 @@ public class CPU {
     private Program program;//all information on how to run the program
     private Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
+
+	private Map<Address, List<Annotation>> annotations;
 
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
@@ -134,7 +131,9 @@ public class CPU {
         for(SimulationListener l : listeners) {
             l.processMessage(m);
 
-            if(m instanceof DataMovementMessage) {
+			if(m instanceof AnnotationMessage) {
+				l.processAnnotationMessage((AnnotationMessage) m);
+			} else if(m instanceof DataMovementMessage) {
                 l.processDataMovementMessage((DataMovementMessage) m);
             } else if(m instanceof ProblemMessage) {
                 l.processProblemMessage((ProblemMessage) m);
@@ -171,6 +170,8 @@ public class CPU {
             labels.put(key, l.getValue());
             labelMetaData.put(key, l.getKey());
         }
+
+		annotations = program.annotations;
 
         try {
             this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
@@ -586,6 +587,12 @@ public class CPU {
         fetch();
         InstructionFormat instruction = decode();
         execute(instruction);
+		if(annotations.containsKey(programCounter)) {
+			for(Annotation a : annotations.get(programCounter)) {
+				sendMessage(new AnnotationMessage(a));
+			}
+		}
+
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached
         {
             this.isRunning = false;//stop running

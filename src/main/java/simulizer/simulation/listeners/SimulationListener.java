@@ -11,6 +11,7 @@ public abstract class SimulationListener {
      */
     public void processMessage(Message m) {}
 
+    public void processAnnotationMessage(AnnotationMessage m) {}
     public void processDataMovementMessage(DataMovementMessage m) {}
     public void processProblemMessage(ProblemMessage m) {}
     public void processStageEnterMessage(StageEnterMessage m) {}
