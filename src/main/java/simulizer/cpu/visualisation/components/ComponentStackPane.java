@@ -40,6 +40,10 @@ public class ComponentStackPane extends StackPane {
 
     }
 
+    public Shape getComponentShape(){
+        return shape;
+    }
+
     public double getShapeHeight(){
         return height;
     }

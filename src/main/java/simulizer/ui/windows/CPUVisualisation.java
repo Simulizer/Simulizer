@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.cpu.visualisation.CPU;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -48,6 +49,10 @@ public class CPUVisualisation extends InternalWindow {
 
 	public Pane getPane() {
 		return pane;
+	}
+
+	public WindowManager getMainWindowManager(){
+		return super.getWindowManager();
 	}
 
 	public void setPaneWidth(double width) {

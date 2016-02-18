@@ -1,10 +1,24 @@
 package simulizer.cpu.visualisation;
 
+import javafx.animation.FillTransition;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 import simulizer.cpu.visualisation.components.*;
+import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CPU {
 
@@ -106,6 +120,52 @@ public class CPU {
 
         controlUnitToRegisters.animateData(5, true);
 
+        vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double x = event.getX();
+                double y = event.getY();
+                double xMin = register.getLayoutX();
+                double xMax = xMin + register.getShapeWidth();
+                double yMin = register.getLayoutY();
+                double yMax = yMin + register.getShapeHeight();
+
+                if( x > xMin && x < xMax && y > yMin && y < yMax){
+                    // In register box, highlight register window somehow?
+                    System.out.println("in register");
+                    InternalWindow window = vis.getMainWindowManager().findInternalWindow(WindowEnum.REGISTERS);
+
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        window.getStyleClass().add("highlighting");
+                                    }
+                                });
+
+                                try {
+                                    Thread.sleep(1500);
+                                } catch(InterruptedException e){
+                                    System.out.println(e.getMessage());
+                                }
+
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        window.getStyleClass().remove("highlighting");
+                                    }
+                                });
+                        }
+                    }).start();
+
+                }
+            }
+        });
+
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
         vis.addAll(controlUnit, components, generalWires, complexWires);
     }
@@ -142,8 +202,8 @@ public class CPU {
                 new CustomLine(width * 0.05, CustomLine.Direction.RIGHT)
         );
 
-        PCToPlusFour.drawLine(width * 0.1, height * 0.275,
-                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+        PCToPlusFour.drawLine(width * 0.12, height * 0.275,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.25, CustomLine.Direction.DOWN)
         );
 
@@ -153,35 +213,35 @@ public class CPU {
                 new CustomLine(width * 0.25, CustomLine.Direction.RIGHT)
         );
 
-        IMToALU.drawLine(width * 0.316, height * 0.375,
+        IMToALU.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
                 new CustomLine(width * 0.2333, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.UP)
+                new CustomLine(height * 0.31, CustomLine.Direction.UP)
         );
 
-        IMToIR.drawLine(width * 0.316, height * 0.375,
+        IMToIR.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.275, CustomLine.Direction.LEFT)
+                new CustomLine(width * 0.272, CustomLine.Direction.LEFT)
         );
 
-        IMToRegister1.drawLine(width * 0.316, height * 0.375,
+        IMToRegister1.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.175, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister2.drawLine(width * 0.316, height * 0.375,
+        IMToRegister2.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.1, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister3.drawLine(width * 0.316, height * 0.375,
+        IMToRegister3.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.025, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
     }
