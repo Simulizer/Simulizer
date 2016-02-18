@@ -9,6 +9,16 @@ import java.util.Scanner;
  */
 public class IOConsole implements IO
 {
+	private Scanner scan;
+	
+	/**initialises the scanner
+	 * 
+	 */
+	public IOConsole()
+	{
+		this.scan = new Scanner(System.in);
+	}
+	
 	/**method prints a string passed to it
 	 * 
 	 * @param str the string to be printed
@@ -42,9 +52,8 @@ public class IOConsole implements IO
 	 */
 	public String readString()
 	{
-		Scanner readStr = new Scanner(System.in);
-		String read = readStr.nextLine();
-		readStr.close();
+		
+		String read = scan.nextLine();
 		return read;
 	}
 	
@@ -54,9 +63,7 @@ public class IOConsole implements IO
 	 */
 	public int readInt()
 	{
-		Scanner readInt = new Scanner(System.in);
-		int num = readInt.nextInt();
-		readInt.close();
+		int num = scan.nextInt();
 		return num;
 	}
 	
@@ -66,9 +73,15 @@ public class IOConsole implements IO
 	 */
 	public char readChar()
 	{
-		Scanner readChar = new Scanner(System.in);
-		char letter = readChar.next().charAt(0);
-		readChar.close();
+		char letter = scan.next().charAt(0);
 		return letter;
+	}
+	
+	/**closes the scanner object
+	 * 
+	 */
+	public void closeScanner()
+	{
+		scan.close();
 	}
 }

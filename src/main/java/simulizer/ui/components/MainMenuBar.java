@@ -1,7 +1,6 @@
 package simulizer.ui.components;
 
 import java.io.*;
-
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -15,14 +14,13 @@ import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
-import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
 import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -126,8 +124,7 @@ public class MainMenuBar extends MenuBar {
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
 				int val = Integer.valueOf(f.getCharacter());
 
-				if (p.a == -1)
-					p.a = val;
+				if (p.a == -1) p.a = val;
 				else {
 					p.b = val;
 
@@ -191,13 +188,7 @@ public class MainMenuBar extends MenuBar {
 			ProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText(), log);
-			CPU cpu = new CPU(p, new IOConsole());
-			try {
-				System.out.println("START HERE!!!!!!!");
-				cpu.runProgram();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			wm.runProgram(p);
 		});
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
@@ -226,8 +217,11 @@ public class MainMenuBar extends MenuBar {
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
 
-		MenuItem emphWindow = new MenuItem("Emphasise Window");
-		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
+		MenuItem emphWindow = new MenuItem("Refresh Registers");
+		emphWindow.setOnAction(e -> {
+			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
+			reg.refreshData();
+		});
 
 		MenuItem lineWrap = new MenuItem("Line Wrap");
 		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
