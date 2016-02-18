@@ -1,9 +1,6 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
@@ -32,6 +29,7 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
+import simulizer.simulation.listeners.*;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -46,6 +44,8 @@ import simulizer.simulation.instructions.SpecialInstruction;
  *
  */
 public class CPU {
+
+    private List<SimulationListener> listeners;
 
     private Address programCounter;
     private Statement instructionRegister;
@@ -72,9 +72,10 @@ public class CPU {
      */
     public CPU(Program program, IO io)
     {
-        this.loadProgram(program);//set up the CPU with the program
-        this.clock = new Clock();
-        this.isRunning = false;
+        listeners = new ArrayList<>();
+        loadProgram(program);//set up the CPU with the program
+        clock = new Clock();
+        isRunning = false;
         this.io = io;
     }
 
@@ -92,6 +93,32 @@ public class CPU {
     public void pauseClock()
     {
         this.clock.setClockRunning(false);
+    }
+
+    /**
+     * Register a listener to receive messages
+     * @param l the listener to send messages to
+     */
+    public void registerListener(SimulationListener l) {
+        listeners.add(l);
+    }
+
+    /**
+     * send a message to all of the registered listeners
+     * @param m the message to send
+     */
+    private void sendMessage(Message m) {
+        for(SimulationListener l : listeners) {
+            l.processMessage(m);
+
+            if(m instanceof DataMovementMessage) {
+                l.processDataMovementMessage((DataMovementMessage) m);
+            } else if(m instanceof ProblemMessage) {
+                l.processProblemMessage((ProblemMessage) m);
+            } else if(m instanceof StageEnterMessage) {
+                l.processStageEnterMessage((StageEnterMessage) m);
+            }
+        }
     }
 
     /**this method is used to set up the cpu whenever a new program is loaded into it
