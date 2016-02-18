@@ -3,6 +3,7 @@ package simulizer.assembler.representation;
 import simulizer.assembler.representation.operand.Operand;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * stores an instruction and its operands
@@ -18,6 +19,14 @@ public class Statement {
         this.instruction = instruction;
         this.operandList = operandList;
         this.lineNumber = lineNumber;
+    }
+
+    @Override
+    public String toString() {
+        String opString = operandList.stream()
+            .map(Operand::toString)
+            .collect(Collectors.joining(", "));
+        return "Statement(" + instruction + ", " + opString + ")";
     }
 
     public Instruction getInstruction() {

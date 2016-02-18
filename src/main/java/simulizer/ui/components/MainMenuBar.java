@@ -1,6 +1,6 @@
 package simulizer.ui.components;
 
-import java.io.File;
+import java.io.*;
 
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -13,6 +13,7 @@ import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
+import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IOConsole;
@@ -218,15 +219,39 @@ public class MainMenuBar extends MenuBar {
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
+
 		MenuItem windowLocation = new MenuItem("Window Locations");
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
+
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
-		MenuItem emphWindow = new MenuItem("Emphisise Window");
+
+		MenuItem emphWindow = new MenuItem("Emphasise Window");
 		emphWindow.setOnAction(e -> wm.findInternalWindow(WindowEnum.REGISTERS).emphasise());
+
 		MenuItem lineWrap = new MenuItem("Line Wrap");
 		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
-		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap);
+
+		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
+		dumpProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText(), null);
+			String outputFilename = "program-dump.txt";
+			if(p == null) {
+				try {
+					PrintWriter out = new PrintWriter(outputFilename);
+					out.println("null");
+				} catch(IOException e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				ProgramStringBuilder.dumpToFile(p, outputFilename);
+			}
+			System.out.println("Program dumped to: \"" + outputFilename + "\"");
+		});
+
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap, dumpProgram);
 		return debugMenu;
 	}
 
