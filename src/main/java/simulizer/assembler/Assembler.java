@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import simulizer.assembler.extractor.ProgramExtractor;
+import simulizer.assembler.extractor.problem.ProblemCountLogger;
+import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.*;
 import simulizer.parser.SimpLexer;
@@ -18,7 +20,13 @@ import java.util.Map;
 
 
 public class Assembler {
-    public Program assemble(String input) {
+    /**
+     * Assemble a problem and catch any problem output
+     * @param input the program string to assemble
+     * @param log the logger to send the error messages (may be null)
+     * @return the assembled program (or null if errors are encountered)
+     */
+    public Program assemble(String input, ProblemLogger log) {
 
         input += '\n'; // to parse correctly, must end with a newline
 
@@ -28,11 +36,11 @@ public class Assembler {
         // try to parse a program from the input
         SimpParser.ProgramContext tree = parser.program();
 
-        StoreProblemLogger log = new StoreProblemLogger();
-        ProgramExtractor extractor = new ProgramExtractor(log);
+        ProblemCountLogger counter = new ProblemCountLogger(log);
+        ProgramExtractor extractor = new ProgramExtractor(counter);
         ParseTreeWalker.DEFAULT.walk(extractor, tree);
 
-        if(!log.getProblems().isEmpty()) {
+        if(counter.problemCount != 0) {
             return null;
         }
 
@@ -55,6 +63,10 @@ public class Assembler {
                 for(String labelName : reverseTextLabels.get(i)) {
                     p.labels.put(new Label(labelName, s.getLineNumber(), Label.Type.INSTRUCTION), address);
                 }
+            }
+
+            if(extractor.annotations.containsKey(i)) {
+                p.annotations.put(address, extractor.annotations.get(i));
             }
 
             p.textSegment.put(address, s);

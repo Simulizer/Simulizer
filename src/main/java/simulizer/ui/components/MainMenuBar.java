@@ -10,6 +10,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
+import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
 import simulizer.simulation.cpu.components.CPU;
@@ -185,8 +187,9 @@ public class MainMenuBar extends MenuBar {
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
 			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			ProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
-			Program p = a.assemble(code.getText());
+			Program p = a.assemble(code.getText(), log);
 			CPU cpu = new CPU(p, new IOConsole());
 			try {
 				System.out.println("START HERE!!!!!!!");

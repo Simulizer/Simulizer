@@ -1,6 +1,7 @@
 package simulizer.assembler.representation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +33,7 @@ public class Program {
     public Address dynamicSegmentStart;
 
     public Map<Label, Address> labels;
+    public Map<Address, List<Annotation>> annotations;
     public Map<Address, Integer> lineNumbers;
 
     /**
@@ -48,6 +50,7 @@ public class Program {
         dataSegment = null;
         dynamicSegmentStart = Address.NULL;
         labels = new HashMap<>();
+        annotations = new HashMap<>();
         lineNumbers = new HashMap<>();
         sourceHash = -1;
     }
