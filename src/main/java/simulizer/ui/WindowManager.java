@@ -2,6 +2,7 @@ package simulizer.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
 
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -167,7 +168,6 @@ public class WindowManager extends Pane {
 		if(cpuThread != null) {
 			System.out.println("Terminating running program");
 			cpu.stopRunning();
-			cpu.pauseClock();
 			try {
 				cpuThread.join();
 			} catch(InterruptedException e) {

@@ -2,6 +2,7 @@ package simulizer.simulation.cpu.components;
 
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 
 import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.AddressOperand;
@@ -619,10 +620,10 @@ public class CPU {
                 if(isRunning) {
                     clock.waitForNextTick();
                 }
-            } catch(InterruptedException e) {
-                e.printStackTrace();
+            } catch(InterruptedException | BrokenBarrierException e) {
+				System.out.println("CPU interrupted");
             }
-        }
+		}
         System.out.println("---- Program Execution Ended ----");
         stopRunning();
     }

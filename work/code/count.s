@@ -1,7 +1,7 @@
-# print the numbers from 1
-# to 100... except it doesn't
+# print the numbers from 1 to 100
 .data
-	mystr: .asciiz "hello there"
+	mystr: .asciiz "Done"
+
 .text
 main:
 	li $s0 0
@@ -16,6 +16,10 @@ LOOP:   addi $s0 $s0 1
 	beq $s0 $t0 END # @
 	j LOOP
 END:	nop
+
+	li $v0 4
+	la $a0 mystr
+	syscall # print string
 
 	li $v0 10
 	syscall

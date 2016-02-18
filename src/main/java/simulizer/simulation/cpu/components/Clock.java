@@ -1,6 +1,8 @@
 package simulizer.simulation.cpu.components;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 
 /**thread for the clock keeping time of the IE cycle
  * 
@@ -13,8 +15,8 @@ public class Clock extends Thread {
 
 	private boolean isRunning;//determine if still running
 	private long ticks;
-	CountDownLatch latch;
-	int waitForCount; // the number of threads waiting on the latch
+	CyclicBarrier barrier;
+	int waitForCount; // the number of threads waiting on the barrier
 	
 	/**constructor sets up field
 	 */
@@ -24,12 +26,13 @@ public class Clock extends Thread {
 		this.isRunning = false;//not running on initial creation
 		ticks = 0;
 		waitForCount = 2;
+		barrier = new CyclicBarrier(waitForCount);
 	}
 
 	public void reset() {
 		isRunning = false;
 		ticks = 0;
-		latch = null;
+		barrier.reset();
 	}
 
 	private synchronized void incrementTicks()  {
@@ -39,11 +42,8 @@ public class Clock extends Thread {
 		return ticks;
 	}
 
-	public void waitForNextTick() throws InterruptedException {
-		if(latch != null) {
-			latch.countDown();
-			latch.await();
-		}
+	public void waitForNextTick() throws BrokenBarrierException, InterruptedException {
+		barrier.await();
 	}
 
 
@@ -53,16 +53,7 @@ public class Clock extends Thread {
 
 	public void stopRunning() {
 		isRunning = false;
-
-		for(int i = 0; i < waitForCount; i++) {
-			// may become null while doing this
-			if(latch != null) {
-				latch.countDown();
-			}
-		}
-
-		latch = null;
-
+		barrier.reset();
 	}
 
 	/**run method will run the loop of the clock
@@ -77,9 +68,12 @@ public class Clock extends Thread {
 			{
 				// 1 for cpu, 1 for the clock.
 				// all must be waiting before the clock advances
-				latch = new CountDownLatch(waitForCount);
 				lastTickStart = System.currentTimeMillis();
 				Thread.sleep(Math.max(tickMillis - overshoot, 0));
+
+				if(!isRunning) {
+					break;
+				}
 
 				// wait for all others to finish
 				waitForNextTick();
@@ -88,7 +82,7 @@ public class Clock extends Thread {
 
 				incrementTicks();
 			}
-		} catch (InterruptedException ignored) {
+		} catch (InterruptedException | BrokenBarrierException ignored) {
 
 		}
 	}
