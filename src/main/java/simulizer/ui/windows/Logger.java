@@ -36,7 +36,7 @@ public class Logger extends InternalWindow implements IO {
 		submit.setOnAction((e) -> {
 			lastInput = input.getText();
 			input.setText("");
-			output.setText(output.getText() + lastInput);
+			output.setText(output.getText() + lastInput + "\n");
 			cdl.countDown();
 		});
 		pane.add(submit, 1, 1);

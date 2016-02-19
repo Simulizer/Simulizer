@@ -9,8 +9,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.IO;
-import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
@@ -20,6 +18,7 @@ import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.Logger;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
@@ -30,7 +29,6 @@ public class WindowManager extends Pane {
 	private Stage primaryStage;
 	private CPU cpu;
 	private Thread cpuThread;
-	private IO cpuIO;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -47,7 +45,6 @@ public class WindowManager extends Pane {
 	private void init(Stage primaryStage, String theme, int x, int y) {
 		cpu = null;
 		cpuThread = null;
-		cpuIO = new IOConsole();
 
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
@@ -172,12 +169,13 @@ public class WindowManager extends Pane {
 	}
 
 	public void runProgram(Program p) {
+		Logger io = (Logger) findInternalWindow(WindowEnum.LOGGER);
 		stopCPU();
 		cpuThread = new Thread(new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {
 				try {
-					cpu = new CPU(p, cpuIO);
+					cpu = new CPU(p, io);
 					// cpu.setClockSpeed(0);
 					cpu.runProgram();
 				} catch (Exception e) {
