@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -38,6 +39,7 @@ public class Themes implements Iterable<Theme> {
 					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
 						t.location = themeFolder.toURI().toString();
+						t.themes = this;
 						// @formatter:off
 						try {
 							// Selects the theme to start with (either default, or last selected) 

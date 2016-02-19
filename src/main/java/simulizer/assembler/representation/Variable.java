@@ -32,6 +32,12 @@ public class Variable {
         this.lineNumber = lineNumber;
     }
 
+    @Override
+    public String toString() {
+        String initial = initialValue.isPresent() ? initialValue.get().toString() : "no initial value";
+        return "Variable(" + type + "(" + size + " bytes) : " + initial + ")";
+    }
+
     public Type getType() {
         return type;
     }

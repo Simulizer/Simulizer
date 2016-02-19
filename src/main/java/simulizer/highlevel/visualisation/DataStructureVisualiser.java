@@ -1,28 +1,20 @@
 package simulizer.highlevel.visualisation;
 
-import javafx.scene.layout.Pane;
+import simulizer.ui.windows.HighLevelVisualisation;
 
 public abstract class DataStructureVisualiser {
-	private Pane drawingPane;
-	private int width;
-	private int height;
-	private int rate = 500;
+	private double width;
+	private double height;
+	private int rate = 1000;
+	private HighLevelVisualisation vis;
 
-	public DataStructureVisualiser(Pane drawingPane, int width, int height) {
-		this.drawingPane = drawingPane;
+	public DataStructureVisualiser(HighLevelVisualisation vis, double width, double height) {
 		this.width = width;
 		this.height = height;
+		this.vis = vis;
 
 		// Clear existing content
-		drawingPane.getChildren().clear();
-	}
-
-	/**
-	 * @param drawingPane
-	 *            the pane onto which this visualiser should draw
-	 */
-	public void setDrawingPane(Pane drawingPane) {
-		this.drawingPane = drawingPane;
+		vis.getDrawingPane().getChildren().clear();
 	}
 
 	/**
@@ -40,16 +32,26 @@ public abstract class DataStructureVisualiser {
 		return rate;
 	}
 
-	public int getWidth() {
+	public double getWidth() {
 		return width;
 	}
 
-	public int getHeight() {
+	public double getHeight() {
 		return height;
 	}
 
-	public Pane getDrawingPane() {
-		return this.drawingPane;
+	public void setWidth(double width) {
+		this.width = width;
 	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
+	public HighLevelVisualisation getHighLevelVisualisation() {
+		return vis;
+	}
+
+	public abstract void resize();
 
 }

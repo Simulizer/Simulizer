@@ -1,17 +1,10 @@
 package simulizer.simulation.cpu.components;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 
-import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.Label;
-import simulizer.assembler.representation.Program;
-import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
@@ -34,6 +27,7 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
+import simulizer.simulation.listeners.*;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -49,6 +43,8 @@ import simulizer.simulation.instructions.SpecialInstruction;
  */
 public class CPU {
 
+    private List<SimulationListener> listeners;
+
     private Address programCounter;
     private Statement instructionRegister;
 
@@ -62,11 +58,12 @@ public class CPU {
     private Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
 
+	private Map<Address, List<Annotation>> annotations;
+
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
     
     private IO io;
-    private boolean wait;//for clock access
 
 
     /**the constructor will set all the components up
@@ -75,11 +72,11 @@ public class CPU {
      */
     public CPU(Program program, IO io)
     {
+        listeners = new ArrayList<>();
         this.loadProgram(program);//set up the CPU with the program
-        this.clock = new Clock(this);
+        this.clock = new Clock(100);
         this.isRunning = false;
         this.io = io;
-        this.wait = false;
     }
 
     /**this method will set the clock controlling
@@ -87,9 +84,11 @@ public class CPU {
      */
     public void startClock()
     {
-    	this.clock = new Clock(this);//resetting clock
-    	this.clock.setClockRunning(true);
-    	this.clock.start();//start the clock!
+        clock.reset();
+        clock.startRunning();
+        if(!clock.isAlive()) {
+            clock.start();//start the clock thread
+        }
     }
 
     /**this method will set the clock controlling
@@ -97,7 +96,53 @@ public class CPU {
      */
     public void pauseClock()
     {
-        this.clock.setClockRunning(false);
+        if(clock != null) {
+            clock.stopRunning();
+        }
+    }
+
+    public void setClockSpeed(int tickMillis) {
+        clock.tickMillis = tickMillis;
+    }
+
+    public void stopRunning() {
+        isRunning = false;
+        if(clock != null) {
+            pauseClock();
+            try {
+                clock.join(); // stop the clock thread
+            } catch(InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Register a listener to receive messages
+     * @param l the listener to send messages to
+     */
+    public void registerListener(SimulationListener l) {
+        listeners.add(l);
+    }
+
+    /**
+     * send a message to all of the registered listeners
+     * @param m the message to send
+     */
+    private void sendMessage(Message m) {
+        for(SimulationListener l : listeners) {
+            l.processMessage(m);
+
+			if(m instanceof AnnotationMessage) {
+				l.processAnnotationMessage((AnnotationMessage) m);
+			} else if(m instanceof DataMovementMessage) {
+                l.processDataMovementMessage((DataMovementMessage) m);
+            } else if(m instanceof ProblemMessage) {
+                l.processProblemMessage((ProblemMessage) m);
+            } else if(m instanceof StageEnterMessage) {
+                l.processStageEnterMessage((StageEnterMessage) m);
+            }
+        }
     }
 
     /**this method is used to set up the cpu whenever a new program is loaded into it
@@ -129,6 +174,8 @@ public class CPU {
             labelMetaData.put(key, l.getKey());
         }
 
+		annotations = program.annotations;
+
         try {
             this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
         } catch(Exception e) {//if entry point load fails
@@ -150,8 +197,7 @@ public class CPU {
         this.registers = new Word[32];
         for(int i = 0; i < this.registers.length; i++)
         {
-            byte[] word = new byte[]{0x00,0x00,0x00,0x00};//initially setting to 0
-            this.registers[i] = new Word(word);
+            this.registers[i] = new Word(DataConverter.encodeAsUnsigned(0));
         }
     }
 
@@ -518,7 +564,6 @@ public class CPU {
     		case 10://exit program
     			this.pauseClock();//probably reasonable for now
     			this.isRunning = false;//stop execution all together
-    			this.setWait(false);//stop all waiting if trapped
     			break;
     		case 11://print char
     			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
@@ -549,6 +594,12 @@ public class CPU {
         fetch();
         InstructionFormat instruction = decode();
         execute(instruction);
+		if(annotations.containsKey(programCounter)) {
+			for(Annotation a : annotations.get(programCounter)) {
+				sendMessage(new AnnotationMessage(a));
+			}
+		}
+
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached
         {
             this.isRunning = false;//stop running
@@ -566,25 +617,22 @@ public class CPU {
      */
     public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
-    	
     	this.startClock();
+        System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         while(isRunning)//need something to stop this
         {
-        	this.setWait(true);
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute
-            while(this.wait){}
-        }
-        this.pauseClock();//stop the clock
-    }
-    
-    /**setting the wait on the instruction cycle
-     * 
-     * @param wait whether IE cycle should wait or not
-     */
-    public synchronized void setWait(boolean wait)
-    {
-    	this.wait = wait;
+            try {
+                if(isRunning) {
+                    clock.waitForNextTick();
+                }
+            } catch(InterruptedException | BrokenBarrierException e) {
+				System.out.println("CPU interrupted");
+            }
+		}
+        System.out.println("---- Program Execution Ended ----");
+        stopRunning();
     }
 
     /**useful auxiliary methods to check if 2 byte arrays equal

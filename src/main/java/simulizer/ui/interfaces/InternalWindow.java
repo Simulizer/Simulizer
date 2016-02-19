@@ -2,6 +2,7 @@ package simulizer.ui.interfaces;
 
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import jfxtras.labs.scene.control.window.CloseIcon;
@@ -16,6 +17,8 @@ public abstract class InternalWindow extends Window {
 	public InternalWindow() {
 		setScaleX(0);
 		setScaleY(0);
+
+		setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
@@ -38,6 +41,8 @@ public abstract class InternalWindow extends Window {
 				setLayoutY(25);
 			}
 		});
+
+		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
@@ -66,12 +71,18 @@ public abstract class InternalWindow extends Window {
 	}
 
 	public final void emphasise() {
-		ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
-		sc.setToX(1.15);
-		sc.setToY(1.15);
-		sc.setCycleCount(2);
-		sc.setAutoReverse(true);
-		sc.play();
+		// Ignore if window is just being opened
+		if (getScaleX() == 1 && getScaleY() == 1) {
+			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
+			sc.setToX(1.15);
+			sc.setToY(1.15);
+			sc.setCycleCount(2);
+			sc.setAutoReverse(true);
+			getStyleClass().add("highlighting");
+			sc.setOnFinished((e) -> getStyleClass().remove("highlighting"));
+			sc.play();
+			toFront();
+		}
 	}
 
 	public void setTheme(Theme theme) {

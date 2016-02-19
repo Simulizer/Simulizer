@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.Variable;
@@ -43,6 +44,11 @@ public class ProgramExtractor extends SimpBaseListener {
     public List<Variable> dataSegment;
 
     /**
+     * store annotations relating to statements in the text segment
+     */
+    public Map<Integer, List<Annotation>> annotations;
+
+    /**
      * keep track of labels that are waiting to be assigned to a line
      */
     public List<String> outstandingLabels;
@@ -52,10 +58,12 @@ public class ProgramExtractor extends SimpBaseListener {
         currentState = State.OUTSIDE;
         this.log = log;
 
-        dataSegmentLabels = new HashMap<>();
-        dataSegment = new ArrayList<>();
         textSegmentLabels = new HashMap<>();
         textSegment = new ArrayList<>();
+        dataSegmentLabels = new HashMap<>();
+        dataSegment = new ArrayList<>();
+
+        annotations = new HashMap<>();
 
         outstandingLabels = new ArrayList<>();
     }
@@ -294,7 +302,7 @@ public class ProgramExtractor extends SimpBaseListener {
                 log.logProblem("only .globl directives should be placed inside the .text segment", ctx);
             }
         } else {
-            log.logProblem("Assembler directives should only be placed inside" +
+            log.logProblem("Assembler directives should only be placed inside " +
                            "either the .data or .text segment", ctx);
         }
     }
@@ -351,6 +359,24 @@ public class ProgramExtractor extends SimpBaseListener {
         }
     }
 
+    @Override
+    public void enterComment(SimpParser.CommentContext ctx) {
+        if(ctx.getText().contains("@")) {
+            int lastInstruction = textSegment.size() - 1;
+            if(lastInstruction < 0) {
+                log.logProblem("annotation before the first instruction", ctx);
+                return;
+            }
+
+            if(annotations.containsKey(lastInstruction)) {
+                annotations.get(lastInstruction).add(new Annotation());
+            } else {
+                List<Annotation> a = new ArrayList<>();
+                a.add(new Annotation());
+                annotations.put(lastInstruction, a);
+            }
+        }
+    }
 
     public void pushStatement(Statement s) {
         textSegment.add(s);

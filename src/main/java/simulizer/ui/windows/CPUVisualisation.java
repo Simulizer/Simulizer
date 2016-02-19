@@ -5,48 +5,54 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.cpu.visualisation.CPU;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
 public class CPUVisualisation extends InternalWindow {
 
-	double width;
-	double height;
-	Pane pane;
+    double width;
+    double height;
+    Pane pane;
 
 	public CPUVisualisation() {
-		width = 600;
-		height = 350;
-		pane = new Pane();
-		pane.setPrefWidth(width);
-		pane.setMinWidth(width);
-		pane.setMaxWidth(width);
-		pane.setPrefHeight(height);
-		pane.setMinHeight(height);
-		pane.setMaxHeight(height);
-
-		setMinWidth(600);
-		setMinHeight(getMinimalHeight());
-		getChildren().add(pane);
+        width = 600;
+        height = 350;
+        pane = new Pane();
+        pane.setPrefWidth(width);
+        pane.setMinWidth(width);
+        pane.setMaxWidth(width);
+        pane.setPrefHeight(height);
+        pane.setMinHeight(height);
+        pane.setMaxHeight(height);
+        getChildren().add(pane);
+        setMinWidth(600);
+        setMinHeight(getMinimalHeight());
 		drawVisualisation();
 	}
 
-	@Override
-	public void setTheme(Theme theme) {
-		super.setTheme(theme);
-		getStylesheets().add(theme.getStyleSheet("cpu.css"));
-	}
+    @Override
+    public void setTheme(Theme theme) {
+        super.setTheme(theme);
+        getStylesheets().clear();
+        getStylesheets().add(theme.getStyleSheet("window.css"));
+        getStylesheets().add(theme.getStyleSheet("cpu.css"));
+    }
 
-	public void add(Node e) {
-		pane.getChildren().add(e);
-	}
+    public void add(Node e){
+        pane.getChildren().add(e);
+    }
 
-	public void addAll(Node... elements) {
-		pane.getChildren().addAll(elements);
-	}
+    public void addAll(Node... elements){
+        pane.getChildren().addAll(elements);
+    }
 
 	public Pane getPane() {
 		return pane;
+	}
+
+	public WindowManager getMainWindowManager(){
+		return super.getWindowManager();
 	}
 
 	public void setPaneWidth(double width) {
@@ -95,7 +101,7 @@ public class CPUVisualisation extends InternalWindow {
 		});
 
 	}
-
+	
 	@Override
 	protected double getMinimalHeight() {
 		return 400;

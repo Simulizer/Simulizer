@@ -18,6 +18,11 @@ public class Address {
     }
 
     @Override
+    public String toString() {
+        return "Address(0x" + Integer.toHexString(value) + ")";
+    }
+
+    @Override
     public boolean equals(Object other) {
         return this == other ||
             (other instanceof Address &&

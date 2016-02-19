@@ -1,23 +1,26 @@
 package simulizer.ui.components;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
+import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
-import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
+import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
-import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -41,7 +44,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = openFileSelector("Open an assembly file", new File(System.getProperty("user.dir")), new ExtensionFilter("Assembly files *.s", "*.s"));
 			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
@@ -65,18 +68,12 @@ public class MainMenuBar extends MenuBar {
 				editor.saveFile();
 			}
 		});
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem);
+
+		MenuItem exitItem = new MenuItem("Exit");
+		exitItem.setOnAction(e -> System.exit(0));
+
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
-	}
-
-	private class PegWrapper {
-		public int a;
-		public int b;
-
-		public PegWrapper(int a, int b) {
-			this.a = a;
-			this.b = b;
-		}
 	}
 
 	private Menu viewMenu() {
@@ -103,40 +100,6 @@ public class MainMenuBar extends MenuBar {
 			item.setOnAction(e -> wm.setLayout(l));
 			menu.getItems().add(item);
 		}
-
-		// | | | -- High Level Only Layout
-		MenuItem highLevelLayoutItem = new MenuItem("High Level Test");
-		highLevelLayoutItem.setOnAction(e -> {
-			HighLevelVisualisation hv = (HighLevelVisualisation) wm.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-			// ListVisualiser<Integer> lv = new
-			// ListVisualiser<>(hv.getDrawingPane(), 1000, 400, Arrays.asList(3,
-			// 1, 4, 1, 5));
-			// hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
-			// int n = Integer.valueOf(f.getCharacter());
-			// lv.swap(n % 5, (n+1) % 5);
-			// lv.commit();
-			// });
-
-			PegWrapper p = new PegWrapper(-1, -1);
-			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv.getDrawingPane(), 1000, 400, 0, 4);
-			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
-				int val = Integer.valueOf(f.getCharacter());
-
-				if (p.a == -1)
-					p.a = val;
-				else {
-					p.b = val;
-
-					tv.move(p.a - 1, p.b - 1);
-					tv.commit();
-
-					p.a = -1;
-					p.b = -1;
-				}
-
-			});
-			tv.setRate(2000);
-		});
 
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
@@ -181,18 +144,26 @@ public class MainMenuBar extends MenuBar {
 	private Menu runMenu() {
 		// To be moved to separate buttons later
 		Menu runMenu = new Menu("Run Code");
+
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
 			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			ProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
-			Program p = a.assemble(code.getText());
+			Program p = a.assemble(code.getText(), log);
 			wm.runProgram(p);
 		});
+
 		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
+		singleStep.setDisable(true);
+
 		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
-		simplePipeline.setOnAction(e -> System.out.println("Does nothing yet"));
-		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline);
+		simplePipeline.setDisable(true);
+
+		MenuItem stop = new MenuItem("Stop Simulation");
+		stop.setOnAction(e -> wm.stopCPU());
+
+		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline, stop);
 		return runMenu;
 	}
 
@@ -208,18 +179,42 @@ public class MainMenuBar extends MenuBar {
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
+
 		MenuItem windowLocation = new MenuItem("Window Locations");
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
+
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
+
 		MenuItem emphWindow = new MenuItem("Refresh Registers");
 		emphWindow.setOnAction(e -> {
 			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
 			reg.refreshData();
 		});
-		MenuItem lineWrap = new MenuItem("Line Wrap");
+
+		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
+		lineWrap.setSelected(((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).getLineWrap());
 		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
-		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap);
+
+		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
+		dumpProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText(), null);
+			String outputFilename = "program-dump.txt";
+			if (p == null) {
+				try (PrintWriter out = new PrintWriter(outputFilename)) {
+					out.println("null");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				ProgramStringBuilder.dumpToFile(p, outputFilename);
+			}
+			System.out.println("Program dumped to: \"" + outputFilename + "\"");
+		});
+
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap, dumpProgram);
 		return debugMenu;
 	}
 

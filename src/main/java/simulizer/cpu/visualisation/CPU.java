@@ -1,9 +1,16 @@
 package simulizer.cpu.visualisation;
 
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import simulizer.cpu.visualisation.components.*;
+import javafx.scene.input.MouseEvent;
+import simulizer.cpu.visualisation.components.ALU;
+import simulizer.cpu.visualisation.components.ConnectorWire;
+import simulizer.cpu.visualisation.components.CustomLine;
+import simulizer.cpu.visualisation.components.CustomWire;
+import simulizer.cpu.visualisation.components.GeneralComponent;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
 
 public class CPU {
@@ -39,14 +46,8 @@ public class CPU {
     }
 
     public void drawCPU(){
-        double width = vis.getWindowWidth();
-        double height = vis.getWindowHeight();
-
-        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
-
         Group components = new Group();
-        generalWires = new Group();
-
+        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
         programCounter = new GeneralComponent(20, 60, (width * 0.06), 100, "PC");
         instructionMemory = new GeneralComponent(90, 60, 100, 100, "Instruction Memory");
         register = new GeneralComponent(220, 60, 100, 100, "Registers");
@@ -55,23 +56,21 @@ public class CPU {
         ir = new GeneralComponent(15, 220, 20, 50, "");
         unknown = new GeneralComponent(60, 210, 40, 40, "+4");
 
-        Wire controlUnitToIr = ir.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPC = programCounter.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToPlusFour = unknown.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToIM1 = instructionMemory.vericalLineTo(controlUnit, true, true, -0.1);
-        Wire controlUnitToIM2 = instructionMemory.vericalLineTo(controlUnit, true, false, 0.1);
-        Wire controlUnitToRegisters = register.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToALU = alu.vericalLineTo(controlUnit, true, true, 0);
-        Wire controlUnitToDataMemory = mainMemory.vericalLineTo(controlUnit, true, true, 0);
+        generalWires = new Group();
 
-        controlUnitToIM1.animateData(4, true);
-
-        Wire plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
-        Wire PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
-        Wire aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
-
-        Wire reisterToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
-        Wire reisterToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
+        ConnectorWire controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
+        ConnectorWire controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
+        ConnectorWire controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
+        ConnectorWire plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
+        ConnectorWire PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
+        ConnectorWire aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
+        ConnectorWire registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
+        ConnectorWire registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
 
         memToRes = new CustomWire(580, 80);
         IrTOPC = new CustomWire(15, 230);
@@ -95,8 +94,8 @@ public class CPU {
                 plusFourToIr,
                 PCToIM,
                 aluToMemory,
-                reisterToALU1,
-                reisterToALU2
+                registerToALU1,
+                registerToALU2
         );
 
         Group complexWires = new Group();
@@ -112,10 +111,28 @@ public class CPU {
                 IMToRegister3
         );
 
+        controlUnitToRegisters.animateData(5, true);
+
+        vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double x = event.getX();
+                double y = event.getY();
+                double xMin = register.getLayoutX();
+                double xMax = xMin + register.getShapeWidth();
+                double yMin = register.getLayoutY();
+                double yMax = yMin + register.getShapeHeight();
+
+                if( x > xMin && x < xMax && y > yMin && y < yMax){
+                    // In register box, highlight register window somehow?
+                    vis.getMainWindowManager().findInternalWindow(WindowEnum.REGISTERS).emphasise();
+                }
+            }
+        });
+
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
         vis.addAll(controlUnit, components, generalWires, complexWires);
     }
-
 
     public void resizeShapes(){
         double width = vis.getWindowWidth();
@@ -133,7 +150,7 @@ public class CPU {
         ObservableList<Node> wires = generalWires.getChildren();
 
         for(Node wire : wires){
-            ((Wire) wire).updateLine();
+            ((ConnectorWire) wire).updateLine();
         }
 
         memToRes.drawLine(width * 0.96, height * 0.2, new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
@@ -149,8 +166,8 @@ public class CPU {
                 new CustomLine(width * 0.05, CustomLine.Direction.RIGHT)
         );
 
-        PCToPlusFour.drawLine(width * 0.1, height * 0.275,
-                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+        PCToPlusFour.drawLine(width * 0.12, height * 0.275,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.25, CustomLine.Direction.DOWN)
         );
 
@@ -160,37 +177,36 @@ public class CPU {
                 new CustomLine(width * 0.25, CustomLine.Direction.RIGHT)
         );
 
-        IMToALU.drawLine(width * 0.316, height * 0.375,
+        IMToALU.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
                 new CustomLine(width * 0.2333, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.UP)
+                new CustomLine(height * 0.31, CustomLine.Direction.UP)
         );
 
-        IMToIR.drawLine(width * 0.316, height * 0.375,
+        IMToIR.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.275, CustomLine.Direction.LEFT)
+                new CustomLine(width * 0.272, CustomLine.Direction.LEFT)
         );
 
-        IMToRegister1.drawLine(width * 0.316, height * 0.375,
+        IMToRegister1.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.175, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister2.drawLine(width * 0.316, height * 0.375,
+        IMToRegister2.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.1, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister3.drawLine(width * 0.316, height * 0.375,
+        IMToRegister3.drawLine(width * 0.310, height * 0.375,
                 new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.025, CustomLine.Direction.UP),
-                new CustomLine(width * 0.033, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
-
 
     }
 }

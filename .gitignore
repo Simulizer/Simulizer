@@ -10,6 +10,9 @@ misc/svn-gatekeeper/experiment
 /settings.json
 /themes/
 
+# ignore program dumps
+program-dump.txt
+
 # ignore IntelliJ project files
 .idea/
 ## module library
@@ -50,3 +53,7 @@ gradle.properties
 
 # Ignore application working directory
 # work/ # Temporarily allowing work dir until I can copy out of a jar file
+
+# Ignore logs
+*.log
+
