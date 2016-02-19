@@ -31,6 +31,7 @@ public class WindowManager extends Pane {
 	private Stage primaryStage;
 	private CPU cpu;
 	private Thread cpuThread;
+	UISimulationListener simListener;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -47,6 +48,7 @@ public class WindowManager extends Pane {
 	private void init(Stage primaryStage, String theme, int x, int y) {
 		cpu = null;
 		cpuThread = null;
+		simListener = new UISimulationListener(this);
 
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
@@ -167,6 +169,7 @@ public class WindowManager extends Pane {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			cpuThread = null;
 			System.out.println("Running program terminated");
 		}
 	}
@@ -177,6 +180,8 @@ public class WindowManager extends Pane {
 
 		cpu = new CPU(p, io);
 		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
+		cpu.registerListener(simListener);
+
 		io.clear();
 
 		cpuThread = new Thread(new Task<Object>() {

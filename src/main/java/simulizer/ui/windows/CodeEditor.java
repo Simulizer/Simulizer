@@ -14,9 +14,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -37,6 +45,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
+import org.reactfx.value.Val;
 import simulizer.assembler.extractor.ProgramExtractor;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
@@ -60,6 +69,7 @@ public class CodeEditor extends InternalWindow {
 
 	private CodeArea codeArea;
 	private File currentFile = null;
+	private SimpleIntegerProperty currentLine;
 	private boolean fileEdited = false, lineWrap = true;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private Popup tooltipPopup = new Popup();
@@ -93,8 +103,19 @@ public class CodeEditor extends InternalWindow {
 		tooltipPopup.getContent().add(tooltipMsg);
 		tooltipMsg.getStyleClass().add("tooltip");
 
+		currentLine = new SimpleIntegerProperty(-1);
+
 		codeArea = new CodeArea();
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+		IntFunction<Node> numberFactory = LineNumberFactory.get(codeArea);
+		IntFunction<Node> arrowFactory = new LineArrowFactory(currentLine.asObject());
+		IntFunction<Node> combinedFactory = line -> {
+			HBox hbox = new HBox(
+			numberFactory.apply(line),
+			arrowFactory.apply(line));
+			hbox.setAlignment(Pos.CENTER_LEFT);
+			return hbox;
+		};
+		codeArea.setParagraphGraphicFactory(combinedFactory);
 
 		// Change behaviour of pressing TAB
 		EventHandler<? super KeyEvent> tabHandler =
@@ -455,5 +476,37 @@ public class CodeEditor extends InternalWindow {
 		return errorSpansBuilder.create();
 	}
 
+
+	class LineArrowFactory implements IntFunction<Node> {
+		public final ObservableValue<Integer> selectedLine;
+
+		public LineArrowFactory(ObservableValue<Integer> selectedLine) {
+			this.selectedLine = selectedLine;
+		}
+
+		@Override public Node apply(int lineNum) {
+			Polygon triangle = new Polygon(0.0, 0.0, 10.0, 5.0, 0.0, 10.0);
+			triangle.setFill(Color.GREEN);
+
+			ObservableValue<Boolean> visible = Val.map(selectedLine, l -> l == lineNum);
+
+			triangle.visibleProperty().bind(
+				Val.flatMap(triangle.sceneProperty(), scene -> {
+					if(scene != null) {
+						return visible;
+					} else {
+						return Val.constant(false);
+					}
+				})
+			);
+
+			return triangle;
+		}
+	}
+
+
+	public void highlightCurrentLine(int lineNum) {
+		currentLine.set(lineNum);
+	}
 
 }

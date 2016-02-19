@@ -1,6 +1,5 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.Date;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -137,6 +136,8 @@ public class CPU {
 				l.processAnnotationMessage((AnnotationMessage) m);
 			} else if(m instanceof DataMovementMessage) {
                 l.processDataMovementMessage((DataMovementMessage) m);
+            } else if(m instanceof ExecuteStatementMessage) {
+                l.processExecuteStatementMessage((ExecuteStatementMessage) m);
             } else if(m instanceof ProblemMessage) {
                 l.processProblemMessage((ProblemMessage) m);
             } else if(m instanceof StageEnterMessage) {
@@ -187,6 +188,10 @@ public class CPU {
 
         this.Alu = new ALU();//initialising Alu
         this.getLastAddress();
+    }
+
+    public Program getProgram() {
+        return program;
     }
 
     /**this method resets the registers in the memory
@@ -592,6 +597,7 @@ public class CPU {
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
         fetch();
+        sendMessage(new ExecuteStatementMessage(programCounter));
         InstructionFormat instruction = decode();
         execute(instruction);
 		if(annotations.containsKey(programCounter)) {
