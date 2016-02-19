@@ -1,6 +1,6 @@
 ![banner](misc/SimulizerLogo.png)
 
-Simulizer allows you to write assembly code, run it on a simulated and visualised CPU.
+Simulizer allows you to write assembly code and run it on a simulated and visualised CPU. It has been designed to improve various features of [SPIM](http://spimsimulator.sourceforge.net).
 
 Features
 --------
