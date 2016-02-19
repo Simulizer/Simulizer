@@ -56,8 +56,7 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setOnAction(e -> {
 			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
 			if (editor.getCurrentFile() == null) {
-				editor.setCurrentFile(
-					saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
+				editor.setCurrentFile(saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
 			}
 			editor.saveFile();
 		});
@@ -72,7 +71,11 @@ public class MainMenuBar extends MenuBar {
 				editor.saveFile();
 			}
 		});
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem);
+
+		MenuItem exitItem = new MenuItem("Exit");
+		exitItem.setOnAction(e -> System.exit(0));
+
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
 
