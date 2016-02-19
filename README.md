@@ -2,6 +2,8 @@
 
 Simulizer allows you to write assembly code and run it on a simulated and visualised CPU. It has been designed to improve various features of [SPIM](http://spimsimulator.sourceforge.net).
 
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
+
 Features
 --------
 - A code editor with syntax highlighting for the MIPS language, along with real-time error checking and tooltips.
@@ -10,6 +12,10 @@ Features
 - Interaction with the CPU, e.g. controlling the clock speed, pausing, stepping through execution, etc.
 - Helpful messages and animations as the simulation is running to help the user understand how the CPU is operating.
 - High-level visualisation of annotated programs, see below.
+
+Demo
+----
+![TODO demo gif](./)
 
 Annotations
 -----------
