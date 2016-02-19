@@ -9,6 +9,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
@@ -16,6 +17,7 @@ import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
@@ -154,6 +156,17 @@ public class MainMenuBar extends MenuBar {
 			wm.runProgram(p);
 		});
 
+		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
+		setClockSpeed.setOnAction(e -> {
+			CPU cpu = wm.getCPU();
+			if (cpu != null) {
+				TextInputDialog clockSpeed = new TextInputDialog();
+				clockSpeed.setTitle("Clock Speed");
+				clockSpeed.setContentText("Enter Clock Speed: ");
+				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockSpeed(Integer.parseInt(speed)));
+			}
+		});
+
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setDisable(true);
 
@@ -163,7 +176,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem stop = new MenuItem("Stop Simulation");
 		stop.setOnAction(e -> wm.stopCPU());
 
-		runMenu.getItems().addAll(runProgram, singleStep, simplePipeline, stop);
+		runMenu.getItems().addAll(runProgram, setClockSpeed, singleStep, simplePipeline, stop);
 		return runMenu;
 	}
 
