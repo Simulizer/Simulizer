@@ -171,6 +171,7 @@ public class WindowManager extends Pane {
 	public void runProgram(Program p) {
 		Logger io = (Logger) findInternalWindow(WindowEnum.LOGGER);
 		stopCPU();
+		io.clear();
 		cpuThread = new Thread(new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {

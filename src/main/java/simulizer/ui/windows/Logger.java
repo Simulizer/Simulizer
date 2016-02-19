@@ -22,6 +22,7 @@ public class Logger extends InternalWindow implements IO {
 
 		// Output Console
 		output.setEditable(false);
+		output.textProperty().addListener((e) -> output.setScrollTop(Double.MAX_VALUE));
 		GridPane.setHgrow(output, Priority.ALWAYS);
 		GridPane.setVgrow(output, Priority.ALWAYS);
 		pane.add(output, 0, 0, 2, 1);
@@ -36,7 +37,7 @@ public class Logger extends InternalWindow implements IO {
 		submit.setOnAction((e) -> {
 			lastInput = input.getText();
 			input.setText("");
-			output.setText(output.getText() + lastInput + "\n");
+			output.appendText(lastInput + "\n");
 			cdl.countDown();
 		});
 		pane.add(submit, 1, 1);
@@ -82,17 +83,22 @@ public class Logger extends InternalWindow implements IO {
 
 	@Override
 	public void printString(String str) {
-		output.setText(output.getText() + str + "\n");
+		output.appendText(str + "\n");
 	}
 
 	@Override
 	public void printInt(int num) {
-		output.setText(output.getText() + num + "\n");
+		output.appendText(num + "\n");
 	}
 
 	@Override
 	public void printChar(char letter) {
-		output.setText(output.getText() + letter + "\n");
+		output.appendText(letter + "\n");
+	}
+
+	public void clear() {
+		lastInput = "";
+		output.setText("");
 	}
 
 }
