@@ -40,6 +40,14 @@ public abstract class DataStructureVisualiser {
 		return height;
 	}
 
+	public void setWidth(double width) {
+		this.width = width;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
 	public HighLevelVisualisation getHighLevelVisualisation() {
 		return vis;
 	}

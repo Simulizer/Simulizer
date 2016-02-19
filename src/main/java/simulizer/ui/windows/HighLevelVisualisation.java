@@ -30,12 +30,14 @@ public class HighLevelVisualisation extends InternalWindow {
 		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
 
 		widthProperty().addListener((o, old, newValue) -> {
-			setPaneWidth(newValue.doubleValue());
+			width = newValue.doubleValue();
+			setPaneWidth(width);
 			visualiser.resize();
 		});
 
 		heightProperty().addListener((o, old, newValue) -> {
-			setPaneHeight(newValue.doubleValue());
+			height = newValue.doubleValue();
+			setPaneHeight(height);
 			visualiser.resize();
 		});
 	}

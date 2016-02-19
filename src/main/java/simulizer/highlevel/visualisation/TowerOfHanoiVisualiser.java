@@ -32,14 +32,14 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private List<Stack<Rectangle>> pegs = new ArrayList<>();
 
 	// Dimensions
-	private int xOffset;
-	private int pegY0;
-	private int pegHeight;
-	private int platformWidth;
-	private int pegWidth;
-	private int discHeight;
-	private int maxdiscWidth;
-	private int discWidthDelta;
+	private double xOffset;
+	private double pegY0;
+	private double pegHeight;
+	private double platformWidth;
+	private double pegWidth;
+	private double discHeight;
+	private double maxdiscWidth;
+	private double discWidthDelta;
 
 	private List<Animation> animationBuffer = new ArrayList<>();
 	private List<MoveIndices> moveIndices = new ArrayList<>();
@@ -67,16 +67,15 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
 		this.maxdiscWidth = platformWidth / 3 - width / 120;
 		this.discWidthDelta = Math.min(width / 30, (maxdiscWidth - pegWidth - width / 120) / (numDiscs - 1));
-		System.out.println(discWidthDelta);
 
-		initPlatform();
+		init();
 		resize();
 	}
 
 	/**
 	 * Draws the platform and the initial discs
 	 */
-	private void initPlatform() {
+	private void init() {
 		HighLevelVisualisation vis = getHighLevelVisualisation();
 
 		this.base = new Rectangle(xOffset, pegY0 + pegHeight, platformWidth, discHeight);
@@ -92,9 +91,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		}
 
 		// Draw discs
-		int y = pegY0 + pegHeight - discHeight;
-		int width = maxdiscWidth;
-		int x = xOffset + 5 / 2;
+		double y = pegY0 + pegHeight - discHeight;
+		double width = maxdiscWidth;
+		double x = xOffset + 5 / 2;
 		for (int i = 0; i < numDiscs; ++i) {
 			discs[i] = new Rectangle(x, y, width, discHeight);
 			discs[i].setFill(colorGradient[i % colorGradient.length]);
@@ -114,7 +113,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 *            the peg whose x coordinate will be calculated
 	 * @return the x coordinate of the specified peg
 	 */
-	private int getX(int pegIndex) {
+	private double getX(int pegIndex) {
 		return (int) (xOffset + (pegIndex + 0.5) * platformWidth / 3);
 	}
 
@@ -123,7 +122,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 *            the index of the peg for the calculation
 	 * @return the y coordinate of the topmost disc on the specified peg
 	 */
-	private int getY(int pegIndex) {
+	private double getY(int pegIndex) {
 		int numdiscsOnPeg = pegs.get(pegIndex).size();
 		return ((pegY0 + pegHeight) - numdiscsOnPeg * discHeight);
 	}
@@ -180,7 +179,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 * @return the transition representing the animation from the source to the
 	 *         target
 	 */
-	private PathTransition getTransition(Rectangle disc, int x1, int y1, int x2, int y2) {
+	private PathTransition getTransition(Rectangle disc, double x1, double y1, double x2, double y2) {
 		int height = disc.heightProperty().intValue();
 		double arcHeight = (getHighLevelVisualisation().getWindowHeight() / 10);
 
@@ -201,10 +200,49 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void resize() {
-        double width = getHighLevelVisualisation().getWindowWidth();
-        double height = getHighLevelVisualisation().getWindowHeight();
+		double windowWidth = getHighLevelVisualisation().getWindowWidth();
+		double windowHeight = getHighLevelVisualisation().getWindowHeight();
 
+		this.platformWidth = (4 * windowWidth) / 5;
+		this.xOffset = (windowWidth - platformWidth) / 2;
+		this.pegY0 = windowHeight / 3;
+		this.pegHeight = windowHeight / 2;
+		this.pegWidth = windowWidth / 40;
 
+		this.discHeight = Math.min(windowHeight / 14, pegHeight / numDiscs);
+		this.maxdiscWidth = platformWidth / 3 - windowWidth / 120;
+		this.discWidthDelta = Math.min(windowWidth / 30, (maxdiscWidth - pegWidth - windowWidth / 120) / (numDiscs - 1));
+
+		setAttrs(this.base, xOffset, pegY0 + pegHeight, platformWidth, discHeight);
+
+		for (int i = 0; i < 3; ++i) {
+			setAttrs(vPegs[i], getX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight);
+		}
+
+		double w = getWidth();
+		double h = getHeight();
+
+		// Draw discs
+		for (int i = 0; i < numDiscs; ++i) {
+			Rectangle disc = discs[i];
+
+			double newX = (disc.getX() / w) * windowWidth;
+			double newY = (disc.getY() / h) * windowHeight;
+			double newWidth = (disc.widthProperty().doubleValue() / w) * windowWidth;
+			double newHeight = (disc.heightProperty().doubleValue() / h) * windowHeight;
+
+			setAttrs(discs[i], newX, newY, newWidth, newHeight);
+		}
+
+		setWidth(windowWidth);
+		setHeight(windowHeight);
+	}
+
+	private void setAttrs(Rectangle rect, double x, double y, double width, double height) {
+		rect.setX(x);
+		rect.setY(y);
+		rect.setWidth(width);
+		rect.setHeight(height);
 	}
 
 }
