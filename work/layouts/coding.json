@@ -1,0 +1,28 @@
+{
+  "name": "Coding",
+  "width": 1024.0,
+  "height": 705.0,
+  "windows": [
+    {
+      "id": "REGISTERS",
+      "x": 563.0,
+      "y": 35.0,
+      "width": 451.0,
+      "height": 417.0
+    },
+    {
+      "id": "CODE_EDITOR",
+      "x": 10.0,
+      "y": 35.0,
+      "width": 548.0,
+      "height": 660.0
+    },
+    {
+      "id": "LOGGER",
+      "x": 565.0,
+      "y": 458.0,
+      "width": 449.0,
+      "height": 237.0
+    }
+  ]
+}

@@ -6,13 +6,24 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Registers extends InternalWindow {
 	private TableView<Data> table = new TableView<Data>();
+	private CPU cpu;
 
 	public void refreshData() {
+		// Create Listener for Register Changes
+		CPU cpu = getWindowManager().getCPU();
+		if (cpu != null && this.cpu != cpu) {
+			this.cpu = cpu;
+			cpu.registerListener(new RegisterListener());
+		}
+
 		ObservableList<Data> data = FXCollections.observableArrayList();
 		int i = 0;
 		for (Register r : Register.values()) {
@@ -41,15 +52,20 @@ public class Registers extends InternalWindow {
 	public void ready() {
 		TableColumn<Data, String> register = new TableColumn<Data, String>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<Data, String>("name"));
+
 		TableColumn<Data, String> hex = new TableColumn<Data, String>("Hexadecimal");
 		hex.setCellValueFactory(new PropertyValueFactory<Data, String>("hex"));
+
 		TableColumn<Data, String> unsigned = new TableColumn<Data, String>("Unsigned");
 		unsigned.setCellValueFactory(new PropertyValueFactory<Data, String>("unsigned"));
+
 		TableColumn<Data, String> signed = new TableColumn<Data, String>("Signed");
 		signed.setCellValueFactory(new PropertyValueFactory<Data, String>("signed"));
+
 		refreshData();
 		table.getColumns().addAll(register, hex, unsigned, signed);
 		table.setEditable(false);
+
 		getContentPane().getChildren().add(table);
 		super.ready();
 	}
@@ -81,6 +97,13 @@ public class Registers extends InternalWindow {
 			return signed;
 		}
 
+	}
+
+	private class RegisterListener extends SimulationListener {
+		@Override
+		public void processMessage(Message m) {
+			refreshData();
+		}
 	}
 
 }
