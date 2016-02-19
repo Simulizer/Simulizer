@@ -3,17 +3,15 @@ package simulizer.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.simulation.data.representation.Word;
-import simulizer.simulation.exceptions.DecodeException;
-import simulizer.simulation.exceptions.ExecuteException;
-import simulizer.simulation.exceptions.HeapException;
-import simulizer.simulation.exceptions.InstructionException;
-import simulizer.simulation.exceptions.MemoryException;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -22,7 +20,6 @@ import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.Logger;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
@@ -32,6 +29,8 @@ public class WindowManager extends Pane {
 	private Layouts layouts = new Layouts(this);
 	private Stage primaryStage;
 	private CPU cpu;
+	private Thread cpuThread;
+	private IO cpuIO;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -46,6 +45,10 @@ public class WindowManager extends Pane {
 	}
 
 	private void init(Stage primaryStage, String theme, int x, int y) {
+		cpu = null;
+		cpuThread = null;
+		cpuIO = new IOConsole();
+
 		Scene scene = new Scene(pane, x, y);
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setScene(scene);
@@ -127,6 +130,7 @@ public class WindowManager extends Pane {
 
 		// Not found -> Create a new one
 		InternalWindow w = window.createNewWindow();
+		assert w != null;
 		w.setWindowManager(this);
 		// TODO: Look for a smarter bounds first (possibly from layout), otherwise maximise the frame
 		w.setBounds(10, 35, pane.getWidth() - 20, pane.getHeight() - 45);
@@ -154,13 +158,35 @@ public class WindowManager extends Pane {
 		return pane;
 	}
 
-	public void runProgram(Program p) {
-		cpu = new CPU(p, (Logger) findInternalWindow(WindowEnum.LOGGER));
-		try {
-			cpu.runProgram();
-		} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException e) {
-			e.printStackTrace();
+	public void stopCPU() {
+		if (cpuThread != null) {
+			System.out.println("Terminating running program");
+			cpu.stopRunning();
+			try {
+				cpuThread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Running program terminated");
 		}
+	}
+
+	public void runProgram(Program p) {
+		stopCPU();
+		cpuThread = new Thread(new Task<Object>() {
+			@Override
+			protected Object call() throws Exception {
+				try {
+					cpu = new CPU(p, cpuIO);
+					// cpu.setClockSpeed(0);
+					cpu.runProgram();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+		});
+		cpuThread.start();
 	}
 
 	public Word[] getRegisters() {

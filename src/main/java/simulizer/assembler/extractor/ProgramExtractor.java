@@ -302,7 +302,7 @@ public class ProgramExtractor extends SimpBaseListener {
                 log.logProblem("only .globl directives should be placed inside the .text segment", ctx);
             }
         } else {
-            log.logProblem("Assembler directives should only be placed inside" +
+            log.logProblem("Assembler directives should only be placed inside " +
                            "either the .data or .text segment", ctx);
         }
     }

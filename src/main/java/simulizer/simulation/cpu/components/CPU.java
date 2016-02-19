@@ -1,16 +1,10 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Date;
+import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 
-import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.Label;
-import simulizer.assembler.representation.Program;
-import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
@@ -32,6 +26,7 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
+import simulizer.simulation.listeners.*;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -47,6 +42,8 @@ import simulizer.simulation.instructions.SpecialInstruction;
  */
 public class CPU {
 
+    private List<SimulationListener> listeners;
+
     private Address programCounter;
     private Statement instructionRegister;
 
@@ -60,6 +57,8 @@ public class CPU {
     private Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
 
+	private Map<Address, List<Annotation>> annotations;
+
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
     
@@ -72,8 +71,9 @@ public class CPU {
      */
     public CPU(Program program, IO io)
     {
+        listeners = new ArrayList<>();
         this.loadProgram(program);//set up the CPU with the program
-        this.clock = new Clock();
+        this.clock = new Clock(100);
         this.isRunning = false;
         this.io = io;
     }
@@ -83,7 +83,11 @@ public class CPU {
      */
     public void startClock()
     {
-        this.clock.setClockRunning(true);
+        clock.reset();
+        clock.startRunning();
+        if(!clock.isAlive()) {
+            clock.start();//start the clock thread
+        }
     }
 
     /**this method will set the clock controlling
@@ -91,7 +95,53 @@ public class CPU {
      */
     public void pauseClock()
     {
-        this.clock.setClockRunning(false);
+        if(clock != null) {
+            clock.stopRunning();
+        }
+    }
+
+    public void setClockSpeed(int tickMillis) {
+        clock.tickMillis = tickMillis;
+    }
+
+    public void stopRunning() {
+        isRunning = false;
+        if(clock != null) {
+            pauseClock();
+            try {
+                clock.join(); // stop the clock thread
+            } catch(InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Register a listener to receive messages
+     * @param l the listener to send messages to
+     */
+    public void registerListener(SimulationListener l) {
+        listeners.add(l);
+    }
+
+    /**
+     * send a message to all of the registered listeners
+     * @param m the message to send
+     */
+    private void sendMessage(Message m) {
+        for(SimulationListener l : listeners) {
+            l.processMessage(m);
+
+			if(m instanceof AnnotationMessage) {
+				l.processAnnotationMessage((AnnotationMessage) m);
+			} else if(m instanceof DataMovementMessage) {
+                l.processDataMovementMessage((DataMovementMessage) m);
+            } else if(m instanceof ProblemMessage) {
+                l.processProblemMessage((ProblemMessage) m);
+            } else if(m instanceof StageEnterMessage) {
+                l.processStageEnterMessage((StageEnterMessage) m);
+            }
+        }
     }
 
     /**this method is used to set up the cpu whenever a new program is loaded into it
@@ -122,13 +172,16 @@ public class CPU {
             labelMetaData.put(key, l.getKey());
         }
 
+		annotations = program.annotations;
+
         try {
             this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
         } catch(Exception e) {//if entry point load fails
             //SEND TO LOGGER HERE
         }
 
-        this.registers[Register.gp.getID()] = new Word(new byte[]{0x10,0x00,(byte)0x80,0x00});//setting global pointer
+        this.registers[Register.gp.getID()] = this.program.initialGP;//setting global pointer
+        this.registers[Register.sp.getID()] = this.program.initialSP;//setting up stack pointer
 
         this.Alu = new ALU();//initialising Alu
         this.getLastAddress();
@@ -142,8 +195,7 @@ public class CPU {
         this.registers = new Word[32];
         for(int i = 0; i < this.registers.length; i++)
         {
-            byte[] word = new byte[]{0x00,0x00,0x00,0x00};//initially setting to 0
-            this.registers[i] = new Word(word);
+            this.registers[i] = new Word(DataConverter.encodeAsUnsigned(0));
         }
     }
 
@@ -387,10 +439,6 @@ public class CPU {
                 {
                     this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
                 }
-                else
-                {
-                    this.programCounter = new Address(this.programCounter.getValue() + 4);//increment as normal
-                }
                 break;
             case SPECIAL:
                 if(instruction.getInstruction().equals(Instruction.syscall))//syscall
@@ -509,7 +557,8 @@ public class CPU {
     			this.registers[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
     			break;
     		case 10://exit program
-    			this.pauseClock();//need to change this!!
+    			this.pauseClock();//probably reasonable for now
+    			this.isRunning = false;//stop execution all together
     			break;
     		case 11://print char
     			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
@@ -539,6 +588,12 @@ public class CPU {
         fetch();
         InstructionFormat instruction = decode();
         execute(instruction);
+		if(annotations.containsKey(programCounter)) {
+			for(Annotation a : annotations.get(programCounter)) {
+				sendMessage(new AnnotationMessage(a));
+			}
+		}
+
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached
         {
             this.isRunning = false;//stop running
@@ -555,16 +610,22 @@ public class CPU {
      */
     public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
     {
+    	this.startClock();
+        System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         while(isRunning)//need something to stop this
         {
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute
-           /* try {
-                wait();
-            } catch (InterruptedException e) {
-                //we want the interruption so do nothing and keep looping
-            }*/
-        }
+            try {
+                if(isRunning) {
+                    clock.waitForNextTick();
+                }
+            } catch(InterruptedException | BrokenBarrierException e) {
+				System.out.println("CPU interrupted");
+            }
+		}
+        System.out.println("---- Program Execution Ended ----");
+        stopRunning();
     }
 
     /**useful auxiliary methods to check if 2 byte arrays equal
