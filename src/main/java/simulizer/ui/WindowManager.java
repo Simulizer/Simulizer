@@ -175,7 +175,7 @@ public class WindowManager extends Pane {
 		stopCPU();
 
 		cpu = new CPU(p, cpuIO);
-		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).setCPU(cpu);
+		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
 
 		cpuThread = new Thread(new Task<Object>() {
 			@Override

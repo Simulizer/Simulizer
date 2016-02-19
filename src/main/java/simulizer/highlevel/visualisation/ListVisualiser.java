@@ -7,7 +7,6 @@ import javafx.animation.Animation;
 import javafx.animation.FillTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
@@ -16,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
  * Visualises the sorting of a list
@@ -56,8 +56,8 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(Pane contentPane, int width, int height, List<T> list) {
-		super(contentPane, width, height);
+	public ListVisualiser(HighLevelVisualisation vis, int width, int height, List<T> list) {
+		super(vis, width, height);
 		this.setList(list);
 	}
 
@@ -70,7 +70,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private void initRectsAndBoxes() {
-		Pane contentPane = getDrawingPane();
+		HighLevelVisualisation vis = getHighLevelVisualisation();
 		int rectWidth = getRectWidth();
 
 		for (int i = 0; i < rectangles.length; ++i) {
@@ -82,7 +82,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			textLabels[i].setTranslateX(getTextX(i));
 			textLabels[i].setTranslateY(getTextY(i));
 
-			contentPane.getChildren().addAll(rectangles[i], textLabels[i]);
+			vis.addAll(rectangles[i], textLabels[i]);
 		}
 	}
 
@@ -99,7 +99,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private int getRectWidth() {
-		return (getWidth() - 2 * X0) / rectangles.length - SPACING + 1;
+		return (int) ((getWidth() - 2 * X0) / rectangles.length - SPACING + 1);
 	}
 
 	/**
@@ -215,5 +215,11 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		pathTransition.setCycleCount(1);
 
 		return pathTransition;
+	}
+
+	@Override
+	public void resize() {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -125,7 +125,7 @@ public class MainMenuBar extends MenuBar {
 			// });
 
 			PegWrapper p = new PegWrapper(-1, -1);
-			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv.getDrawingPane(), 1000, 400, 0, 4);
+			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv, 1000, 400, 0, 4);
 			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
 				int val = Integer.valueOf(f.getCharacter());
 
