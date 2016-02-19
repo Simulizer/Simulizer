@@ -9,7 +9,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
@@ -17,13 +16,11 @@ import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
-import simulizer.highlevel.visualisation.TowerOfHanoiVisualiser;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
-import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -79,16 +76,6 @@ public class MainMenuBar extends MenuBar {
 		return fileMenu;
 	}
 
-	private class PegWrapper {
-		public int a;
-		public int b;
-
-		public PegWrapper(int a, int b) {
-			this.a = a;
-			this.b = b;
-		}
-	}
-
 	private Menu viewMenu() {
 		// | View
 		Menu viewMenu = new Menu("View");
@@ -113,40 +100,6 @@ public class MainMenuBar extends MenuBar {
 			item.setOnAction(e -> wm.setLayout(l));
 			menu.getItems().add(item);
 		}
-
-		// | | | -- High Level Only Layout
-		MenuItem highLevelLayoutItem = new MenuItem("High Level Test");
-		highLevelLayoutItem.setOnAction(e -> {
-			HighLevelVisualisation hv = (HighLevelVisualisation) wm.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-			// ListVisualiser<Integer> lv = new
-			// ListVisualiser<>(hv.getDrawingPane(), 1000, 400, Arrays.asList(3,
-			// 1, 4, 1, 5));
-			// hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
-			// int n = Integer.valueOf(f.getCharacter());
-			// lv.swap(n % 5, (n+1) % 5);
-			// lv.commit();
-			// });
-
-			PegWrapper p = new PegWrapper(-1, -1);
-			TowerOfHanoiVisualiser tv = new TowerOfHanoiVisualiser(hv, 1000, 400, 0, 4);
-			hv.addEventHandler(KeyEvent.KEY_TYPED, f -> {
-				int val = Integer.valueOf(f.getCharacter());
-
-				if (p.a == -1)
-					p.a = val;
-				else {
-					p.b = val;
-
-					tv.move(p.a - 1, p.b - 1);
-					tv.commit();
-
-					p.a = -1;
-					p.b = -1;
-				}
-
-			});
-			tv.setRate(2000);
-		});
 
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
@@ -202,10 +155,10 @@ public class MainMenuBar extends MenuBar {
 		});
 
 		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setOnAction(e -> System.out.println("Does nothing yet"));
+		singleStep.setDisable(true);
 
 		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
-		simplePipeline.setOnAction(e -> System.out.println("Does nothing yet"));
+		simplePipeline.setDisable(true);
 
 		MenuItem stop = new MenuItem("Stop Simulation");
 		stop.setOnAction(e -> wm.stopCPU());
