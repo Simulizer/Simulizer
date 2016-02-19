@@ -2,6 +2,7 @@ package simulizer.ui.interfaces;
 
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import jfxtras.labs.scene.control.window.CloseIcon;
@@ -16,6 +17,8 @@ public abstract class InternalWindow extends Window {
 	public InternalWindow() {
 		setScaleX(0);
 		setScaleY(0);
+
+		setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
