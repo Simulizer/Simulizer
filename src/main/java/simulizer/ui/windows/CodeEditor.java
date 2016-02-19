@@ -211,6 +211,7 @@ public class CodeEditor extends InternalWindow {
 
 				// Show the code in the editor
 				setText(codeIn);
+				updateRegexHighlighting();
 				fileEdited = false;
 				setTitle(TITLE + " - " + selectedFile.getName());
 				updateTitleEditStatus();
