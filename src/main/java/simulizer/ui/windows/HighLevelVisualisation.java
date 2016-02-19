@@ -93,6 +93,7 @@ public class HighLevelVisualisation extends InternalWindow {
 	 * @param cpu
 	 */
 	public void attachCPU(CPU cpu) {
+		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
 		cpu.registerListener(new PresentationTowerOfHanoiListener((PresentationTowerOfHanoiVisualiser) visualiser));
 		setResizableWindow(false);
 	}
