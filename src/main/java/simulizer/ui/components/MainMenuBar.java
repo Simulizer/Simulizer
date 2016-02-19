@@ -44,7 +44,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector("Open an assembly file", new File(System.getProperty("user.dir")), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
