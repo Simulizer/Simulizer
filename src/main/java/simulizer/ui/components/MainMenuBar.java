@@ -47,7 +47,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = openFileSelector("Open an assembly file", new File(System.getProperty("user.dir")), new ExtensionFilter("Assembly files *.s", "*.s"));
 			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
@@ -247,8 +247,7 @@ public class MainMenuBar extends MenuBar {
 			Program p = a.assemble(code.getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
-				try {
-					PrintWriter out = new PrintWriter(outputFilename);
+				try (PrintWriter out = new PrintWriter(outputFilename)) {
 					out.println("null");
 				} catch (IOException e1) {
 					e1.printStackTrace();
