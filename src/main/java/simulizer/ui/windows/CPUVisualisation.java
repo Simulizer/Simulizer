@@ -16,8 +16,8 @@ public class CPUVisualisation extends InternalWindow {
     Pane pane;
 
 	public CPUVisualisation() {
-        width = 600;
-        height = 350;
+        width = 530;
+        height = 415;
         pane = new Pane();
         pane.setPrefWidth(width);
         pane.setMinWidth(width);
@@ -26,7 +26,7 @@ public class CPUVisualisation extends InternalWindow {
         pane.setMinHeight(height);
         pane.setMaxHeight(height);
         getChildren().add(pane);
-        setMinWidth(600);
+        setMinWidth(530);
         setMinHeight(getMinimalHeight());
 		drawVisualisation();
 	}
@@ -104,6 +104,6 @@ public class CPUVisualisation extends InternalWindow {
 	
 	@Override
 	protected double getMinimalHeight() {
-		return 400;
+		return 415;
 	}
 }

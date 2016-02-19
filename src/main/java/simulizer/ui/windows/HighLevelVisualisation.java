@@ -10,8 +10,8 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
 public class HighLevelVisualisation extends InternalWindow {
-	private double width = 600;
-	private double height = 350;
+	private double width = 400;
+	private double height = 300;
 
 	private DataStructureVisualiser visualiser;
 	private Pane drawingPane = new Pane();
@@ -72,7 +72,7 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	@Override
 	protected double getMinimalHeight() {
-		return 400;
+		return 200;
 	}
 
 	public void setVisualiser(DataStructureVisualiser visualiser) {
