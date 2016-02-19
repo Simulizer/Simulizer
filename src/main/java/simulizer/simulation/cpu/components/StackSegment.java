@@ -27,10 +27,10 @@ public class StackSegment {
 		this.stackPointer = stackPointer;
 		this.lowestAddress = lowestAddress;
 		this.stack = new ArrayList<Byte>();
-		/*for(int i = 0; i < this.stackPointer.getValue() - this.lowestAddress.getValue() - 1; i++)
+		for(int i = 0; i < 100; i++)//this.stackPointer.getValue() - this.lowestAddress.getValue() - 1; i++)
 		{
 			this.stack.add(new Byte((byte)0x00));//initialising stack
-		}*/
+		}
 	}
 	
 	/**method reads a number of bytes from the stack
