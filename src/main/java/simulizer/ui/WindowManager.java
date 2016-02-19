@@ -157,6 +157,7 @@ public class WindowManager extends Pane {
 		return pane;
 	}
 
+
 	public void stopCPU() {
 		if (cpuThread != null) {
 			System.out.println("Terminating running program");

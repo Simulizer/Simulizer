@@ -20,6 +20,7 @@ import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.InstructionException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
+import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.ITypeInstruction;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
@@ -160,9 +161,10 @@ public class CPU {
         Address textSegmentStart = this.program.textSegmentStart;
         Address dataSegmentStart = this.program.dataSegmentStart;
         Address dynamicSegmentStart = this.program.dynamicSegmentStart;
+        Address stackPointer = new Address((int)DataConverter.decodeAsSigned(this.program.initialSP.getWord()));
         byte[] staticDataSegment = this.program.dataSegment;
         Map<Address,Statement> textSegment = this.program.textSegment;
-        this.memory = new MainMemory(textSegment,staticDataSegment,textSegmentStart,dataSegmentStart,dynamicSegmentStart);
+        this.memory = new MainMemory(textSegment,staticDataSegment,textSegmentStart,dataSegmentStart,dynamicSegmentStart,stackPointer);
 
         labels = new HashMap<>();
         labelMetaData = new HashMap<>();
@@ -349,14 +351,15 @@ public class CPU {
 
             Optional<Address> goToAddress = Optional.of(this.decodeAddressOperand(op1.asAddressOp()));//where to jump
             Optional<Word> currentAddress = Optional.empty();//storing current address if needed by jal
-            Integer currentLine  = this.instructionRegister.getLineNumber();//line number of current instruction
-            for(Map.Entry<Address,Integer> entry : this.program.lineNumbers.entrySet())//iterating to find current address
+            //Integer currentLine  = this.instructionRegister.getLineNumber();//line number of current instruction
+            /*for(Map.Entry<Address,Integer> entry : this.program.lineNumbers.entrySet())//iterating to find current address
             {
                 if(entry.getValue().equals(currentLine))//if address found
                 {
                     currentAddress = Optional.of(encodeU((long)entry.getKey().getValue()));//current address for jal
                 }
-            }
+            }*/
+            currentAddress = Optional.of(new Word(DataConverter.encodeAsSigned((long)this.programCounter.getValue())));
             return new JTypeInstruction(instruction,goToAddress,currentAddress);
         }
         else if(instruction.getOperandFormat() == OperandFormat.register)//for jr
@@ -424,8 +427,9 @@ public class CPU {
      * @throws ExecuteException if problem during execution
      * @throws HeapException if problem with heap
      * @throws MemoryException if problem accessing memory
+     * @throws StackException 
      */
-    private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException
+    private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException
     {
         switch(instruction.mode)//switch based on instruction format
         {
@@ -506,8 +510,9 @@ public class CPU {
      * @throws InstructionException if invalid syscall code
      * @throws HeapException if problem using sbrk like a0 not multiple of 4
      * @throws MemoryException if problem reading from memory for read string
+     * @throws StackException 
      */
-    private void syscall(int v0) throws InstructionException, HeapException, MemoryException
+    private void syscall(int v0) throws InstructionException, HeapException, MemoryException, StackException
     {
     	int a0 = (int)DataConverter.decodeAsSigned(this.registers[Register.a0.getID()].getWord());//getting main argument register
     	switch(v0)
@@ -581,9 +586,10 @@ public class CPU {
      * @throws InstructionException if error with instruction
      * @throws ExecuteException if problem during execution
      * @throws HeapException if the heap goes wrong at some point
+     * @throws StackException 
      *
      */
-    public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
+    public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
         fetch();
         InstructionFormat instruction = decode();
@@ -607,8 +613,9 @@ public class CPU {
      * @throws InstructionException if bad instruction
      * @throws ExecuteException if problem during execution
      * @throws HeapException if problem accessing the heap
+     * @throws StackException if problem accessing stack
      */
-    public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException
+    public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
     	this.startClock();
         System.out.println("---- Program Execution Started ----");
@@ -771,6 +778,10 @@ public class CPU {
         return new Word(DataConverter.encodeAsUnsigned(value));
     }
 
+    /**returns register array for retrieval by the UI
+     * 
+     * @return the array of words representing the registers
+     */
 	public Word[] getRegisters() {
 		return registers;
 	}
