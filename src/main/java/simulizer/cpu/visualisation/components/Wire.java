@@ -36,6 +36,7 @@ public class Wire extends Group {
         this.arrowHead = arrowHead;
         this.type = type;
         this.animating = false;
+        this.progressing = new Timer();
     }
 
     public void reanimateData(){

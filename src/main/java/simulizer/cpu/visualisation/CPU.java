@@ -1,15 +1,14 @@
 package simulizer.cpu.visualisation;
 
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import simulizer.cpu.visualisation.components.ALU;
-import simulizer.cpu.visualisation.components.ConnectorWire;
-import simulizer.cpu.visualisation.components.CustomLine;
-import simulizer.cpu.visualisation.components.CustomWire;
-import simulizer.cpu.visualisation.components.GeneralComponent;
+import simulizer.cpu.visualisation.components.*;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
 
@@ -38,6 +37,19 @@ public class CPU {
     CustomWire IMToRegister1;
     CustomWire IMToRegister2;
     CustomWire IMToRegister3;
+    ConnectorWire controlUnitToIr;
+    ConnectorWire controlUnitToPC;
+    ConnectorWire controlUnitToPlusFour;
+    ConnectorWire controlUnitToIM1;
+    ConnectorWire controlUnitToIM2;
+    ConnectorWire controlUnitToRegisters;
+    ConnectorWire controlUnitToALU;
+    ConnectorWire controlUnitToDataMemory;
+    ConnectorWire plusFourToIr;
+    ConnectorWire PCToIM;
+    ConnectorWire aluToMemory;
+    ConnectorWire registerToALU1;
+    ConnectorWire registerToALU2;
 
     public CPU(CPUVisualisation vis, double width, double height){
         this.width = width;
@@ -58,19 +70,19 @@ public class CPU {
 
         generalWires = new Group();
 
-        ConnectorWire controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
-        ConnectorWire controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
-        ConnectorWire controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
-        ConnectorWire plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
-        ConnectorWire PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
-        ConnectorWire aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
-        ConnectorWire registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
-        ConnectorWire registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
+        controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
+        controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
+        controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
+        controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
+        controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
+        controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
+        controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
+        controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
+        plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
+        PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
+        aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
+        registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
+        registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
 
         memToRes = new CustomWire(580, 80);
         IrTOPC = new CustomWire(15, 230);
@@ -111,8 +123,6 @@ public class CPU {
                 IMToRegister3
         );
 
-        controlUnitToRegisters.animateData(5, true);
-
         vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -132,6 +142,137 @@ public class CPU {
 
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
         vis.addAll(controlUnit, components, generalWires, complexWires);
+
+    }
+
+    public void demoVis(){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            controlUnit.highlight(2);
+                        }
+                    });
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            controlUnitToIr.animateData(2, true);
+                        }
+                    });
+
+                    Thread.sleep(3000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            ir.highlight(2);
+                        }
+                    });
+
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            IrTOPC.animateData(4, false);
+                        }
+                    });
+
+                    Thread.sleep(4000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            programCounter.highlight(2);
+                        }
+                    });
+
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            PCToIM.animateData(1, false);
+                        }
+                    });
+
+                    Thread.sleep(1000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            instructionMemory.highlight(2);
+                        }
+                    });
+
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            IMToRegister1.animateData(3, false);
+                        }
+                    });
+
+                    Thread.sleep(3000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            register.highlight(2);
+                        }
+                    });
+
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            registerToALU1.animateData(1, false);
+                        }
+                    });
+
+                    Thread.sleep(1000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            alu.highlight(2);
+                        }
+                    });
+
+                    Thread.sleep(500);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            aluToMemory.animateData(1, false);
+                        }
+                    });
+
+                    Thread.sleep(1000);
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainMemory.highlight(2);
+                        }
+                    });
+
+                } catch(InterruptedException e){
+                    System.out.println(e.getMessage());
+                }
+
+            }
+        }).start();
+
     }
 
     public void resizeShapes(){
@@ -142,7 +283,7 @@ public class CPU {
         programCounter.setAttrs(width * 0.06, height * 0.15, width * 0.06, height * 0.25);
         instructionMemory.setAttrs(width * 0.15, height * 0.15, width * 0.16, height * 0.25);
         register.setAttrs(width * 0.367, height * 0.15, width * 0.16, height * 0.25);
-        alu.setAttrs(width * 0.58, height * 0.15, width * 0.16, height * 0.25);
+        alu.setAttrs(width * 0.58, height * 0.15, width * 0.11, height * 0.25);
         mainMemory.setAttrs(width * 0.8, height * 0.15, width * 0.16, height * 0.4);
         ir.setAttrs(width * 0.025, height * 0.55, width * 0.03, height * 0.125);
         unknown.setAttrs(width * 0.1, height * 0.525, width * 0.06, height * 0.1);

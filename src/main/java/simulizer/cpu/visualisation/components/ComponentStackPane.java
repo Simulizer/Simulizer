@@ -4,6 +4,7 @@ import javafx.animation.FillTransition;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.RadialGradient;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -69,15 +70,10 @@ public class ComponentStackPane extends StackPane {
     }
 
     public void highlight(int n){
-        FillTransition ft = new FillTransition(Duration.millis(300), shape, Color.WHITE, Color.RED);
-        FillTransition tt = new FillTransition(Duration.millis(300), text, Color.BLACK, Color.WHITE);
+        FillTransition ft = new FillTransition(Duration.millis(300), shape, Color.valueOf("#1e3c72"), Color.RED);
         ft.setCycleCount(n);
         ft.setAutoReverse(true);
         ft.play();
-
-        tt.setCycleCount(n);
-        tt.setAutoReverse(true);
-        tt.play();
     }
 
 }
