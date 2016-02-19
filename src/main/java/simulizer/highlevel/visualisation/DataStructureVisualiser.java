@@ -6,7 +6,7 @@ public abstract class DataStructureVisualiser {
 	private Pane drawingPane;
 	private int width;
 	private int height;
-	private int rate = 500;
+	private int rate = 1000;
 
 	public DataStructureVisualiser(Pane drawingPane, int width, int height) {
 		this.drawingPane = drawingPane;

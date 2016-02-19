@@ -2,7 +2,6 @@ package simulizer.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
 
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -13,11 +12,6 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.simulation.data.representation.Word;
-import simulizer.simulation.exceptions.DecodeException;
-import simulizer.simulation.exceptions.ExecuteException;
-import simulizer.simulation.exceptions.HeapException;
-import simulizer.simulation.exceptions.InstructionException;
-import simulizer.simulation.exceptions.MemoryException;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -26,6 +20,7 @@ import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.HighLevelVisualisation;
 
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
@@ -178,12 +173,15 @@ public class WindowManager extends Pane {
 	}
 	public void runProgram(Program p) {
 		stopCPU();
+
+		cpu = new CPU(p, cpuIO);
+		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).setCPU(cpu);
+
 		cpuThread = new Thread(new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {
 				try {
-					cpu = new CPU(p, cpuIO);
-					//cpu.setClockSpeed(0);
+					cpu.setClockSpeed(250);
 					cpu.runProgram();
 				} catch(Exception e) {
 					e.printStackTrace();
