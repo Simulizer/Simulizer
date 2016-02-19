@@ -26,7 +26,7 @@ public class PresentationTowerOfHanoiVisualiser extends TowerOfHanoiVisualiser {
 			// will throw IndexOutOfBounds and then won't increase moveIndex
 			int i = moves[moveIndex + 1][0], j = moves[moveIndex + 1][1];
 			// if no IndexOutOfBounds error then increase moveIndex
-			++moveIndex;
+			moveIndex++;
 			super.move(i, j);
 			super.commit();
 		} catch (ArrayIndexOutOfBoundsException e) {
