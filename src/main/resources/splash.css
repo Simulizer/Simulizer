@@ -1,0 +1,6 @@
+.splashscreen {
+  -fx-font-family: "sans-serif";
+  -fx-border-radius: 2;
+  -fx-border-color: black;
+  -fx-background-color: rgb(230, 230, 230);
+}

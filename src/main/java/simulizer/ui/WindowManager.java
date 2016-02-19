@@ -28,6 +28,7 @@ public class WindowManager extends Pane {
 	private Pane pane = new Pane();
 	private Themes themes = new Themes();
 	private Layouts layouts = new Layouts(this);
+	private Scene scene;
 	private Stage primaryStage;
 	private CPU cpu;
 	private Thread cpuThread;
@@ -46,13 +47,14 @@ public class WindowManager extends Pane {
 	}
 
 	private void init(Stage primaryStage, String theme, int x, int y) {
+		this.primaryStage = primaryStage;
+
 		cpu = null;
 		cpuThread = null;
 		simListener = new UISimulationListener(this);
 
-		Scene scene = new Scene(pane, x, y);
-		primaryStage.setTitle("Simulizer");
-		primaryStage.setScene(scene);
+		scene = new Scene(pane, x, y);
+
 		themes.setTheme(theme);
 		pane.getStyleClass().add("background");
 
@@ -63,6 +65,11 @@ public class WindowManager extends Pane {
 		// Resize menubar to window width
 		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
 		setTheme(themes.getTheme());
+	}
+
+	public void show() {
+		primaryStage.setTitle("Simulizer");
+		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
