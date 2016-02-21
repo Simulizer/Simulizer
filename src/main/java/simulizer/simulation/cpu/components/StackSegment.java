@@ -67,17 +67,31 @@ public class StackSegment {
 	{
 		for(int i = address; i < address + toWrite.length; i++)
 		{
+			if(stack.size() > this.stackPointer.getValue() - this.lowestAddress.getValue())//bounds checking (need to do before and after)
+			{
+				throw new StackException("Stack overflow.", i);
+			}
+			
 			if(i < this.stack.size())
 			{
-				this.stack.set(i, toWrite[i-address]);
+					this.stack.set(i, toWrite[i-address]);
 			}
 			else if (i >= this.stack.size())
 			{
-				this.stack.add(toWrite[i-address]);
+				while(stack.size() < i)
+				{
+					this.stack.add(new Byte((byte)0x00));//filling out stack
+				}
+				this.stack.add(toWrite[i-address]);//growing stack
 			}
 			else
 			{
 				throw new StackException("Invalid write onto stack.", i);
+			}
+			
+			if(stack.size() > this.stackPointer.getValue() - this.lowestAddress.getValue())//bounds checking
+			{
+				throw new StackException("Stack overflow.", i);
 			}
 		}
 	}
