@@ -76,12 +76,9 @@ public class StackSegment {
 			{
 					this.stack.set(i, toWrite[i-address]);
 			}
-			else if (i >= this.stack.size())
+			else if (i == this.stack.size())
 			{
-				while(stack.size() < i)
-				{
-					this.stack.add(new Byte((byte)0x00));//filling out stack
-				}
+				
 				this.stack.add(toWrite[i-address]);//growing stack
 			}
 			else

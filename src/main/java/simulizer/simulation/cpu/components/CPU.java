@@ -1,6 +1,6 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.Date;
+
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -351,14 +351,6 @@ public class CPU {
 
             Optional<Address> goToAddress = Optional.of(this.decodeAddressOperand(op1.asAddressOp()));//where to jump
             Optional<Word> currentAddress = Optional.empty();//storing current address if needed by jal
-            //Integer currentLine  = this.instructionRegister.getLineNumber();//line number of current instruction
-            /*for(Map.Entry<Address,Integer> entry : this.program.lineNumbers.entrySet())//iterating to find current address
-            {
-                if(entry.getValue().equals(currentLine))//if address found
-                {
-                    currentAddress = Optional.of(encodeU((long)entry.getKey().getValue()));//current address for jal
-                }
-            }*/
             currentAddress = Optional.of(new Word(DataConverter.encodeAsSigned((long)this.programCounter.getValue())));
             return new JTypeInstruction(instruction,goToAddress,currentAddress);
         }

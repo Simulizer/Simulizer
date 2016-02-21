@@ -3,8 +3,10 @@ package simulizer.simulation.components;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
+import category.UnitTests;
 import simulizer.assembler.representation.Address;
 import simulizer.simulation.cpu.components.StackSegment;
 import simulizer.simulation.exceptions.StackException;
@@ -14,6 +16,7 @@ import simulizer.simulation.exceptions.StackException;
  * @author Charlie Street
  *
  */
+@Category({UnitTests.class})
 public class StackTest {
 
 	
@@ -113,11 +116,13 @@ public class StackTest {
 		{//valid write (outside force growth)
 			StackSegment stack = createStack(10,0);
 			assertEquals(4,stack.size());
-			stack.setBytes(5,new byte[]{0x11,0x10});
-			assertEquals(7,stack.size());
-			assertEquals(0x00,stack.getBytes(4, 1)[0]);
-			assertEquals(0x11,stack.getBytes(5, 2)[0]);
-			assertEquals(0x10,stack.getBytes(5, 2)[1]);
+			try
+			{
+				stack.setBytes(5,new byte[]{0x11,0x10});
+				fail();
+			} catch(StackException e) {
+				assertTrue(e.getMessage().equals("Invalid write onto stack."));
+			}
 		}
 		
 		{//stack overflow test
