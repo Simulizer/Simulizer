@@ -30,7 +30,7 @@ public class UISimulationListener extends SimulationListener {
 					Map<Address, Integer> lineNums = cpu.getProgram().lineNumbers;
 					if(lineNums.containsKey(m.statementAddress)) {
 						int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
-						code.highlightCurrentLine(lineNum);
+						code.highlightCurrentLine(lineNum-1);
 					}
 				}
 			}

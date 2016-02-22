@@ -1,10 +1,6 @@
 package simulizer.assembler.extractor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -317,7 +313,7 @@ public class ProgramExtractor extends SimpBaseListener {
             Instruction instruction;
             try {
                 instruction = Instruction.fromString(instructionName);
-            } catch(IllegalArgumentException e) {
+            } catch(NoSuchElementException e) {
                 log.logProblem("Unknown instruction: \"" + instructionName + "\"", ctx.instruction());
                 return;
             }

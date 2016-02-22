@@ -1,6 +1,7 @@
 package simulizer.assembler.extractor.problem;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 /**
  * Holds information about problems encountered while parsing source code
@@ -70,7 +71,14 @@ public class Problem {
         if(ctx != null) {
             lineNum = ctx.getStart().getLine();
             rangeStart = ctx.getStart().getStartIndex();
-            rangeEnd = ctx.getStop().getStopIndex();
+
+            // appears to be null only if the input is an empty string
+            Token stop = ctx.getStop();
+            if(stop != null) {
+                rangeEnd = stop.getStopIndex();
+            } else {
+                rangeEnd = rangeStart;
+            }
         } else {
             lineNum = NO_LINE_NUM;
             rangeStart = -1;

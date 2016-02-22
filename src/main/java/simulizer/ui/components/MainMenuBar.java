@@ -153,7 +153,11 @@ public class MainMenuBar extends MenuBar {
 			ProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText(), log);
-			wm.runProgram(p);
+			if(p != null) {
+				wm.runProgram(p);
+			} else {
+				//TODO: handle error here (any error and the assembler bails out and returns null)
+			}
 		});
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");

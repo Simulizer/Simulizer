@@ -58,7 +58,6 @@ plugins {
 }
 
 
-
 /////////////////////////////////////////////////
 //
 // Built-in Plugins
@@ -169,19 +168,18 @@ dependencies {
         // version for generating parsers during build
         antlr   'org.antlr:antlr4:4.5'
 
-    // JFExtras
-        compile 'org.jfxtras:jfxtras-controls:8.0-r4'
-        compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
+    // JFXtras (internal window only)
+        compile 'org.jfxtras:jfxtras-window:8.0-r4'
 
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-        
+
     // GSON: JSON Parsing
     	compile 'com.google.code.gson:gson:2.5'
 
     // Testing
         testCompile 'junit:junit:4.12'
-    
+
     mkdir('work')
 }
 
@@ -228,7 +226,7 @@ run {
 jar {
     // Include all dependencies in the jar file
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    
+
     manifest {
         attributes 'Implementation-Title':   name,
                    'Implementation-Version': version,
