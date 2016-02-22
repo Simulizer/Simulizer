@@ -5,43 +5,123 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Collections;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.function.IntFunction;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.StyleSpans;
-import org.fxmisc.richtext.StyleSpansBuilder;
-import simulizer.parser.SmallMipsLexer;
-import simulizer.parser.SmallMipsParser;
+import org.fxmisc.richtext.MouseOverTextEvent;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.reactfx.EventStream;
+import org.reactfx.value.Val;
+
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.stage.Popup;
+import simulizer.ui.SyntaxHighlighter;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
 
+/**
+ * Bits of code from https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/
+ * main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+ *
+ * @author Kelsey McKenna
+ */
 public class CodeEditor extends InternalWindow {
-
 	private CodeArea codeArea;
 	private File currentFile = null;
-	private boolean fileEdited = false;
+	private SimpleIntegerProperty currentLine;
+	private boolean fileEdited = false, lineWrap = true;
+	private SyntaxHighlighter syntaxHighlighter;
+
 	private final String TITLE = WindowEnum.toEnum(this).toString();
 
 	public CodeEditor() {
+		Popup tooltipPopup = new Popup();
+		Label tooltipMsg = new Label();
+
+		tooltipPopup.getContent().add(tooltipMsg);
+		tooltipMsg.getStyleClass().add("tooltip");
+
+		currentLine = new SimpleIntegerProperty(-1);
+
 		codeArea = new CodeArea();
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-		codeArea.richChanges().subscribe(change -> codeArea.setStyleSpans(0, computeAntlrHighlighting(codeArea.getText())));
+		syntaxHighlighter = new SyntaxHighlighter(codeArea);
+		IntFunction<Node> numberFactory = LineNumberFactory.get(codeArea);
+		IntFunction<Node> arrowFactory = new LineArrowFactory(currentLine.asObject());
+		IntFunction<Node> combinedFactory = line -> {
+			HBox hbox = new HBox(numberFactory.apply(line), arrowFactory.apply(line));
+			hbox.setAlignment(Pos.CENTER_LEFT);
+			return hbox;
+		};
+		codeArea.setParagraphGraphicFactory(combinedFactory);
+
+		// Change behaviour of pressing TAB
+		EventHandler<? super KeyEvent> tabHandler =
+			EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.TAB)).act(event -> codeArea.replaceSelection("    ")).create();
+		EventHandlerHelper.install(codeArea.onKeyPressedProperty(), tabHandler);
+
+		// Thanks to:
+		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/JavaKeywordsAsync.java
+		EventStream<?> plainTextChanges = codeArea.plainTextChanges();
+		plainTextChanges.successionEnds(Duration.ofMillis(1000)).supplyTask(syntaxHighlighter::computeErrorHighlightingAsync)
+			.awaitLatest(plainTextChanges).filterMap(t -> {
+				if (t.isSuccess()) {
+					return Optional.of(t.get());
+				} else {
+					t.getFailure().printStackTrace();
+					return Optional.empty();
+				}
+			}).subscribe(syntaxHighlighter::applyAndSaveErrorHighlighting);
+
+		// Update regex highlighting and edit status on key press
+		codeArea.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
+			syntaxHighlighter.updateRegexHighlighting();
+
+			fileEdited = true;
+			updateTitleEditStatus();
+		});
+
+		// Thanks to:
+		// https://github.com/TomasMikula/RichTextFX/blob/master/richtextfx-demos/src/main/java/org/fxmisc/richtext/demo/TooltipDemo.java
+		// Show tooltips
+		codeArea.setMouseOverTextDelay(Duration.ofMillis(250));
+		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
+			int chIdx = e.getCharacterIndex();
+			Point2D pos = e.getScreenPosition();
+
+			String errorMessage = syntaxHighlighter.getErrorMessage(chIdx);
+			if (errorMessage == null) return;
+
+			tooltipMsg.setText(wrap(errorMessage, 45));
+			tooltipPopup.show(codeArea, pos.getX(), pos.getY() + 10);
+		});
+		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_END, e -> tooltipPopup.hide());
+
+		codeArea.setCursor(Cursor.TEXT);
+		codeArea.replaceText("");
 		codeArea.setWrapText(true);
+
 		setTitle(TITLE + " - New File");
 		getContentPane().getChildren().add(codeArea);
 	}
 
-	@Override
-	public void setTheme(Theme theme) {
-		super.setTheme(theme);
-		getStylesheets().clear();
-		getStylesheets().add(theme.getStyleSheet("code.css"));
-	}
+	// -- Getters, setters, and public void methods
 
 	public void setText(String text) {
 		codeArea.replaceText(text);
@@ -71,66 +151,8 @@ public class CodeEditor extends InternalWindow {
 		setTitle(title + (fileEdited ? "*" : ""));
 	}
 
-	/** http://www.programcreek.com/java-api-examples/index.php?api=org.fxmisc.richtext.StyleSpansBuilder Throws a big exception when no text is entered (but you can still write in the editor fine, and syntax highlighting still applies)
-	 * @param text the plaintext content of the code editor
-	 * @return the text, now split into sections with attached css classes for styling */
-	private StyleSpans<Collection<String>> computeAntlrHighlighting(String text) {
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-
-		int lastTokenEnd = 0;
-		ANTLRInputStream input = new ANTLRInputStream(text);
-		SmallMipsLexer lexer = new SmallMipsLexer(input);
-		lexer.removeErrorListeners();
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		tokens.fill();
-
-		// For each token (up to the EOF token)
-		Token t;
-		for (int i = 0; i < tokens.size() && (t = tokens.get(i)).getType() != Token.EOF; i++) {
-			// Find the styleClass
-			String styleClass;
-			switch (t.getType()) {
-				// Comment
-				case SmallMipsLexer.COMMENT:
-					styleClass = "comment";
-					break;
-
-				// Register
-				case SmallMipsLexer.REGISTER:
-					styleClass = "register";
-					break;
-
-				// Number
-				case SmallMipsLexer.NUMBER:
-					styleClass = "constant";
-					break;
-
-				// OP Code
-				case SmallMipsParser.OPCODE2:
-				case SmallMipsParser.OPCODE3:
-				case SmallMipsParser.OPCODE2V:
-				case SmallMipsParser.OPCODE3V:
-					styleClass = "keyword";
-					break;
-
-				// Plain text
-				default:
-					styleClass = "plain";
-					break;
-			}
-
-			// Set the styleClass to the text
-			int spacing = t.getStartIndex() - lastTokenEnd;
-			if (spacing > 0) spansBuilder.add(Collections.emptyList(), spacing);
-			int stylesize = (t.getStopIndex() - t.getStartIndex()) + 1;
-			spansBuilder.add(Collections.singleton(styleClass), stylesize);
-			lastTokenEnd = t.getStopIndex() + 1;
-		}
-
-		// Make sure there is at least one style added
-		spansBuilder.add(Collections.emptyList(), 0);
-
-		return spansBuilder.create();
+	public boolean getLineWrap() {
+		return lineWrap;
 	}
 
 	public void newFile() {
@@ -163,6 +185,7 @@ public class CodeEditor extends InternalWindow {
 
 				// Show the code in the editor
 				setText(codeIn);
+				syntaxHighlighter.updateRegexHighlighting();
 				fileEdited = false;
 				setTitle(TITLE + " - " + selectedFile.getName());
 				updateTitleEditStatus();
@@ -183,6 +206,74 @@ public class CodeEditor extends InternalWindow {
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	public void toggleLineWrap() {
+		codeArea.setWrapText(!lineWrap);
+		lineWrap = !lineWrap;
+	}
+
+	@Override
+	public void setTheme(Theme theme) {
+		super.setTheme(theme);
+		getStylesheets().clear(); // Should this be here?
+		getStylesheets().add(theme.getStyleSheet("code.css"));
+	}
+
+	// -- Helper methods for syntax highlighting tokens
+
+	private String wrap(String text, int width) {
+		String svar = "";
+
+		while (!text.isEmpty()) {
+			text = text.trim();
+
+			String c = text.substring(0, Math.min(width, text.length()));
+
+			if (text.length() >= width && text.charAt(c.length()) != ' ') {
+				int spaceIndex = c.lastIndexOf(' ');
+				if (spaceIndex >= 0) {
+					c = c.substring(0, spaceIndex);
+				}
+			}
+
+			svar += c + "\n";
+			text = text.substring(c.length());
+		}
+
+		return svar;
+	}
+
+	// -- Updating syntax highlighting
+
+	class LineArrowFactory implements IntFunction<Node> {
+		public final ObservableValue<Integer> selectedLine;
+
+		public LineArrowFactory(ObservableValue<Integer> selectedLine) {
+			this.selectedLine = selectedLine;
+		}
+
+		@Override
+		public Node apply(int lineNum) {
+			Polygon triangle = new Polygon(0.0, 0.0, 10.0, 5.0, 0.0, 10.0);
+			triangle.setFill(Color.GREEN);
+
+			ObservableValue<Boolean> visible = Val.map(selectedLine, l -> l == lineNum);
+
+			triangle.visibleProperty().bind(Val.flatMap(triangle.sceneProperty(), scene -> {
+				if (scene != null) {
+					return visible;
+				} else {
+					return Val.constant(false);
+				}
+			}));
+
+			return triangle;
+		}
+	}
+
+	public void highlightCurrentLine(int lineNum) {
+		currentLine.set(lineNum);
 	}
 
 }

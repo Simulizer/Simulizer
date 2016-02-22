@@ -179,7 +179,7 @@ TODO: research what happens at each stage and write separate notes
 After a jump, everything in the pipeline is invalidated and so is cleared out.
 
 ## Hazards ##
-A [hazard](https://en.wikipedia.org/wiki/Hazard_(computer_architecture)) is a
+A [hazard](https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29) is a
 situation in which a pipeline could potentially produce incorrect results.
 
 ### Structural Hazards ###

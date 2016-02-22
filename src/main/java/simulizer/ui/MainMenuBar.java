@@ -1,16 +1,29 @@
 package simulizer.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import simulizer.assembler.Assembler;
+import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
+import simulizer.assembler.representation.Program;
+import simulizer.assembler.representation.ProgramStringBuilder;
+import simulizer.simulation.cpu.components.CPU;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.CodeEditor;
+import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -19,7 +32,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), viewMenu(), windowsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
 	}
 
 	private Menu fileMenu() {
@@ -57,7 +70,11 @@ public class MainMenuBar extends MenuBar {
 				editor.saveFile();
 			}
 		});
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem);
+
+		MenuItem exitItem = new MenuItem("Exit");
+		exitItem.setOnAction(e -> System.exit(0));
+
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
 
@@ -126,6 +143,47 @@ public class MainMenuBar extends MenuBar {
 		return menu;
 	}
 
+	private Menu runMenu() {
+		// To be moved to separate buttons later
+		Menu runMenu = new Menu("Run Code");
+
+		MenuItem runProgram = new MenuItem("Run Program");
+		runProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			ProblemLogger log = new StoreProblemLogger();
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText(), log);
+			if(p != null) {
+				wm.runProgram(p);
+			} else {
+				//TODO: handle error here (any error and the assembler bails out and returns null)
+			}
+		});
+
+		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
+		setClockSpeed.setOnAction(e -> {
+			CPU cpu = wm.getCPU();
+			if (cpu != null) {
+				TextInputDialog clockSpeed = new TextInputDialog();
+				clockSpeed.setTitle("Clock Speed");
+				clockSpeed.setContentText("Enter Clock Speed: ");
+				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockSpeed(Integer.parseInt(speed)));
+			}
+		});
+
+		MenuItem singleStep = new MenuItem("Single Step");
+		singleStep.setDisable(true);
+
+		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
+		simplePipeline.setDisable(true);
+
+		MenuItem stop = new MenuItem("Stop Simulation");
+		stop.setOnAction(e -> wm.stopCPU());
+
+		runMenu.getItems().addAll(runProgram, setClockSpeed, singleStep, simplePipeline, stop);
+		return runMenu;
+	}
+
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
@@ -138,11 +196,42 @@ public class MainMenuBar extends MenuBar {
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
+
 		MenuItem windowLocation = new MenuItem("Window Locations");
 		windowLocation.setOnAction(e -> wm.printWindowLocations());
+
 		MenuItem delWindows = new MenuItem("Close All Windows");
 		delWindows.setOnAction(e -> wm.closeAll());
-		debugMenu.getItems().addAll(windowLocation, delWindows);
+
+		MenuItem emphWindow = new MenuItem("Refresh Registers");
+		emphWindow.setOnAction(e -> {
+			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
+			reg.refreshData();
+		});
+
+		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
+		lineWrap.setSelected(((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).getLineWrap());
+		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
+
+		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
+		dumpProgram.setOnAction(e -> {
+			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			Assembler a = new Assembler();
+			Program p = a.assemble(code.getText(), null);
+			String outputFilename = "program-dump.txt";
+			if (p == null) {
+				try (PrintWriter out = new PrintWriter(outputFilename)) {
+					out.println("null");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				ProgramStringBuilder.dumpToFile(p, outputFilename);
+			}
+			System.out.println("Program dumped to: \"" + outputFilename + "\"");
+		});
+
+		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap, dumpProgram);
 		return debugMenu;
 	}
 

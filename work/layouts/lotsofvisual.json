@@ -1,42 +1,42 @@
 {
   "name": "Very Visual",
-  "width": 1920.0,
-  "height": 1017.0,
+  "width": 1024.0,
+  "height": 705.0,
   "windows": [
     {
       "id": "CODE_EDITOR",
-      "x": 1481.0,
+      "x": 536.0,
       "y": 28.0,
-      "width": 436.0,
-      "height": 687.0
-    },
-    {
-      "id": "LOGGER",
-      "x": 1483.0,
-      "y": 722.0,
-      "width": 433.0,
-      "height": 285.0
+      "width": 487.0,
+      "height": 129.0
     },
     {
       "id": "CPU_VISUALISATION",
-      "x": 5.0,
-      "y": 31.0,
-      "width": 759.0,
-      "height": 497.0
+      "x": 3.0,
+      "y": 27.0,
+      "width": 533.0,
+      "height": 415.0
     },
     {
       "id": "REGISTERS",
-      "x": 6.0,
-      "y": 533.0,
-      "width": 1468.0,
-      "height": 476.0
+      "x": 537.0,
+      "y": 159.0,
+      "width": 484.0,
+      "height": 411.0
     },
     {
       "id": "HIGH_LEVEL_VISUALISATION",
-      "x": 772.0,
-      "y": 29.0,
-      "width": 698.0,
-      "height": 496.0
+      "x": 3.0,
+      "y": 445.0,
+      "width": 532.0,
+      "height": 257.0
+    },
+    {
+      "id": "LOGGER",
+      "x": 537.0,
+      "y": 572.0,
+      "width": 475.0,
+      "height": 130.0
     }
   ]
 }

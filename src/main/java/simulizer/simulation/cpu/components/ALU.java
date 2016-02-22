@@ -1,316 +1,244 @@
 package simulizer.simulation.cpu.components;
 
-import java.math.BigInteger;
-import java.util.Observable;
+import java.util.Optional;
 
+import simulizer.assembler.representation.Instruction;
+import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.InstructionException;
 
-/**
- * this class simulates the Arithemtic and Logic Unit it contains operations for
- * add, shift, mult div, subtract, xor, or and, not it will also include the
- * immediate operations when appropriate
- * 
- * @author Charlie Street
+
+/**this class represents the ALU in the CPU
+ * all it is capable of doing is carrying out various operations
+ * and then returning the result
+ * @author Charlie
  *
  */
-public class ALU extends Observable {
+public class ALU {
 
-	private final String TwoThirtyTwo = "4294967296";// used to bound numbers
-	private Word temp;// temporary holding cell for transport etc.
-	private RegisterBlock registers;
-	private ControlUnit controlUnit;
+    public static final byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
+    public static final byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
 
-	/**
-	 * constructor initialises all the fields
-	 * 
-	 * @param registers
-	 *            the block of registers being used
-	 * @param controlUnit
-	 *            the control unit of the simulated processor
-	 */
-	public ALU(RegisterBlock registers, ControlUnit controlUnit) {
-		super();
-		this.temp = new Word();
-		this.registers = registers;
-		this.controlUnit = controlUnit;
-	}
+    /**empty constructor
+     *
+     */
+    public ALU() {
 
-	/**
-	 * returns the temporary holding value this is a replacement for a bus
-	 * 
-	 * @return the temporary holding value
-	 */
-	public Word getData() {
-		return this.temp;
-	}
+    }
 
-	/**
-	 * this method sets the temporary holding value for the ALU
-	 * 
-	 * @param word
-	 *            the new word to set the temp holding value too
-	 */
-	public synchronized void setData(Word word) {
-		this.temp = word;
-	}
+    /**this method uses a switch statement to execute some operation on two words
+     *
+     * @param instruction the precise instruction to execute
+     * @param firstWord the first word to work on
+     * @param secondWord the second word to work on
+     * @return the result of the operation on the two words
+     * @throws InstructionException if unsupported instruction attempted
+     */
+    public Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord) throws InstructionException
+    {
+        byte[] firstValue;
+        byte[] secondValue;
 
-	/**
-	 * this method reads from a register at a given index
-	 * 
-	 * @param index
-	 *            the register index to retrieve from
-	 * @return the word located at the register
-	 */
-	public Word readFromRegister(int index) {
-		setChanged();
-		notifyObservers();
+        if(firstWord.isPresent())//if a value stored
+        {
+            firstValue = firstWord.get().getWord();
+        }
+        else
+        {
+            throw new InstructionException("No operand given for alu operation", instruction);
+        }
 
-		return this.registers.getRegister(index).getData();
-	}
+        if(secondWord.isPresent())//if a value stored
+        {
+            secondValue = secondWord.get().getWord();
+        }
+        else
+        {
+            secondValue = new byte[]{0x00,0x00,0x00,0x00};//this is probably the best workaround in case of something silly
+            //this will either end up returning the original value, or produce undefined behaviour
+        }
 
-	/**
-	 * this method will write to a register in the block of general purpose
-	 * registers at the specified index
-	 * 
-	 * @param index
-	 *            the index of the register
-	 * @param toStore
-	 *            the word to store in said register
-	 */
-	public synchronized void writeToRegister(int index, Word toStore) {
-		this.registers.setRegister(index, toStore);
+        switch(instruction) {//checking each possible instruction
+            case abs:
+                return encodeS(Math.abs(decodeS(firstValue)));
+            case and:
+                byte[] resultAnd = new byte[4];
+                for(int i = 0; i < resultAnd.length; i++) {
+                    resultAnd[i] = (byte) (firstValue[i] & secondValue[i]);
+                }
+                return new Word(resultAnd);
+            case add:
+                return encodeS(decodeS(firstValue) + decodeS(secondValue));
+            case addu:
+                return encodeU(decodeU(firstValue) + decodeU(secondValue));
+            case addi:
+                return encodeS(decodeS(firstValue) + decodeS(secondValue));
+            case addiu:
+                return encodeU(decodeU(firstValue) + decodeU(secondValue));
+            case sub:
+                return encodeS(decodeS(firstValue) - decodeS(secondValue));
+            case subu:
+                return encodeU(decodeU(firstValue) - decodeU(secondValue));
+            case subi:
+                return encodeS(decodeS(firstValue) - decodeS(secondValue));
+            case subiu:
+                return encodeU(decodeU(firstValue) - decodeU(secondValue));
+            case mul:
+                return encodeS(decodeS(firstValue) * decodeS(secondValue));
+            case mulo:
+                return encodeS(decodeS(firstValue) * decodeS(secondValue));//might have to take more into account with overflow
+            case mulou:
+                return encodeU(decodeU(firstValue) * decodeU(secondValue));//might have to take more into account with overflow
+            case div:
+                return encodeS(decodeS(firstValue) / decodeS(secondValue));
+            case divu:
+                return encodeU(decodeU(firstValue) / decodeU(secondValue));
+            case neg:
+                return encodeS(decodeS(firstValue)*-1);
+            case negu:
+                return encodeU(decodeS(firstValue)*-1);//is this correct?
+            case nor:
+                byte[] resultNor = new byte[4];
+                for(int i = 0; i < resultNor.length; i++) {
+                    resultNor[i] = (byte) ~(firstValue[i] | secondValue[i]);
+                }
+                return new Word(resultNor);
+            case not:
+                byte[] resultNot = new byte[4];
+                for(int i = 0; i < resultNot.length; i++) {
+                    resultNot[i] = (byte) ~(firstValue[i]);
+                }
+                return new Word(resultNot);
+            case or:
+                byte[] resultOr = new byte[4];
+                for(int i = 0; i < resultOr.length; i++) {
+                    resultOr[i] = (byte) (firstValue[i] | secondValue[i]);
+                }
+                return new Word(resultOr);
+            case ori:
+                byte[] resultOri = new byte[4];
+                for(int i = 0; i < resultOri.length; i++) {
+                    resultOri[i] = (byte) (firstValue[i] | secondValue[i]);
+                }
+                return new Word(resultOri);
+            case xor:
+                byte[] resultXor = new byte[4];
+                for(int i = 0; i < resultXor.length; i++) {
+                    resultXor[i] = (byte) (firstValue[i] ^ secondValue[i]);
+                }
+                return new Word(resultXor);
+            case xori:
+                byte[] resultXori = new byte[4];
+                for(int i = 0; i < resultXori.length; i++) {
+                    resultXori[i] = (byte) (firstValue[i] ^ secondValue[i]);
+                }
+                return new Word(resultXori);
+            case b:
+                return new Word(branchTrue);
+            case beq:
+                for(int i = 0; i < firstValue.length; i++) {
+                    if(firstValue[i] != secondValue[i]) {
+                        return new Word(branchFalse);
+                    }
+                }
+                return new Word(branchTrue);//if all bytes equal
+            case bne:
+                for(int i = 0; i < firstValue.length; i++) {
+                    if(firstValue[i] != secondValue[i]) {//if a difference found
+                        return new Word(branchTrue);
+                    }
+                }
+                return new Word(branchFalse);//if all bytes equal then false
+            case bgez:
+                if(decodeS(firstValue) >= 0)
+                {
+                    return new Word(branchTrue);
+                }
+                else
+                {
+                    return new Word(branchFalse);
+                }
+            case bgtz:
+                if(decodeS(firstValue) > 0)
+                {
+                    return new Word(branchTrue);
+                }
+                else
+                {
+                    return new Word(branchFalse);
+                }
+            case blez:
+                if(decodeS(firstValue) <= 0)
+                {
+                    return new Word(branchTrue);
+                }
+                else
+                {
+                    return new Word(branchFalse);
+                }
+            case bltz:
+                if(decodeS(firstValue) < 0)
+                {
+                    return new Word(branchTrue);
+                }
+                else
+                {
+                    return new Word(branchFalse);
+                }
+            case beqz:
+                if(decodeS(firstValue) == 0)
+                {
+                    return new Word(branchTrue);
+                }
+                else
+                {
+                    return new Word(branchFalse);
+                }
+            case move:
+                return new Word(firstValue);
+            default:
+                throw new InstructionException("Invalid/Unsupported Instruction.",instruction);
+        }
+    }
 
-		setChanged();
-		notifyObservers();
-	}
+    /**
+     * interpret a byte array as a 4 byte signed integer
+     *
+     * @param word the word to interpret
+     * @return the interpreted value
+     */
+    private static long decodeS(byte[] word) {
+        return DataConverter.decodeAsSigned(word);
+    }
 
-	/**
-	 * sends something from the ALUs temp data to the control unit
-	 * 
-	 */
-	public void sendControlUnit() {
-		this.controlUnit.setData(this.getData());
-		setChanged();
-		notifyObservers();
-	}
+    /**
+     * interpret a byte array as a 4 byte unsigned integer
+     *
+     * @param word the word to interpret
+     * @return the interpreted value
+     */
+    private static long decodeU(byte[] word) {
+        return DataConverter.decodeAsUnsigned(word);
+    }
 
-	/**
-	 * this method receives some data from the control unit it is then stored
-	 * into the temp field in the ALU
-	 */
-	public void receiveControlUnit() {
-		this.setData(this.controlUnit.getData());
-		setChanged();
-		notifyObservers();
-	}
+    /**
+     * take a value interpreted as having a sign and encode it as a word
+     *
+     * @param value the signed value to encode
+     * @return the encoded value
+     */
+    private static Word encodeS(long value) {
+        return new Word(DataConverter.encodeAsSigned(value));
+    }
 
-	/**
-	 * this method carries out exclusive or on two words
-	 * 
-	 * @param firstWord
-	 *            the first word being used
-	 * @param secondWord
-	 *            the second word being used
-	 * @return the exclusive or of these two words
-	 */
-	public Word xor(Word firstWord, Word secondWord) {
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
+    /**
+     * take a value interpreted as being unsigned and encode it as a word
+     *
+     * @param value the unsigned value to encode
+     * @return the encoded value
+     */
+    private static Word encodeU(long value) {
+        return new Word(DataConverter.encodeAsUnsigned(value));
+    }
 
-		BigInteger result = firstInt.xor(secondInt);
-
-		setChanged();
-		notifyObservers();
-		return new Word(result);
-	}
-
-	/**
-	 * carries out inclusive or on two words, pretty much the same as xor
-	 * 
-	 * @param firstWord
-	 *            the first word being used
-	 * @param secondWord
-	 *            the second word being used
-	 * @return the bitwise or of these two words
-	 */
-	public Word or(Word firstWord, Word secondWord) {
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
-
-		BigInteger result = firstInt.or(secondInt);
-
-		setChanged();
-		notifyObservers();
-		return new Word(result);
-	}
-
-	/**
-	 * method carries out the and operation on two words very similar to or, xor
-	 * with different conditions
-	 * 
-	 * @param firstWord
-	 * @param secondWord
-	 * @return a word as the result of the and operation
-	 */
-	public Word and(Word firstWord, Word secondWord) {
-		BigInteger firstInt = firstWord.getWord();
-		BigInteger secondInt = secondWord.getWord();
-
-		BigInteger result = firstInt.and(secondInt);
-
-		setChanged();
-		notifyObservers();
-		return new Word(result);
-	}
-
-	/**
-	 * this method will negate the bits of a word
-	 * 
-	 * @param toNegate
-	 *            the word to be negated
-	 * @return the negated Word
-	 */
-	public Word not(Word toNegate) {
-		BigInteger result = toNegate.getWord().not();
-
-		setChanged();
-		notifyObservers();
-		return new Word(result);
-	}
-
-	/**
-	 * this function carries out the nand operation on two binary values
-	 * 
-	 * @param firstWord
-	 *            the first value
-	 * @param secondWord
-	 *            the second value
-	 * @return the result of the nand operation in a word
-	 */
-	public Word nand(Word firstWord, Word secondWord) {
-		Word and = this.and(firstWord, secondWord);
-		Word result = this.not(and);
-		setChanged();
-		notifyObservers();
-		return result;
-	}
-
-	/**
-	 * this method carries out the nor operation on two binary values
-	 * 
-	 * @param firstWord
-	 *            the first binary value
-	 * @param secondWord
-	 *            the second binary value
-	 * @return the result of the nor operation on these two words
-	 */
-	public Word nor(Word firstWord, Word secondWord) {
-		Word or = this.or(firstWord, secondWord);
-		Word result = this.not(or);
-		setChanged();
-		notifyObservers();
-		return result;
-	}
-
-	/**
-	 * generic shift, what direction the shift is in depends on the sign of the
-	 * shift number
-	 * 
-	 * @param toShift
-	 *            the word to be shifted
-	 * @param shiftNumber
-	 *            the shift amount
-	 * @return the word shifted
-	 */
-	public Word shift(Word toShift, Word shiftNumber) {
-		if (shiftNumber.getWord().compareTo(new BigInteger("0")) < 0) // if negative shift right
-		{
-			BigInteger result = toShift.getWord().shiftRight(shiftNumber.getWord().negate().intValue());
-			result = result.mod(new BigInteger(this.TwoThirtyTwo));
-			return new Word(result);
-		} else {
-			BigInteger result = toShift.getWord().shiftLeft(shiftNumber.getWord().intValue());
-			result = result.mod(new BigInteger(this.TwoThirtyTwo));
-			return new Word(result);
-		}
-	}
-
-	/**
-	 * this function will add two numbers using twos complement on BigInteger
-	 * 
-	 * @param num1
-	 *            the first number
-	 * @param num2
-	 *            the second number
-	 * @return the sum of the numbers
-	 */
-	public Word add(Word num1, Word num2) {
-		BigInteger result = num1.getWord().add(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-
-		setChanged();
-		notifyObservers();
-
-		return new Word(result);
-
-	}
-
-	/**
-	 * this method subtracts one twos complement number from the other.The
-	 * numbers are bigInts
-	 * 
-	 * @param num1
-	 *            the first number
-	 * @param num2
-	 *            the number to subtract away from num1
-	 * @return the subtraction of num1 - num2
-	 */
-	public Word sub(Word num1, Word num2) {
-		BigInteger result = num1.getWord().subtract(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-
-		setChanged();
-		notifyObservers();
-
-		return new Word(result);
-	}
-
-	/**
-	 * this method multiplies two 2s complement numbers together these numbers
-	 * are represented in big ints
-	 * 
-	 * @param num1
-	 *            the first number
-	 * @param num2
-	 *            the second number
-	 * @return the multiplication of the two, ignoring overflow
-	 */
-	public Word mult(Word num1, Word num2) {
-		BigInteger result = num1.getWord().multiply(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-
-		setChanged();
-		notifyObservers();
-
-		return new Word(result);
-	}
-
-	/**
-	 * this method divides two numbers represented as big integers
-	 * 
-	 * @param num1
-	 *            the first number
-	 * @param num2
-	 *            the number to divide by
-	 * @return the division of the two numbers in binary format
-	 */
-	public Word div(Word num1, Word num2) {
-		BigInteger result = num1.getWord().divide(num2.getWord());
-		result = result.mod(new BigInteger(this.TwoThirtyTwo));
-
-		setChanged();
-		notifyObservers();
-
-		return new Word(result);
-	}
 }

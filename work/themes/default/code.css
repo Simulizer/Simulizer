@@ -1,11 +1,37 @@
 
 .plain {
-
+	-fx-fill: black;
 }
 
-.keyword {
-    -fx-fill: blue;
+.directiveid {
+	-fx-font-weight: bold;
+}
+
+.label {
+	-fx-fill: orange;
+	-fx-font-weight: bold;
+}
+
+.recognised-instruction {
+	-fx-fill: blue;
     -fx-font-weight: bold;
+}
+
+.unrecognised-instruction {
+	-fx-fill: blue;
+	-fx-background-color: red;
+}
+
+.data-directive {
+	-fx-font-weight: bold;
+}
+
+.text-directive {
+	-fx-font-weight: bold;
+}
+
+.base-bracket {
+	-fx-font-weight: bold;
 }
 
 .register {
@@ -16,12 +42,23 @@
     -fx-fill: purple;
 }
 
-
 .annotation {
-    -fx-fill: yellow;
+    -fx-fill: green;
+    -fx-font-weight: bold;
 }
 
 .comment {
     -fx-fill: grey;
+}
+
+.error {
+	-fx-fill: red;
+	-fx-font-weight: bold;
+}
+
+.tooltip {
+	-fx-fill: white;
+	-fx-background-color: black;
+	-fx-font-size: 20px;
 }
 

@@ -4,30 +4,43 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javafx.animation.ScaleTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
-import jfxtras.labs.scene.control.window.CloseIcon;
-import jfxtras.labs.scene.control.window.MinimizeIcon;
-import jfxtras.labs.scene.control.window.Window;
+import javafx.util.Duration;
+import jfxtras.scene.control.window.CloseIcon;
+import jfxtras.scene.control.window.MinimizeIcon;
+import jfxtras.scene.control.window.Window;
 import simulizer.ui.GridBounds;
 import simulizer.ui.MainMenuBar;
+import simulizer.ui.WindowManager;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window implements Observer {
+	private double windowWidth, windowHeight;
 	private GridBounds grid;
-	private double windowWidth = 1060, windowHeight = 740;
+	private WindowManager wm;
 
 	public InternalWindow() {
+		setScaleX(0);
+		setScaleY(0);
+
+		setCursor(Cursor.DEFAULT);
+
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
 
 		// Adds minimise icon
 		MinimizeIcon minimize = new MinimizeIcon(this);
 		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30) setMinHeight(0.0); // Minimising
-			else setMinHeight(getMinimalHeight()); // Maximising
+			if (getHeight() > 30)
+				setMinHeight(0.0); // Minimising
+			else
+				setMinHeight(getMinimalHeight()); // Maximising
 		});
 		getRightIcons().add(minimize);
 
@@ -41,6 +54,8 @@ public abstract class InternalWindow extends Window implements Observer {
 				setLayoutY(25);
 			}
 		});
+
+		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
@@ -60,6 +75,29 @@ public abstract class InternalWindow extends Window implements Observer {
 		return 0.0;
 	}
 
+	protected final WindowManager getWindowManager() {
+		return wm;
+	}
+
+	public final void setWindowManager(WindowManager wm) {
+		this.wm = wm;
+	}
+
+	public final void emphasise() {
+		// Ignore if window is just being opened
+		if (getScaleX() == 1 && getScaleY() == 1) {
+			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
+			sc.setToX(1.15);
+			sc.setToY(1.15);
+			sc.setCycleCount(2);
+			sc.setAutoReverse(true);
+			getStyleClass().add("highlighting");
+			sc.setOnFinished((e) -> getStyleClass().remove("highlighting"));
+			sc.play();
+			toFront();
+		}
+	}
+
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
@@ -75,8 +113,7 @@ public abstract class InternalWindow extends Window implements Observer {
 		layoutXProperty().addListener(resizeEvent);
 		layoutYProperty().addListener(resizeEvent);
 	}
-
-	@Override
+	
 	public void update(Observable arg0, Object obj) {
 		double[] dim = (double[]) obj;
 		if (windowWidth != dim[0]) {
@@ -102,7 +139,8 @@ public abstract class InternalWindow extends Window implements Observer {
 
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			if (task != null) task.cancel();
+			if (task != null)
+				task.cancel();
 			task = new TimerTask() {
 				@Override
 				public void run() {
@@ -131,4 +169,13 @@ public abstract class InternalWindow extends Window implements Observer {
 		}
 
 	};
+
+	/** Called when all internal window stuff is done */
+	public void ready() {
+		ScaleTransition sc = new ScaleTransition(Duration.millis(200), this);
+		sc.setToX(1);
+		sc.setToY(1);
+		sc.play();
+	}
+
 }

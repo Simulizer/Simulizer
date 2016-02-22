@@ -1,28 +1,28 @@
 {
-  "name": "Default Layout",
-  "width": 1060,
-  "height": 740,
+  "name": "Default Projector",
+  "width": 1024.0,
+  "height": 705.0,
   "windows": [
     {
       "id": "CODE_EDITOR",
-      "x": 20,
-      "y": 35,
-      "width": 400,
-      "height": 685
+      "x": 4.0,
+      "y": 30.0,
+      "width": 400.0,
+      "height": 668.0
     },
     {
       "id": "CPU_VISUALISATION",
-      "x": 440,
-      "y": 35,
-      "width": 600,
-      "height": 400
+      "x": 411.0,
+      "y": 31.0,
+      "width": 606.0,
+      "height": 408.0
     },
     {
       "id": "REGISTERS",
-      "x": 440,
-      "y": 440,
-      "width": 600,
-      "height": 280
+      "x": 411.0,
+      "y": 445.0,
+      "width": 606.0,
+      "height": 249.0
     }
   ]
 }

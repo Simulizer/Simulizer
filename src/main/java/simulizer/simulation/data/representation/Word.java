@@ -1,53 +1,41 @@
 package simulizer.simulation.data.representation;
 
-import java.math.BigInteger;
 
 /**
- * this class represents a single 4-byte word, with appropriate operations
- * included to be carried out on them
+ * this class represents a single 4-byte word
+ * the word is immutable
  * 
  * @author Charlie Street
  */
 public class Word {
-	private final String modBound = "4294967296";
-	private BigInteger word;
+	private byte[] word;
 
-	/**
-	 * constructor just initialises the word field
-	 * 
-	 * @param word
-	 *            the word in question
-	 * @throws Exception
-	 *             if word of wrong size
+	public static final Word ZERO = new Word(new byte[] {0, 0, 0, 0});
+
+	/**the constructor just initialises the word
+	 * so long as a byte array of length 4 has been passed in
+	 * @param word the word to set
 	 */
-	public Word(BigInteger word) {
-		this.word = word;
+	public Word(byte[] word)
+	{
+		if(word.length == 4)
+		{
+			this.word = word;
+		}
+		else
+		{
+			//ERROR THROW LOGGER PROBLEM
+		}
 	}
 
-	/** Separate constructor for initialising to zero */
-	public Word() {
-		this.word = new BigInteger("0");
-	}
-
-	/**
-	 * this method will return the word encapsulated in this class
+	/**this method returns the word stored in this object
 	 * 
-	 * @return the word
+	 * @return the word stored
 	 */
-	public BigInteger getWord() {
+	public byte[] getWord()
+	{
 		return this.word;
 	}
 
-	/**method adds two 32 bit valuestogether
-	 * any carry will be ignored
-	 * @param word the word to add
-	 */
-	public Word add(Word word)
-	{
-		BigInteger num1 = this.getWord();
-		BigInteger num2 = word.getWord();
-		
-		
-		return new Word((num1.add(num2)).mod(new BigInteger(modBound)));
-	}
+
 }

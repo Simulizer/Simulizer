@@ -10,3 +10,7 @@
 .window-titlebar {
     -fx-opacity: 1;
 }
+
+.window.highlighting .window-titlebar{
+    -fx-background-color: red;
+}
