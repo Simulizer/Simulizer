@@ -68,12 +68,12 @@ public class CPU {
 
     /**the constructor will set all the components up
      *
-     * @param program the program information received from the assembler
+     * @param io the io type being used
      */
-    public CPU(Program program, IO io)
+    public CPU(Program program,IO io)
     {
         listeners = new ArrayList<>();
-        this.loadProgram(program);//set up the CPU with the program
+        this.clearRegisters();
         this.clock = new Clock(100);
         this.isRunning = false;
         this.io = io;
@@ -249,13 +249,13 @@ public class CPU {
 
     /**this method carries out the decode of the FDE cycle, it will
      * look through the statement object and take the instruction and decode the operands
+     * @param instruction the instruction format to decode
+     * @param operandList the list of operands to be decoded
      * @return InstructionFormat the instruction ready for execution
      * @throws DecodeException if something goes wrong during decode
      */
-    private InstructionFormat decode() throws DecodeException
+    public InstructionFormat decode(Instruction instruction, List<Operand> operandList) throws DecodeException
     {
-        Instruction instruction = this.instructionRegister.getInstruction();
-        List<Operand> operandList = this.instructionRegister.getOperandList();//shouldn't ever be more than 3 stored
 
         Operand op1 = null;
         OperandType op1Type = null;
@@ -301,17 +301,7 @@ public class CPU {
             Optional<Word> src2 = Optional.of(decodeRegister(op3.asRegisterOp()));
             return new RTypeInstruction(instruction, dest, destinationRegister, src1, src2);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm)//immediate arithmetic operations
-        {
-            assert (op1 != null) && (op2 != null) && (op3 != null);
-
-            Optional<Word> dest = Optional.empty();
-            Register destinationRegister = op1.asRegisterOp().value;
-            Optional<Word> srcRegister = Optional.of(this.decodeRegister(op2.asRegisterOp()));
-            Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(op3.asIntegerOp()));
-            return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, immValue);
-        }
-        else if(instruction.getOperandFormat() == OperandFormat.destSrcImmU)//immediate unsigned arithmetic ops (same as destSrcImm code wise)
+        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm || instruction.getOperandFormat() == OperandFormat.destSrcImmU)//immediate arithmetic operations (signed and unsigned)
         {
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
@@ -421,7 +411,7 @@ public class CPU {
      * @throws MemoryException if problem accessing memory
      * @throws StackException 
      */
-    private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException
+    public void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException
     {
         switch(instruction.mode)//switch based on instruction format
         {
@@ -584,7 +574,7 @@ public class CPU {
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
         fetch();
-        InstructionFormat instruction = decode();
+        InstructionFormat instruction = decode(this.instructionRegister.getInstruction(),this.instructionRegister.getOperandList());
         execute(instruction);
 		if(annotations.containsKey(programCounter)) {
 			for(Annotation a : annotations.get(programCounter)) {
