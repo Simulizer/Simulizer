@@ -15,9 +15,8 @@ import javafx.util.Duration;
 import jfxtras.scene.control.window.CloseIcon;
 import jfxtras.scene.control.window.MinimizeIcon;
 import jfxtras.scene.control.window.Window;
-import simulizer.ui.GridBounds;
-import simulizer.ui.MainMenuBar;
 import simulizer.ui.WindowManager;
+import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window implements Observer {
@@ -48,13 +47,7 @@ public abstract class InternalWindow extends Window implements Observer {
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
 
-		// Stops window covering MenuBar
-		layoutYProperty().addListener((observableValue, oldY, newY) -> {
-			if (newY.doubleValue() <= 25) {
-				setLayoutY(25);
-			}
-		});
-
+		// Bring to front when clicked
 		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Adds a small window border
@@ -81,6 +74,9 @@ public abstract class InternalWindow extends Window implements Observer {
 
 	public final void setWindowManager(WindowManager wm) {
 		this.wm = wm;
+		windowWidth = wm.getPane().getWidth();
+		windowHeight = wm.getPane().getHeight();
+		// wm.addObserver(this);
 	}
 
 	public final void emphasise() {
@@ -104,30 +100,31 @@ public abstract class InternalWindow extends Window implements Observer {
 	}
 
 	public void setGridBounds(GridBounds grid) {
+		if (this.grid == null) {
+			// Listens for Resize/Move Events
+			widthProperty().addListener(resizeEvent);
+			heightProperty().addListener(resizeEvent);
+			layoutXProperty().addListener(resizeEvent);
+			layoutYProperty().addListener(resizeEvent);
+		}
 		this.grid = grid;
-		grid.addObserver(this);
-
-		// Listens for Resize/Move Events
-		widthProperty().addListener(resizeEvent);
-		heightProperty().addListener(resizeEvent);
-		layoutXProperty().addListener(resizeEvent);
-		layoutYProperty().addListener(resizeEvent);
 	}
-	
+
+	@Override
 	public void update(Observable arg0, Object obj) {
 		double[] dim = (double[]) obj;
 		if (windowWidth != dim[0]) {
 			double ratio = dim[0] / windowWidth;
 			setLayoutX(getLayoutX() * ratio);
 			setPrefWidth(getWidth() * ratio);
+			windowWidth = dim[0];
 		}
 		if (windowHeight != dim[1]) {
 			double ratio = dim[1] / windowHeight;
-			setLayoutY(((getLayoutY() - MainMenuBar.HEIGHT) * ratio) + MainMenuBar.HEIGHT);
+			setLayoutY(getLayoutY() * ratio);
 			setPrefHeight(getHeight() * ratio);
+			windowHeight = dim[1];
 		}
-		windowWidth = dim[0];
-		windowHeight = dim[1];
 	}
 
 	/** Snaps InternalWindow to grid when it is resized */
@@ -144,23 +141,23 @@ public abstract class InternalWindow extends Window implements Observer {
 			task = new TimerTask() {
 				@Override
 				public void run() {
-					double[] coords = { getLayoutX(), getLayoutY() - MainMenuBar.HEIGHT, getLayoutX() + getWidth(), getLayoutY() + getHeight() - MainMenuBar.HEIGHT };
+					double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
 					coords = grid.moveToGrid(coords);
 					if (coords[2] != getLayoutX() + getWidth()) {
 						System.out.println("Changed Width to: " + (coords[2] - coords[0]));
 						setPrefWidth(coords[2] - coords[0]);
 					}
-					if (coords[3] != getLayoutY() + getHeight() - MainMenuBar.HEIGHT) {
-						System.out.println("Changed Height to: " + (coords[3] - coords[1] + MainMenuBar.HEIGHT));
+					if (coords[3] != getLayoutY() + getHeight()) {
+						System.out.println("Changed Height to: " + (coords[3] - coords[1]));
 						setPrefHeight(coords[3] - coords[1]);
 					}
 					if (coords[0] != getLayoutX()) {
 						System.out.println("Changed X to: " + coords[0]);
 						setLayoutX(coords[0]);
 					}
-					if (coords[1] != getLayoutY() - MainMenuBar.HEIGHT) {
-						System.out.println("Changed Y to: " + (coords[1] + MainMenuBar.HEIGHT));
-						setLayoutY(coords[1] + 25);
+					if (coords[1] != getLayoutY()) {
+						System.out.println("Changed Y to: " + (coords[1]));
+						setLayoutY(coords[1]);
 					}
 					task.cancel();
 				}
@@ -176,6 +173,13 @@ public abstract class InternalWindow extends Window implements Observer {
 		sc.setToX(1);
 		sc.setToY(1);
 		sc.play();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof InternalWindow))
+			return false;
+		return WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
 	}
 
 }

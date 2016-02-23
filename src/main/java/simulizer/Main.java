@@ -82,18 +82,29 @@ public class Main extends Application {
 					System.exit(0);
 				});
 
+				System.out.println("Before Sleep");
 				// Just show the main window for now
 				wm = new WindowManager(primaryStage, "default", 1024, 705);
 
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 				Thread.sleep(750); // so that it's at least readable
-
+				System.out.println("After Sleep");
 				return true;
 			};
 		};
 
-		showSplash(startupTask);
-		new Thread(startupTask).start();
+		//showSplash(startupTask);
+		//new Thread(startupTask).start();
+		
+		// Close application
+		primaryStage.setOnCloseRequest((t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+
+		// Just show the main window for now
+		wm = new WindowManager(primaryStage, "default", 1024, 705);
+		wm.show();
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {
@@ -125,6 +136,7 @@ public class Main extends Application {
 		stage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
 		stage.setWidth(SPLASH_WIDTH);
 		stage.setHeight(SPLASH_HEIGHT);
+		stage.setAlwaysOnTop(true);
 		stage.show();
 	}
 

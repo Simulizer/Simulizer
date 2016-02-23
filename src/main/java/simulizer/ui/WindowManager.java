@@ -1,36 +1,41 @@
 package simulizer.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.Word;
+import simulizer.ui.components.MainMenuBar;
+import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.ui.layout.Layout;
+import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
-import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
-
 public class WindowManager extends Pane {
-	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>(); // Stores a list of all open windows
-	private Stage primaryStage;
+	// Stores a set of all open windows
+	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
+
 	private Pane pane = new Pane();
-	private GridBounds grid = new GridBounds(4, 3, 5);
-	private Themes themes = new Themes();
-	private Layouts layouts = new Layouts(this);
-	private Scene scene;
-	private CPU cpu;
-	private Thread cpuThread;
+	private Stage primaryStage;
+
+	private GridBounds grid;
+	private Themes themes;
+	private Layouts layouts;
+
+	private CPU cpu = null;
+	private Thread cpuThread = null;
 	UISimulationListener simListener;
 
 	public WindowManager(Stage primaryStage) {
@@ -46,17 +51,19 @@ public class WindowManager extends Pane {
 	}
 
 	private void init(Stage primaryStage, String theme, int x, int y) {
-		Scene scene = new Scene(pane, x, y);
-		primaryStage.setTitle("Simulizer");
-		primaryStage.setScene(scene);
-		this.primaryStage = primaryStage;
+		GridPane gridPane = new GridPane();
+		//getChildren().add(gridPane);
+		GridPane.setHgrow(pane, Priority.ALWAYS);
+		gridPane.add(pane, 0, 1);
 
-		cpu = null;
-		cpuThread = null;
+		Scene scene = new Scene(gridPane, x, y);
 		simListener = new UISimulationListener(this);
 
-		themes.setTheme(theme);
-		pane.getStyleClass().add("background");
+		this.primaryStage = primaryStage;
+		primaryStage.setWidth(x);
+		primaryStage.setHeight(y);
+		primaryStage.setTitle("Simulizer");
+		primaryStage.setScene(scene);
 
 		// Set the theme
 		themes = new Themes();
@@ -65,27 +72,23 @@ public class WindowManager extends Pane {
 
 		// Sets the grid
 		grid = new GridBounds(4, 2, 30);
-		grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25);
-		scene.widthProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
-		scene.heightProperty().addListener((a, b, newSceneWidth) -> grid.setWindowSize(scene.getWidth(), scene.getHeight() - 25));
+		grid.setWindowSize(scene.getWidth(), scene.getHeight());
 
 		// Set the layout
 		layouts = new Layouts(this);
+		layouts.setDefaultLayout();
 
 		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
-		bar.prefWidthProperty().bind(primaryStage.widthProperty());
-		pane.getChildren().add(bar);
+		gridPane.add(bar, 0, 0);
 
-		// Resize menubar to window width
-		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
-		setTheme(themes.getTheme());
 	}
 
 	public void show() {
-		primaryStage.setTitle("Simulizer");
-		primaryStage.setScene(scene);
 		primaryStage.show();
+
+		// Snap to grid after the stage is shown
+		grid.setGridSnap(true);
 	}
 
 	public void closeAll() {
@@ -93,14 +96,18 @@ public class WindowManager extends Pane {
 		openWindows.clear();
 	}
 
-	private void addWindows(InternalWindow... windows) {
+	public void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
-			window.setOnCloseAction((e) -> removeWindows(window));
-			openWindows.add(window);
-			window.setTheme(themes.getTheme());
-			pane.getChildren().addAll(window);
-			window.setGridBounds(grid);
-			window.ready();
+			if (!openWindows.contains(window)) {
+				window.setOnCloseAction((e) -> removeWindows(window));
+				openWindows.add(window);
+				window.setTheme(themes.getTheme());
+				pane.getChildren().addAll(window);
+				window.setGridBounds(grid);
+				window.ready();
+			} else {
+				System.out.println("Window already exists: " + window.getTitle());
+			}
 		}
 	}
 
@@ -112,27 +119,10 @@ public class WindowManager extends Pane {
 		}
 	}
 
-	public void setLayout(Layout layout) {
-		List<InternalWindow> newOpenWindows = new ArrayList<InternalWindow>();
-
-		// For each new window
-		for (WindowLocation location : layout) {
-			InternalWindow window = findInternalWindow(location.getWindowEnum());
-			window.setBounds(location.getX(), location.getY(), location.getWidth(), location.getHeight());
-			newOpenWindows.add(window);
-		}
-
-		closeAll();
-		pane.getChildren().addAll(newOpenWindows);
-		openWindows = newOpenWindows;
-
-		setTheme(themes.getTheme());
-	}
-
 	public void setTheme(Theme theme) {
 		themes.setTheme(theme);
-		pane.getStylesheets().clear();
-		pane.getStylesheets().add(theme.getStyleSheet("background.css"));
+		getStylesheets().clear();
+		getStylesheets().add(theme.getStyleSheet("background.css"));
 		for (InternalWindow window : openWindows)
 			window.setTheme(theme);
 	}
@@ -146,20 +136,26 @@ public class WindowManager extends Pane {
 		}
 	}
 
+	public InternalWindow openInternalWindow(WindowEnum window) {
+		InternalWindow w = findInternalWindow(window);
+		if (w != null)
+			return w;
+
+		// Not found -> Create a new one
+		w = window.createNewWindow();
+		assert w != null;
+		w.setWindowManager(this);
+		layouts.setWindowDimentions(w);
+		addWindows(w);
+		return w;
+	}
+
 	public InternalWindow findInternalWindow(WindowEnum window) {
 		// Find existing window
 		for (InternalWindow w : openWindows)
 			if (window.equals(w))
 				return w;
-
-		// Not found -> Create a new one
-		InternalWindow w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(this);
-		// TODO: Look for a smarter bounds first (possibly from layout), otherwise maximise the frame
-		w.setBounds(10, 35, pane.getWidth() - 20, pane.getHeight() - 45);
-		addWindows(w);
-		return w;
+		return null;
 	}
 
 	public Stage getPrimaryStage() {
@@ -174,14 +170,13 @@ public class WindowManager extends Pane {
 		return layouts;
 	}
 
-	public List<InternalWindow> getOpenWindows() {
+	public Set<InternalWindow> getOpenWindows() {
 		return openWindows;
 	}
 
 	public Pane getPane() {
 		return pane;
 	}
-
 
 	public void stopCPU() {
 		if (cpuThread != null) {
@@ -198,11 +193,11 @@ public class WindowManager extends Pane {
 	}
 
 	public void runProgram(Program p) {
-		Logger io = (Logger) findInternalWindow(WindowEnum.LOGGER);
+		Logger io = (Logger) openInternalWindow(WindowEnum.LOGGER);
 		stopCPU();
 
 		cpu = new CPU(p, io);
-		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
+		((HighLevelVisualisation) openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
 		cpu.registerListener(simListener);
 
 		io.clear();
@@ -228,5 +223,9 @@ public class WindowManager extends Pane {
 
 	public CPU getCPU() {
 		return cpu;
+	}
+
+	public void closeAllExcept(InternalWindow... newOpenWindows) {
+
 	}
 }
