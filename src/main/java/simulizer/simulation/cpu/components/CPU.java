@@ -55,7 +55,7 @@ public class CPU {
     private MainMemory memory;
 
     private Program program;//all information on how to run the program
-    private Map<String, Address> labels;
+    public Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
 
 	private Map<Address, List<Annotation>> annotations;
@@ -254,7 +254,7 @@ public class CPU {
      * @return InstructionFormat the instruction ready for execution
      * @throws DecodeException if something goes wrong during decode
      */
-    public InstructionFormat decode(Instruction instruction, List<Operand> operandList) throws DecodeException
+    private InstructionFormat decode(Instruction instruction, List<Operand> operandList) throws DecodeException
     {
 
         Operand op1 = null;
@@ -411,7 +411,7 @@ public class CPU {
      * @throws MemoryException if problem accessing memory
      * @throws StackException 
      */
-    public void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException
+    private void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException
     {
         switch(instruction.mode)//switch based on instruction format
         {
