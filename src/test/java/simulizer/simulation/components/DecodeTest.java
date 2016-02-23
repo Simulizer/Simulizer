@@ -4,12 +4,15 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
+import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.RegisterOperand;
@@ -18,6 +21,7 @@ import simulizer.simulation.cpu.user_interaction.IOConsole;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
+import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
@@ -203,5 +207,50 @@ public class DecodeTest {
 		SpecialInstruction special = instr.asSpecial();
 		assertTrue(special.mode.equals(AddressMode.SPECIAL));
 		assertTrue(special.getInstruction().equals(Instruction.syscall));
+	}
+	
+	/**will test the label operand format
+	 * instruction tested: j
+	 * @throws DecodeException
+	 */
+	@Test
+	public void testLabel() throws DecodeException
+	{
+		CPU cpu = new CPU(null,new IOConsole());
+		Instruction instruction = Instruction.j;
+		
+		AddressOperand op1 = new AddressOperand();
+		op1.labelName = Optional.of("testName");//test label name
+		List<Operand> opList = new ArrayList<Operand>();
+		opList.add(op1);
+		
+		InstructionFormat instr = cpu.decode(instruction, opList);
+		JTypeInstruction jtype = instr.asJType();
+		assertTrue(jtype.mode.equals(AddressMode.JTYPE));
+		assertTrue(jtype.getInstruction().equals(Instruction.j));
+		assertTrue(jtype.getJumpAddress().get().equals(Address.NULL));
+		assertFalse(jtype.getCurrentAddress().isPresent());
+	}
+	
+	/**will test the register operand format
+	 * instruction tested: jr
+	 * @throws DecodeException if something goes wrong during decode
+	 */
+	@Test
+	public void testRegister() throws DecodeException
+	{
+		CPU cpu = new CPU(null,new IOConsole());
+		Instruction instruction = Instruction.jr;
+		
+		RegisterOperand op1 = new RegisterOperand(Register.t0);
+		List<Operand> opList = new ArrayList<Operand>();
+		opList.add(op1);
+		
+		InstructionFormat instr = cpu.decode(instruction,opList);
+		JTypeInstruction jtype = instr.asJType();
+		assertTrue(jtype.mode.equals(AddressMode.JTYPE));
+		assertTrue(jtype.getInstruction().equals(Instruction.jr));
+		assertFalse(jtype.getCurrentAddress().isPresent());
+		assertEquals(0,jtype.getJumpAddress().get().getValue());
 	}
 }
