@@ -1,6 +1,11 @@
 // Full user guide available at:
 // https://docs.gradle.org/2.10/userguide/tutorial_java_projects.html
-/*
+/* Groovy notes:
+- double quotes are necessary to embed variables using "$myvar" or "${myvar.thing}"
+ */
+
+
+/* Task Overview:
 
     run a task by running:
         gradle TASK_NAME
@@ -54,7 +59,8 @@ Custom tasks:
 
 // from https://plugins.gradle.org/
 plugins {
-
+    // git dependencies
+        id 'org.ajoberstar.grgit' version '1.4.2'
 }
 
 
@@ -111,11 +117,14 @@ defaultTasks 'build', 'run'
 //
 /////////////////////////////////////////////////
 
-def name = 'Simulizer'
-version  = '0.01'
+
+def name = rootProject.name // defined in settings.gradle
+version = '0.01'
+
+description = 'MIPS-like assembly language interpreter' +
+        ' with CPU and high-level algorithm visualisations'
 
 mainClassName = 'simulizer.Main'
-
 
 
 /////////////////////////////////////////////////
@@ -126,7 +135,7 @@ mainClassName = 'simulizer.Main'
 
 // where to place generated files such as Antlr parsers
 def generatedOutput = 'src/generated/'
-def antlrOutput     = generatedOutput + 'antlr/'
+def antlrOutput     = "$generatedOutput/antlr/"
 
 sourceSets.main.java.srcDirs += antlrOutput
 
@@ -140,9 +149,59 @@ generateGrammarSource {
 
 // extends the clean task
 clean {
-    delete antlrOutput
+    delete generatedOutput
 }
 
+
+/////////////////////////////////////////////////
+//
+// Git Dependencies
+//
+/////////////////////////////////////////////////
+
+// Grgit API reference: http://ajoberstar.org/grgit/docs/groovydoc/index.html?org/ajoberstar/grgit/Grgit.html
+
+
+// Ace editor
+
+// where to clone the repository into
+def aceDLDir = file("$buildDir/ace")
+// where to place the needed runtime files
+def aceResDir = file("$projectDir/src/main/resources/generated")
+
+// clone the ace editor git repository
+// to refresh, download manually or execute `gradle clean build`
+task downloadAce << {
+    def ref  = 'v1.2.3' // the reference to checkout. Set to HEAD to use latest
+
+    if (!aceDLDir.exists()) {
+        println 'cloning ace editor git repo. May take a while...'
+        def repo = org.ajoberstar.grgit.Grgit.clone(
+                dir: aceDLDir,
+                uri: 'https://github.com/ajaxorg/ace-builds.git',
+                refToCheckout: ref
+        )
+    } else {
+        println 'ace repo already cloned'
+    }
+}
+
+// extract the required files to the resources path
+task copyAceFiles(dependsOn: downloadAce, type: Copy) {
+    if(!aceResDir.exists()) {
+        mkdir(aceResDir)
+    }
+
+    from file("$aceDLDir/src-min-noconflict")
+    into aceResDir
+
+    // files to copy
+    include 'ace.js'
+}
+
+clean {
+    delete aceResDir
+}
 
 
 /////////////////////////////////////////////////
@@ -174,6 +233,7 @@ dependencies {
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
 
+
     // GSON: JSON Parsing
     	compile 'com.google.code.gson:gson:2.5'
 
@@ -183,9 +243,12 @@ dependencies {
     mkdir('work')
 }
 
+// Ace Editor
+build.dependsOn copyAceFiles
+
 
 clean{
-    // delete "work" // Disabled until copying out of jar works
+    // delete 'work' // Disabled until copying out of jar works
 }
 
 
@@ -207,7 +270,7 @@ test {
         //excludeCategories 'category.InProgressTests'
     }
     testLogging {
-        events "passed", "skipped", "failed", "standardOut", "standardError"
+        events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
     }
 }
 
