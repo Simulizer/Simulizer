@@ -253,4 +253,44 @@ public class DecodeTest {
 		assertFalse(jtype.getCurrentAddress().isPresent());
 		assertEquals(0,jtype.getJumpAddress().get().getValue());
 	}
+	
+	/**will test the cmp cmp label operand format
+	 * instruction used: beq
+	 * @throws DecodeException if error during decode
+	 */
+	@Test
+	public void testCmpCmpLabel() throws DecodeException
+	{
+		
+	}
+	
+	/**will test the cmp label operand format
+	 * instruction used: bltz
+	 * @throws DecodeException if error during decode
+	 */
+	@Test
+	public void testCmpLabel() throws DecodeException
+	{
+		
+	}
+	
+	/**will test the src addr operand format
+	 * instruction used: sw
+	 * @throws DecodeException if error during decode
+	 */
+	@Test
+	public void testSrcAddr() throws DecodeException
+	{
+		
+	}
+	
+	/**will test the dest addr operand format
+	 * instruction used: lw
+	 * @throws DecodeException if error during decode
+	 */
+	@Test
+	public void testDestAddr() throws DecodeException
+	{
+		
+	}
 }
