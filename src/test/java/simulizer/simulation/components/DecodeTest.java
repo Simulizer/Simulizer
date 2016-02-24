@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,9 +16,7 @@ import org.junit.experimental.categories.Category;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.Label;
 import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.Label.Type;
 import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;

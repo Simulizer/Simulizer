@@ -2,15 +2,14 @@ package simulizer.simulation.components;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import simulizer.assembler.Assembler;
+import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
@@ -115,6 +114,40 @@ public class ExecuteTest {
 		return cpu;
 	}
 	
+	/**method retrieves the program counter for examination
+	 * 
+	 * @param cpu the cpu oibject to retrieve from
+	 * @return the program counter of that cpu object
+	 * @throws NoSuchFieldException all related to me accessing private methods for testing
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	private Address getProgramCounter(CPU cpu) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		Field pc = cpu.getClass().getDeclaredField("programCounter");//accesing private stuff for testing
+		pc.setAccessible(true);
+		Address programCounter = (Address)pc.get(cpu);
+		return programCounter;
+	}
+	
+	/**method will get the labels in the program along with their addresses, used for testing
+	 * 
+	 * @param cpu the cpu object being run on
+	 * @return the map of labels to addresses
+	 * @throws IllegalArgumentException if problem while accessing a provate field
+	 * @throws IllegalAccessException
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 */
+	private Map<String,Address> getLabels(CPU cpu) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		Field labels = cpu.getClass().getDeclaredField("labels");
+		labels.setAccessible(true);
+		HashMap<String,Address> map = (HashMap<String,Address>)labels.get(cpu);
+		return map;
+	}
+	
 	/**test the execution of the add instruction
 	 * @throws StackException 
 	 * @throws HeapException 
@@ -142,6 +175,7 @@ public class ExecuteTest {
 		assertEquals(7,accessRegisterSigned(cpu, Register.t1));
 		assertEquals(12,accessRegisterSigned(cpu, Register.t2));
 	}
+	
 	/**method will test the execution of the abs instruction
 	 * @throws StackException 
 	 * @throws HeapException 
@@ -737,5 +771,368 @@ public class ExecuteTest {
 		CPU cpu = createCPU(myInstructions);
 		
 		assertEquals(5,accessRegisterSigned(cpu,Register.v0));
+	}
+	
+	/**method tests the b instruction's execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testBExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "b TEST;\n" +
+								"li $v0,5;\n" +
+								"li $a0, 9;\n" +
+								"TEST: li $v0, 8;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+		assertEquals(8,accessRegisterSigned(cpu,Register.v0));//checking instruction on line of label is actually run
+		assertNotEquals(9,accessRegisterSigned(cpu,Register.a0));//checking skiiped instructions aren't being executed
+	}
+	
+	/**method tests beq instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBeqExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing equal
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 5;\n" + 
+									"beq $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing not equal
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 4;\n" + 
+									"beq $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**this method will test the execution of the bne instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testBneExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing not equal
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 4;\n" + 
+									"bne $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//testing equal
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 5;\n" + 
+									"bne $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+	}
+	
+	/**method will test the execution of the bgez instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testBgezExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		{//testing >= 0
+			String myInstructions = "li $a0, 5;\n"+
+									"bgez $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//testing < 0
+			String myInstructions = "li $a0, -1;\n"+
+									"bgez $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+	}
+	
+	/**method will test the execution of the bgtz instruction
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testBgtzExecute() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//test > 0
+			String myInstructions = "li $a0, 1;\n"+
+									"bgtz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//test <=0
+			String myInstructions = "li $a0, 0;\n"+
+									"bgtz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+	}
+	
+	/**this method will test the execution of the blez instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testBlezExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		{//test <= 0
+			String myInstructions = "li $a0, 0;\n"+
+									"blez $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//test > 0
+			String myInstructions = "li $a0, 1;\n"+
+									"blez $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+	}
+	
+	/**this method will test the execution of the bltz instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testBltzExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		{//test < 0
+			String myInstructions = "li $a0, -1;\n"+
+									"bltz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//test >= 0
+			String myInstructions = "li $a0, 0;\n"+
+									"bltz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+	}
+	
+	/**method will test the execution of the beqz instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testBeqz() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		{//testing == 0
+			String myInstructions = "li $a0, 0;\n"+
+									"beqz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
+		
+		{//testing != 0
+			String myInstructions = "li $a0, 4;\n"+
+									"beqz $a0, TEST;\n" +
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 8;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);
+			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
+		}
 	}
 }
