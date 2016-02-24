@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
+import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
@@ -33,6 +34,7 @@ public class WindowManager extends Pane {
 	private CPU cpu;
 	private Thread cpuThread;
 	UISimulationListener simListener;
+	private Settings settings;
 
 	public WindowManager(Stage primaryStage) {
 		init(primaryStage, "default", 1060, 740);
@@ -212,5 +214,9 @@ public class WindowManager extends Pane {
 
 	public CPU getCPU() {
 		return cpu;
+	}
+
+	public void setSettings(Settings settings) {
+		this.settings = settings;
 	}
 }

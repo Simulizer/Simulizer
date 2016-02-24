@@ -17,4 +17,9 @@ public class BooleanSetting extends SettingValue<Boolean> {
 		return false;
 	}
 
+	@Override
+	public String getSettingType() {
+		return "Boolean";
+	}
+
 }

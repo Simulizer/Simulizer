@@ -1,5 +1,6 @@
 package simulizer;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,6 +24,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
 
 public class Main extends Application {
@@ -52,9 +54,7 @@ public class Main extends Application {
 			e.printStackTrace();
 		}
 
-		progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n"
-			+ "Version: 0.0.1\n"
-			+ "https://github.com/ToastNumber/Simulizer");
+		progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n" + "Version: 0.0.1\n" + "https://github.com/ToastNumber/Simulizer");
 
 		splashLayout = new VBox();
 		splashLayout.getChildren().addAll(splash, progressText);
@@ -75,7 +75,8 @@ public class Main extends Application {
 			protected Boolean call() throws Exception {
 				// TODO: Remove this code, simple check for if we are running within the work folder
 				String cwd = System.getProperty("user.dir");
-				if (!cwd.endsWith("work")) System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+				if (!cwd.endsWith("work"))
+					System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
 
 				// Close application
 				primaryStage.setOnCloseRequest((t) -> {
@@ -83,8 +84,12 @@ public class Main extends Application {
 					System.exit(0);
 				});
 
+				// Loads the settings from file
+				Settings settings = Settings.loadSettings(new File("settings.json"));
+
 				// Just show the main window for now
 				wm = new WindowManager(primaryStage, "default", 1024, 705);
+				wm.setSettings(settings);
 
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 				Thread.sleep(750); // so that it's at least readable
@@ -93,8 +98,27 @@ public class Main extends Application {
 			};
 		};
 
-		showSplash(startupTask);
-		new Thread(startupTask).start();
+		//showSplash(startupTask);
+		//new Thread(startupTask).start();
+		
+		// TODO: Remove Splash Screen skip
+		String cwd = System.getProperty("user.dir");
+		if (!cwd.endsWith("work"))
+			System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+
+		// Close application
+		primaryStage.setOnCloseRequest((t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+
+		// Loads the settings from file
+		Settings settings = Settings.loadSettings(new File("settings.json"));
+
+		// Just show the main window for now
+		wm = new WindowManager(primaryStage, "default", 1024, 705);
+		wm.setSettings(settings);
+		wm.show();
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {

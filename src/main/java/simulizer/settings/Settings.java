@@ -19,13 +19,21 @@ import simulizer.settings.types.StringSetting;
 public class Settings {
 	private Set<SettingValue<?>> settings = new HashSet<SettingValue<?>>();
 
+	public static Settings loadSettings(File json) throws IOException {
+		JsonParser parser = new JsonParser();
+		JsonElement jsonElement = parser.parse(new FileReader(json));
+		JsonObject jsonObject = jsonElement.getAsJsonObject();
+		Settings settings = new Settings(jsonObject);
+		return settings;
+	}
+	
 	private Settings(JsonObject jsonObject) {
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new ObjectSetting("workspace", "Workspace")
 					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default.json"))
 					.add(new StringSetting("layout", "Default Layout", "The default layout to load", "default.json"))
-					.add(new StringSetting("ui-scaling", "Autosize Internal Windows", "Resize all Internal Windows when the main window resizes"))
+					.add(new StringSetting("scale-ui", "Autosize Internal Windows", "Resize all Internal Windows when the main window resizes"))
 					.add(new ObjectSetting("grid", "Grid Settings", "Configure when Internal Windows should snap to a grid")
 					  	.add(new BooleanSetting("enabled", "Allow grid snapping", "Enables/Disable snapping Internal Windows to a grid"))
 					  	.add(new IntegerSetting("horizontal", "Horizontal Lines", "Number of horizontal gridlines to snap to"))
@@ -45,17 +53,41 @@ public class Settings {
 		// @formatter:on
 
 		// Loads all the values from jsonObject
+		for (SettingValue<?> setting : settings) {
+			loadFromJson(jsonObject, setting);
+		}
 	}
 
-	public static Settings loadSettings(File json) throws IOException {
-		JsonParser parser = new JsonParser();
-		JsonElement jsonElement = parser.parse(new FileReader(json));
-		JsonObject jsonObject = jsonElement.getAsJsonObject();
-		Settings settings = new Settings(jsonObject);
-		return settings;
+	private void loadFromJson(JsonObject jsonObject, SettingValue<?> setting) {
+
+		switch (setting.getSettingType()) {
+			case "Boolean":
+				((BooleanSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsBoolean());
+				break;
+
+			case "Double":
+				((DoubleSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsDouble());
+				break;
+
+			case "Integer":
+				((IntegerSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsInt());
+				break;
+
+			case "Object":
+				for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
+					loadFromJson(jsonObject.get(setting.getJsonName()).getAsJsonObject(), s);
+				break;
+
+			case "String":
+				((StringSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsString());
+				break;
+
+			default:
+				System.err.println("Unknown: " + setting.getSettingType());
+		}
 	}
 
-	public static void saveSettings(Settings settings, File json) {
-	}
+
+
 
 }

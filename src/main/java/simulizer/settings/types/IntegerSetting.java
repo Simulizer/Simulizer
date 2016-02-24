@@ -29,4 +29,9 @@ public class IntegerSetting extends SettingValue<Integer> {
 			return lowBound <= value && value <= highBound;
 	}
 
+	@Override
+	public String getSettingType() {
+		return "Integer";
+	}
+
 }

@@ -27,4 +27,9 @@ public class DoubleSetting extends SettingValue<Double> {
 			return lowBound <= value && value <= highBound;
 	}
 
+	@Override
+	public String getSettingType() {
+		return "Double";
+	}
+
 }

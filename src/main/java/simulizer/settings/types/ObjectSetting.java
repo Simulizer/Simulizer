@@ -25,4 +25,9 @@ public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
 		return this;
 	}
 
+	@Override
+	public String getSettingType() {
+		return "Object";
+	}
+
 }

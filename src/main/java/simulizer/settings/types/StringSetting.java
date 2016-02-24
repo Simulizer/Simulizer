@@ -17,4 +17,9 @@ public class StringSetting extends SettingValue<String> {
 		return true;
 	}
 
+	@Override
+	public String getSettingType() {
+		return "String";
+	}
+
 }

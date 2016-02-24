@@ -10,13 +10,13 @@
       "sensitivity": 10,
       "delay": 200
     },
-    "lock-to-window": false,
+    "lock-to-window": false
   },
   "simulation": {
     "clock-speed": 250,
-    "zero-memory": true,
+    "zero-memory": true
   },
   "code_editor": {
-    "word-wrap": true,
+    "word-wrap": true
   }
 }
