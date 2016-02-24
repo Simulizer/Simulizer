@@ -20,7 +20,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
 public class WindowManager extends GridPane {
-	private Workspace workspace = new Workspace(this);
+	private Workspace workspace;
 	private Stage primaryStage;
 
 	private GridBounds grid;
@@ -37,15 +37,16 @@ public class WindowManager extends GridPane {
 	}
 
 	public WindowManager(Stage primaryStage, Settings settings, int x, int y) {
-	
+		this.primaryStage = primaryStage;
+		this.settings = settings;
+		workspace = new Workspace(this);
+
 		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
 		GridPane.setHgrow(workspace.getPane(), Priority.ALWAYS);
 		GridPane.setVgrow(workspace.getPane(), Priority.ALWAYS);
 		add(workspace.getPane(), 0, 1);
 
 		// Set up the Primary Stage
-		this.primaryStage = primaryStage;
-		this.settings = settings;
 		primaryStage.setWidth(x);
 		primaryStage.setHeight(y);
 		primaryStage.setTitle("Simulizer");
@@ -56,7 +57,7 @@ public class WindowManager extends GridPane {
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
 		// Sets the grid
-		grid = new GridBounds(4, 2, 30);
+		grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), (int) settings.get("workspace.grid.vertical"), (double) settings.get("workspace.grid.sensitivity"));
 		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
 
 		// Set the layout
@@ -73,7 +74,8 @@ public class WindowManager extends GridPane {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		grid.setGridSnap(true);
+		workspace.resizeInternalWindows();
+		grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
 		widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 		heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 	}
@@ -140,7 +142,6 @@ public class WindowManager extends GridPane {
 	public CPU getCPU() {
 		return cpu;
 	}
-
 
 	public Workspace getWorkspace() {
 		return workspace;

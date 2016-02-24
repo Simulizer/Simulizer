@@ -5,8 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
@@ -25,20 +29,39 @@ public class Workspace extends Observable implements Themeable {
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
-		wm.widthProperty().addListener((e) -> {
-			double width = pane.getWidth(), height = pane.getHeight();
-			if (width > 0 && height > 0)
-				for (InternalWindow window : openWindows)
-					window.setWorkspaceSize(width, height);
-		});
-		wm.heightProperty().addListener((e) -> {
-			double width = pane.getWidth(), height = pane.getHeight();
-			if (width > 0 && height > 0)
-				for (InternalWindow window : openWindows)
-					window.setWorkspaceSize(width, height);
-		});
+		wm.widthProperty().addListener(resizeEvent);
+		wm.heightProperty().addListener(resizeEvent);
 	}
 
+	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
+		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+		final Timer timer = new Timer();
+		TimerTask task = null;
+		final long delayTime = 50; // Delay before resize UI
+
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			if (task != null)
+				task.cancel();
+			task = new TimerTask() {
+				@Override
+				public void run() {
+					resizeInternalWindows();
+					task.cancel();
+				}
+			};
+			timer.schedule(task, delayTime);
+		}
+
+	};
+
+	public void resizeInternalWindows(){
+		double width = pane.getWidth(), height = pane.getHeight();
+		if (width > 0 && height > 0)
+			for (InternalWindow window : openWindows)
+				window.setWorkspaceSize(width, height);
+	}
+	
 	public Pane getPane() {
 		return pane;
 	}
@@ -119,7 +142,7 @@ public class Workspace extends Observable implements Themeable {
 		for (InternalWindow window : openWindows)
 			if (!keepOpen.contains(window))
 				close.add(window);
-		
+
 		for (InternalWindow window : close)
 			removeWindows(window);
 	}
