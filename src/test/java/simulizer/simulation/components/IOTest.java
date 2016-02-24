@@ -2,41 +2,51 @@ package simulizer.simulation.components;
 
 import simulizer.simulation.cpu.user_interaction.IO;
 
-public class IOTest implements IO{
+/**this class is used as a really naive way of taking I/O to and from the simulation
+ * it is used only for testing purposes and will not be used in the final system at all
+ * @author Charlie Street
+ *
+ */
+public class IOTest implements IO {
 
+	public String scanner = "";//used for taking output/input
+	
 	@Override
 	public String readString() {
-		// TODO Auto-generated method stub
-		return null;
+		String scanned = scanner;
+		scanner = "";
+		return scanned;
 	}
 
 	@Override
 	public int readInt() {
-		// TODO Auto-generated method stub
-		return 0;
+		int scanned = Integer.parseInt(scanner);
+		scanner = "";
+		return scanned;
 	}
 
 	@Override
 	public char readChar() {
-		// TODO Auto-generated method stub
-		return 0;
+		char scanned = scanner.charAt(0);
+		scanner = "";
+		return scanned;
 	}
 
 	@Override
 	public void printString(String str) {
-		// TODO Auto-generated method stub
+		scanner = str;
 		
 	}
 
 	@Override
 	public void printInt(int num) {
-		// TODO Auto-generated method stub
+		scanner = num+"";
 		
 	}
 
 	@Override
 	public void printChar(char letter) {
-		// TODO Auto-generated method stub
+		scanner = letter+"";
 		
 	}
 

@@ -393,10 +393,6 @@ public class CPU {
         }
         else//invalid instruction format or BREAK
         {
-            if(instruction.equals(Instruction.BREAK))
-            {
-                //do some break stuff here
-            }
             throw new DecodeException("Invalid instruction format.", op1);
         }
 
@@ -436,6 +432,10 @@ public class CPU {
                 {
                     //just do nothing
                 }
+                else if(instruction.getInstruction().equals(Instruction.BREAK))
+                {
+                	this.pauseClock();//stop clock for now
+                }
                 else
                 {
                     throw new ExecuteException("Error with zero argument instruction", instruction);
@@ -463,18 +463,62 @@ public class CPU {
                     	Word address = new Word(DataConverter.encodeAsSigned((long)retrieveAddress));
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = address;
                 	}
-                    else
+                    else if(instruction.getInstruction().equals(Instruction.lw))
                     {
                     	int length = 4;//this may be wrong, hence outside, may depend on instruction
                     	byte[] read = this.memory.readFromMem(retrieveAddress, length);
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
                     }
+                    else if(instruction.getInstruction().equals(Instruction.lb))
+                    {
+                    	byte[] read = this.memory.readFromMem(retrieveAddress, 1);
+                    	long val = DataConverter.decodeAsSigned(read);
+                    	byte[] signed = DataConverter.encodeAsSigned(val);
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(signed);
+                    }
+                    else if(instruction.getInstruction().equals(Instruction.lbu))
+                    {
+                    	byte[] read = this.memory.readFromMem(retrieveAddress, 1);
+                    	long val = DataConverter.decodeAsUnsigned(read);
+                    	byte[] unsigned = DataConverter.encodeAsUnsigned(val);
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(unsigned);
+                    }
+                    else if(instruction.getInstruction().equals(Instruction.lh))
+                    {
+                    	byte[] read = this.memory.readFromMem(retrieveAddress, 2);
+                    	long val = DataConverter.decodeAsSigned(read);
+                    	byte[] signed = DataConverter.encodeAsSigned(val);
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(signed);
+                    }
+                    else if(instruction.getInstruction().equals(Instruction.lhu))
+                    {
+                    	byte[] read = this.memory.readFromMem(retrieveAddress, 2);
+                    	long val = DataConverter.decodeAsUnsigned(read);
+                    	byte[] unsigned = DataConverter.encodeAsUnsigned(val);
+                    	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(unsigned);
+                    }
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.srcAddr))//store
                 {
-                    byte[] toStore = instruction.asLSType().getRegister().get().getWord();//all 4 bytes
-                    int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
-                    this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+                	if(instruction.getInstruction().equals(Instruction.sb))
+                	{
+                		byte toStore = instruction.asLSType().getRegister().get().getWord()[3];//lowest byte
+                		int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
+	                    this.memory.writeToMem(storeAddress, new byte[]{toStore});//this might be better though still naive
+                	}
+                	else if(instruction.getInstruction().equals(Instruction.sh))
+                	{
+                		byte[] toStore = instruction.asLSType().getRegister().get().getWord();
+                		toStore = new byte[]{toStore[2],toStore[3]};
+                		int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
+	                    this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+                	}
+                	else//sw
+                	{
+	                    byte[] toStore = instruction.asLSType().getRegister().get().getWord();//all 4 bytes
+	                    int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
+	                    this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+                	}
                 }
                 else
                 {
@@ -530,10 +574,10 @@ public class CPU {
     			}
     			for(int i = 0; i < readInString.length(); i++)//writing each character to memory
     			{
-    				int currentChar = readInString.charAt(i);
-    				byte[] toWrite = DataConverter.encodeAsSigned(currentChar);
+    				String toWriteStr = "" + readInString.charAt(i);
+    				byte[] toWrite = toWriteStr.getBytes();
     				this.memory.writeToMem(addressIBuf, toWrite);//write into memory
-    				addressIBuf += 4;//moving to next word in memory
+    				addressIBuf += 1;//moving to next word in memory
     			}
     			
     			byte[] nullTerminator = new byte[]{0x00,0x00,0x00,0x00};//null terminator for string
@@ -548,13 +592,14 @@ public class CPU {
     			this.isRunning = false;//stop execution all together
     			break;
     		case 11://print char
-    			char toPrintChar = new String(DataConverter.encodeAsUnsigned(a0)).charAt(0);//int directly to char
+    			char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
     			this.io.printChar(toPrintChar);
     			break;
     		case 12://read char
-    			char readChar = this.io.readChar();//from console
-    			int asInt = (int)readChar;//converting into integer form
-    			Word toWord = new Word(DataConverter.encodeAsSigned((long)asInt));//format for register storage
+    			String readChar = this.io.readChar() + "";//from console
+    			byte[] asBytes = readChar.getBytes();
+    			long asLong = DataConverter.decodeAsSigned(asBytes);
+    			Word toWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage
     			this.registers[Register.v0.getID()] = toWord;
     			break;
     		default://if invalid syscall code

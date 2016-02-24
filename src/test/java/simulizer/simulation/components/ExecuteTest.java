@@ -36,6 +36,8 @@ import simulizer.simulation.exceptions.StackException;
  */
 public class ExecuteTest {
 
+	public IOTest io = new IOTest();
+	
 	/**this method will create a test program for the execute
 	 * tests; these programs will be let to run but are
 	 * written as single/a small number of instructions in order to isolate
@@ -46,7 +48,9 @@ public class ExecuteTest {
 	private Program createProgram(String myInstructions)
 	{
 		String program = ".data\n" + //forming string of program
-						 "mystr: .asciiz \"This is my testString\"\n"+
+						 "mystr: .asciiz \"This is my test String\"\n"+
+						 "mynum: .word -10\n" +
+						 "mynewnum: .byte 10\n" +
 						 ".align 2\n" + 
 						 ".text\n" + 
 						 ".globl main\n" +
@@ -108,7 +112,7 @@ public class ExecuteTest {
 	 */
 	private CPU createCPU(String myInstructions) throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
 	{
-		CPU cpu = new CPU(null,new IOTest());
+		CPU cpu = new CPU(null,io);
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
 		cpu.setClockSpeed(50);//speed it up a bit
 		cpu.runProgram();//execute the program
@@ -1105,7 +1109,7 @@ public class ExecuteTest {
 	 * 
 	 */
 	@Test
-	public void testBeqz() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	public void testBeqzExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
 		{//testing == 0
 			String myInstructions = "li $a0, 0;\n"+
@@ -1231,5 +1235,515 @@ public class ExecuteTest {
 		assertEquals(7,accessRegisterSigned(cpu,Register.a0));
 		assertEquals(10,accessRegisterSigned(cpu,Register.v0));
 		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+	}
+	
+	/**will test the execution of the move instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testMoveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $s0, 7;\n" +
+								"move $s1, $s0;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		assertEquals(7,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(7,accessRegisterSigned(cpu,Register.s1));
+	}
+	
+	/**method will test the execution of the nop instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testNopExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "nop;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		for(int i = 0; i < 32; i++)//checking no registers affected
+		{
+			if(i != 28 && i != 29)//not global pointer or stack pointer
+			{
+				assertEquals(0,accessRegisterSigned(cpu, Register.fromID(i)));
+			}
+		}
+	}
+	
+	/**tests the execution of the la instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testLaExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		String myInstructions = "la $t0, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		Field prog = cpu.getClass().getDeclaredField("program");//accesing private stuff for testing
+		prog.setAccessible(true);
+		Program program = (Program)prog.get(cpu);
+		
+		assertEquals(accessRegisterSigned(cpu,Register.t0),program.dataSegmentStart.getValue());
+	}
+	
+	/**testing the execution of the lw instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testLwExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		String myInstructions = "lw $t0, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		assertEquals(1416128883,accessRegisterUnsigned(cpu,Register.t0));
+	}
+	
+	/**testing the execution of the sw instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSwExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $t0, 1147235694;\n" +
+								"sw $t0, mystr;\n" +
+								"lw $t1, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(accessRegisterUnsigned(cpu,Register.t0),accessRegisterUnsigned(cpu,Register.t1));
+		assertEquals(1147235694,accessRegisterUnsigned(cpu,Register.t1));
+	}
+	
+	/**method will test the lb instruction execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testLBExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "lb $t0, mynum;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(-1,accessRegisterSigned(cpu,Register.t0));
+	}
+	
+	/**method will test the lbu instruction execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testLbuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "lbu $t0, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(84,accessRegisterUnsigned(cpu,Register.t0));
+	}
+	
+	/**method will test the lh instruction execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testLhExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "lh $t0, mynum;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(-1,accessRegisterSigned(cpu,Register.t0));
+	}
+	
+	/**method tests the execution of the lhu instruction
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 */
+	@Test
+	public void testLhuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "lhu $t0, mynum;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		assertEquals(65535,accessRegisterUnsigned(cpu,Register.t0));
+	}
+	
+	/**method tests the execution of the sb instructin
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 *  
+	 */
+	@Test
+	public void testSbExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $t0, 116;\n"+
+								"sb $t0, mystr;\n" +
+								"lb $t1, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(accessRegisterSigned(cpu,Register.t0),accessRegisterSigned(cpu,Register.t1));
+		assertEquals(116,accessRegisterSigned(cpu,Register.t1));
+	}
+	
+	/**method tests the execution of the sh instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testShExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $t0, 7448;\n"+
+								"sh $t0, mystr;\n"+
+								"lh $t1, mystr;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(accessRegisterSigned(cpu,Register.t0),accessRegisterSigned(cpu,Register.t1));
+		assertEquals(7448,accessRegisterSigned(cpu,Register.t1));
+	}
+	
+	/**method will test the execution of syscall with code 10 (exit)
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSyscallTenExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $v0, 10;\n"+
+								"syscall;\n" +
+								"li $v0, 5";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(10,accessRegisterSigned(cpu,Register.v0));
+		assertNotEquals(5,accessRegisterSigned(cpu,Register.v0));
+	}
+	
+	/**method will test the execution of syscall with code 1 (print int_
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSyscallOneExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		String myInstructions = "li $v0, 1;\n" +
+								"li $a0, 5;\n" +
+								"syscall; \n";
+		
+		createCPU(myInstructions);
+		assertEquals("5",this.io.scanner);
+		this.io.scanner = "";//flushing io string
+	}
+	
+	/**method will test the execution of syscall code 4: print string
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSyscallFourExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		String myInstructions = "li $v0, 4;\n" +
+								"la $a0, mystr;\n" +
+								"syscall;\n";
+		
+		createCPU(myInstructions);
+		assertEquals("This is my test String",this.io.scanner);
+		this.io.scanner = "";
+	}
+	
+	/**will test the execution of syscall with code 11: print char
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSyscallElevenExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		String myInstructions = "li $v0, 11;\n" +
+								"li $a0, 99;\n" +//99 in ascii is 'c'
+								"syscall;\n";
+		
+		createCPU(myInstructions);	
+		assertEquals("c",this.io.scanner);
+		this.io.scanner = "";
+	}
+	
+	/**will test the execution of syscall with code 5: read int
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSyscallFiveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $v0, 5;\n" +
+								"syscall;\n";
+		
+		this.io.scanner = "78";//input into program
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(78,accessRegisterSigned(cpu,Register.v0));
+		this.io.scanner = "";
+	}
+	
+	
+	/**method used to test the execution of syscall code 12: read char
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSyscallTwelveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $v0, 12;\n" +
+								"syscall;\n";
+		
+		this.io.scanner = "c";
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(99,accessRegisterSigned(cpu,Register.v0));//'c' in ascii is 99 in decimal
+		this.io.scanner = "";
+	}
+	
+	/**method used to test the execution of syscall code 8: read string
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSyscallEightExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		{//test with too long input
+			String myInstructions = "li $v0, 8;\n" +
+									"li $a1, 4;\n" +
+									"la $a0, mystr;\n" +
+									"syscall;\n" + 
+									"lw $t1, mystr;\n" + 
+									"li $v0, 4;\n" + 
+									"la $a0, mystr;\n" + 
+									"syscall;\n";
+			
+			this.io.scanner = "THIS IS MY TEST STRING";//should only read up to end of THIS
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals("THI",this.io.scanner);
+			assertEquals(1414023424,accessRegisterSigned(cpu,Register.t1));
+			this.io.scanner = "";
+		}
+		
+		{//test with too short input
+			String myInstructions = "li $v0, 8;\n" +
+									"li $a1, 4;\n" +
+									"la $a0, mystr;\n" +
+									"syscall;\n" + 
+									"lw $t1, mystr;\n" + 
+									"li $v0, 4;\n" + 
+									"la $a0, mystr;\n" + 
+									"syscall;\n";
+
+			this.io.scanner = "TH";//should only read up to end of THIS
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals("TH",this.io.scanner);
+			//assertEquals(54480000,accessRegisterSigned(cpu,Register.t1));
+			this.io.scanner = "";
+		}
+	}
+	
+	/**method will test the execution of syscall code 9: sbrk
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSyscallNineExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $v0, 9;\n" +
+								"li $a0, 4;\n" +
+								"syscall;\n" +
+								"li $v0, 9;\n" +
+								"syscall;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		long heapBreak = accessRegisterUnsigned(cpu,Register.v0);
+		
+		Field prog = cpu.getClass().getDeclaredField("program");//accesing private stuff for testing
+		prog.setAccessible(true);
+		Program program = (Program)prog.get(cpu);
+		
+		long intendedHeapBreak = program.dynamicSegmentStart.getValue()+4;
+		
+		assertEquals(intendedHeapBreak,heapBreak);
+	}
+	
+	/**method will test the execution of the break instruction
+	 * 
+	 */
+	@Test
+	public void testBreakExecute()
+	{
+		//is it actually able to test this?
 	}
 }
