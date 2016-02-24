@@ -42,9 +42,10 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	private Rectangle[] rectangles;
 	private Text[] textLabels;
 
-	private final int X0 = 10;
-	private final int Y0 = 80;
-	private final int SPACING = 10;
+	private double rectLength;
+
+	private final double XPAD = 10;
+	private final double YPAD = 10;
 
 	/**
 	 * @param contentPane
@@ -56,7 +57,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(HighLevelVisualisation vis, int width, int height, List<T> list) {
+	public ListVisualiser(HighLevelVisualisation vis, double width, double height, List<T> list) {
 		super(vis, width, height);
 		this.setList(list);
 	}
@@ -67,14 +68,15 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		this.textLabels = new Text[list.size()];
 
 		initRectsAndBoxes();
+		resize();
 	}
 
 	private void initRectsAndBoxes() {
 		HighLevelVisualisation vis = getHighLevelVisualisation();
-		int rectWidth = getRectWidth();
+		double rectWidth = getRectLength();
 
 		for (int i = 0; i < rectangles.length; ++i) {
-			rectangles[i] = new Rectangle(getX(i), Y0, rectWidth, rectWidth);
+			rectangles[i] = new Rectangle(getX(i), getY(), rectWidth, rectWidth);
 			rectangles[i].getStyleClass().add("list-item");
 
 			textLabels[i] = new Text("" + list.get(i));
@@ -86,20 +88,36 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		}
 	}
 
-	private int getX(int rectIndex) {
-		return X0 + rectIndex * (getRectWidth() + SPACING);
+	private double getX(int rectIndex) {
+		double rectLength = getRectLength();
+		double blockWidth = list.size() * rectLength;
+		return getWidth() / 2 - blockWidth / 2 + rectIndex * rectLength;
 	}
 
-	private int getTextX(int rectIndex) {
-		return (int) (getX(rectIndex) + getRectWidth() / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2);
+	private double getY() {
+		// double answer = getHighLevelVisualisation().getWindowHeight() / 2 - getRectLength() / 2;
+		// System.out.println(answer);
+		return super.getHeight() / 2 - getRectLength() / 2;
 	}
 
-	private int getTextY(int rectIndex) {
-		return (int) (Y0 + getRectWidth() / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3);
+	private double getTextX(int rectIndex) {
+		return getX(rectIndex) + getRectLength() / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2;
 	}
 
-	private int getRectWidth() {
-		return (int) ((getWidth() - 2 * X0) / rectangles.length - SPACING + 1);
+	private double getTextY(int rectIndex) {
+		return getY() + getRectLength() / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3;
+	}
+
+	private double getRectLength() {
+		return getRectLength(super.getWidth(), super.getHeight());
+	}
+
+	private double getRectLength(double windowWidth, double windowHeight) {
+		double l;
+		if (windowHeight < windowHeight) l = windowHeight - 2 * YPAD;
+		else l = windowWidth - 2 * XPAD;
+
+		return l / rectangles.length;
 	}
 
 	/**
@@ -117,8 +135,9 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		Text text1 = textLabels[i];
 		Text text2 = textLabels[j];
 
-		animationBuffer.add(setupSwap(rect1, getX(i), Y0, rect2, getX(j), Y0));
-		animationBuffer.add(setupSwap2(text1, getTextX(i), Y0, text2, getTextX(j), Y0));
+		double y0 = getY();
+		animationBuffer.add(setupSwap(rect1, getX(i), y0, rect2, getX(j), y0));
+		animationBuffer.add(setupSwap2(text1, getTextX(i), y0, text2, getTextX(j), y0));
 		swapIndices.add(new Pair(i, j));
 	}
 
@@ -169,7 +188,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		swapIndices.clear();
 	}
 
-	private ParallelTransition setupSwap(Rectangle rect1, int x1, int y1, Rectangle rect2, int x2, int y2) {
+	private ParallelTransition setupSwap(Rectangle rect1, double x1, double y1, Rectangle rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
 		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2));
 		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1));
@@ -177,7 +196,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return svar;
 	}
 
-	private PathTransition getTransition(Rectangle rect, int x1, int y1, int x2, int y2) {
+	private PathTransition getTransition(Rectangle rect, double x1, double y1, double x2, double y2) {
 		int width = rect.widthProperty().intValue();
 		int height = rect.heightProperty().intValue();
 
@@ -193,7 +212,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return pathTransition;
 	}
 
-	private ParallelTransition setupSwap2(Text rect1, int x1, int y1, Text rect2, int x2, int y2) {
+	private ParallelTransition setupSwap2(Text rect1, double x1, double y1, Text rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
 		svar.getChildren().addAll((Animation) getTransition2(rect1, x1, y1, x2, y2));
 		svar.getChildren().addAll((Animation) getTransition2(rect2, x2, y2, x1, y1));
@@ -201,7 +220,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return svar;
 	}
 
-	private PathTransition getTransition2(Text rect, int x1, int y1, int x2, int y2) {
+	private PathTransition getTransition2(Text rect, double x1, double y1, double x2, double y2) {
 		int width = (int) rect.getBoundsInLocal().getWidth();
 		int height = (int) rect.getBoundsInLocal().getHeight();
 
@@ -219,7 +238,21 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	@Override
 	public void resize() {
-		// TODO Auto-generated method stub
+		double windowWidth = getHighLevelVisualisation().getWindowWidth();
+		double windowHeight = getHighLevelVisualisation().getWindowHeight();
 
+		double rectWidth = getRectLength(windowWidth, windowHeight);
+
+		for (int i = 0; i < rectangles.length; ++i) {
+			setAttrs(rectangles[i], getX(i), getY(), rectWidth, rectWidth);
+			rectangles[i].getStyleClass().add("list-item");
+
+			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateY(getTextY(i));
+		}
+
+		setWidth(windowWidth);
+		setHeight(windowHeight);
 	}
+
 }
