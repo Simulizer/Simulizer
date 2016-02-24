@@ -3,8 +3,6 @@ package simulizer.ui.layout;
 import java.util.Arrays;
 
 public class GridBounds {
-	private static double minSens = 0.001; // To account for errors in division
-
 	private final int hor, ver, timeout; // Number of Horizontal and Vertical Lines
 	private double xGap, yGap; // Size of the Main Window
 	private double sens;
@@ -38,6 +36,7 @@ public class GridBounds {
 	public void setWindowSize(double width, double height) {
 		xGap = width / hor;
 		yGap = height / ver;
+		System.out.println("xGap: " + xGap + ", yGap: " + yGap);
 	}
 
 	/**
@@ -50,7 +49,7 @@ public class GridBounds {
 	public double[] moveToGrid(double[] window, boolean resize) {
 		double[] windowAdjusted = Arrays.copyOf(window, window.length);
 		if (gridSnap) {
-			System.out.println("BEFORE: " + window[0] + " " + window[1] + " " + window[2] + " " + window[3]);
+			System.out.println("BEGINNING: " + window[0] + " " + window[1] + " " + window[2] + " " + window[3]);
 			if (window.length != 4)
 				throw new IllegalArgumentException();
 			windowAdjusted[0] = moveIfSens(window[0], xGap);
@@ -58,33 +57,37 @@ public class GridBounds {
 			windowAdjusted[2] = moveIfSens(window[2], xGap);
 			windowAdjusted[3] = moveIfSens(window[3], yGap);
 
+			System.out.println("MIDDLE: " + windowAdjusted[0] + " " + windowAdjusted[1] + " " + windowAdjusted[2] + " " + windowAdjusted[3]);
 			if (!resize) {
 				double width = window[2] - window[0], height = window[3] - window[1];
 				// Find closest gridline
-				if (windowAdjusted[2] == window[2] || Math.abs(windowAdjusted[0] - window[0]) <= Math.abs(windowAdjusted[2] - window[2])) {
+				if (windowAdjusted[2] == window[2] ||  Math.abs(windowAdjusted[2] - window[2]) <= Math.abs(windowAdjusted[0] - window[0])) {
 					windowAdjusted[2] = windowAdjusted[0] + width;
 				} else {
 					windowAdjusted[0] = windowAdjusted[2] - width;
 				}
-				if (windowAdjusted[3] == window[3] || Math.abs(windowAdjusted[1] - window[1]) <= Math.abs(windowAdjusted[3] - window[3])) {
+				if (windowAdjusted[3] == window[3] || Math.abs(windowAdjusted[3] - window[3]) <= Math.abs(windowAdjusted[1] - window[1])) {
 					windowAdjusted[3] = windowAdjusted[1] + height;
 				} else {
 					windowAdjusted[1] = windowAdjusted[3] - height;
 				}
 			}
 
-			System.out.println("AFTER: " + window[0] + " " + window[1] + " " + window[2] + " " + window[3] + "\n");
+			System.out.println("END: " + windowAdjusted[0] + " " + windowAdjusted[1] + " " + windowAdjusted[2] + " " + windowAdjusted[3] + "\n");
 		}
 		return windowAdjusted;
 	}
 
 	private double moveIfSens(double coord, double gap) {
 		double mod = coord % gap;
-		if (mod > minSens) {
-			if (mod <= sens)
-				return coord - mod;
-			else if (mod >= gap - sens)
+		if (Math.abs(mod) <= sens) {
+			return coord - mod;
+		} else if (gap - Math.abs(mod) <= sens) {
+			if (mod >= 0) {
 				return coord + (gap - mod);
+			} else {
+				return coord - (gap + mod);
+			}
 		}
 		return coord;
 	}
