@@ -1,7 +1,5 @@
 package simulizer.ui.interfaces;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,7 +18,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
-public abstract class InternalWindow extends Window implements Observer {
+public abstract class InternalWindow extends Window {
 	private double windowWidth = -1, windowHeight = -1;
 	private GridBounds grid;
 	private WindowManager wm;
@@ -34,6 +32,10 @@ public abstract class InternalWindow extends Window implements Observer {
 		setCacheHint(CacheHint.SPEED);
 
 		setCursor(Cursor.DEFAULT);
+		
+		// Using caching to smooth window movement
+		setCache(true);
+		setCacheHint(CacheHint.SPEED);
 
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
@@ -154,11 +156,6 @@ public abstract class InternalWindow extends Window implements Observer {
 			layoutYProperty().addListener(resizeEvent);
 		}
 		this.grid = grid;
-	}
-
-	@Override
-	public void update(Observable arg0, Object obj) {
-
 	}
 
 	/** Snaps InternalWindow to grid when it is resized */

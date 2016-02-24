@@ -1,11 +1,14 @@
 package simulizer.ui.components;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Observable;
 import java.util.Set;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.layout.Pane;
+import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -22,13 +25,13 @@ public class Workspace extends Observable implements Themeable {
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
-		widthProperty().addListener((e) -> {
+		wm.widthProperty().addListener((e) -> {
 			double width = pane.getWidth(), height = pane.getHeight();
-			if (width > 0  && height > 0 )
+			if (width > 0 && height > 0)
 				for (InternalWindow window : openWindows)
 					window.setWorkspaceSize(width, height);
 		});
-		heightProperty().addListener((e) -> {
+		wm.heightProperty().addListener((e) -> {
 			double width = pane.getWidth(), height = pane.getHeight();
 			if (width > 0 && height > 0)
 				for (InternalWindow window : openWindows)
@@ -108,7 +111,17 @@ public class Workspace extends Observable implements Themeable {
 	}
 
 	public void closeAllExcept(InternalWindow[] newOpenWindows) {
+		List<InternalWindow> keepOpen = new ArrayList<InternalWindow>();
+		for (int i = 0; i < newOpenWindows.length; i++)
+			keepOpen.add(newOpenWindows[i]);
 
+		List<InternalWindow> close = new ArrayList<InternalWindow>();
+		for (InternalWindow window : openWindows)
+			if (!keepOpen.contains(window))
+				close.add(window);
+		
+		for (InternalWindow window : close)
+			removeWindows(window);
 	}
 
 	public Layout generateLayout(String name) {
@@ -128,6 +141,10 @@ public class Workspace extends Observable implements Themeable {
 
 	public ReadOnlyDoubleProperty heightProperty() {
 		return pane.widthProperty();
+	}
+
+	public Settings getSettings() {
+		return wm.getSettings();
 	}
 
 }

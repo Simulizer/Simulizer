@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
+import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
@@ -25,24 +26,18 @@ public class WindowManager extends GridPane {
 	private GridBounds grid;
 	private Themes themes;
 	private Layouts layouts;
+	private Settings settings;
 
 	private CPU cpu = null;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 
-	public WindowManager(Stage primaryStage) {
-		init(primaryStage, "Default", 1060, 740);
+	public WindowManager(Stage primaryStage, Settings settings) {
+		this(primaryStage, settings, 1060, 740);
 	}
 
-	public WindowManager(Stage primaryStage, String theme) {
-		this(primaryStage, theme, 1060, 740);
-	}
-
-	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		init(primaryStage, theme, x, y);
-	}
-
-	private void init(Stage primaryStage, String theme, int x, int y) {
+	public WindowManager(Stage primaryStage, Settings settings, int x, int y) {
+	
 		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
 		GridPane.setHgrow(workspace.getPane(), Priority.ALWAYS);
 		GridPane.setVgrow(workspace.getPane(), Priority.ALWAYS);
@@ -50,6 +45,7 @@ public class WindowManager extends GridPane {
 
 		// Set up the Primary Stage
 		this.primaryStage = primaryStage;
+		this.settings = settings;
 		primaryStage.setWidth(x);
 		primaryStage.setHeight(y);
 		primaryStage.setTitle("Simulizer");
@@ -57,7 +53,7 @@ public class WindowManager extends GridPane {
 		primaryStage.setScene(scene);
 
 		// Set the theme
-		themes = new Themes();
+		themes = new Themes((String) settings.get("workspace.theme"));
 		themes.addThemeableElement(workspace);
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
@@ -73,14 +69,13 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
-
 	}
 
 	public void show() {
 		primaryStage.show();
 		grid.setGridSnap(true);
-		workspace.widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
-		workspace.heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+		widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+		heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 	}
 
 	public Stage getPrimaryStage() {
@@ -146,7 +141,13 @@ public class WindowManager extends GridPane {
 		return cpu;
 	}
 
+
 	public Workspace getWorkspace() {
 		return workspace;
+	}
+
+	public Settings getSettings() {
+		return settings;
+
 	}
 }

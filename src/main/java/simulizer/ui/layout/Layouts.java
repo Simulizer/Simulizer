@@ -16,7 +16,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
-import simulizer.ui.WindowManager;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -24,14 +23,12 @@ public class Layouts implements Iterable<Layout> {
 
 	private final Path folder = Paths.get("layouts");
 	private Set<Layout> layouts = new HashSet<Layout>();
-	private Layout layout;
+	private Layout layout, defaultLayout;
 	private Workspace workspace;
-
-	private static final String DEFAULT_LAYOUT = "default.json";
-	private Layout defaultLayout = null;
 
 	public Layouts(Workspace workspace) {
 		this.workspace = workspace;
+
 		reload(true);
 	}
 
@@ -46,7 +43,7 @@ public class Layouts implements Iterable<Layout> {
 				if (layout.toFile().isFile()) {
 					try {
 						Layout l = g.fromJson(new JsonReader(Files.newBufferedReader(layout)), Layout.class);
-						if (layout.toFile().getName().equals(DEFAULT_LAYOUT))
+						if (layout.toFile().getName().equals((String) workspace.getSettings().get("workspace.layout")))
 							defaultLayout = l;
 						layouts.add(l);
 					} catch (JsonIOException | JsonSyntaxException | IOException e) {
@@ -82,6 +79,7 @@ public class Layouts implements Iterable<Layout> {
 		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			newOpenWindows[i] = workspace.openInternalWindow(locations[i].getWindowEnum());
+			setWindowDimentions(newOpenWindows[i]);
 		}
 
 		workspace.closeAllExcept(newOpenWindows);
@@ -92,7 +90,7 @@ public class Layouts implements Iterable<Layout> {
 		WindowLocation[] wl = layout.getWindowLocations();
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
-				// Resize window to layout dimentions
+				// Resize window to layout dimensions
 				w.setWorkspaceSize(layout.getWidth(), layout.getHeight());
 				w.setBoundsWithoutResize(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
 				double width = workspace.getWidth(), height = workspace.getHeight();
