@@ -2,6 +2,7 @@ package simulizer.ui.interfaces;
 
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
+import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
@@ -19,6 +20,10 @@ public abstract class InternalWindow extends Window {
 		setScaleY(0);
 
 		setCursor(Cursor.DEFAULT);
+		
+		// Using caching to smooth window movement
+		setCache(true);
+		setCacheHint(CacheHint.SPEED);
 
 		// Sets to default title
 		setTitle(WindowEnum.toEnum(this).toString());
