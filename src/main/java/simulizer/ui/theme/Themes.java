@@ -16,12 +16,13 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 public class Themes implements Iterable<Theme> {
-	private final String defaultTheme = "Default";
+	private final String defaultTheme;
 	private final Path folder = Paths.get("themes");
 	private SortedSet<Theme> themes = new TreeSet<Theme>();
 	private Theme theme = null;
 
-	public Themes() {
+	public Themes(String defaultTheme) {
+		this.defaultTheme = defaultTheme;
 		reload();
 	}
 
@@ -43,7 +44,7 @@ public class Themes implements Iterable<Theme> {
 						// @formatter:off
 						try {
 							// Selects the theme to start with (either default, or last selected) 
-							if ((theme == null && t.getName().equals(defaultTheme)) || 
+							if ((theme == null && themeFolder.getName().equals(defaultTheme)) || 
 								(theme != null && t.getName().equals(theme.getName()))) 
 									theme = t;
 						// @formatter:on
@@ -71,7 +72,8 @@ public class Themes implements Iterable<Theme> {
 
 	public void setTheme(String theme) {
 		Theme t = find(theme);
-		if (t != null) this.theme = t;
+		if (t != null)
+			this.theme = t;
 	}
 
 	public void setTheme(Theme theme) {
@@ -80,7 +82,8 @@ public class Themes implements Iterable<Theme> {
 
 	public Theme find(String text) {
 		for (Theme t : themes)
-			if (t.getName().equals(theme)) return t;
+			if (t.getName().equals(theme))
+				return t;
 		return null;
 	}
 

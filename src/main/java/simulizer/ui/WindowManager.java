@@ -22,13 +22,12 @@ import simulizer.ui.theme.Themes;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
-
 public class WindowManager extends Pane {
 	// Stores a list of all open windows (may be already done with jfxtras)
 	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
 	private Pane pane = new Pane();
-	private Themes themes = new Themes();
-	private Layouts layouts = new Layouts(this);
+	private Themes themes;
+	private Layouts layouts;
 	private Scene scene;
 	private Stage primaryStage;
 	private CPU cpu;
@@ -36,20 +35,16 @@ public class WindowManager extends Pane {
 	UISimulationListener simListener;
 	private Settings settings;
 
-	public WindowManager(Stage primaryStage) {
-		init(primaryStage, "default", 1060, 740);
+	public WindowManager(Stage primaryStage, Settings settings) {
+		this(primaryStage, settings, 1060, 740);
 	}
 
-	public WindowManager(Stage primaryStage, String theme) {
-		this(primaryStage, theme, 1060, 740);
-	}
-
-	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		init(primaryStage, theme, x, y);
-	}
-
-	private void init(Stage primaryStage, String theme, int x, int y) {
+	public WindowManager(Stage primaryStage, Settings settings, int x, int y) {
 		this.primaryStage = primaryStage;
+		this.settings = settings;
+
+		themes = new Themes((String) settings.get("workspace.theme"));
+		layouts = new Layouts(this);
 
 		cpu = null;
 		cpuThread = null;
@@ -57,7 +52,7 @@ public class WindowManager extends Pane {
 
 		scene = new Scene(pane, x, y);
 
-		themes.setTheme(theme);
+		themes.setTheme((String) settings.get("workspace.theme"));
 		pane.getStyleClass().add("background");
 
 		MainMenuBar bar = new MainMenuBar(this);
@@ -168,7 +163,6 @@ public class WindowManager extends Pane {
 		return pane;
 	}
 
-
 	public void stopCPU() {
 		if (cpuThread != null) {
 			System.out.println("Terminating running program");
@@ -216,7 +210,7 @@ public class WindowManager extends Pane {
 		return cpu;
 	}
 
-	public void setSettings(Settings settings) {
-		this.settings = settings;
+	public Settings getSettings() {
+		return settings;
 	}
 }

@@ -26,8 +26,6 @@ public class Layouts implements Iterable<Layout> {
 	private Set<Layout> layouts = new HashSet<Layout>();
 	private WindowManager wm;
 
-	private static final String DEFAULT_LAYOUT = "default.json";
-
 	public Layouts(WindowManager wm) {
 		this.wm = wm;
 		reload(true);
@@ -45,7 +43,8 @@ public class Layouts implements Iterable<Layout> {
 				if (layout.toFile().isFile()) {
 					try {
 						Layout l = g.fromJson(new JsonReader(Files.newBufferedReader(layout)), Layout.class);
-						if (layout.toFile().getName().equals(DEFAULT_LAYOUT)) defaultLayout = l;
+						if (layout.toFile().getName().equals((String) wm.getSettings().get("workspace.layout")))
+							defaultLayout = l;
 						layouts.add(l);
 					} catch (JsonIOException | JsonSyntaxException | IOException e) {
 						System.out.println("Invalid File: " + layout.toUri().toString());
@@ -55,7 +54,8 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (defaultLayout != null && findDefault) wm.setLayout(defaultLayout);
+		if (defaultLayout != null && findDefault)
+			wm.setLayout(defaultLayout);
 	}
 
 	public void saveLayout(File saveFile) {

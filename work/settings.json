@@ -1,6 +1,6 @@
 {
   "workspace": {
-    "theme": "default.json",
+    "theme": "default",
     "layout": "default.json",
     "scale-ui": true,
     "grid": {

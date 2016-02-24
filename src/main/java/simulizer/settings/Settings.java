@@ -3,8 +3,6 @@ package simulizer.settings;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,7 +15,7 @@ import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
 
 public class Settings {
-	private Set<SettingValue<?>> settings = new HashSet<SettingValue<?>>();
+	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
 
 	public static Settings loadSettings(File json) throws IOException {
 		JsonParser parser = new JsonParser();
@@ -26,12 +24,12 @@ public class Settings {
 		Settings settings = new Settings(jsonObject);
 		return settings;
 	}
-	
+
 	private Settings(JsonObject jsonObject) {
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new ObjectSetting("workspace", "Workspace")
-					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default.json"))
+					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default"))
 					.add(new StringSetting("layout", "Default Layout", "The default layout to load", "default.json"))
 					.add(new StringSetting("scale-ui", "Autosize Internal Windows", "Resize all Internal Windows when the main window resizes"))
 					.add(new ObjectSetting("grid", "Grid Settings", "Configure when Internal Windows should snap to a grid")
@@ -53,33 +51,38 @@ public class Settings {
 		// @formatter:on
 
 		// Loads all the values from jsonObject
-		for (SettingValue<?> setting : settings) {
+		for (SettingValue<?> setting : settings.getValue()) {
 			loadFromJson(jsonObject, setting);
 		}
 	}
 
 	private void loadFromJson(JsonObject jsonObject, SettingValue<?> setting) {
+		JsonElement element = jsonObject.get(setting.getJsonName());
+
+		// If element doesn't exist in json file, ignore it
+		if (element == null)
+			return;
 
 		switch (setting.getSettingType()) {
 			case "Boolean":
-				((BooleanSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsBoolean());
+				((BooleanSetting) setting).setValue(element.getAsBoolean());
 				break;
 
 			case "Double":
-				((DoubleSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsDouble());
+				((DoubleSetting) setting).setValue(element.getAsDouble());
 				break;
 
 			case "Integer":
-				((IntegerSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsInt());
+				((IntegerSetting) setting).setValue(element.getAsInt());
 				break;
 
 			case "Object":
 				for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
-					loadFromJson(jsonObject.get(setting.getJsonName()).getAsJsonObject(), s);
+					loadFromJson(element.getAsJsonObject(), s);
 				break;
 
 			case "String":
-				((StringSetting) setting).setValue(jsonObject.get(setting.getJsonName()).getAsString());
+				((StringSetting) setting).setValue(element.getAsString());
 				break;
 
 			default:
@@ -87,7 +90,15 @@ public class Settings {
 		}
 	}
 
-
-
+	public Object get(String settingPath) {
+		String[] path = settingPath.split("\\.");
+		SettingValue<?> setting = settings;
+		for (int i = 0; i < path.length; i++) {
+			 setting = ((ObjectSetting) setting).get(path[i]);
+			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
+				return null;
+		}
+		return setting.getValue();
+	}
 
 }

@@ -88,8 +88,7 @@ public class Main extends Application {
 				Settings settings = Settings.loadSettings(new File("settings.json"));
 
 				// Just show the main window for now
-				wm = new WindowManager(primaryStage, "default", 1024, 705);
-				wm.setSettings(settings);
+				wm = new WindowManager(primaryStage, settings, 1024, 705);
 
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 				Thread.sleep(750); // so that it's at least readable
@@ -116,8 +115,7 @@ public class Main extends Application {
 		Settings settings = Settings.loadSettings(new File("settings.json"));
 
 		// Just show the main window for now
-		wm = new WindowManager(primaryStage, "default", 1024, 705);
-		wm.setSettings(settings);
+		wm = new WindowManager(primaryStage, settings, 1024, 705);
 		wm.show();
 	}
 
