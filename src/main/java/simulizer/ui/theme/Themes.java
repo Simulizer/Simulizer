@@ -8,7 +8,9 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -19,6 +21,7 @@ public class Themes implements Iterable<Theme> {
 	private final String defaultTheme = "Default";
 	private final Path folder = Paths.get("themes");
 	private SortedSet<Theme> themes = new TreeSet<Theme>();
+	private Set<Themeable> themeables = new HashSet<Themeable>();
 	private Theme theme = null;
 
 	public Themes() {
@@ -42,11 +45,10 @@ public class Themes implements Iterable<Theme> {
 						t.themes = this;
 						// @formatter:off
 						try {
-							// Selects the theme to start with (either default, or last selected) 
-							if ((theme == null && t.getName().equals(defaultTheme)) || 
-								(theme != null && t.getName().equals(theme.getName()))) 
-									theme = t;
-						// @formatter:on
+							// Selects the theme to start with (either default, or last selected)
+							if ((theme == null && t.getName().equals(defaultTheme)) || (theme != null && t.getName().equals(theme.getName())))
+								theme = t;
+							// @formatter:on
 							themes.add(t);
 						} catch (NullPointerException e) {
 							e.printStackTrace();
@@ -69,19 +71,28 @@ public class Themes implements Iterable<Theme> {
 		return theme;
 	}
 
-	public void setTheme(String theme) {
-		Theme t = find(theme);
-		if (t != null) this.theme = t;
-	}
-
 	public void setTheme(Theme theme) {
 		this.theme = theme;
+
+		// Update all themeable elements
+		for (Themeable themeable : themeables)
+			themeable.setTheme(theme);
 	}
 
-	public Theme find(String text) {
-		for (Theme t : themes)
-			if (t.getName().equals(theme)) return t;
-		return null;
+	public void setTheme(String theme) {
+		for (Theme t : themes) {
+			if (t.getName().equals(theme)) {
+				setTheme(t);
+				return;
+			}
+		}
 	}
 
+	public void addThemeableElement(Themeable t) {
+		themeables.add(t);
+	}
+
+	public void removeThemeableElement(Themeable t) {
+		themeables.remove(t);
+	}
 }

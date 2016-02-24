@@ -65,15 +65,7 @@ public class Layouts implements Iterable<Layout> {
 	}
 
 	public void saveLayout(File saveFile) {
-		Set<InternalWindow> openWindows = wm.getOpenWindows();
-		WindowLocation[] wls = new WindowLocation[openWindows.size()];
-		int i = 0;
-		for(InternalWindow window : openWindows){
-			wls[i] = new WindowLocation(WindowEnum.toEnum(window), window.getLayoutX(), window.getLayoutY(), window.getWidth(), window.getHeight());
-			i++;
-		}
-		
-		Layout l = new Layout(saveFile.getName(), wm.getPane().getWidth(), wm.getPane().getHeight(), wls);
+		Layout l = wm.getWorkspace().generateLayout(saveFile.getName());
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
@@ -90,10 +82,10 @@ public class Layouts implements Iterable<Layout> {
 		WindowLocation[] locations = layout.getWindowLocations();
 		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
 		for (int i = 0; i < locations.length; i++) {
-			newOpenWindows[i] = wm.openInternalWindow(locations[i].getWindowEnum());
+			newOpenWindows[i] = wm.getWorkspace().openInternalWindow(locations[i].getWindowEnum());
 		}
 
-		wm.closeAllExcept(newOpenWindows);
+		wm.getWorkspace().closeAllExcept(newOpenWindows);
 
 	}
 
@@ -101,15 +93,18 @@ public class Layouts implements Iterable<Layout> {
 		WindowLocation[] wl = layout.getWindowLocations();
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
-				GridBounds b = new GridBounds(wl[i].getWidth(), wl[i].getHeight());
-				w.setGridBounds(b);
-				b.setWindowSize(wm.getPane().getWidth(), wm.getPane().getHeight());
+				// Resize window to layout dimentions
+				/*
+				 * GridBounds b = new GridBounds(wl[i].getWidth(), wl[i].getHeight());
+				 * w.setGridBounds(b);
+				 * b.setWindowSize(wm.getPane().getWidth(), wm.getPane().getHeight());
+				 */
 				return;
 			}
 		}
 
 		// If there are no bounds set in the layout, use this default
-		w.setBounds(10, 35, wm.getPane().getWidth(), wm.getPane().getHeight());
+		w.setBoundsWithoutResize(10, 35, wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
 	}
 
 	@Override

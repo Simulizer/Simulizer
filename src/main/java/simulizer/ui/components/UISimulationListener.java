@@ -22,7 +22,7 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	@Override public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		CodeEditor code = (CodeEditor) wm.openInternalWindow(WindowEnum.CODE_EDITOR);
+		CodeEditor code = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 		//TODO clean up the simulation so less things become null
 		if(wm.getCPU() != null) {
 			CPU cpu = wm.getCPU();

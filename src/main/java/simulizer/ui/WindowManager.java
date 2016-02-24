@@ -1,12 +1,8 @@
 package simulizer.ui;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
@@ -14,20 +10,16 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
-import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
-import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
-public class WindowManager extends Pane {
-	// Stores a set of all open windows
-	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
-
-	private Pane pane = new Pane();
+public class WindowManager extends GridPane {
+	private Workspace workspace = new Workspace(this);
 	private Stage primaryStage;
 
 	private GridBounds grid;
@@ -36,10 +28,10 @@ public class WindowManager extends Pane {
 
 	private CPU cpu = null;
 	private Thread cpuThread = null;
-	UISimulationListener simListener;
+	private UISimulationListener simListener = new UISimulationListener(this);
 
 	public WindowManager(Stage primaryStage) {
-		init(primaryStage, "default", 1060, 740);
+		init(primaryStage, "Default", 1060, 740);
 	}
 
 	public WindowManager(Stage primaryStage, String theme) {
@@ -51,111 +43,43 @@ public class WindowManager extends Pane {
 	}
 
 	private void init(Stage primaryStage, String theme, int x, int y) {
-		GridPane gridPane = new GridPane();
-		//getChildren().add(gridPane);
-		GridPane.setHgrow(pane, Priority.ALWAYS);
-		gridPane.add(pane, 0, 1);
+		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
+		GridPane.setHgrow(workspace.getPane(), Priority.ALWAYS);
+		GridPane.setVgrow(workspace.getPane(), Priority.ALWAYS);
+		add(workspace.getPane(), 0, 1);
 
-		Scene scene = new Scene(gridPane, x, y);
-		simListener = new UISimulationListener(this);
-
+		// Set up the Primary Stage
 		this.primaryStage = primaryStage;
 		primaryStage.setWidth(x);
 		primaryStage.setHeight(y);
 		primaryStage.setTitle("Simulizer");
+		Scene scene = new Scene(this, x, y);
 		primaryStage.setScene(scene);
 
 		// Set the theme
 		themes = new Themes();
+		themes.addThemeableElement(workspace);
 		themes.setTheme(theme);
-		setTheme(themes.getTheme());
 
 		// Sets the grid
 		grid = new GridBounds(4, 2, 30);
-		grid.setWindowSize(scene.getWidth(), scene.getHeight());
+		grid.setGridSnap(true);
+		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
+		// TODO: workspace.onResize((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 
 		// Set the layout
 		layouts = new Layouts(this);
-		layouts.setDefaultLayout();
 
 		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
-		gridPane.add(bar, 0, 0);
+		GridPane.setHgrow(bar, Priority.ALWAYS);
+		add(bar, 0, 0);
 
 	}
 
 	public void show() {
+		layouts.setDefaultLayout();
 		primaryStage.show();
-
-		// Snap to grid after the stage is shown
-		grid.setGridSnap(true);
-	}
-
-	public void closeAll() {
-		pane.getChildren().removeAll(openWindows);
-		openWindows.clear();
-	}
-
-	public void addWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			if (!openWindows.contains(window)) {
-				window.setOnCloseAction((e) -> removeWindows(window));
-				openWindows.add(window);
-				window.setTheme(themes.getTheme());
-				pane.getChildren().addAll(window);
-				window.setGridBounds(grid);
-				window.ready();
-			} else {
-				System.out.println("Window already exists: " + window.getTitle());
-			}
-		}
-	}
-
-	private void removeWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			if (window.isVisible())
-				window.close();
-			openWindows.remove(window);
-		}
-	}
-
-	public void setTheme(Theme theme) {
-		themes.setTheme(theme);
-		getStylesheets().clear();
-		getStylesheets().add(theme.getStyleSheet("background.css"));
-		for (InternalWindow window : openWindows)
-			window.setTheme(theme);
-	}
-
-	public void printWindowLocations() {
-		for (InternalWindow w : openWindows) {
-			System.out.print(w.getTitle() + ": ");
-			for (double s : w.getBounds())
-				System.out.print(s + ", ");
-			System.out.println();
-		}
-	}
-
-	public InternalWindow openInternalWindow(WindowEnum window) {
-		InternalWindow w = findInternalWindow(window);
-		if (w != null)
-			return w;
-
-		// Not found -> Create a new one
-		w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(this);
-		layouts.setWindowDimentions(w);
-		addWindows(w);
-		return w;
-	}
-
-	public InternalWindow findInternalWindow(WindowEnum window) {
-		// Find existing window
-		for (InternalWindow w : openWindows)
-			if (window.equals(w))
-				return w;
-		return null;
 	}
 
 	public Stage getPrimaryStage() {
@@ -170,12 +94,8 @@ public class WindowManager extends Pane {
 		return layouts;
 	}
 
-	public Set<InternalWindow> getOpenWindows() {
-		return openWindows;
-	}
-
-	public Pane getPane() {
-		return pane;
+	public GridBounds getGridBounds() {
+		return grid;
 	}
 
 	public void stopCPU() {
@@ -193,11 +113,11 @@ public class WindowManager extends Pane {
 	}
 
 	public void runProgram(Program p) {
-		Logger io = (Logger) openInternalWindow(WindowEnum.LOGGER);
+		Logger io = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
 		stopCPU();
 
 		cpu = new CPU(p, io);
-		((HighLevelVisualisation) openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
+		((HighLevelVisualisation) workspace.openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
 		cpu.registerListener(simListener);
 
 		io.clear();
@@ -225,7 +145,7 @@ public class WindowManager extends Pane {
 		return cpu;
 	}
 
-	public void closeAllExcept(InternalWindow... newOpenWindows) {
-
+	public Workspace getWorkspace() {
+		return workspace;
 	}
 }

@@ -1,10 +1,10 @@
 package simulizer.ui.layout;
 
-public class GridBounds{
+public class GridBounds {
+	private static double minSens = 0.001; // To account for errors in division
 
 	private final int hor, ver; // Number of Horizontal and Vertical Lines
 	private double xGap, yGap; // Size of the Main Window
-	private static double minSens = 0.001; // To account for errors in division
 	private double sens;
 	private boolean gridSnap = false;
 

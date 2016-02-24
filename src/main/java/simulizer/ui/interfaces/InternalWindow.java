@@ -9,6 +9,7 @@ import javafx.animation.ScaleTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
@@ -27,6 +28,10 @@ public abstract class InternalWindow extends Window implements Observer {
 	public InternalWindow() {
 		setScaleX(0);
 		setScaleY(0);
+		
+		// Using caching to smooth movement
+		setCache(true);
+		setCacheHint(CacheHint.SPEED);
 
 		setCursor(Cursor.DEFAULT);
 
@@ -54,31 +59,58 @@ public abstract class InternalWindow extends Window implements Observer {
 		setPadding(new Insets(0, 2, 2, 2));
 	}
 
-	public void setBounds(double locX, double locY, double sizeX, double sizeY) {
-		setLayoutX(locX);
-		setLayoutY(locY);
-		setPrefSize(sizeX, sizeY);
+	/**
+	 * Forcefully puts a window in a location (will override any MainWindow resize)
+	 * 
+	 * @param x
+	 *            the x location within the workspace
+	 * @param y
+	 *            the y location within the workspace
+	 * @param width
+	 *            the width of the InternalWindow
+	 * @param height
+	 *            the height of the InternalWindow
+	 */
+	public void setBoundsWithoutResize(double x, double y, double width, double height) {
+		setLayoutX(x);
+		setLayoutY(y);
+		setPrefSize(width, height);
 	}
 
-	public double[] getBounds() {
-		return new double[] { getLayoutX(), getLayoutY(), getBoundsInLocal().getWidth(), getBoundsInLocal().getHeight() };
-	}
-
+	/**
+	 * This method should be overridden if a minimum height is set
+	 * 
+	 * @return the minimum height when not minimised
+	 */
 	protected double getMinimalHeight() {
 		return 0.0;
 	}
 
+	/**
+	 * An easy way for the InternalWindow to get access to the WindowManager
+	 * 
+	 * @return the WindowManager
+	 */
 	protected final WindowManager getWindowManager() {
 		return wm;
 	}
 
+	/**
+	 * Sets the WindowManager (used when creating the Window)
+	 * 
+	 * @param wm
+	 *            the WindowManager
+	 */
 	public final void setWindowManager(WindowManager wm) {
 		this.wm = wm;
-		windowWidth = wm.getPane().getWidth();
-		windowHeight = wm.getPane().getHeight();
+		//TODO: windowWidth = wm.getPane().getWidth();
+		//TODO: windowHeight = wm.getPane().getHeight();
 		// wm.addObserver(this);
 	}
 
+	/**
+	 * Performs an animation to get the users attention
+	 */
 	public final void emphasise() {
 		// Ignore if window is just being opened
 		if (getScaleX() == 1 && getScaleY() == 1) {
@@ -94,11 +126,23 @@ public abstract class InternalWindow extends Window implements Observer {
 		}
 	}
 
+	/**
+	 * Sets the theme to use
+	 * 
+	 * @param theme
+	 *            the theme to use
+	 */
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 	}
 
+	/**
+	 * Sets the GridBounds (used when creating the window)
+	 * 
+	 * @param grid
+	 *            the GridBounds to snap to
+	 */
 	public void setGridBounds(GridBounds grid) {
 		if (this.grid == null) {
 			// Listens for Resize/Move Events
@@ -112,6 +156,7 @@ public abstract class InternalWindow extends Window implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object obj) {
+		// Resize InternalWindow to new dimensions
 		double[] dim = (double[]) obj;
 		if (windowWidth != dim[0]) {
 			double ratio = dim[0] / windowWidth;
@@ -143,22 +188,14 @@ public abstract class InternalWindow extends Window implements Observer {
 				public void run() {
 					double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
 					coords = grid.moveToGrid(coords);
-					if (coords[2] != getLayoutX() + getWidth()) {
-						System.out.println("Changed Width to: " + (coords[2] - coords[0]));
+					if (coords[2] != getLayoutX() + getWidth())
 						setPrefWidth(coords[2] - coords[0]);
-					}
-					if (coords[3] != getLayoutY() + getHeight()) {
-						System.out.println("Changed Height to: " + (coords[3] - coords[1]));
+					if (coords[3] != getLayoutY() + getHeight())
 						setPrefHeight(coords[3] - coords[1]);
-					}
-					if (coords[0] != getLayoutX()) {
-						System.out.println("Changed X to: " + coords[0]);
+					if (coords[0] != getLayoutX())
 						setLayoutX(coords[0]);
-					}
-					if (coords[1] != getLayoutY()) {
-						System.out.println("Changed Y to: " + (coords[1]));
+					if (coords[1] != getLayoutY())
 						setLayoutY(coords[1]);
-					}
 					task.cancel();
 				}
 			};

@@ -1,0 +1,118 @@
+package simulizer.ui.components;
+
+import java.util.HashSet;
+import java.util.Observable;
+import java.util.Set;
+
+import javafx.beans.value.ChangeListener;
+import javafx.scene.layout.Pane;
+import simulizer.ui.WindowManager;
+import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.layout.Layout;
+import simulizer.ui.layout.WindowLocation;
+import simulizer.ui.theme.Theme;
+import simulizer.ui.theme.Themeable;
+
+public class Workspace extends Observable implements Themeable {
+	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
+	private final Pane pane = new Pane();
+	private final WindowManager wm;
+
+	public Workspace(WindowManager wm) {
+		this.wm = wm;
+		pane.getStyleClass().add("background");
+	}
+
+	public Pane getPane() {
+		return pane;
+	}
+
+	public void onResize(ChangeListener<? super Number> listener) {
+		pane.widthProperty().addListener(listener);
+		pane.heightProperty().addListener(listener);
+	}
+
+	public double getWidth() {
+		return pane.getWidth();
+	}
+
+	public double getHeight() {
+		return pane.getHeight();
+	}
+
+	public void closeAll() {
+		for (InternalWindow window : openWindows)
+			if (window.isVisible())
+				window.close();
+		openWindows.clear();
+	}
+
+	public InternalWindow findInternalWindow(WindowEnum window) {
+		for (InternalWindow w : openWindows)
+			if (window.equals(w))
+				return w;
+		return null;
+	}
+
+	public InternalWindow openInternalWindow(WindowEnum window) {
+		InternalWindow w = findInternalWindow(window);
+		if (w != null)
+			return w;
+
+		// Not found -> Create a new one
+		w = window.createNewWindow();
+		assert w != null;
+		w.setWindowManager(wm);
+		wm.getLayouts().setWindowDimentions(w);
+		addWindows(w);
+		return w;
+	}
+
+	public void addWindows(InternalWindow... windows) {
+		for (InternalWindow window : windows) {
+			if (!openWindows.contains(window)) {
+				window.setOnCloseAction((e) -> removeWindows(window));
+				openWindows.add(window);
+				window.setTheme(wm.getThemes().getTheme());
+				pane.getChildren().addAll(window);
+				window.setGridBounds(wm.getGridBounds());
+				window.ready();
+			} else {
+				System.out.println("Window already exists: " + window.getTitle());
+			}
+		}
+	}
+
+	private void removeWindows(InternalWindow... windows) {
+		for (InternalWindow window : windows) {
+			if (window.isVisible())
+				window.close();
+			openWindows.remove(window);
+		}
+	}
+
+	@Override
+	public void setTheme(Theme theme) {
+		pane.getStylesheets().clear();
+		pane.getStylesheets().add(theme.getStyleSheet("background.css"));
+		for (InternalWindow window : openWindows)
+			window.setTheme(theme);
+	}
+
+	public void closeAllExcept(InternalWindow[] newOpenWindows) {
+
+	}
+
+	public Layout generateLayout(String name) {
+		int i = 0;
+		WindowLocation[] wls = new WindowLocation[openWindows.size()];
+		for (InternalWindow window : openWindows) {
+			wls[i] = new WindowLocation(WindowEnum.toEnum(window), window.getLayoutX(), window.getLayoutY(), window.getWidth(), window.getHeight());
+			i++;
+		}
+
+		return new Layout(name, pane.getWidth(), pane.getHeight(), wls);
+	}
+
+}
