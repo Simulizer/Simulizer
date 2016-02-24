@@ -4,8 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
@@ -32,7 +31,7 @@ public abstract class InternalWindow extends Window {
 		setCacheHint(CacheHint.SPEED);
 
 		setCursor(Cursor.DEFAULT);
-		
+
 		// Using caching to smooth window movement
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
@@ -149,46 +148,46 @@ public abstract class InternalWindow extends Window {
 	 */
 	public void setGridBounds(GridBounds grid) {
 		if (this.grid == null) {
-			// Listens for Resize/Move Events
-			widthProperty().addListener(resizeEvent);
-			heightProperty().addListener(resizeEvent);
-			layoutXProperty().addListener(resizeEvent);
-			layoutYProperty().addListener(resizeEvent);
+			// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+			addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+				private final Timer timer = new Timer();
+				private TimerTask task = null;
+				private final long delayTime = grid.getTimeout(); // Delay before resize to grid
+				private double width = getWidth(), height = getHeight();
+				private boolean resize = false;
+
+				@Override
+				public void handle(MouseEvent event) {
+					resize = !(getWidth() == width && getHeight() == height);
+					if (task != null)
+						task.cancel();
+					task = new TimerTask() {
+						@Override
+						public void run() {
+							double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
+							coords = grid.moveToGrid(coords, resize);
+							if (coords[2] != getLayoutX() + getWidth())
+								setPrefWidth(coords[2] - coords[0]);
+							if (coords[3] != getLayoutY() + getHeight())
+								setPrefHeight(coords[3] - coords[1]);
+							if (coords[0] != getLayoutX())
+								setLayoutX(coords[0]);
+							if (coords[1] != getLayoutY())
+								setLayoutY(coords[1]);
+							task.cancel();
+						}
+					};
+					timer.schedule(task, delayTime);
+
+					// Set the width & height
+					width = getWidth();
+					height = getHeight();
+				}
+
+			});
 		}
 		this.grid = grid;
 	}
-
-	/** Snaps InternalWindow to grid when it is resized */
-	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
-		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
-		final Timer timer = new Timer();
-		TimerTask task = null;
-		final long delayTime = 200; // Delay before resize to grid
-
-		@Override
-		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			if (task != null)
-				task.cancel();
-			task = new TimerTask() {
-				@Override
-				public void run() {
-					double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
-					coords = grid.moveToGrid(coords);
-					if (coords[2] != getLayoutX() + getWidth())
-						setPrefWidth(coords[2] - coords[0]);
-					if (coords[3] != getLayoutY() + getHeight())
-						setPrefHeight(coords[3] - coords[1]);
-					if (coords[0] != getLayoutX())
-						setLayoutX(coords[0]);
-					if (coords[1] != getLayoutY())
-						setLayoutY(coords[1]);
-					task.cancel();
-				}
-			};
-			timer.schedule(task, delayTime);
-		}
-
-	};
 
 	/** Called when all internal window stuff is done */
 	public void ready() {

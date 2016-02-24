@@ -4,11 +4,11 @@
     "layout": "default.json",
     "scale-ui": true,
     "grid": {
-      "enabled": false,
-      "horizontal": 3,
+      "enabled": true,
+      "horizontal": 4,
       "vertical": 2,
       "sensitivity": 10,
-      "delay": 200
+      "delay": 100
     },
     "lock-to-window": false
   },

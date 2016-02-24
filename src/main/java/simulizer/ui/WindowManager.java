@@ -56,11 +56,13 @@ public class WindowManager extends GridPane {
 		themes.addThemeableElement(workspace);
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
-		// Sets the grid
-		grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), (int) settings.get("workspace.grid.vertical"), (double) settings.get("workspace.grid.sensitivity"));
-		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
+		// @formatter:off Sets the grid
+		grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), 
+							  (int) settings.get("workspace.grid.vertical"), 
+							  (double) settings.get("workspace.grid.sensitivity"), 
+							  (int) settings.get("workspace.grid.delay"));
 
-		// Set the layout
+		// @formatter:on Set the layout
 		layouts = new Layouts(workspace);
 		layouts.setDefaultLayout();
 
@@ -75,6 +77,7 @@ public class WindowManager extends GridPane {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		workspace.resizeInternalWindows();
+		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
 		grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
 		widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 		heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));

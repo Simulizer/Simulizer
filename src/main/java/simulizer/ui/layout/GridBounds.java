@@ -1,18 +1,14 @@
 package simulizer.ui.layout;
 
+import java.util.Arrays;
+
 public class GridBounds {
 	private static double minSens = 0.001; // To account for errors in division
 
-	private final int hor, ver; // Number of Horizontal and Vertical Lines
+	private final int hor, ver, timeout; // Number of Horizontal and Vertical Lines
 	private double xGap, yGap; // Size of the Main Window
 	private double sens;
 	private boolean gridSnap = false;
-
-	public GridBounds(double width, double height) {
-		hor = 2;
-		ver = 2;
-		setWindowSize(width, height);
-	}
 
 	/**
 	 * @param horizontal
@@ -21,11 +17,14 @@ public class GridBounds {
 	 *            Number of vertical lines in the grid
 	 * @param sensitivity
 	 *            How close an Internal Window needs to be to a GridLine to snap
+	 * @param timeout
+	 *            The time the window needs to have stayed still until it will snap into place
 	 */
-	public GridBounds(int horizontal, int verical, double sensitivity) {
+	public GridBounds(int horizontal, int verical, double sensitivity, int timeout) {
 		this.hor = horizontal;
 		this.ver = verical;
 		this.sens = sensitivity;
+		this.timeout = timeout;
 	}
 
 	/**
@@ -48,18 +47,35 @@ public class GridBounds {
 	 *            The list of coordinates in the order layoutX, layoutY, layoutX + width, layoutY + height
 	 * @return Converted points
 	 */
-	public double[] moveToGrid(double[] window) {
+	public double[] moveToGrid(double[] window, boolean resize) {
+		double[] windowAdjusted = Arrays.copyOf(window, window.length);
 		if (gridSnap) {
 			System.out.println("BEFORE: " + window[0] + " " + window[1] + " " + window[2] + " " + window[3]);
 			if (window.length != 4)
 				throw new IllegalArgumentException();
-			window[0] = moveIfSens(window[0], xGap);
-			window[1] = moveIfSens(window[1], yGap);
-			window[2] = moveIfSens(window[2], xGap);
-			window[3] = moveIfSens(window[3], yGap);
+			windowAdjusted[0] = moveIfSens(window[0], xGap);
+			windowAdjusted[1] = moveIfSens(window[1], yGap);
+			windowAdjusted[2] = moveIfSens(window[2], xGap);
+			windowAdjusted[3] = moveIfSens(window[3], yGap);
+
+			if (!resize) {
+				double width = window[2] - window[0], height = window[3] - window[1];
+				// Find closest gridline
+				if (windowAdjusted[2] == window[2] || Math.abs(windowAdjusted[0] - window[0]) <= Math.abs(windowAdjusted[2] - window[2])) {
+					windowAdjusted[2] = windowAdjusted[0] + width;
+				} else {
+					windowAdjusted[0] = windowAdjusted[2] - width;
+				}
+				if (windowAdjusted[3] == window[3] || Math.abs(windowAdjusted[1] - window[1]) <= Math.abs(windowAdjusted[3] - window[3])) {
+					windowAdjusted[3] = windowAdjusted[1] + height;
+				} else {
+					windowAdjusted[1] = windowAdjusted[3] - height;
+				}
+			}
+
 			System.out.println("AFTER: " + window[0] + " " + window[1] + " " + window[2] + " " + window[3] + "\n");
 		}
-		return window;
+		return windowAdjusted;
 	}
 
 	private double moveIfSens(double coord, double gap) {
@@ -80,5 +96,9 @@ public class GridBounds {
 	 */
 	public void setGridSnap(boolean value) {
 		gridSnap = value;
+	}
+
+	public long getTimeout() {
+		return timeout;
 	}
 }
