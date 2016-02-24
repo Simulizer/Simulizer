@@ -43,6 +43,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	private Text[] textLabels;
 
 	private double rectLength;
+	private double y0;
 
 	private final double XPAD = 10;
 	private final double YPAD = 10;
@@ -73,51 +74,29 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	private void initRectsAndBoxes() {
 		HighLevelVisualisation vis = getHighLevelVisualisation();
-		double rectWidth = getRectLength();
 
 		for (int i = 0; i < rectangles.length; ++i) {
-			rectangles[i] = new Rectangle(getX(i), getY(), rectWidth, rectWidth);
+			rectangles[i] = new Rectangle();
 			rectangles[i].getStyleClass().add("list-item");
 
 			textLabels[i] = new Text("" + list.get(i));
 			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
-			textLabels[i].setTranslateX(getTextX(i));
-			textLabels[i].setTranslateY(getTextY(i));
 
 			vis.addAll(rectangles[i], textLabels[i]);
 		}
 	}
 
 	private double getX(int rectIndex) {
-		double rectLength = getRectLength();
 		double blockWidth = list.size() * rectLength;
 		return getWidth() / 2 - blockWidth / 2 + rectIndex * rectLength;
 	}
 
-	private double getY() {
-		// double answer = getHighLevelVisualisation().getWindowHeight() / 2 - getRectLength() / 2;
-		// System.out.println(answer);
-		return super.getHeight() / 2 - getRectLength() / 2;
-	}
-
 	private double getTextX(int rectIndex) {
-		return getX(rectIndex) + getRectLength() / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2;
+		return getX(rectIndex) + rectLength / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2;
 	}
 
 	private double getTextY(int rectIndex) {
-		return getY() + getRectLength() / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3;
-	}
-
-	private double getRectLength() {
-		return getRectLength(super.getWidth(), super.getHeight());
-	}
-
-	private double getRectLength(double windowWidth, double windowHeight) {
-		double l;
-		if (windowHeight < windowHeight) l = windowHeight - 2 * YPAD;
-		else l = windowWidth - 2 * XPAD;
-
-		return l / rectangles.length;
+		return y0 + rectLength / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3;
 	}
 
 	/**
@@ -135,7 +114,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		Text text1 = textLabels[i];
 		Text text2 = textLabels[j];
 
-		double y0 = getY();
 		animationBuffer.add(setupSwap(rect1, getX(i), y0, rect2, getX(j), y0));
 		animationBuffer.add(setupSwap2(text1, getTextX(i), y0, text2, getTextX(j), y0));
 		swapIndices.add(new Pair(i, j));
@@ -241,10 +219,15 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		double windowWidth = getHighLevelVisualisation().getWindowWidth();
 		double windowHeight = getHighLevelVisualisation().getWindowHeight();
 
-		double rectWidth = getRectLength(windowWidth, windowHeight);
+		double rectCalc;
+		if (windowHeight < windowHeight) rectCalc = windowHeight - 2 * YPAD;
+		else rectCalc = windowWidth - 2 * XPAD;
+		this.rectLength = rectCalc / rectangles.length;
+
+		this.y0 = windowHeight / 2 - rectLength / 2;
 
 		for (int i = 0; i < rectangles.length; ++i) {
-			setAttrs(rectangles[i], getX(i), getY(), rectWidth, rectWidth);
+			setAttrs(rectangles[i], getX(i), y0, rectLength, rectLength);
 			rectangles[i].getStyleClass().add("list-item");
 
 			textLabels[i].setTranslateX(getTextX(i));
