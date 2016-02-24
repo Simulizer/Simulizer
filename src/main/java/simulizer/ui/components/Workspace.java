@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
 
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.layout.Pane;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
@@ -22,15 +22,22 @@ public class Workspace extends Observable implements Themeable {
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
+		widthProperty().addListener((e) -> {
+			double width = pane.getWidth(), height = pane.getHeight();
+			if (width > 0  && height > 0 )
+				for (InternalWindow window : openWindows)
+					window.setWorkspaceSize(width, height);
+		});
+		heightProperty().addListener((e) -> {
+			double width = pane.getWidth(), height = pane.getHeight();
+			if (width > 0 && height > 0)
+				for (InternalWindow window : openWindows)
+					window.setWorkspaceSize(width, height);
+		});
 	}
 
 	public Pane getPane() {
 		return pane;
-	}
-
-	public void onResize(ChangeListener<? super Number> listener) {
-		pane.widthProperty().addListener(listener);
-		pane.heightProperty().addListener(listener);
 	}
 
 	public double getWidth() {
@@ -113,6 +120,14 @@ public class Workspace extends Observable implements Themeable {
 		}
 
 		return new Layout(name, pane.getWidth(), pane.getHeight(), wls);
+	}
+
+	public ReadOnlyDoubleProperty widthProperty() {
+		return pane.widthProperty();
+	}
+
+	public ReadOnlyDoubleProperty heightProperty() {
+		return pane.widthProperty();
 	}
 
 }

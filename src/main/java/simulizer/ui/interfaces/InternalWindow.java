@@ -21,14 +21,14 @@ import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window implements Observer {
-	private double windowWidth, windowHeight;
+	private double windowWidth = -1, windowHeight = -1;
 	private GridBounds grid;
 	private WindowManager wm;
 
 	public InternalWindow() {
 		setScaleX(0);
 		setScaleY(0);
-		
+
 		// Using caching to smooth movement
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
@@ -75,6 +75,8 @@ public abstract class InternalWindow extends Window implements Observer {
 		setLayoutX(x);
 		setLayoutY(y);
 		setPrefSize(width, height);
+		setWidth(width);
+		setHeight(height);
 	}
 
 	/**
@@ -103,8 +105,8 @@ public abstract class InternalWindow extends Window implements Observer {
 	 */
 	public final void setWindowManager(WindowManager wm) {
 		this.wm = wm;
-		//TODO: windowWidth = wm.getPane().getWidth();
-		//TODO: windowHeight = wm.getPane().getHeight();
+		// TODO: windowWidth = wm.getPane().getWidth();
+		// TODO: windowHeight = wm.getPane().getHeight();
 		// wm.addObserver(this);
 	}
 
@@ -156,20 +158,7 @@ public abstract class InternalWindow extends Window implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object obj) {
-		// Resize InternalWindow to new dimensions
-		double[] dim = (double[]) obj;
-		if (windowWidth != dim[0]) {
-			double ratio = dim[0] / windowWidth;
-			setLayoutX(getLayoutX() * ratio);
-			setPrefWidth(getWidth() * ratio);
-			windowWidth = dim[0];
-		}
-		if (windowHeight != dim[1]) {
-			double ratio = dim[1] / windowHeight;
-			setLayoutY(getLayoutY() * ratio);
-			setPrefHeight(getHeight() * ratio);
-			windowHeight = dim[1];
-		}
+
 	}
 
 	/** Snaps InternalWindow to grid when it is resized */
@@ -217,6 +206,22 @@ public abstract class InternalWindow extends Window implements Observer {
 		if (!(obj instanceof InternalWindow))
 			return false;
 		return WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
+	}
+
+	public void setWorkspaceSize(double width, double height) {
+		// Resize InternalWindow to new dimensions
+		if (windowWidth != width) {
+			double ratio = width / windowWidth;
+			setLayoutX(getLayoutX() * ratio);
+			setPrefWidth(getWidth() * ratio);
+			windowWidth = width;
+		}
+		if (windowHeight != height) {
+			double ratio = height / windowHeight;
+			setLayoutY(getLayoutY() * ratio);
+			setPrefHeight(getHeight() * ratio);
+			windowHeight = height;
+		}
 	}
 
 }

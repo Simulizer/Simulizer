@@ -59,16 +59,15 @@ public class WindowManager extends GridPane {
 		// Set the theme
 		themes = new Themes();
 		themes.addThemeableElement(workspace);
-		themes.setTheme(theme);
+		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
 		// Sets the grid
 		grid = new GridBounds(4, 2, 30);
-		grid.setGridSnap(true);
 		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
-		// TODO: workspace.onResize((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 
 		// Set the layout
-		layouts = new Layouts(this);
+		layouts = new Layouts(workspace);
+		layouts.setDefaultLayout();
 
 		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
@@ -78,8 +77,10 @@ public class WindowManager extends GridPane {
 	}
 
 	public void show() {
-		layouts.setDefaultLayout();
 		primaryStage.show();
+		grid.setGridSnap(true);
+		workspace.widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+		workspace.heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 	}
 
 	public Stage getPrimaryStage() {

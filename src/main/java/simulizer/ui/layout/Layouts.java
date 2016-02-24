@@ -17,22 +17,21 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
-import simulizer.ui.interfaces.WindowEnum;
 
 public class Layouts implements Iterable<Layout> {
-	// TODO: Find a way to scale to window size
 
 	private final Path folder = Paths.get("layouts");
 	private Set<Layout> layouts = new HashSet<Layout>();
 	private Layout layout;
-	private WindowManager wm;
+	private Workspace workspace;
 
 	private static final String DEFAULT_LAYOUT = "default.json";
 	private Layout defaultLayout = null;
 
-	public Layouts(WindowManager wm) {
-		this.wm = wm;
+	public Layouts(Workspace workspace) {
+		this.workspace = workspace;
 		reload(true);
 	}
 
@@ -65,7 +64,7 @@ public class Layouts implements Iterable<Layout> {
 	}
 
 	public void saveLayout(File saveFile) {
-		Layout l = wm.getWorkspace().generateLayout(saveFile.getName());
+		Layout l = workspace.generateLayout(saveFile.getName());
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
@@ -82,10 +81,10 @@ public class Layouts implements Iterable<Layout> {
 		WindowLocation[] locations = layout.getWindowLocations();
 		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
 		for (int i = 0; i < locations.length; i++) {
-			newOpenWindows[i] = wm.getWorkspace().openInternalWindow(locations[i].getWindowEnum());
+			newOpenWindows[i] = workspace.openInternalWindow(locations[i].getWindowEnum());
 		}
 
-		wm.getWorkspace().closeAllExcept(newOpenWindows);
+		workspace.closeAllExcept(newOpenWindows);
 
 	}
 
@@ -94,17 +93,17 @@ public class Layouts implements Iterable<Layout> {
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
 				// Resize window to layout dimentions
-				/*
-				 * GridBounds b = new GridBounds(wl[i].getWidth(), wl[i].getHeight());
-				 * w.setGridBounds(b);
-				 * b.setWindowSize(wm.getPane().getWidth(), wm.getPane().getHeight());
-				 */
+				w.setWorkspaceSize(layout.getWidth(), layout.getHeight());
+				w.setBoundsWithoutResize(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
+				double width = workspace.getWidth(), height = workspace.getHeight();
+				if (width > 0 && height > 0)
+					w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
 				return;
 			}
 		}
 
 		// If there are no bounds set in the layout, use this default
-		w.setBoundsWithoutResize(10, 35, wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
+		w.setBoundsWithoutResize(0, 0, workspace.getWidth(), workspace.getHeight());
 	}
 
 	@Override
