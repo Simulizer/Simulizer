@@ -110,6 +110,7 @@ public class ExecuteTest {
 	{
 		CPU cpu = new CPU(null,new IOTest());
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
+		cpu.setClockSpeed(50);//speed it up a bit
 		cpu.runProgram();//execute the program
 		return cpu;
 	}
@@ -144,6 +145,7 @@ public class ExecuteTest {
 	{
 		Field labels = cpu.getClass().getDeclaredField("labels");
 		labels.setAccessible(true);
+		@SuppressWarnings("unchecked")
 		HashMap<String,Address> map = (HashMap<String,Address>)labels.get(cpu);
 		return map;
 	}
@@ -1134,5 +1136,100 @@ public class ExecuteTest {
 			assertEquals(8,accessRegisterSigned(cpu,Register.v1));
 			assertEquals(7,accessRegisterSigned(cpu,Register.v0));
 		}
+	}
+	
+	/**will test the execution of the j instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testJExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstruction = "li $s0, 4;\n" +
+							   "j TEST;\n" +
+							   "li $v0, 5;\n" +
+							   "TEST: li $v1, 7;\n";
+		
+		CPU cpu = createCPU(myInstruction);
+		
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		assertEquals(newPos.getValue(),testLabel.getValue() + 4);
+		assertEquals(7,accessRegisterSigned(cpu,Register.v1));
+		assertNotEquals(5,accessRegisterSigned(cpu,Register.v0));
+	}
+	
+	/**method will test the execution of the jal instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * 
+	 */
+	@Test
+	public void testJalExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		String myInstructions = "li $s0, 4;\n" +
+							    "jal TEST;\n" +
+							    "LINK: li $v0, 7;\n" +
+							    "TEST: li $v1, 8;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		Address linkLabel = this.getLabels(cpu).get("LINK");//what should be in $ra
+		assertEquals(newPos.getValue(),testLabel.getValue()+4);
+		assertEquals(linkLabel.getValue(),accessRegisterSigned(cpu,Register.ra));
+		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+		assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+	}
+	
+	/**this method aims to test the execution of the jr instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testJrExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $s0, 4;\n" +
+							    "jal TEST;\n" +
+							    "LINK: li $a0, 7;\n" +
+							    "li $v0, 10;\n" +
+							    "syscall;\n" +
+							    "TEST: li $v1, 8;\n" +
+							    "jr $ra;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("LINK");
+		assertEquals(newPos.getValue(),testLabel.getValue()+12);
+		assertEquals(7,accessRegisterSigned(cpu,Register.a0));
+		assertEquals(10,accessRegisterSigned(cpu,Register.v0));
+		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
 	}
 }
