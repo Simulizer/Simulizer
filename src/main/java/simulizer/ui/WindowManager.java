@@ -49,8 +49,6 @@ public class WindowManager extends GridPane {
 		primaryStage.setWidth(x);
 		primaryStage.setHeight(y);
 		primaryStage.setTitle("Simulizer");
-		Scene scene = new Scene(this, x, y);
-		primaryStage.setScene(scene);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -72,6 +70,8 @@ public class WindowManager extends GridPane {
 	}
 
 	public void show() {
+		Scene scene = new Scene(this);
+		primaryStage.setScene(scene);
 		primaryStage.show();
 		grid.setGridSnap(true);
 		widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
