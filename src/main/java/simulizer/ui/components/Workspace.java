@@ -24,20 +24,21 @@ import simulizer.ui.theme.Themeable;
 public class Workspace extends Observable implements Themeable {
 	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
 	private final Pane pane = new Pane();
-	private final WindowManager wm;
+	private WindowManager wm = null;
 
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
-		wm.widthProperty().addListener(resizeEvent);
-		wm.heightProperty().addListener(resizeEvent);
+		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
+			wm.widthProperty().addListener(resizeEvent);
+			wm.heightProperty().addListener(resizeEvent);
+		}
 	}
 
 	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
 		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
 		final Timer timer = new Timer();
 		TimerTask task = null;
-		final long delayTime = 50; // Delay before resize UI
 
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -50,18 +51,18 @@ public class Workspace extends Observable implements Themeable {
 					task.cancel();
 				}
 			};
-			timer.schedule(task, delayTime);
+			timer.schedule(task, (int) wm.getSettings().get("workspace.scale-ui.delay"));
 		}
 
 	};
 
-	public void resizeInternalWindows(){
+	public void resizeInternalWindows() {
 		double width = pane.getWidth(), height = pane.getHeight();
 		if (width > 0 && height > 0)
 			for (InternalWindow window : openWindows)
 				window.setWorkspaceSize(width, height);
 	}
-	
+
 	public Pane getPane() {
 		return pane;
 	}

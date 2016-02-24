@@ -83,7 +83,7 @@ public class Main extends Application {
 					Platform.exit();
 					System.exit(0);
 				});
-				
+
 				// Loads the settings from file
 				Settings settings = Settings.loadSettings(new File("settings.json"));
 
@@ -97,10 +97,11 @@ public class Main extends Application {
 			};
 		};
 
-		showSplash(startupTask);
-		new Thread(startupTask).start();
-		
-		
+		// showSplash(startupTask);
+		// new Thread(startupTask).start();
+		Settings settings = Settings.loadSettings(new File("settings.json"));
+		wm = new WindowManager(primaryStage, settings, 1024, 705);
+		wm.show();
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {

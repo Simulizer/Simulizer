@@ -2,12 +2,15 @@
   "workspace": {
     "theme": "default",
     "layout": "default.json",
-    "scale-ui": true,
-    "grid": {
+    "scale-ui": {
       "enabled": true,
-      "horizontal": 4,
-      "vertical": 2,
-      "sensitivity": 10000000,
+      "delay": 0
+    },
+    "grid": {
+      "enabled": false,
+      "horizontal": 6,
+      "vertical": 3,
+      "sensitivity": 30,
       "delay": 200
     },
     "lock-to-window": false
