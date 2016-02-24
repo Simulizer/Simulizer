@@ -61,7 +61,7 @@ public class GridBounds {
 			if (!resize) {
 				double width = window[2] - window[0], height = window[3] - window[1];
 				// Find closest gridline
-				if (windowAdjusted[2] == window[2] ||  Math.abs(windowAdjusted[2] - window[2]) <= Math.abs(windowAdjusted[0] - window[0])) {
+				if (windowAdjusted[2] == window[2] || Math.abs(windowAdjusted[2] - window[2]) <= Math.abs(windowAdjusted[0] - window[0])) {
 					windowAdjusted[2] = windowAdjusted[0] + width;
 				} else {
 					windowAdjusted[0] = windowAdjusted[2] - width;
@@ -80,6 +80,11 @@ public class GridBounds {
 
 	private double moveIfSens(double coord, double gap) {
 		double mod = coord % gap;
+		double sens = this.sens;
+		if (sens + 1 > gap / 2.0) {
+			sens = (gap / 2.0) - 1;
+		}
+
 		if (Math.abs(mod) <= sens) {
 			return coord - mod;
 		} else if (gap - Math.abs(mod) <= sens) {

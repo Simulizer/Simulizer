@@ -7,8 +7,8 @@
       "enabled": true,
       "horizontal": 4,
       "vertical": 2,
-      "sensitivity": 10,
-      "delay": 100
+      "sensitivity": 10000000,
+      "delay": 200
     },
     "lock-to-window": false
   },
