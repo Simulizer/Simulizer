@@ -271,18 +271,11 @@ dependencies {
 
     // Testing
         testCompile 'junit:junit:4.12'
-
-    mkdir('work')
 }
 
 // Ace Editor
-build.dependsOn copyAceFiles
-build.dependsOn downloadExternalDependencies
-
-
-clean{
-    // delete 'work' // Disabled until copying out of jar works
-}
+compileJava.dependsOn copyAceFiles
+compileJava.dependsOn downloadExternalDependencies
 
 
 /////////////////////////////////////////////////
