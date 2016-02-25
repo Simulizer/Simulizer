@@ -58,12 +58,10 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		final Layout chosen = defaultLayout; // final for the lambda
-		if (defaultLayout != null && findDefault) Platform.runLater(() -> wm.setLayout(chosen));
 	}
 
 	public void setDefaultLayout() {
-		setLayout(defaultLayout);
+		Platform.runLater(() -> setLayout(defaultLayout));
 	}
 
 	public void saveLayout(File saveFile) {
