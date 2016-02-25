@@ -1,10 +1,11 @@
-package simulizer.ui;
+package simulizer.ui.components;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.SimulationListener;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CodeEditor;
 
@@ -21,7 +22,7 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	@Override public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+		CodeEditor code = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 		//TODO clean up the simulation so less things become null
 		if(wm.getCPU() != null) {
 			CPU cpu = wm.getCPU();

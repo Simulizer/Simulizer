@@ -135,7 +135,7 @@ public class CPU {
 
                 if( x > xMin && x < xMax && y > yMin && y < yMax){
                     // In register box, highlight register window somehow?
-                    vis.getMainWindowManager().findInternalWindow(WindowEnum.REGISTERS).emphasise();
+                    vis.getMainWindowManager().getWorkspace().openInternalWindow(WindowEnum.REGISTERS).emphasise();
                 }
             }
         });

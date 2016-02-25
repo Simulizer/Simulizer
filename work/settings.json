@@ -1,3 +1,25 @@
 {
-  "defaultTheme": "default"
+  "workspace": {
+    "theme": "default",
+    "layout": "default.json",
+    "scale-ui": {
+      "enabled": true,
+      "delay": 0
+    },
+    "grid": {
+      "enabled": false,
+      "horizontal": 6,
+      "vertical": 3,
+      "sensitivity": 30,
+      "delay": 200
+    },
+    "lock-to-window": false
+  },
+  "simulation": {
+    "clock-speed": 250,
+    "zero-memory": true
+  },
+  "code_editor": {
+    "word-wrap": true
+  }
 }

@@ -31,7 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.stage.Popup;
-import simulizer.ui.SyntaxHighlighter;
+import simulizer.ui.components.SyntaxHighlighter;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;

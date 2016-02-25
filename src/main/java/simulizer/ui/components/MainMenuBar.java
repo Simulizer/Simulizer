@@ -27,7 +27,6 @@ import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
-
 	private WindowManager wm;
 
 	public MainMenuBar(WindowManager wm) {
@@ -41,19 +40,19 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
-		newItem.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).newFile());
+		newItem.setOnAction(e -> ((CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR)).newFile());
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
 			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
+			((CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR)).loadFile(f);
 		});
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
-			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			CodeEditor editor = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 			if (editor.getCurrentFile() == null) {
 				editor.setCurrentFile(saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s")));
 			}
@@ -63,7 +62,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
-			CodeEditor editor = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			CodeEditor editor = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 			File saveFile = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (saveFile != null) {
 				editor.setCurrentFile(saveFile);
@@ -99,7 +98,7 @@ public class MainMenuBar extends MenuBar {
 
 		for (Layout l : wm.getLayouts()) {
 			MenuItem item = new MenuItem(l.getName());
-			item.setOnAction(e -> wm.setLayout(l));
+			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
 
@@ -128,7 +127,7 @@ public class MainMenuBar extends MenuBar {
 
 		for (Theme t : wm.getThemes()) {
 			MenuItem item = new MenuItem(t.getName());
-			item.setOnAction(e -> wm.setTheme(t));
+			item.setOnAction(e -> wm.getThemes().setTheme(t));
 			menu.getItems().add(item);
 		}
 
@@ -136,7 +135,7 @@ public class MainMenuBar extends MenuBar {
 		reloadThemeItem.setOnAction(e -> {
 			wm.getThemes().reload();
 			themeMenu(menu);
-			wm.setTheme(wm.getThemes().getTheme());
+			wm.getThemes().setTheme(wm.getThemes().getTheme());
 		});
 
 		menu.getItems().addAll(new SeparatorMenuItem(), reloadThemeItem);
@@ -149,14 +148,14 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
-			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			CodeEditor code = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 			ProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText(), log);
-			if(p != null) {
+			if (p != null) {
 				wm.runProgram(p);
 			} else {
-				//TODO: handle error here (any error and the assembler bails out and returns null)
+				// TODO: handle error here (any error and the assembler bails out and returns null)
 			}
 		});
 
@@ -188,7 +187,7 @@ public class MainMenuBar extends MenuBar {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> wm.findInternalWindow(wenum));
+			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
 		return windowsMenu;
@@ -197,25 +196,26 @@ public class MainMenuBar extends MenuBar {
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
-		MenuItem windowLocation = new MenuItem("Window Locations");
-		windowLocation.setOnAction(e -> wm.printWindowLocations());
-
 		MenuItem delWindows = new MenuItem("Close All Windows");
-		delWindows.setOnAction(e -> wm.closeAll());
+		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
 
 		MenuItem emphWindow = new MenuItem("Refresh Registers");
 		emphWindow.setOnAction(e -> {
-			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
+			Registers reg = (Registers) wm.getWorkspace().openInternalWindow(WindowEnum.REGISTERS);
 			reg.refreshData();
 		});
 
 		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
-		lineWrap.setSelected(((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).getLineWrap());
-		lineWrap.setOnAction(e -> ((CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
+		CodeEditor c = (CodeEditor) wm.getWorkspace().findInternalWindow(WindowEnum.CODE_EDITOR);
+		if (c == null)
+			lineWrap.setSelected(true);
+		else
+			lineWrap.setSelected(c.getLineWrap());
+		lineWrap.setOnAction(e -> ((CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR)).toggleLineWrap());
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-			CodeEditor code = (CodeEditor) wm.findInternalWindow(WindowEnum.CODE_EDITOR);
+			CodeEditor code = (CodeEditor) wm.getWorkspace().openInternalWindow(WindowEnum.CODE_EDITOR);
 			Assembler a = new Assembler();
 			Program p = a.assemble(code.getText(), null);
 			String outputFilename = "program-dump.txt";
@@ -231,7 +231,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap, dumpProgram);
+		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram);
 		return debugMenu;
 	}
 
