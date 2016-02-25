@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css" media="screen">
+#editor {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+</style>
+</head>
+<body>
+<div id="editor"></div>
+<script type="text/javascript">
+    var editor;
+    function init() {
+        editor = ace.edit('editor');
+        editor.setOptions({
+            useSoftTabs    : true,
+            tabSize        : 4,
+            wrap           : false,
+            scrollSpeed    : 0.1,
+            animatedScroll : false,
+            fontSize       : '12pt',
+            scrollPastEnd  : true
+        });
+        editor.setTheme("ace/theme/monokai");
+        editor.on('change', function(e) {bridge.onChange();}); // a java method
+    }
+
+    function loadText(text) {
+        var cursorPos = -1; // indicates the beginning
+        editor.setValue(text, cursorPos);
+        editor.getSession().setMode("ace/mode/simp");
+        editor.getSession().foldAll();
+    }
+
+</script>
+</body>
+</html>

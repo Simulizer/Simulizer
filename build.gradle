@@ -61,6 +61,9 @@ Custom tasks:
 plugins {
     // git dependencies
         id 'org.ajoberstar.grgit' version '1.4.2'
+
+    // HTTP download dependencies
+        id "de.undercouch.download" version "2.1.0"
 }
 
 
@@ -133,9 +136,16 @@ mainClassName = 'simulizer.Main'
 //
 /////////////////////////////////////////////////
 
+def generatedSrcDir = file('src/generated/')
+// extends the clean task
+clean {
+    delete generatedSrcDir
+}
+
+// Antlr
+
 // where to place generated files such as Antlr parsers
-def generatedOutput = 'src/generated/'
-def antlrOutput     = "$generatedOutput/antlr/"
+def antlrOutput     = "$generatedSrcDir/antlr/"
 
 sourceSets.main.java.srcDirs += antlrOutput
 
@@ -147,27 +157,31 @@ generateGrammarSource {
     arguments += ['-listener', '-visitor']
 }
 
-// extends the clean task
-clean {
-    delete generatedOutput
-}
 
 
 /////////////////////////////////////////////////
 //
-// Git Dependencies
+// Generated Resources Configuration
+//
+/////////////////////////////////////////////////
+
+def ExternalResDir = file("$projectDir/src/main/resources/external")
+
+clean {
+    delete ExternalResDir
+}
+
+/////////////////////////////////////////////////
+//
+// External Resources > Git Dependencies
 //
 /////////////////////////////////////////////////
 
 // Grgit API reference: http://ajoberstar.org/grgit/docs/groovydoc/index.html?org/ajoberstar/grgit/Grgit.html
 
-
 // Ace editor
-
 // where to clone the repository into
 def aceDLDir = file("$buildDir/ace")
-// where to place the needed runtime files
-def aceResDir = file("$projectDir/src/main/resources/generated")
 
 // clone the ace editor git repository
 // to refresh, download manually or execute `gradle clean build`
@@ -176,10 +190,10 @@ task downloadAce << {
 
     if (!aceDLDir.exists()) {
         println 'cloning ace editor git repo. May take a while...'
-        def repo = org.ajoberstar.grgit.Grgit.clone(
-                dir: aceDLDir,
-                uri: 'https://github.com/ajaxorg/ace-builds.git',
-                refToCheckout: ref
+        org.ajoberstar.grgit.Grgit.clone(
+            dir: aceDLDir,
+            uri: 'https://github.com/ajaxorg/ace-builds.git',
+            refToCheckout: ref
         )
     } else {
         println 'ace repo already cloned'
@@ -188,20 +202,39 @@ task downloadAce << {
 
 // extract the required files to the resources path
 task copyAceFiles(dependsOn: downloadAce, type: Copy) {
-    if(!aceResDir.exists()) {
-        mkdir(aceResDir)
-    }
+    mkdir ExternalResDir
 
     from file("$aceDLDir/src-min-noconflict")
-    into aceResDir
+    into ExternalResDir
 
     // files to copy
     include 'ace.js'
+    include 'theme-monokai.js'
+    include 'theme-ambiance.js'
+    include 'theme-tomorrow_night_eighties.js'
+    include 'mode-javascript.js'
 }
 
-clean {
-    delete aceResDir
+/////////////////////////////////////////////////
+//
+// Generated Resources > HTTP Dependencies
+//
+/////////////////////////////////////////////////
+
+
+// download web dependencies once. must clean to get new copies
+task downloadExternalDependencies << {
+    mkdir ExternalResDir
+    // dest can either be a directory or a filename
+
+    download {
+        src 'http://requirejs.org/docs/release/2.1.22/minified/require.js'
+        dest ExternalResDir
+        overwrite false
+    }
+
 }
+
 
 
 /////////////////////////////////////////////////
@@ -233,7 +266,6 @@ dependencies {
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
 
-
     // GSON: JSON Parsing
     	compile 'com.google.code.gson:gson:2.5'
 
@@ -245,6 +277,7 @@ dependencies {
 
 // Ace Editor
 build.dependsOn copyAceFiles
+build.dependsOn downloadExternalDependencies
 
 
 clean{

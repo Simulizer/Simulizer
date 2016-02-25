@@ -49,7 +49,7 @@ public class CodeEditor extends InternalWindow {
 	private boolean fileEdited = false, lineWrap = true;
 	private SyntaxHighlighter syntaxHighlighter;
 
-	private final String TITLE = WindowEnum.toEnum(this).toString();
+	private final String TITLE = WindowEnum.getName(this);
 
 	public CodeEditor() {
 		Popup tooltipPopup = new Popup();
@@ -197,9 +197,9 @@ public class CodeEditor extends InternalWindow {
 
 	public void saveFile() {
 		if (currentFile != null) {
-			try (PrintWriter writer = new PrintWriter(currentFile);) {
+			try (PrintWriter writer = new PrintWriter(currentFile)) {
 				writer.print(getText());
-				setTitle(WindowEnum.toEnum(this).toString() + " - " + currentFile.getName());
+				setTitle(WindowEnum.getName(this) + " - " + currentFile.getName());
 				fileEdited = false;
 				updateTitleEditStatus();
 			} catch (IOException ex) {

@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
+import javafx.application.Platform;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -55,7 +56,8 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (defaultLayout != null && findDefault) wm.setLayout(defaultLayout);
+		final Layout chosen = defaultLayout; // final for the lambda
+		if (defaultLayout != null && findDefault) Platform.runLater(() -> wm.setLayout(chosen));
 	}
 
 	public void saveLayout(File saveFile) {

@@ -21,7 +21,7 @@ public abstract class InternalWindow extends Window {
 		setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
-		setTitle(WindowEnum.toEnum(this).toString());
+		setTitle(WindowEnum.getName(this));
 
 		// Adds minimise icon
 		MinimizeIcon minimize = new MinimizeIcon(this);

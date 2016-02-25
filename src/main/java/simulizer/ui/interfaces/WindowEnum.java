@@ -1,19 +1,23 @@
 package simulizer.ui.interfaces;
 
 public enum WindowEnum {
-	CODE_EDITOR("CodeEditor", "Code Editor"), CPU_VISUALISATION("CPUVisualisation",
-			"CPU Visualisation"), LOGGER("Logger"), REGISTERS("Registers"), HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation");
+	CODE_EDITOR("CodeEditor", "Code Editor"),
+	ACE_EDITOR("AceEditor", "Ace Editor"),
+	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
+	LOGGER("Logger"),
+	REGISTERS("Registers"),
+	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation");
 
 	private final String pkg = "simulizer.ui.windows.";
 	private final String className;
 	private final String defaultTitle;
 
-	private WindowEnum(String className) {
+	WindowEnum(String className) {
 		this.className = className;
 		this.defaultTitle = className;
 	}
 
-	private WindowEnum(String className, String defaultTitle) {
+	WindowEnum(String className, String defaultTitle) {
 		this.className = className;
 		this.defaultTitle = defaultTitle;
 	}
@@ -38,6 +42,15 @@ public enum WindowEnum {
 			if (we.equals(w))
 				return we;
 		return null;
+	}
+
+	public static String getName(InternalWindow w) {
+		WindowEnum e = toEnum(w);
+		if(e != null) {
+			return e.toString();
+		} else {
+			return "Unknown Window";
+		}
 	}
 
 	@Override

@@ -36,8 +36,9 @@ bin/
 *.class
 build/
 
-# ignore generated source files
+# ignore generated and external files
 generated/
+external/
 
 # ignore gradle files
 .gradle/

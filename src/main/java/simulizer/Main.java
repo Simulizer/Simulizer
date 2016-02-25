@@ -90,7 +90,7 @@ public class Main extends Application {
 				Thread.sleep(750); // so that it's at least readable
 
 				return true;
-			};
+			}
 		};
 
 		showSplash(startupTask);
