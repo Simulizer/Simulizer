@@ -1,8 +1,12 @@
 package simulizer.ui.windows;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.highlevel.visualisation.DataStructureVisualiser;
+import simulizer.highlevel.visualisation.ListVisualiser;
 import simulizer.highlevel.visualisation.PresentationTowerOfHanoiVisualiser;
 import simulizer.highlevel.visualisation.listeners.PresentationTowerOfHanoiListener;
 import simulizer.simulation.cpu.components.CPU;
@@ -27,7 +31,8 @@ public class HighLevelVisualisation extends InternalWindow {
 		setMinHeight(getMinimalHeight());
 
 		// TODO remove this line so that the visualiser is set depending on code
-		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		// this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		this.visualiser = new ListVisualiser<Integer>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();

@@ -1,14 +1,13 @@
-package simulizer.ui;
+package simulizer.ui.components;
 
 import javafx.application.Platform;
 import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.SimulationListener;
+import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.AceEditor;
-import simulizer.ui.windows.CodeEditor;
 
 import java.util.Map;
 
@@ -26,7 +25,7 @@ public class UISimulationListener extends SimulationListener {
 
 	private AceEditor getEditor() {
 		if(_editor == null) {
-			_editor = (AceEditor) wm.findInternalWindow(WindowEnum.ACE_EDITOR);
+			_editor = (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
 		}
 		return _editor;
 	}

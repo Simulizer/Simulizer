@@ -40,7 +40,7 @@ public class MainMenuBar extends MenuBar {
 
 	private AceEditor getEditor() {
 		if(_editor == null) {
-			_editor = (AceEditor) wm.findInternalWindow(WindowEnum.ACE_EDITOR);
+			_editor = (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
 		}
 		return _editor;
 	}
@@ -108,7 +108,7 @@ public class MainMenuBar extends MenuBar {
 
 		for (Layout l : wm.getLayouts()) {
 			MenuItem item = new MenuItem(l.getName());
-			item.setOnAction(e -> wm.setLayout(l));
+			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
 
@@ -137,7 +137,7 @@ public class MainMenuBar extends MenuBar {
 
 		for (Theme t : wm.getThemes()) {
 			MenuItem item = new MenuItem(t.getName());
-			item.setOnAction(e -> wm.setTheme(t));
+			item.setOnAction(e -> wm.getThemes().setTheme(t));
 			menu.getItems().add(item);
 		}
 
@@ -145,7 +145,7 @@ public class MainMenuBar extends MenuBar {
 		reloadThemeItem.setOnAction(e -> {
 			wm.getThemes().reload();
 			themeMenu(menu);
-			wm.setTheme(wm.getThemes().getTheme());
+			wm.getThemes().setTheme(wm.getThemes().getTheme());
 		});
 
 		menu.getItems().addAll(new SeparatorMenuItem(), reloadThemeItem);
@@ -197,7 +197,7 @@ public class MainMenuBar extends MenuBar {
 		Menu windowsMenu = new Menu("Add Window");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> wm.findInternalWindow(wenum));
+			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
 		return windowsMenu;
@@ -206,15 +206,12 @@ public class MainMenuBar extends MenuBar {
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
-		MenuItem windowLocation = new MenuItem("Window Locations");
-		windowLocation.setOnAction(e -> wm.printWindowLocations());
-
 		MenuItem delWindows = new MenuItem("Close All Windows");
-		delWindows.setOnAction(e -> wm.closeAll());
+		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
 
 		MenuItem emphWindow = new MenuItem("Refresh Registers");
 		emphWindow.setOnAction(e -> {
-			Registers reg = (Registers) wm.findInternalWindow(WindowEnum.REGISTERS);
+			Registers reg = (Registers) wm.getWorkspace().openInternalWindow(WindowEnum.REGISTERS);
 			reg.refreshData();
 		});
 
@@ -241,7 +238,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(windowLocation, delWindows, emphWindow, lineWrap, dumpProgram);
+		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram);
 		return debugMenu;
 	}
 

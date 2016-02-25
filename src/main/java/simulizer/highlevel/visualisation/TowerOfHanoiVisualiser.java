@@ -238,11 +238,4 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		setHeight(windowHeight);
 	}
 
-	private void setAttrs(Rectangle rect, double x, double y, double width, double height) {
-		rect.setX(x);
-		rect.setY(y);
-		rect.setWidth(width);
-		rect.setHeight(height);
-	}
-
 }

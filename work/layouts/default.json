@@ -1,28 +1,28 @@
 {
-  "name": "Default Projector",
-  "width": 1024.0,
-  "height": 705.0,
+  "name": "Default",
+  "width": 1008.0,
+  "height": 641.0,
   "windows": [
     {
       "id": "ACE_EDITOR",
-      "x": 4.0,
-      "y": 30.0,
-      "width": 400.0,
-      "height": 668.0
+      "x": 0.0,
+      "y": 0.0,
+      "width": 409.0,
+      "height": 641.0
     },
     {
       "id": "CPU_VISUALISATION",
-      "x": 411.0,
-      "y": 31.0,
-      "width": 606.0,
-      "height": 408.0
+      "x": 410.0,
+      "y": 0.0,
+      "width": 598.0,
+      "height": 415.0
     },
     {
       "id": "REGISTERS",
-      "x": 411.0,
-      "y": 445.0,
-      "width": 606.0,
-      "height": 249.0
+      "x": 406.0,
+      "y": 417.0,
+      "width": 602.0,
+      "height": 225.0
     }
   ]
 }

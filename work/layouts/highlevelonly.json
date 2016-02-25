@@ -1,14 +1,14 @@
 {
   "name": "High Level Only",
-  "width": 1024.0,
-  "height": 705.0,
+  "width": 1129.0,
+  "height": 641.0,
   "windows": [
     {
       "id": "HIGH_LEVEL_VISUALISATION",
-      "x": 10.0,
-      "y": 35.0,
-      "width": 1004.0,
-      "height": 660.0
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1130.0,
+      "height": 641.0
     }
   ]
 }

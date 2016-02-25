@@ -1,4 +1,4 @@
-package simulizer.ui;
+package simulizer.ui.components;
 
 import java.util.ArrayList;
 import java.util.Arrays;
