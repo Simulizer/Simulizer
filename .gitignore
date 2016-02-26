@@ -58,3 +58,5 @@ gradle.properties
 # Ignore logs
 *.log
 
+# Ignore generated tex files
+docs/final-report/tables/*.tex
