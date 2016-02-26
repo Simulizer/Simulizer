@@ -51,23 +51,14 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private Rectangle[] vPegs = new Rectangle[3];
 	private Rectangle[] discs;
 
-	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, int width, int height, int startingPeg, int numDiscs) {
+	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDiscs) {
 		super(vis, width, height);
 
 		this.startingPeg = startingPeg;
 		this.numDiscs = numDiscs;
 		this.discs = new Rectangle[numDiscs];
 
-		this.platformWidth = (4 * width) / 5;
-		this.xOffset = (width - platformWidth) / 2;
-		this.pegY0 = height / 3;
-		this.pegHeight = height / 2;
-		this.pegWidth = width / 40;
-
-		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
-		this.maxdiscWidth = platformWidth / 3 - width / 120;
-		this.discWidthDelta = Math.min(width / 30, (maxdiscWidth - pegWidth - width / 120) / (numDiscs - 1));
-
+		calculateDimensions(width, height);
 		init();
 		resize();
 	}
@@ -198,20 +189,28 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		return pathTransition;
 	}
 
+	private void calculateDimensions() {
+		calculateDimensions(getHighLevelVisualisation().getWindowWidth(), getHighLevelVisualisation().getWindowHeight());
+	}
+
+	private void calculateDimensions(double width, double height) {
+		this.platformWidth = (4 * width) / 5;
+		this.xOffset = (width - platformWidth) / 2;
+		this.pegY0 = height / 3;
+		this.pegHeight = height / 2;
+		this.pegWidth = width / 40;
+
+		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
+		this.maxdiscWidth = platformWidth / 3 - width / 120;
+		this.discWidthDelta = Math.min(width / 30, (maxdiscWidth - pegWidth - width / 120) / (numDiscs - 1));
+	}
+
 	@Override
 	public void resize() {
 		double windowWidth = getHighLevelVisualisation().getWindowWidth();
 		double windowHeight = getHighLevelVisualisation().getWindowHeight();
 
-		this.platformWidth = (4 * windowWidth) / 5;
-		this.xOffset = (windowWidth - platformWidth) / 2;
-		this.pegY0 = windowHeight / 3;
-		this.pegHeight = windowHeight / 2;
-		this.pegWidth = windowWidth / 40;
-
-		this.discHeight = Math.min(windowHeight / 14, pegHeight / numDiscs);
-		this.maxdiscWidth = platformWidth / 3 - windowWidth / 120;
-		this.discWidthDelta = Math.min(windowWidth / 30, (maxdiscWidth - pegWidth - windowWidth / 120) / (numDiscs - 1));
+		calculateDimensions();
 
 		setAttrs(this.base, xOffset, pegY0 + pegHeight, platformWidth, discHeight);
 
