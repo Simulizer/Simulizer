@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cd ..
 SVNREPO=../A4
 
 for f in $(git ls-tree -r master --name-only); do
