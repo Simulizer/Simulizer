@@ -16,18 +16,13 @@ import java.util.Map;
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;
-	private AceEditor _editor; // use getEditor instead of direct access
 
 	public UISimulationListener(WindowManager wm) {
 		this.wm = wm;
-		_editor = null;
 	}
 
 	private AceEditor getEditor() {
-		if(_editor == null) {
-			_editor = (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
-		}
-		return _editor;
+		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
 	}
 
 	@Override

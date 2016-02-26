@@ -40,11 +40,8 @@ public class Workspace extends Observable implements Themeable {
 		final Timer timer = new Timer();
 		TimerTask task = null;
 
-		/**
-		 * @note this method is synchronized so that only one thread alters the timer at once
-		 */
 		@Override
-		public synchronized void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 			if (task != null)
 				task.cancel();
 			task = new TimerTask() {

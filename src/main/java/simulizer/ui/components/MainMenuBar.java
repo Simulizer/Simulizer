@@ -5,12 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import javafx.application.Platform;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
@@ -31,7 +26,6 @@ import simulizer.ui.windows.Registers;
 public class MainMenuBar extends MenuBar {
 
 	private WindowManager wm;
-	private AceEditor _editor; // use getEditor instead of direct access
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
@@ -39,10 +33,7 @@ public class MainMenuBar extends MenuBar {
 	}
 
 	private AceEditor getEditor() {
-		if(_editor == null) {
-			_editor = (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
-		}
-		return _editor;
+		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
 	}
 
 	private Menu fileMenu() {
@@ -57,8 +48,9 @@ public class MainMenuBar extends MenuBar {
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
 			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			assert f != null;
-			getEditor().loadFile(f);
+			if(f != null) {
+				getEditor().loadFile(f);
+			}
 		});
 
 		// | |-- Save
@@ -66,8 +58,9 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setOnAction(e -> {
 			if(getEditor().getCurrentFile() == null) {
 				File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-				assert f != null;
-				getEditor().saveAs(f);
+				if(f != null) {
+					getEditor().saveAs(f);
+				}
 			}
 			getEditor().saveFile();
 		});
@@ -76,8 +69,9 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
 			File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			assert f != null;
-			getEditor().saveAs(f);
+			if(f != null) {
+				getEditor().saveAs(f);
+			}
 		});
 
 		MenuItem exitItem = new MenuItem("Exit");
@@ -158,14 +152,24 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
-			ProblemLogger log = new StoreProblemLogger();
+			StoreProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
 			Program p = a.assemble(getEditor().getText(), log);
 			if(p != null) {
 				wm.runProgram(p);
 			} else {
-				//TODO: handle error here (any error and the assembler bails out and returns null)
-				assert false;
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Could Not Run");
+				int size = log.getProblems().size();
+				if(size == 1) {
+					alert.setHeaderText("The Program Contains An Error!");
+				} else {
+					alert.setHeaderText("The Program Contains " + size + " Errors!");
+				}
+				alert.setContentText("You must fix them before you can\nexecute the program.");
+				alert.show();
+
+				getEditor().setProblems(log.getProblems());
 			}
 		});
 

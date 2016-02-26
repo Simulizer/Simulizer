@@ -8,6 +8,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import org.w3c.dom.Document;
+import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.ui.interfaces.InternalWindow;
@@ -15,8 +16,6 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,7 +28,9 @@ public class AceEditor extends InternalWindow {
 	//TODO: confirm exit or load if file edited
 	//TODO: annotations
 	//TODO: refresh current file if not edited
-	//TODO: become read-only when executing
+	//TODO: become read-only and hide cursor when executing
+	//TODO: mechanism for loading and saving settings
+	//TODO: update problems as the user types. maybe do this using ace's worker
 
 	private WebView view;
 	private WebEngine engine;
@@ -50,7 +51,8 @@ public class AceEditor extends InternalWindow {
 	 * Communication between this class and the javascript running in the webview
 	 */
 	public class Bridge {
-		AceEditor editor;
+		private AceEditor editor;
+		public List<Problem> problems;
 
 		public Bridge(AceEditor editor) {
 			this.editor = editor;
@@ -187,6 +189,12 @@ public class AceEditor extends InternalWindow {
 		sb.append(FileUtils.getResourceContent("/editor/mode-simp.js"));
 
 		engine.executeScript(sb.toString());
+	}
+
+
+	public void setProblems(List<Problem> problems) {
+		bridge.problems = problems;
+		jsWindow.call("refreshProblems");
 	}
 
 

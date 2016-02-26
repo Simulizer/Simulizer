@@ -4,7 +4,7 @@
     "layout": "default.json",
     "scale-ui": {
       "enabled": true,
-      "delay": 0
+      "delay": 10
     },
     "grid": {
       "enabled": false,
