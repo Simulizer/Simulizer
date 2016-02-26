@@ -25,7 +25,8 @@ var SimpHighlightRules = function() {
     this.$rules = {
         'start' : [
             { token: 'comment.assembly',
-              regex: '#.*$'
+              regex: '#',
+              next:  'comment'
             },
             { token: 'keyword.control.assembly',
               regex: keywordRegex,
@@ -67,6 +68,15 @@ var SimpHighlightRules = function() {
             // unrecognised text is assumed to be a label
             { token: 'entity.name.function.assembly',
               regex: '\\b([a-zA-Z_][a-zA-Z0-9_]*)',
+            }
+        ],
+        'comment' : [
+            { token: 'comment',
+              regex: '[^@]*$', // comment body up until EOL
+              next:  'pop'
+            },
+            { token: 'comment',
+              regex: '([^@]|(@[^\{]))*' // normal comment body up to an annotation
             }
         ]
     };
@@ -172,10 +182,44 @@ var oop = require("../lib/oop");
 var TextMode  = require("./text").Mode;
 
 var SimpHighlightRules = require("./simp_highlight_rules").SimpHighlightRules;
+var JavaScriptHighlightRules =
+    require("./javascript_highlight_rules").JavaScriptHighlightRules;
 var SimpFoldMode = require("./folding/simp_fold_mode").FoldMode;
 
+
+// combined Simp + annotation highlight rules
+var DocumentHighlightRules = function() {
+    SimpHighlightRules.call(this);
+
+    var startRules = [
+        { token: 'keyword',
+          regex: '@\{',
+          push: 'js-start'
+        }
+    ];
+
+    var endRules = [
+        { token: 'keyword',
+          regex: '\}@$', // annotation right up to EOL
+          next: 'start'
+        },
+        { token: 'keyword',
+          regex: '\}@', // annotation with comment after
+          next: 'pop'
+        }
+    ];
+
+    this.embedRules(JavaScriptHighlightRules, 'js-', endRules, ['start']);
+
+    // able to enter js mode from comments only
+    this.$rules['comment'].unshift.apply(this.$rules['comment'], startRules);
+
+    this.normalizeRules();
+}
+oop.inherits(DocumentHighlightRules, SimpHighlightRules);
+
 var SimpMode = function() {
-    this.HighlightRules = SimpHighlightRules;
+    this.HighlightRules = DocumentHighlightRules;
     this.foldingRules = new SimpFoldMode();
 };
 oop.inherits(SimpMode, TextMode);

@@ -31,6 +31,9 @@ public class AceEditor extends InternalWindow {
 	//TODO: become read-only and hide cursor when executing
 	//TODO: mechanism for loading and saving settings
 	//TODO: update problems as the user types. maybe do this using ace's worker
+	//TODO: vim keybindings
+	//TODO: remove requirejs dependency because ace already provides it
+	//TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
 
 	private WebView view;
 	private WebEngine engine;
@@ -68,8 +71,6 @@ public class AceEditor extends InternalWindow {
 	private Bridge bridge;
 
 	public AceEditor() {
-		setCache(true);
-		setCacheHint(CacheHint.SPEED);
 		setStyle("-fx-background-color: black;");
 
 		view = new WebView();
@@ -96,7 +97,7 @@ public class AceEditor extends InternalWindow {
 
 					//engine.executeScript(FileUtils.getResourceContent("/external/require.js"));
 					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
-					//engine.executeScript(FileUtils.getResourceContent("/generated/mode-javascript.js"));
+					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
 					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
 					//engine.executeScript(FileUtils.getResourceContent("/external/theme-ambiance.js"));
 					//engine.executeScript(FileUtils.getResourceContent("/external/theme-tomorrow_night_eighties.js"));
@@ -238,7 +239,7 @@ public class AceEditor extends InternalWindow {
 
 	private void setEdited(boolean edited) {
 		String filename = currentFile != null ? currentFile.getName() : "New File";
-		String editedSymbol = currentFile != null && edited ? "*" : "";
+		String editedSymbol = edited ? " *" : "";
 		setTitle(WindowEnum.getName(this) + " - " + filename + editedSymbol);
 		changedSinceLastSave = edited;
 	}
