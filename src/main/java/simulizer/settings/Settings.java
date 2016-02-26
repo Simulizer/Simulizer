@@ -29,8 +29,8 @@ public class Settings {
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new ObjectSetting("window", "Window")
-				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 0, Integer.MAX_VALUE))
-				.add(new IntegerSetting("height", "Height", "Default window height", 705, 0, Integer.MAX_VALUE))
+				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 300, Integer.MAX_VALUE))
+				.add(new IntegerSetting("height", "Height", "Default window height", 705, 300, Integer.MAX_VALUE))
 			);
 		settings.add(new ObjectSetting("workspace", "Workspace")
 					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default"))

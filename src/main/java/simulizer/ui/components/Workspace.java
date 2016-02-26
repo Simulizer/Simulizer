@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,6 +18,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
+import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themeable;
@@ -36,8 +38,12 @@ public class Workspace extends Observable implements Themeable {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
 		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
-			ChangeListener<Object> resizeEvent = new ChangeListener<Object>() {
-				// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+			// Register event listeners
+			wm.getPrimaryStage().widthProperty().addListener((a, b, c) -> Platform.runLater(() -> resizeInternalWindows()));
+			wm.getPrimaryStage().heightProperty().addListener((a, b, c) -> Platform.runLater(() -> resizeInternalWindows()));
+
+			// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+			wm.getPrimaryStage().maximizedProperty().addListener(new ChangeListener<Object>() {
 				final Timer timer = new Timer("Window-Resizing", true);
 				TimerTask task = null;
 				int delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
@@ -48,17 +54,12 @@ public class Workspace extends Observable implements Themeable {
 					task = new TimerTask() {
 						@Override
 						public void run() {
-							resizeInternalWindows();
+							Platform.runLater(() -> resizeInternalWindows());
 						}
 					};
 					timer.schedule(task, delay);
 				}
-			};
-			
-			// Register event listeners
-			wm.getPrimaryStage().widthProperty().addListener(resizeEvent);
-			wm.getPrimaryStage().heightProperty().addListener(resizeEvent);
-			wm.getPrimaryStage().maximizedProperty().addListener(resizeEvent);
+			});
 		}
 	}
 
@@ -212,11 +213,17 @@ public class Workspace extends Observable implements Themeable {
 		int i = 0;
 		WindowLocation[] wls = new WindowLocation[openWindows.size()];
 		for (InternalWindow window : openWindows) {
-			wls[i] = new WindowLocation(WindowEnum.toEnum(window), window.getLayoutX(), window.getLayoutY(), window.getWidth(), window.getHeight());
+			// @formatter:off
+			wls[i] = new WindowLocation(WindowEnum.toEnum(window), 
+										window.getLayoutX() / getWidth(), 
+										window.getLayoutY() / getHeight(), 
+										window.getWidth() / getWidth(), 
+										window.getHeight() / getHeight());
+			// @formatter:on
 			i++;
 		}
 
-		return new Layout(name, pane.getWidth(), pane.getHeight(), wls);
+		return new Layout(name, wls);
 	}
 
 	public ReadOnlyDoubleProperty widthProperty() {
@@ -233,5 +240,5 @@ public class Workspace extends Observable implements Themeable {
 	public Settings getSettings() {
 		return wm.getSettings();
 	}
-
+	
 }

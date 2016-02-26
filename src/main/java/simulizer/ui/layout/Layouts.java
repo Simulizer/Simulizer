@@ -16,7 +16,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
-import javafx.application.Platform;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -38,7 +37,7 @@ public class Layouts implements Iterable<Layout> {
 		Gson g = new Gson();
 
 		try {
-			String layoutName = (String)workspace.getSettings().get("workspace.layout");
+			String layoutName = (String) workspace.getSettings().get("workspace.layout");
 
 			// Check all files in the layouts folder
 			for (Path layout : Files.newDirectoryStream(folder)) {
@@ -60,7 +59,7 @@ public class Layouts implements Iterable<Layout> {
 	}
 
 	public void setDefaultLayout() {
-		Platform.runLater(() -> setLayout(defaultLayout));
+		setLayout(defaultLayout);
 	}
 
 	public void saveLayout(File saveFile) {
@@ -90,21 +89,25 @@ public class Layouts implements Iterable<Layout> {
 	}
 
 	public void setWindowDimentions(InternalWindow w) {
+		double width = workspace.getWidth(), height = workspace.getHeight();
+
 		WindowLocation[] wl = layout.getWindowLocations();
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
 				// Resize window to layout dimensions
-				w.setWorkspaceSize(layout.getWidth(), layout.getHeight());
-				w.setBoundsWithoutResize(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
-				double width = workspace.getWidth(), height = workspace.getHeight();
-				if (width > 0 && height > 0)
+				w.setNormalisedDimentions(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
+				if (width > 0 && height > 0) {
 					w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
+				}
 				return;
 			}
 		}
 
 		// If there are no bounds set in the layout, use this default
-		w.setBoundsWithoutResize(0, 0, workspace.getWidth(), workspace.getHeight());
+		w.setNormalisedDimentions(0.1, 0.1, 0.8, 0.8);
+		if (width > 0 && height > 0) {
+			w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
+		}
 	}
 
 	@Override

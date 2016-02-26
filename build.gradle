@@ -127,7 +127,7 @@ version = '0.01'
 description = 'MIPS-like assembly language interpreter' +
         ' with CPU and high-level algorithm visualisations'
 
-mainClassName = 'simulizer.Main'
+mainClassName = 'simulizer.Simulizer'
 
 
 /////////////////////////////////////////////////

@@ -28,7 +28,7 @@
     "open-file" : null
   },
   "splash-screen": {
-    "enabled": true,
+    "enabled": false,
     "delay": 750,
     "width": 676,
     "height": 235

@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
@@ -18,12 +19,10 @@ import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
-	private double windowWidth = -1, windowHeight = -1;
+	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
 
 	public InternalWindow() {
-		setScaleX(0);
-		setScaleY(0);
 
 		// Using caching to smooth movement
 		setCache(true);
@@ -55,28 +54,34 @@ public abstract class InternalWindow extends Window {
 		// Bring to front when clicked
 		onMouseClickedProperty().addListener((e) -> toFront());
 
+		// Update layout on move/resize
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(() -> calculateLayout()));
+
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
+
+		// For open animation
+		setScaleX(0);
+		setScaleY(0);
 	}
 
 	/**
-	 * Forcefully puts a window in a location (will override any MainWindow resize)
+	 * Sets the normalised dimensions
 	 * 
 	 * @param x
-	 *            the x location within the workspace
+	 *            the normalised x location within the workspace
 	 * @param y
-	 *            the y location within the workspace
+	 *            the normalised y location within the workspace
 	 * @param width
-	 *            the width of the InternalWindow
+	 *            the normalised width of the InternalWindow
 	 * @param height
-	 *            the height of the InternalWindow
+	 *            the normalised height of the InternalWindow
 	 */
-	public void setBoundsWithoutResize(double x, double y, double width, double height) {
-		setLayoutX(x);
-		setLayoutY(y);
-		setPrefSize(width, height);
-		setWidth(width);
-		setHeight(height);
+	public void setNormalisedDimentions(double layX, double layY, double layWidth, double layHeight) {
+		this.layX = layX;
+		this.layY = layY;
+		this.layWidth = layWidth;
+		this.layHeight = layHeight;
 	}
 
 	/**
@@ -186,10 +191,10 @@ public abstract class InternalWindow extends Window {
 
 	/** Called when all internal window stuff is done */
 	public void ready() {
-		ScaleTransition sc = new ScaleTransition(Duration.millis(200), this);
+		ScaleTransition sc = new ScaleTransition(Duration.millis(250), this);
 		sc.setToX(1);
 		sc.setToY(1);
-		sc.play();
+		Platform.runLater(() -> sc.playFromStart());
 	}
 
 	@Override
@@ -200,19 +205,22 @@ public abstract class InternalWindow extends Window {
 	}
 
 	public void setWorkspaceSize(double width, double height) {
-		// Resize InternalWindow to new dimensions
-		if (windowWidth != width) {
-			double ratio = width / windowWidth;
-			setLayoutX(getLayoutX() * ratio);
-			setPrefWidth(getWidth() * ratio);
+		if (width != Double.NaN && height != Double.NaN) {
+			setLayoutX(layX * width);
+			setPrefWidth(layWidth * width);
+			setLayoutY(layY * height);
+			setPrefHeight(layHeight * height);
 			windowWidth = width;
-		}
-		if (windowHeight != height) {
-			double ratio = height / windowHeight;
-			setLayoutY(getLayoutY() * ratio);
-			setPrefHeight(getHeight() * ratio);
 			windowHeight = height;
 		}
 	}
 
+	private void calculateLayout() {
+		if (windowWidth > 0 && windowHeight > 0) {
+			layX = getLayoutX() / windowWidth;
+			layWidth = getWidth() / windowWidth;
+			layY = getLayoutY() / windowHeight;
+			layHeight = getHeight() / windowHeight;
+		}
+	}
 }
