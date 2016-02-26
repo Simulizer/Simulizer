@@ -185,7 +185,6 @@ public class CodeEditor extends InternalWindow {
 
 				// Show the code in the editor
 				setText(codeIn);
-				syntaxHighlighter.updateRegexHighlighting();
 				fileEdited = false;
 				setTitle(TITLE + " - " + selectedFile.getName());
 				updateTitleEditStatus();
@@ -274,6 +273,12 @@ public class CodeEditor extends InternalWindow {
 
 	public void highlightCurrentLine(int lineNum) {
 		currentLine.set(lineNum);
+	}
+	
+	@Override
+	public void close() {
+		syntaxHighlighter.stop();
+		super.close();
 	}
 
 }

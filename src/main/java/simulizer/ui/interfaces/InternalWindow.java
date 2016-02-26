@@ -19,7 +19,6 @@ import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
 	private double windowWidth = -1, windowHeight = -1;
-	private GridBounds grid;
 	private WindowManager wm;
 
 	public InternalWindow() {
@@ -147,7 +146,7 @@ public abstract class InternalWindow extends Window {
 	 *            the GridBounds to snap to
 	 */
 	public void setGridBounds(GridBounds grid) {
-		if (this.grid == null) {
+		if (grid != null) {
 			// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
 			addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
 				private final Timer timer = new Timer();
@@ -186,7 +185,6 @@ public abstract class InternalWindow extends Window {
 
 			});
 		}
-		this.grid = grid;
 	}
 
 	/** Called when all internal window stuff is done */

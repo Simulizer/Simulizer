@@ -14,6 +14,7 @@ public class CPUVisualisation extends InternalWindow {
     double width;
     double height;
     Pane pane;
+	private CPU cpu;
 
 	public CPUVisualisation() {
         width = 530;
@@ -77,7 +78,7 @@ public class CPUVisualisation extends InternalWindow {
 
 	private void drawVisualisation() {
 
-		CPU cpu = new CPU(this, width, height);
+		cpu = new CPU(this, width, height);
 		cpu.drawCPU();
 
 		widthProperty().addListener(new ChangeListener<Number>() {
@@ -105,5 +106,11 @@ public class CPUVisualisation extends InternalWindow {
 	@Override
 	protected double getMinimalHeight() {
 		return 415;
+	}
+	
+	@Override
+	public void close() {
+		cpu.closeAllThreads();
+		super.close();
 	}
 }

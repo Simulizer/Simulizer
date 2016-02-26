@@ -57,10 +57,11 @@ public class WindowManager extends GridPane {
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
 		// @formatter:off Sets the grid
-		grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), 
-							  (int) settings.get("workspace.grid.vertical"), 
-							  (double) settings.get("workspace.grid.sensitivity"), 
-							  (int) settings.get("workspace.grid.delay"));
+		if((boolean) settings.get("workspace.grid.enabled"))
+			grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), 
+								  (int) settings.get("workspace.grid.vertical"), 
+								  (double) settings.get("workspace.grid.sensitivity"), 
+								  (int) settings.get("workspace.grid.delay"));
 
 		// @formatter:on Set the layout
 		layouts = new Layouts(workspace);
@@ -77,10 +78,13 @@ public class WindowManager extends GridPane {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		workspace.resizeInternalWindows();
-		grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
-		grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
-		widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
-		heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+		
+		if (grid != null) {
+			grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
+			grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
+			widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+			heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+		}
 	}
 
 	public Stage getPrimaryStage() {

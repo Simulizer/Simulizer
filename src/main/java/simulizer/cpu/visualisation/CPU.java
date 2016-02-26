@@ -350,4 +350,29 @@ public class CPU {
         );
 
     }
+    
+    public void closeAllThreads(){
+    	memToRes.closeThread();
+    	IrTOPC.closeThread();
+    	PCToPlusFour.closeThread();
+    	registerToMemory.closeThread();
+    	IMToALU.closeThread();
+    	IMToIR.closeThread();
+    	IMToRegister1.closeThread();
+    	IMToRegister2.closeThread();
+    	IMToRegister3.closeThread();
+    	controlUnitToIr.closeThread();
+    	controlUnitToPC.closeThread();
+    	controlUnitToPlusFour.closeThread();
+    	controlUnitToIM1.closeThread();
+    	controlUnitToIM2.closeThread();
+    	controlUnitToRegisters.closeThread();
+    	controlUnitToALU.closeThread();
+    	controlUnitToDataMemory.closeThread();
+    	plusFourToIr.closeThread();
+    	PCToIM.closeThread();
+    	aluToMemory.closeThread();
+    	registerToALU1.closeThread();
+    	registerToALU2.closeThread();
+    }
 }
