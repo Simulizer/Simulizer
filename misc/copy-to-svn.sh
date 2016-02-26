@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cd ..
 SVNREPO=../A4
 
 echo "Copying files to ${SVNREPO} ..."
