@@ -5,6 +5,8 @@ import java.util.concurrent.CountDownLatch;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import simulizer.simulation.cpu.user_interaction.IO;
@@ -18,6 +20,8 @@ public class Logger extends InternalWindow implements IO {
 	private CountDownLatch cdl = new CountDownLatch(1);
 
 	public Logger() {
+		setTitle("Program I/O");
+
 		GridPane pane = new GridPane();
 
 		// Output Console
@@ -34,18 +38,25 @@ public class Logger extends InternalWindow implements IO {
 		// Enter Button
 		Button submit = new Button();
 		submit.setText("Enter");
-		submit.setOnAction((e) -> {
-			lastInput = input.getText();
-			input.setText("");
-			output.appendText(lastInput + "\n");
-			cdl.countDown();
+		submit.setOnAction((e) -> submitText());
+		addEventHandler(KeyEvent.ANY, (e) -> {
+			if (e.getCode() == KeyCode.ENTER)
+				submitText();
 		});
+
 		pane.add(submit, 1, 1);
 
 		widthProperty().addListener((e) -> pane.setPrefWidth(getContentPane().getWidth()));
 		heightProperty().addListener((e) -> pane.setPrefHeight(getContentPane().getHeight()));
 
 		getContentPane().getChildren().add(pane);
+	}
+
+	private void submitText() {
+		lastInput = input.getText();
+		input.setText("");
+		output.appendText(lastInput + "\n");
+		cdl.countDown();
 	}
 
 	@Override
