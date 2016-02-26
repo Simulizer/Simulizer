@@ -1,13 +1,7 @@
-package simulizer.cpu.visualisation.components;
+package simulizer.ui.components.cpu;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.PathTransition;
 import javafx.beans.binding.DoubleBinding;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.shape.*;
-import javafx.util.Duration;
+import javafx.scene.shape.Polyline;
 
 public class ConnectorWire extends Wire {
 

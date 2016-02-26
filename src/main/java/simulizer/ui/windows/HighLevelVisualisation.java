@@ -5,11 +5,11 @@ import java.util.Arrays;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.highlevel.visualisation.DataStructureVisualiser;
-import simulizer.highlevel.visualisation.ListVisualiser;
-import simulizer.highlevel.visualisation.PresentationTowerOfHanoiVisualiser;
-import simulizer.highlevel.visualisation.listeners.PresentationTowerOfHanoiListener;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.ui.components.highlevel.DataStructureVisualiser;
+import simulizer.ui.components.highlevel.ListVisualiser;
+import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.listeners.PresentationTowerOfHanoiListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 

@@ -1,4 +1,4 @@
-package simulizer.highlevel.visualisation;
+package simulizer.ui.components.highlevel;
 
 import java.util.ArrayList;
 import java.util.List;

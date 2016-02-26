@@ -105,9 +105,6 @@ public abstract class InternalWindow extends Window {
 	 */
 	public final void setWindowManager(WindowManager wm) {
 		this.wm = wm;
-		// TODO: windowWidth = wm.getPane().getWidth();
-		// TODO: windowHeight = wm.getPane().getHeight();
-		// wm.addObserver(this);
 	}
 
 	/**

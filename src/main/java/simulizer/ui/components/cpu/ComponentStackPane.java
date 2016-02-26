@@ -1,10 +1,9 @@
-package simulizer.cpu.visualisation.components;
+package simulizer.ui.components.cpu;
 
 import javafx.animation.FillTransition;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.RadialGradient;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;

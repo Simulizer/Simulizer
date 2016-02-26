@@ -1,4 +1,8 @@
 {
+  "window": {
+  	"width": 1366,
+  	"height": 768
+  },
   "workspace": {
     "theme": "default",
     "layout": "default.json",
@@ -22,5 +26,11 @@
   "code_editor": {
     "word-wrap": true,
     "open-file" : null
+  },
+  "splash-screen": {
+    "enabled": true,
+    "delay": 750,
+    "width": 676,
+    "height": 235
   }
 }

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,10 +31,9 @@ public class SyntaxHighlighter {
 	private CodeArea codeArea;
 
 	private List<Problem> problems = new ArrayList<>();
-	private StyleSpans<Collection<String>> errorHighlighting =
-		new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), 0).create();
+	private StyleSpans<Collection<String>> errorHighlighting = new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), 0).create();
 
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	private ExecutorService executor = Executors.newSingleThreadExecutor((r) -> new Thread(r, "SyntaxHighlighter"));
 
 	private static final String[] KEYWORDS = getKeywords();
 	private static final String[] REGISTERS = getRegisterNames();
@@ -49,10 +49,7 @@ public class SyntaxHighlighter {
 	private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
 	private static final String ANNOTATION_PATTERN = "@[^\n]*";
 
-	private static final Pattern PATTERN = Pattern.compile("(?<LABEL>" + LABEL_PATTERN + ")" + "|(?<DIRECTIVE>" + DIRECTIVE_PATTERN + ")"
-		+ "|(?<KEYWORD>" + KEYWORD_PATTERN + ")" + "|(?<REGISTER>" + REGISTER_PATTERN + ")" + "|(?<LABELREF>" + LABELREF_PATTERN + ")"
-		+ "|(?<CONSTANT>" + CONSTANT_PATTERN + ")" + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")" + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
-		+ "|(?<STRING>" + STRING_PATTERN + ")" + "");
+	private static final Pattern PATTERN = Pattern.compile("(?<LABEL>" + LABEL_PATTERN + ")" + "|(?<DIRECTIVE>" + DIRECTIVE_PATTERN + ")" + "|(?<KEYWORD>" + KEYWORD_PATTERN + ")" + "|(?<REGISTER>" + REGISTER_PATTERN + ")" + "|(?<LABELREF>" + LABELREF_PATTERN + ")" + "|(?<CONSTANT>" + CONSTANT_PATTERN + ")" + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")" + "|(?<COMMENT>" + COMMENT_PATTERN + ")" + "|(?<STRING>" + STRING_PATTERN + ")" + "");
 
 	public SyntaxHighlighter(CodeArea codeArea) {
 		this.codeArea = codeArea;
@@ -99,7 +96,8 @@ public class SyntaxHighlighter {
 	 */
 	public String getErrorMessage(int chIdx) {
 		for (Problem problem : problems) {
-			if (problem.rangeStart <= chIdx && chIdx <= problem.rangeEnd) return problem.message;
+			if (problem.rangeStart <= chIdx && chIdx <= problem.rangeEnd)
+				return problem.message;
 		}
 
 		return null;
@@ -125,15 +123,10 @@ public class SyntaxHighlighter {
 			int cPosition = codeArea.getCaretPosition();
 
 			// Don't override error messages, unless the caret is over an error block
-			if ((cPosition < mStart || cPosition > mEnd) && (getErrorMessage(mStart) != null || getErrorMessage(mEnd) != null)) continue;
+			if ((cPosition < mStart || cPosition > mEnd) && (getErrorMessage(mStart) != null || getErrorMessage(mEnd) != null))
+				continue;
 
-			String styleClass = matcher.group("LABEL") != null ? "label"
-				: matcher.group("KEYWORD") != null ? "recognised-instruction"
-					: matcher.group("REGISTER") != null ? "register"
-						: matcher.group("DIRECTIVE") != null ? "directiveid"
-							: matcher.group("CONSTANT") != null ? "constant"
-								: matcher.group("STRING") != null ? "constant" : matcher.group("ANNOTATION") != null ? "annotation"
-									: matcher.group("COMMENT") != null ? "comment" : matcher.group("LABELREF") != null ? "label" : null;
+			String styleClass = matcher.group("LABEL") != null ? "label" : matcher.group("KEYWORD") != null ? "recognised-instruction" : matcher.group("REGISTER") != null ? "register" : matcher.group("DIRECTIVE") != null ? "directiveid" : matcher.group("CONSTANT") != null ? "constant" : matcher.group("STRING") != null ? "constant" : matcher.group("ANNOTATION") != null ? "annotation" : matcher.group("COMMENT") != null ? "comment" : matcher.group("LABELREF") != null ? "label" : null;
 			/* never happens */ assert styleClass != null;
 
 			int start = matcher.start();
@@ -226,10 +219,12 @@ public class SyntaxHighlighter {
 		for (Problem p : log.getProblems()) {
 			System.out.println(p);
 			// If it is a global error, just show it in the logger or something
-			if (p.rangeStart == -1 && p.rangeEnd == -1 && p.lineNum == Problem.NO_LINE_NUM) continue;
+			if (p.rangeStart == -1 && p.rangeEnd == -1 && p.lineNum == Problem.NO_LINE_NUM)
+				continue;
 
 			int spacing = p.rangeStart - lastTokenEnd;
-			if (spacing > 0) errorSpansBuilder.add(Collections.emptyList(), spacing);
+			if (spacing > 0)
+				errorSpansBuilder.add(Collections.emptyList(), spacing);
 
 			int styleSize = p.rangeEnd - p.rangeStart + 1;
 			errorSpansBuilder.add(Collections.singleton("error"), styleSize);

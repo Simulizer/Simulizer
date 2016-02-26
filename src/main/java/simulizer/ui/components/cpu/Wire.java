@@ -1,7 +1,4 @@
-package simulizer.cpu.visualisation.components;
-
-import java.util.Timer;
-import java.util.TimerTask;
+package simulizer.ui.components.cpu;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
@@ -28,30 +25,33 @@ public class Wire extends Group {
 	PathTransition pathTransition;
 	Path path;
 	int time;
-	double progressed;
+	Double progressed = 0.0;
 	boolean from;
 	boolean animating;
-	Timer progressing;
+	//Timer progressing;
 
 	public Wire(Polyline line, Polyline arrowHead, Type type) {
 		this.line = line;
 		this.arrowHead = arrowHead;
 		this.type = type;
 		this.animating = false;
-		this.progressing = new Timer();
+		//this.progressing = new Timer("Wire", true);
 	}
 
 	public void reanimateData() {
 		if (!animating)
 			return;
-		progressing.cancel();
+		//progressing.cancel();
 		pathTransition.stop();
 
 		setUpAnimationPath();
 
 		pathTransition.playFrom(new Duration(progressed));
 
-		progressAnimation();
+		//progressAnimation();
+		synchronized(progressed){
+			progressed++;
+		}
 	}
 
 	public void setUpAnimationPath() {
@@ -110,7 +110,7 @@ public class Wire extends Group {
 				ft.setToValue(0.0);
 				ft.play();
 				animating = false;
-				progressed = 0;
+				progressed = 0.0;
 
 				ft.setOnFinished(new EventHandler<ActionEvent>() {
 					@Override
@@ -122,21 +122,23 @@ public class Wire extends Group {
 			}
 		});
 
-		progressAnimation();
-
+		//progressAnimation();
+		synchronized(progressed){
+			progressed++;
+		}
 	}
 
-	public void progressAnimation() {
-		this.progressing = new Timer();
-		progressing.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				progressed++;
-			}
-		}, 0, 1);
-	}
+//	private void progressAnimation() {
+//		this.progressing = new Timer("Wire", true);
+//		progressing.schedule(new TimerTask() {
+//			@Override
+//			public void run() {
+//				progressed++;
+//			}
+//		}, 0, 1);
+//	}
 
 	public void closeThread() {
-		progressing.cancel();
+		//progressing.cancel();
 	}
 }

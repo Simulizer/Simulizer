@@ -1,9 +1,6 @@
-package simulizer.cpu.visualisation.components;
+package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Rectangle;
-
-import java.util.Observable;
-import java.util.Observer;
 
 public class GeneralComponent extends ComponentStackPane {
 

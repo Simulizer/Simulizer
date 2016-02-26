@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
@@ -31,28 +30,28 @@ public class Main extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
 
 	public URI SPLASH_IMAGE;
-
+	private int SPLASH_WIDTH, SPLASH_HEIGHT;
+	private long splashStartTime;
 	private Pane splashLayout;
 	private Label progressText;
+
 	private WindowManager wm;
-	private static final int SPLASH_WIDTH = 676;
-	private static final int SPLASH_HEIGHT = 235;
+	private Settings settings;
 
 	public static void main(String[] args) {
-		System.out.println("Hello world!");
 		launch(args);
 	}
 
 	@Override
-	public void init() {
+	public void init() throws Exception {
 		ImageView splash = null;
 
-		try {
-			SPLASH_IMAGE = getResource("SimulizerLogo.png");
-			splash = new ImageView(new Image(SPLASH_IMAGE.toString(), SPLASH_WIDTH, SPLASH_HEIGHT, true, true));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
+		settings = Settings.loadSettings(new File("settings.json"));
+		SPLASH_WIDTH = (int) settings.get("splash-screen.width");
+		SPLASH_HEIGHT = (int) settings.get("splash-screen.height");
+
+		SPLASH_IMAGE = getResource("SimulizerLogo.png");
+		splash = new ImageView(new Image(SPLASH_IMAGE.toString(), SPLASH_WIDTH, SPLASH_HEIGHT, true, true));
 
 		progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n" + "Version: 0.0.1\n" + "https://github.com/ToastNumber/Simulizer");
 
@@ -79,30 +78,31 @@ public class Main extends Application {
 					System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
 
 				// Close application
-				primaryStage.setOnCloseRequest((t) -> {
-					Platform.exit();
-					System.exit(0);
-				});
-
-				// Loads the settings from file
-				Settings settings = Settings.loadSettings(new File("settings.json"));
+				primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
 
 				// Just show the main window for now
-				System.out.println("Before Sleep");
-				wm = new WindowManager(primaryStage, settings, 1024, 705);
+				wm = new WindowManager(primaryStage, settings);
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
-				Thread.sleep(750); // so that it's at least readable
-				System.out.println("After Sleep");
+				long offset = (int) settings.get("splash-screen.delay") - (System.currentTimeMillis() - splashStartTime);
+				if (offset > 0)
+					Thread.sleep(offset);
 				return true;
 			}
 		};
 
-//		Settings settings = Settings.loadSettings(new File("settings.json"));
-//		wm = new WindowManager(primaryStage, settings, 1024, 705);
-//		wm.show();
-		
-		showSplash(startupTask);
-		new Thread(startupTask).start();
+		if ((boolean) settings.get("splash-screen.enabled")) {
+			showSplash(startupTask);
+			new Thread(startupTask).start();
+		} else {
+			// TODO: Remove this code, simple check for if we are running within the work folder
+			String cwd = System.getProperty("user.dir");
+			if (!cwd.endsWith("work"))
+				System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+
+			primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
+			wm = new WindowManager(primaryStage, settings);
+			wm.show();
+		}
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {
@@ -136,6 +136,7 @@ public class Main extends Application {
 		stage.setHeight(SPLASH_HEIGHT);
 		stage.setAlwaysOnTop(true);
 		stage.show();
+		splashStartTime = System.currentTimeMillis();
 	}
 
 	private URI getResource(String filepath) throws URISyntaxException {

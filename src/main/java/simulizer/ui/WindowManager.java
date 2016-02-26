@@ -1,5 +1,6 @@
 package simulizer.ui;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
@@ -32,11 +33,9 @@ public class WindowManager extends GridPane {
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 
-	public WindowManager(Stage primaryStage, Settings settings) {
-		this(primaryStage, settings, 1060, 740);
-	}
 
-	public WindowManager(Stage primaryStage, Settings settings, int x, int y) {
+
+	public WindowManager(Stage primaryStage, Settings settings) {
 		this.primaryStage = primaryStage;
 		this.settings = settings;
 		workspace = new Workspace(this);
@@ -47,8 +46,8 @@ public class WindowManager extends GridPane {
 		add(workspace.getPane(), 0, 1);
 
 		// Set up the Primary Stage
-		primaryStage.setWidth(x);
-		primaryStage.setHeight(y);
+		primaryStage.setWidth((int) settings.get("window.width"));
+		primaryStage.setHeight((int) settings.get("window.height"));
 		primaryStage.setTitle("Simulizer");
 
 		// Set the theme
@@ -77,7 +76,7 @@ public class WindowManager extends GridPane {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		workspace.resizeInternalWindows();
+		Platform.runLater(() -> workspace.resizeInternalWindows());
 		
 		if (grid != null) {
 			grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
@@ -138,7 +137,7 @@ public class WindowManager extends GridPane {
 				}
 				return null;
 			}
-		});
+		}, "CPU-Thread");
 		cpuThread.start();
 	}
 

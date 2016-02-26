@@ -1,14 +1,16 @@
-package simulizer.cpu.visualisation;
+package simulizer.ui.components;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import simulizer.cpu.visualisation.components.*;
+import simulizer.ui.components.cpu.ALU;
+import simulizer.ui.components.cpu.ConnectorWire;
+import simulizer.ui.components.cpu.CustomLine;
+import simulizer.ui.components.cpu.CustomWire;
+import simulizer.ui.components.cpu.GeneralComponent;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
 
@@ -136,6 +138,8 @@ public class CPU {
                 if( x > xMin && x < xMax && y > yMin && y < yMax){
                     // In register box, highlight register window somehow?
                     vis.getMainWindowManager().getWorkspace().openInternalWindow(WindowEnum.REGISTERS).emphasise();
+                } else {
+                	demoVis();
                 }
             }
         });
@@ -146,132 +150,55 @@ public class CPU {
     }
 
     public void demoVis(){
-
+    	
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(500);
+                	Thread.sleep(500);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            controlUnit.highlight(2);
-                        }
-                    });
+                	Platform.runLater(() -> controlUnit.highlight(2));
+                	Platform.runLater(() -> controlUnitToIr.animateData(2, true));
+                	Thread.sleep(3000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            controlUnitToIr.animateData(2, true);
-                        }
-                    });
+                	Platform.runLater(() -> ir.highlight(2));
+                	Thread.sleep(500);
 
-                    Thread.sleep(3000);
+                	Platform.runLater(() -> IrTOPC.animateData(4, false));
+                	Thread.sleep(4000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            ir.highlight(2);
-                        }
-                    });
+                	Platform.runLater(() -> programCounter.highlight(2));
+                	Thread.sleep(500);
 
-                    Thread.sleep(500);
+                	Platform.runLater(() -> PCToIM.animateData(1, false));
+                	Thread.sleep(1000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            IrTOPC.animateData(4, false);
-                        }
-                    });
+                	Platform.runLater(() -> instructionMemory.highlight(2));
+                	Thread.sleep(500);
 
-                    Thread.sleep(4000);
+                	Platform.runLater(() -> IMToRegister1.animateData(3, false));
+                	Thread.sleep(3000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            programCounter.highlight(2);
-                        }
-                    });
+                	Platform.runLater(() -> register.highlight(2));
+                	Thread.sleep(500);
 
-                    Thread.sleep(500);
+                	Platform.runLater(() -> registerToALU1.animateData(1, false));
+                	Thread.sleep(1000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            PCToIM.animateData(1, false);
-                        }
-                    });
+                	Platform.runLater(() -> alu.highlight(2));
+                	Thread.sleep(500);
 
-                    Thread.sleep(1000);
+                	Platform.runLater(() -> aluToMemory.animateData(1, false));
+                	Thread.sleep(1000);
 
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            instructionMemory.highlight(2);
-                        }
-                    });
-
-                    Thread.sleep(500);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            IMToRegister1.animateData(3, false);
-                        }
-                    });
-
-                    Thread.sleep(3000);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            register.highlight(2);
-                        }
-                    });
-
-                    Thread.sleep(500);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            registerToALU1.animateData(1, false);
-                        }
-                    });
-
-                    Thread.sleep(1000);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            alu.highlight(2);
-                        }
-                    });
-
-                    Thread.sleep(500);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            aluToMemory.animateData(1, false);
-                        }
-                    });
-
-                    Thread.sleep(1000);
-
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            mainMemory.highlight(2);
-                        }
-                    });
+                	Platform.runLater(() -> mainMemory.highlight(2));
 
                 } catch(InterruptedException e){
                     System.out.println(e.getMessage());
                 }
 
             }
-        }).start();
+        }, "Demo-Vis").start();
 
     }
 

@@ -4,8 +4,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.cpu.visualisation.CPU;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.CPU;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 

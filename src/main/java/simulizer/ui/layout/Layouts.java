@@ -16,9 +16,8 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
-import simulizer.ui.components.Workspace;
 import javafx.application.Platform;
-import simulizer.ui.WindowManager;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Layouts implements Iterable<Layout> {

@@ -26,21 +26,24 @@ public class Workspace extends Observable implements Themeable {
 	private final Pane pane = new Pane();
 	private WindowManager wm = null;
 
+	/**
+	 * A workspace holds all the Internal Windows
+	 * 
+	 * @param wm
+	 *            The stage to listen for resize events
+	 */
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
 		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
 			ChangeListener<Object> resizeEvent = new ChangeListener<Object>() {
 				// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
-				final Timer timer = new Timer();
+				final Timer timer = new Timer("Window-Resizing", true);
 				TimerTask task = null;
-				int delay = -1;
+				int delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
 
 				@Override
 				public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-					if (delay < 0)
-						delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
-
 					timer.purge();
 					task = new TimerTask() {
 						@Override
@@ -51,13 +54,17 @@ public class Workspace extends Observable implements Themeable {
 					timer.schedule(task, delay);
 				}
 			};
+			
+			// Register event listeners
 			wm.getPrimaryStage().widthProperty().addListener(resizeEvent);
 			wm.getPrimaryStage().heightProperty().addListener(resizeEvent);
 			wm.getPrimaryStage().maximizedProperty().addListener(resizeEvent);
 		}
 	}
 
-
+	/**
+	 * Notifies all open Internal Windows to recalculate their size and positioning
+	 */
 	public void resizeInternalWindows() {
 		double width = pane.getWidth(), height = pane.getHeight();
 		if (width > 0 && height > 0)
@@ -65,18 +72,30 @@ public class Workspace extends Observable implements Themeable {
 				window.setWorkspaceSize(width, height);
 	}
 
+	/**
+	 * @return the content pane
+	 */
 	public Pane getPane() {
 		return pane;
 	}
 
+	/**
+	 * @return the workspace width
+	 */
 	public double getWidth() {
 		return pane.getWidth();
 	}
 
+	/**
+	 * @return the workspace height
+	 */
 	public double getHeight() {
 		return pane.getHeight();
 	}
 
+	/**
+	 * Closes all open Internal Windows
+	 */
 	public void closeAll() {
 		for (InternalWindow window : openWindows)
 			if (window.isVisible())
@@ -84,6 +103,13 @@ public class Workspace extends Observable implements Themeable {
 		openWindows.clear();
 	}
 
+	/**
+	 * Finds an Internal Window if it is already open. Returns null if window is not open
+	 * 
+	 * @param window
+	 *            The Internal Window to find
+	 * @return The internal window if already open
+	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
 		for (InternalWindow w : openWindows)
 			if (window.equals(w))
@@ -91,6 +117,13 @@ public class Workspace extends Observable implements Themeable {
 		return null;
 	}
 
+	/**
+	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open
+	 * 
+	 * @param window
+	 *            The Internal Window to find
+	 * @return The internal window
+	 */
 	public InternalWindow openInternalWindow(WindowEnum window) {
 		InternalWindow w = findInternalWindow(window);
 		if (w != null)
@@ -105,6 +138,12 @@ public class Workspace extends Observable implements Themeable {
 		return w;
 	}
 
+	/**
+	 * Adds Internal Windows to the workspace (use openInternalWindow instead)
+	 * 
+	 * @param windows
+	 *            List of windows to add to the workspace
+	 */
 	public void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (!openWindows.contains(window)) {
@@ -115,11 +154,17 @@ public class Workspace extends Observable implements Themeable {
 				window.setGridBounds(wm.getGridBounds());
 				window.ready();
 			} else {
-				System.out.println("Window already exists: " + window.getTitle());
+				System.err.println("Tried to add a window which already exists: " + window.getTitle());
 			}
 		}
 	}
 
+	/**
+	 * Removes Internal Windows from the workspace
+	 * 
+	 * @param windows
+	 *            List of Internal Windows to close
+	 */
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (window.isVisible())
@@ -136,10 +181,16 @@ public class Workspace extends Observable implements Themeable {
 			window.setTheme(theme);
 	}
 
-	public void closeAllExcept(InternalWindow[] newOpenWindows) {
+	/**
+	 * Closes all open Internal Windows except theseWindows
+	 * 
+	 * @param theseWindows
+	 *            The Internal Windows to keep open
+	 */
+	public void closeAllExcept(InternalWindow[] theseWindows) {
 		List<InternalWindow> keepOpen = new ArrayList<InternalWindow>();
-		for (int i = 0; i < newOpenWindows.length; i++)
-			keepOpen.add(newOpenWindows[i]);
+		for (int i = 0; i < theseWindows.length; i++)
+			keepOpen.add(theseWindows[i]);
 
 		List<InternalWindow> close = new ArrayList<InternalWindow>();
 		for (InternalWindow window : openWindows)
@@ -150,6 +201,13 @@ public class Workspace extends Observable implements Themeable {
 			removeWindows(window);
 	}
 
+	/**
+	 * Will generate a Layout of the current workspace
+	 * 
+	 * @param name
+	 *            The name of the layout
+	 * @return The layout of the current workspace
+	 */
 	public Layout generateLayout(String name) {
 		int i = 0;
 		WindowLocation[] wls = new WindowLocation[openWindows.size()];
@@ -169,6 +227,9 @@ public class Workspace extends Observable implements Themeable {
 		return pane.widthProperty();
 	}
 
+	/**
+	 * @return the settings object
+	 */
 	public Settings getSettings() {
 		return wm.getSettings();
 	}

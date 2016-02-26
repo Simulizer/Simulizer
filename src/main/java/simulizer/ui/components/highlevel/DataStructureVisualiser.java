@@ -1,4 +1,4 @@
-package simulizer.highlevel.visualisation;
+package simulizer.ui.components.highlevel;
 
 import javafx.scene.shape.Rectangle;
 import simulizer.ui.windows.HighLevelVisualisation;

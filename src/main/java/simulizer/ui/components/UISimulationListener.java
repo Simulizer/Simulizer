@@ -1,5 +1,7 @@
 package simulizer.ui.components;
 
+import java.util.Map;
+
 import javafx.application.Platform;
 import simulizer.assembler.representation.Address;
 import simulizer.simulation.cpu.components.CPU;
@@ -8,8 +10,6 @@ import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.AceEditor;
-
-import java.util.Map;
 
 /**
  * Listen to messages from the simulation which concern the UI
@@ -21,22 +21,22 @@ public class UISimulationListener extends SimulationListener {
 		this.wm = wm;
 	}
 
-	private AceEditor getEditor() {
-		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
-	}
-
 	@Override
 	public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		//TODO clean up the simulation so less things become null
-		if(wm.getCPU() != null) {
+		// TODO clean up the simulation so less things become null
+		if (wm.getCPU() != null) {
 			CPU cpu = wm.getCPU();
-			if(cpu.getProgram() != null) {
-				if(cpu.getProgram().lineNumbers != null) {
+			if (cpu.getProgram() != null) {
+				if (cpu.getProgram().lineNumbers != null) {
 					Map<Address, Integer> lineNums = cpu.getProgram().lineNumbers;
-					if(lineNums.containsKey(m.statementAddress)) {
+					if (lineNums.containsKey(m.statementAddress)) {
 						int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
-						//editor.setReadOnly(true);
-						Platform.runLater(() -> getEditor().gotoLine(lineNum-1));
+						// editor.setReadOnly(true);
+						Platform.runLater(() -> {
+							AceEditor editor = (AceEditor) wm.getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+							if (editor != null)
+								editor.gotoLine(lineNum - 1);
+						});
 					}
 				}
 			}

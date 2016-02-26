@@ -1,11 +1,7 @@
-package simulizer.cpu.visualisation.components;
+package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
-
-import java.util.Observable;
-import java.util.Observer;
 
 public class ALU extends ComponentStackPane {
 

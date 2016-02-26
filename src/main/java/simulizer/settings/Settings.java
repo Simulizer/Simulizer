@@ -28,6 +28,10 @@ public class Settings {
 	private Settings(JsonObject jsonObject) {
 		// Sets up the structure of the settings file
 		// @formatter:off
+		settings.add(new ObjectSetting("window", "Window")
+				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 0, Integer.MAX_VALUE))
+				.add(new IntegerSetting("height", "Height", "Default window height", 705, 0, Integer.MAX_VALUE))
+			);
 		settings.add(new ObjectSetting("workspace", "Workspace")
 					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default"))
 					.add(new StringSetting("layout", "Default Layout", "The default layout to load", "default.json"))
@@ -44,12 +48,18 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-					.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
-					.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
+						.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
+						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 					);
 		settings.add(new ObjectSetting("code_editor", "Code Editor")
-				.add(new BooleanSetting("word-wrap", "Word Wrapping", "Toggles word wrap"))
-				);		
+					.add(new BooleanSetting("word-wrap", "Word Wrapping", "Toggles word wrap"))
+					);
+		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
+					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
+					.add(new IntegerSetting("delay", "Display Time", "Minimum time the splash screen should be shown for", 750, 0, Integer.MAX_VALUE))
+					.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
+					.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
+					);	
 		// @formatter:on
 
 		// Loads all the values from jsonObject
@@ -96,7 +106,7 @@ public class Settings {
 		String[] path = settingPath.split("\\.");
 		SettingValue<?> setting = settings;
 		for (int i = 0; i < path.length; i++) {
-			 setting = ((ObjectSetting) setting).get(path[i]);
+			setting = ((ObjectSetting) setting).get(path[i]);
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
 				return null;
 		}

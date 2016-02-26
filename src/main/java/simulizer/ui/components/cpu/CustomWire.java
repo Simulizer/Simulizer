@@ -1,4 +1,4 @@
-package simulizer.cpu.visualisation.components;
+package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
 
