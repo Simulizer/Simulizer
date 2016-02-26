@@ -17,7 +17,7 @@ public class PresentationTowerOfHanoiVisualiser extends TowerOfHanoiVisualiser {
 	 *            a two dimensional array where each element is an array of two elements denoting the source peg and the destination peg,
 	 *            0-2
 	 */
-	public PresentationTowerOfHanoiVisualiser(HighLevelVisualisation vis, int width, int height, int startingPeg, int numDisks) {
+	public PresentationTowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDisks) {
 		super(vis, width, height, startingPeg, numDisks);
 	}
 
