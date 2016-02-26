@@ -216,7 +216,7 @@ public class Workspace extends Observable implements Themeable {
 			i++;
 		}
 
-		return new Layout(name, pane.getWidth(), pane.getHeight(), wls);
+		return new Layout(name, wls);
 	}
 
 	public ReadOnlyDoubleProperty widthProperty() {

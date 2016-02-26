@@ -26,7 +26,7 @@ import javafx.util.Duration;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
 
-public class Main extends Application {
+public class Simulizer extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
 
 	public URI SPLASH_IMAGE;
@@ -72,16 +72,7 @@ public class Main extends Application {
 		Task<Boolean> startupTask = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
-				// TODO: Remove this code, simple check for if we are running within the work folder
-				String cwd = System.getProperty("user.dir");
-				if (!cwd.endsWith("work"))
-					System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
-
-				// Close application
-				primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
-
-				// Just show the main window for now
-				wm = new WindowManager(primaryStage, settings);
+				launchWindowManager(primaryStage);
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 				long offset = (int) settings.get("splash-screen.delay") - (System.currentTimeMillis() - splashStartTime);
 				if (offset > 0)
@@ -94,15 +85,22 @@ public class Main extends Application {
 			showSplash(startupTask);
 			new Thread(startupTask).start();
 		} else {
-			// TODO: Remove this code, simple check for if we are running within the work folder
-			String cwd = System.getProperty("user.dir");
-			if (!cwd.endsWith("work"))
-				System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
-
-			primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
-			wm = new WindowManager(primaryStage, settings);
+			launchWindowManager(primaryStage);
 			wm.show();
 		}
+	}
+
+	private void launchWindowManager(Stage primaryStage) {
+		// TODO: Remove this code, simple check for if we are running within the work folder
+		String cwd = System.getProperty("user.dir");
+		if (!cwd.endsWith("work"))
+			System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
+
+		// Close application
+		primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
+
+		// Just show the main window for now
+		wm = new WindowManager(primaryStage, settings);
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {
@@ -119,7 +117,7 @@ public class Main extends Application {
 
 				wm.show();
 				fadeSplash.play();
-			} // todo add code to gracefully handle other task states.
+			} // TODO: add code to gracefully handle other task states.
 		});
 
 		Scene splashScene = new Scene(splashLayout);

@@ -2,27 +2,5 @@
   "name": "Default",
   "width": 1008.0,
   "height": 641.0,
-  "windows": [
-    {
-      "id": "ACE_EDITOR",
-      "x": 0.0,
-      "y": 0.0,
-      "width": 409.0,
-      "height": 641.0
-    },
-    {
-      "id": "CPU_VISUALISATION",
-      "x": 410.0,
-      "y": 0.0,
-      "width": 598.0,
-      "height": 415.0
-    },
-    {
-      "id": "REGISTERS",
-      "x": 406.0,
-      "y": 417.0,
-      "width": 602.0,
-      "height": 225.0
-    }
-  ]
+  "windows": []
 }

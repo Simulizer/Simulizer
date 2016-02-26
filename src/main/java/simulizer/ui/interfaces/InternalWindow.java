@@ -18,7 +18,7 @@ import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
 public abstract class InternalWindow extends Window {
-	private double windowWidth = -1, windowHeight = -1;
+	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
 
 	public InternalWindow() {
@@ -38,22 +38,18 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
-		// Adds minimise icon
-		MinimizeIcon minimize = new MinimizeIcon(this);
-		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30)
-				setMinHeight(0.0); // Minimising
-			else
-				setMinHeight(getMinimalHeight()); // Maximising
-		});
-		getRightIcons().add(minimize);
-
 		// Adds close icon
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
 
 		// Bring to front when clicked
 		onMouseClickedProperty().addListener((e) -> toFront());
+
+		// Update layout on move/resize
+		layoutXProperty().addListener((a, b, c) -> calculateLayout());
+		layoutYProperty().addListener((a, b, c) -> calculateLayout());
+		widthProperty().addListener((a, b, c) -> calculateLayout());
+		heightProperty().addListener((a, b, c) -> calculateLayout());
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
@@ -71,12 +67,11 @@ public abstract class InternalWindow extends Window {
 	 * @param height
 	 *            the height of the InternalWindow
 	 */
-	public void setBoundsWithoutResize(double x, double y, double width, double height) {
-		setLayoutX(x);
-		setLayoutY(y);
-		setPrefSize(width, height);
-		setWidth(width);
-		setHeight(height);
+	public void setLayoutDimentions(double layX, double layY, double layWidth, double layHeight) {
+		this.layX = layX;
+		this.layY = layY;
+		this.layWidth = layWidth;
+		this.layHeight = layHeight;
 	}
 
 	/**
@@ -200,19 +195,22 @@ public abstract class InternalWindow extends Window {
 	}
 
 	public void setWorkspaceSize(double width, double height) {
-		// Resize InternalWindow to new dimensions
-		if (windowWidth != width) {
-			double ratio = width / windowWidth;
-			setLayoutX(getLayoutX() * ratio);
-			setPrefWidth(getWidth() * ratio);
+		if (width != Double.NaN && height != Double.NaN) {
+			setLayoutX(layX * width);
+			setPrefWidth(layWidth * width);
+			setLayoutY(layY * height);
+			setPrefHeight(layHeight * height);
 			windowWidth = width;
-		}
-		if (windowHeight != height) {
-			double ratio = height / windowHeight;
-			setLayoutY(getLayoutY() * ratio);
-			setPrefHeight(getHeight() * ratio);
 			windowHeight = height;
 		}
 	}
 
+	private void calculateLayout() {
+		if (windowWidth > 0 && windowHeight > 0) {
+			layX = getLayoutX() / windowWidth;
+			layWidth = getWidth() / windowWidth;
+			layY = getLayoutY() / windowHeight;
+			layHeight = getHeight() / windowHeight;
+		}
+	}
 }

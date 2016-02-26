@@ -60,7 +60,7 @@ public class Layouts implements Iterable<Layout> {
 	}
 
 	public void setDefaultLayout() {
-		Platform.runLater(() -> setLayout(defaultLayout));
+		setLayout(defaultLayout);
 	}
 
 	public void saveLayout(File saveFile) {
@@ -94,8 +94,7 @@ public class Layouts implements Iterable<Layout> {
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
 				// Resize window to layout dimensions
-				w.setWorkspaceSize(layout.getWidth(), layout.getHeight());
-				w.setBoundsWithoutResize(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
+				w.setLayoutDimentions(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
 				double width = workspace.getWidth(), height = workspace.getHeight();
 				if (width > 0 && height > 0)
 					w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
@@ -104,7 +103,7 @@ public class Layouts implements Iterable<Layout> {
 		}
 
 		// If there are no bounds set in the layout, use this default
-		w.setBoundsWithoutResize(0, 0, workspace.getWidth(), workspace.getHeight());
+		w.setLayoutDimentions(0, 0, 1, 1);
 	}
 
 	@Override
