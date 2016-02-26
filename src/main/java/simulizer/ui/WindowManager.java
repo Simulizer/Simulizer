@@ -1,140 +1,89 @@
 package simulizer.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import simulizer.assembler.representation.Program;
+import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
-import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.components.UISimulationListener;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.ui.layout.Layout;
+import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
-import simulizer.ui.layout.WindowLocation;
-import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themes;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
-
-public class WindowManager extends Pane {
-	// Stores a list of all open windows (may be already done with jfxtras)
-	private List<InternalWindow> openWindows = new ArrayList<InternalWindow>();
-	private Pane pane = new Pane();
-	private Themes themes = new Themes();
-	private Layouts layouts = new Layouts(this);
+public class WindowManager extends GridPane {
+	private Workspace workspace;
 	private Stage primaryStage;
-	private CPU cpu;
-	private Thread cpuThread;
 
-	public WindowManager(Stage primaryStage) {
-		init(primaryStage, "default", 1060, 740);
-	}
+	private GridBounds grid;
+	private Themes themes;
+	private Layouts layouts;
+	private Settings settings;
 
-	public WindowManager(Stage primaryStage, String theme) {
-		this(primaryStage, theme, 1060, 740);
-	}
+	private CPU cpu = null;
+	private Thread cpuThread = null;
+	private UISimulationListener simListener = new UISimulationListener(this);
 
-	public WindowManager(Stage primaryStage, String theme, int x, int y) {
-		init(primaryStage, theme, x, y);
-	}
+	public WindowManager(Stage primaryStage, Settings settings) {
+		this.primaryStage = primaryStage;
+		this.settings = settings;
+		workspace = new Workspace(this);
 
-	private void init(Stage primaryStage, String theme, int x, int y) {
-		cpu = null;
-		cpuThread = null;
+		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
+		GridPane.setHgrow(workspace.getPane(), Priority.ALWAYS);
+		GridPane.setVgrow(workspace.getPane(), Priority.ALWAYS);
+		add(workspace.getPane(), 0, 1);
 
-		Scene scene = new Scene(pane, x, y);
+		// Set up the Primary Stage
+		primaryStage.setWidth((int) settings.get("window.width"));
+		primaryStage.setHeight((int) settings.get("window.height"));
 		primaryStage.setTitle("Simulizer");
-		primaryStage.setScene(scene);
-		themes.setTheme(theme);
-		pane.getStyleClass().add("background");
+		primaryStage.setMinWidth(300);
+		primaryStage.setMinHeight(300);
 
+		// Set the theme
+		themes = new Themes((String) settings.get("workspace.theme"));
+		themes.addThemeableElement(workspace);
+		themes.setTheme(themes.getTheme()); // TODO: Remove hack
+
+		// @formatter:off Sets the grid
+		if((boolean) settings.get("workspace.grid.enabled"))
+			grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), 
+								  (int) settings.get("workspace.grid.vertical"), 
+								  (double) settings.get("workspace.grid.sensitivity"), 
+								  (int) settings.get("workspace.grid.delay"));
+
+		// @formatter:on Set the layout
+		layouts = new Layouts(workspace);
+		layouts.setDefaultLayout();
+
+		// MainMenuBar
 		MainMenuBar bar = new MainMenuBar(this);
-		bar.setMinWidth(1060);
-		pane.getChildren().add(bar);
+		GridPane.setHgrow(bar, Priority.ALWAYS);
+		add(bar, 0, 0);
+	}
 
-		// Resize menubar to window width
-		scene.widthProperty().addListener((a, b, newSceneWidth) -> bar.setMinWidth((double) newSceneWidth));
-		setTheme(themes.getTheme());
+	public void show() {
+		Scene scene = new Scene(this);
+		primaryStage.setScene(scene);
 		primaryStage.show();
-	}
+		Platform.runLater(() -> workspace.resizeInternalWindows());
 
-	public void closeAll() {
-		pane.getChildren().removeAll(openWindows);
-		openWindows.clear();
-	}
-
-	private void addWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			window.setOnCloseAction((e) -> removeWindows(window));
-			openWindows.add(window);
-			window.setTheme(themes.getTheme());
-			pane.getChildren().addAll(window);
-			window.ready();
+		if (grid != null) {
+			grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
+			grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
+			widthProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
+			heightProperty().addListener((e) -> grid.setWindowSize(workspace.getWidth(), workspace.getHeight()));
 		}
-	}
-
-	private void removeWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			if (window.isVisible())
-				window.close();
-			openWindows.remove(window);
-		}
-	}
-
-	public void setLayout(Layout layout) {
-		List<InternalWindow> newOpenWindows = new ArrayList<InternalWindow>();
-
-		// For each new window
-		for (WindowLocation location : layout) {
-			InternalWindow window = findInternalWindow(location.getWindowEnum());
-			window.setBounds(location.getX(), location.getY(), location.getWidth(), location.getHeight());
-			newOpenWindows.add(window);
-		}
-
-		closeAll();
-		pane.getChildren().addAll(newOpenWindows);
-		openWindows = newOpenWindows;
-
-		setTheme(themes.getTheme());
-	}
-
-	public void setTheme(Theme theme) {
-		themes.setTheme(theme);
-		pane.getStylesheets().clear();
-		pane.getStylesheets().add(theme.getStyleSheet("background.css"));
-		for (InternalWindow window : openWindows)
-			window.setTheme(theme);
-	}
-
-	public void printWindowLocations() {
-		for (InternalWindow w : openWindows) {
-			System.out.print(w.getTitle() + ": ");
-			for (double s : w.getBounds())
-				System.out.print(s + ", ");
-			System.out.println();
-		}
-	}
-
-	public InternalWindow findInternalWindow(WindowEnum window) {
-		// Find existing window
-		for (InternalWindow w : openWindows)
-			if (window.equals(w))
-				return w;
-
-		// Not found -> Create a new one
-		InternalWindow w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(this);
-		// TODO: Look for a smarter bounds first (possibly from layout), otherwise maximise the frame
-		w.setBounds(10, 35, pane.getWidth() - 20, pane.getHeight() - 45);
-		addWindows(w);
-		return w;
 	}
 
 	public Stage getPrimaryStage() {
@@ -149,14 +98,9 @@ public class WindowManager extends Pane {
 		return layouts;
 	}
 
-	public List<InternalWindow> getOpenWindows() {
-		return openWindows;
+	public GridBounds getGridBounds() {
+		return grid;
 	}
-
-	public Pane getPane() {
-		return pane;
-	}
-
 
 	public void stopCPU() {
 		if (cpuThread != null) {
@@ -167,16 +111,22 @@ public class WindowManager extends Pane {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			cpuThread = null;
 			System.out.println("Running program terminated");
 		}
 	}
 
 	public void runProgram(Program p) {
-		Logger io = (Logger) findInternalWindow(WindowEnum.LOGGER);
+		Logger io = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
 		stopCPU();
 
-		cpu = new CPU(p, io);
-		((HighLevelVisualisation) findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
+		cpu = new CPU(io);
+		HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+		if (hlv != null)
+			hlv.attachCPU(cpu);
+		cpu.loadProgram(p);
+		cpu.registerListener(simListener);
+
 		io.clear();
 
 		cpuThread = new Thread(new Task<Object>() {
@@ -190,7 +140,8 @@ public class WindowManager extends Pane {
 				}
 				return null;
 			}
-		});
+		}, "CPU-Thread");
+		cpuThread.setDaemon(true);
 		cpuThread.start();
 	}
 
@@ -200,5 +151,14 @@ public class WindowManager extends Pane {
 
 	public CPU getCPU() {
 		return cpu;
+	}
+
+	public Workspace getWorkspace() {
+		return workspace;
+	}
+
+	public Settings getSettings() {
+		return settings;
+
 	}
 }

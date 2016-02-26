@@ -36,8 +36,9 @@ bin/
 *.class
 build/
 
-# ignore generated source files
+# ignore generated and external files
 generated/
+external/
 
 # ignore gradle files
 .gradle/
@@ -57,3 +58,5 @@ gradle.properties
 # Ignore logs
 *.log
 
+# Ignore generated tex files
+docs/final-report/tables/*.tex

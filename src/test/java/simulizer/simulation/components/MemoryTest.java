@@ -75,7 +75,7 @@ public class MemoryTest {
 		
 		Program program = createProgram(myInstructions);
 		
-		CPU cpu = new CPU(null,new IOTest());
+		CPU cpu = new CPU(new IOTest());
 		cpu.loadProgram(program);
 		cpu.runProgram();//run the program
 		
@@ -218,7 +218,7 @@ public class MemoryTest {
 
 		Program program = createProgram(myInstructions);
 		
-		CPU cpu = new CPU(null,new IOTest());
+		CPU cpu = new CPU(new IOTest());
 		cpu.loadProgram(program);
 		cpu.runProgram();//run the program
 		

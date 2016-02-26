@@ -37,7 +37,7 @@ public class Logger extends InternalWindow implements IO {
 		submit.setOnAction((e) -> {
 			lastInput = input.getText();
 			input.setText("");
-			output.appendText("\n" + lastInput);
+			output.appendText(lastInput + "\n");
 			cdl.countDown();
 		});
 		pane.add(submit, 1, 1);
@@ -83,17 +83,17 @@ public class Logger extends InternalWindow implements IO {
 
 	@Override
 	public void printString(String str) {
-		output.appendText("\n" + str);
+		output.appendText(str);
 	}
 
 	@Override
 	public void printInt(int num) {
-		output.appendText("\n" + num);
+		output.appendText("" + num);
 	}
 
 	@Override
 	public void printChar(char letter) {
-		output.appendText("\n" + letter);
+		output.appendText("" + letter);
 	}
 
 	public void clear() {

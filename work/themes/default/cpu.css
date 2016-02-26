@@ -1,7 +1,7 @@
 .cpu-component{
     -fx-stroke: "#1e3c72";
     -fx-effect: dropshadow(gaussian , rgba(0,0,0,0.4) , 6,0,1,1 );
-    -fx-fill: radial-gradient(center 50% 50%, radius 140%, #2a5298 5%, #1e3c72 50%);
+    -fx-fill: #1e3c72;
 }
 
 .cpu-data{
@@ -22,8 +22,4 @@
     -fx-fill: "#fff";
     -fx-text-alignment: center;
     -fx-font: 16px "Arial, sans-serif";
-}
-
-.cpu-component-label.ALU{
-    -fx-text-alignment: "right";
 }

@@ -6,7 +6,7 @@ package simulizer.simulation.exceptions;
  *
  */
 public class StackException extends Exception {
-
+	private static final long serialVersionUID = 3575131873818521606L;
 	private int stackAddress;//address relative 0 point of stack
 	
 	/**constructor calls super constructor and initialises field

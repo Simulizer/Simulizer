@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css" media="screen">
+#editor {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.error {
+    position: absolute;
+    border-radius: 2px;
+    border: 1px solid red;
+}
+</style>
+</head>
+<body>
+<div id="editor"></div>
+<script type="text/javascript">
+
+var editor;
+var session;
+var doc;
+var markers = null;
+var Range;
+
+function init() {
+    Range = ace.require("ace/range").Range;
+
+    editor  = ace.edit('editor');
+    session = editor.getSession();
+    doc     = session.getDocument();
+
+    editor.setOptions({
+        useSoftTabs    : true,
+        tabSize        : 4,
+        wrap           : false,
+        scrollSpeed    : 0.1,
+        animatedScroll : false,
+        fontSize       : '12pt',
+        scrollPastEnd  : true,
+        displayIndentGuides: false
+    });
+    editor.setTheme("ace/theme/monokai");
+    doc.on('change', function(e) {
+        bridge.onChange();// a java method
+        if(markers)
+            removeMarkers();
+    });
+}
+
+function loadText(text) {
+    var cursorPos = -1; // indicates the beginning
+    session.setValue(text, cursorPos);
+    session.setMode("ace/mode/simp");
+    //editor.getSession().foldAll();
+}
+
+function refreshProblems() {
+    var ps = bridge.problems;
+
+    removeMarkers();
+    session.clearAnnotations();
+
+    var errorList = [];
+    markers = [];
+
+    var size = ps.size();
+
+    for(var i = 0; i < size; i++) {
+        var p = ps.get(i);
+
+        // place all of the errors with no designated line on the first line
+        // -1 because Antlr lines start from 1
+        var line = p.lineNum === -1 ? 0 : p.lineNum-1;
+        errorList.push({
+            row: line,
+            column: 0,
+            text: '- ' + p.message,
+            type: "error"
+        });
+
+        // -1 indicates no associated range
+        if(p.rangeStart !== -1 && p.rangeEnd !== -1) {
+            var start = doc.indexToPosition(p.rangeStart, 0);
+            var end   = doc.indexToPosition(p.rangeEnd, 0);
+            var range = new Range(start.row, start.column, end.row, end.column+1);
+            // keep the ID of the marker to remove it later
+            markers.push(session.addMarker(range, "error", "text", true));
+        }
+    }
+
+    session.setAnnotations(errorList);
+}
+
+function removeMarkers() {
+    if(markers) {
+        for(var i = 0; i < markers.length; i++) {
+            session.removeMarker(markers[i]);
+        }
+        markers = null;
+    }
+}
+
+</script>
+</body>
+</html>

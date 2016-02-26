@@ -115,7 +115,7 @@ public class ExecuteTest {
 	 */
 	private CPU createCPU(String myInstructions) throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
 	{
-		CPU cpu = new CPU(null,io);
+		CPU cpu = new CPU(io);
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
 		cpu.setClockSpeed(50);//speed it up a bit
 		cpu.runProgram();//execute the program

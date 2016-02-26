@@ -197,7 +197,7 @@ public class ProgramExtractorTests {
                 ".data; .asciiz \"\\hello\\\"\n.text; main: syscall;";
             ex = new ProgramExtractor(log);
             ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
-            expectGood();
+            expectBadParse("Error node: \"\"\\hello\\\"\"");
         }
     }
 }

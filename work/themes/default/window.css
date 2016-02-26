@@ -1,6 +1,6 @@
 .window {
     -fx-background-color: linear-gradient(to bottom, #dddddd 0%,#aaaabb 100%);
-    -fx-opacity: 0.8;
+    -fx-opacity: 0.95;
 }
 
 .window:hover {
