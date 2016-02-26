@@ -54,7 +54,7 @@ public class Workspace extends Observable implements Themeable {
 					timer.schedule(task, delay);
 				}
 			};
-			
+
 			// Register event listeners
 			wm.getPrimaryStage().widthProperty().addListener(resizeEvent);
 			wm.getPrimaryStage().heightProperty().addListener(resizeEvent);
@@ -212,7 +212,13 @@ public class Workspace extends Observable implements Themeable {
 		int i = 0;
 		WindowLocation[] wls = new WindowLocation[openWindows.size()];
 		for (InternalWindow window : openWindows) {
-			wls[i] = new WindowLocation(WindowEnum.toEnum(window), window.getLayoutX(), window.getLayoutY(), window.getWidth(), window.getHeight());
+			// @formatter:off
+			wls[i] = new WindowLocation(WindowEnum.toEnum(window), 
+										window.getLayoutX() / getWidth(), 
+										window.getLayoutY() / getHeight(), 
+										window.getWidth() / getWidth(), 
+										window.getHeight() / getHeight());
+			// @formatter:on
 			i++;
 		}
 

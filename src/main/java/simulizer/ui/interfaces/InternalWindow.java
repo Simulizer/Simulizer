@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
@@ -11,7 +12,6 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.CloseIcon;
-import jfxtras.scene.control.window.MinimizeIcon;
 import jfxtras.scene.control.window.Window;
 import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
@@ -22,8 +22,6 @@ public abstract class InternalWindow extends Window {
 	private WindowManager wm;
 
 	public InternalWindow() {
-		setScaleX(0);
-		setScaleY(0);
 
 		// Using caching to smooth movement
 		setCache(true);
@@ -46,13 +44,14 @@ public abstract class InternalWindow extends Window {
 		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Update layout on move/resize
-		layoutXProperty().addListener((a, b, c) -> calculateLayout());
-		layoutYProperty().addListener((a, b, c) -> calculateLayout());
-		widthProperty().addListener((a, b, c) -> calculateLayout());
-		heightProperty().addListener((a, b, c) -> calculateLayout());
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> calculateLayout());
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
+
+		// For open animation
+		setScaleX(0);
+		setScaleY(0);
 	}
 
 	/**
@@ -181,10 +180,10 @@ public abstract class InternalWindow extends Window {
 
 	/** Called when all internal window stuff is done */
 	public void ready() {
-		ScaleTransition sc = new ScaleTransition(Duration.millis(200), this);
+		ScaleTransition sc = new ScaleTransition(Duration.millis(250), this);
 		sc.setToX(1);
 		sc.setToY(1);
-		sc.play();
+		Platform.runLater(() -> sc.playFromStart());
 	}
 
 	@Override
