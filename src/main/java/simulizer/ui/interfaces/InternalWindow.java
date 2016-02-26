@@ -12,6 +12,7 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.CloseIcon;
+import jfxtras.scene.control.window.MinimizeIcon;
 import jfxtras.scene.control.window.Window;
 import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
@@ -36,6 +37,16 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
+		// Adds minimise icon
+		MinimizeIcon minimize = new MinimizeIcon(this);
+		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+			if (getHeight() > 30)
+				setMinHeight(0.0); // Minimising
+			else
+				setMinHeight(getMinimalHeight()); // Maximising
+		});
+		getRightIcons().add(minimize);
+
 		// Adds close icon
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
@@ -44,7 +55,7 @@ public abstract class InternalWindow extends Window {
 		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Update layout on move/resize
-		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> calculateLayout());
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(() -> calculateLayout()));
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
@@ -55,18 +66,18 @@ public abstract class InternalWindow extends Window {
 	}
 
 	/**
-	 * Forcefully puts a window in a location (will override any MainWindow resize)
+	 * Sets the normalised dimensions
 	 * 
 	 * @param x
-	 *            the x location within the workspace
+	 *            the normalised x location within the workspace
 	 * @param y
-	 *            the y location within the workspace
+	 *            the normalised y location within the workspace
 	 * @param width
-	 *            the width of the InternalWindow
+	 *            the normalised width of the InternalWindow
 	 * @param height
-	 *            the height of the InternalWindow
+	 *            the normalised height of the InternalWindow
 	 */
-	public void setLayoutDimentions(double layX, double layY, double layWidth, double layHeight) {
+	public void setNormalisedDimentions(double layX, double layY, double layWidth, double layHeight) {
 		this.layX = layX;
 		this.layY = layY;
 		this.layWidth = layWidth;

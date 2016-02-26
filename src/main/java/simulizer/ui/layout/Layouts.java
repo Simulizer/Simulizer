@@ -81,6 +81,7 @@ public class Layouts implements Iterable<Layout> {
 		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			newOpenWindows[i] = workspace.openInternalWindow(locations[i].getWindowEnum());
+			setWindowDimentions(newOpenWindows[i]);
 		}
 
 		workspace.closeAllExcept(newOpenWindows);
@@ -94,21 +95,18 @@ public class Layouts implements Iterable<Layout> {
 		for (int i = 0; i < wl.length; i++) {
 			if (wl[i].getWindowEnum().equals(w)) {
 				// Resize window to layout dimensions
-				w.setLayoutDimentions(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
-				System.out.println("Layout Set");
+				w.setNormalisedDimentions(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
 				if (width > 0 && height > 0) {
 					w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
-					System.out.println("Workspace Set");
 				}
 				return;
 			}
 		}
 
 		// If there are no bounds set in the layout, use this default
-		w.setLayoutDimentions(0.1, 0.1, 0.8, 0.8);
+		w.setNormalisedDimentions(0.1, 0.1, 0.8, 0.8);
 		if (width > 0 && height > 0) {
 			w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
-			System.out.println("Workspace Set");
 		}
 	}
 

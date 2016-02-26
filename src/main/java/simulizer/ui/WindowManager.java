@@ -33,8 +33,6 @@ public class WindowManager extends GridPane {
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 
-
-
 	public WindowManager(Stage primaryStage, Settings settings) {
 		this.primaryStage = primaryStage;
 		this.settings = settings;
@@ -49,6 +47,8 @@ public class WindowManager extends GridPane {
 		primaryStage.setWidth((int) settings.get("window.width"));
 		primaryStage.setHeight((int) settings.get("window.height"));
 		primaryStage.setTitle("Simulizer");
+		primaryStage.setMinWidth(300);
+		primaryStage.setMinHeight(300);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -77,7 +77,7 @@ public class WindowManager extends GridPane {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		Platform.runLater(() -> workspace.resizeInternalWindows());
-		
+
 		if (grid != null) {
 			grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
 			grid.setGridSnap((boolean) settings.get("workspace.grid.enabled"));
@@ -121,7 +121,9 @@ public class WindowManager extends GridPane {
 		stopCPU();
 
 		cpu = new CPU(p, io);
-		((HighLevelVisualisation) workspace.openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION)).attachCPU(cpu);
+		HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+		if (hlv != null)
+			hlv.attachCPU(cpu);
 		cpu.registerListener(simListener);
 
 		io.clear();
@@ -138,6 +140,7 @@ public class WindowManager extends GridPane {
 				return null;
 			}
 		}, "CPU-Thread");
+		cpuThread.setDaemon(true);
 		cpuThread.start();
 	}
 
