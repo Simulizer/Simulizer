@@ -154,27 +154,7 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Run Code");
 
 		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> {
-			StoreProblemLogger log = new StoreProblemLogger();
-			Assembler a = new Assembler();
-			Program p = a.assemble(getEditor().getText(), log);
-			if(p != null) {
-				wm.runProgram(p);
-			} else {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Could Not Run");
-				int size = log.getProblems().size();
-				if(size == 1) {
-					alert.setHeaderText("The Program Contains An Error!");
-				} else {
-					alert.setHeaderText("The Program Contains " + size + " Errors!");
-				}
-				alert.setContentText("You must fix them before you can\nexecute the program.");
-				alert.show();
-
-				getEditor().setProblems(log.getProblems());
-			}
-		});
+		runProgram.setOnAction(e -> wm.runProgram());
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {

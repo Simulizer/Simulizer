@@ -3,12 +3,16 @@ package simulizer.ui;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.assembler.Assembler;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
@@ -17,19 +21,20 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.AceEditor;
 import simulizer.ui.windows.HighLevelVisualisation;
-import simulizer.ui.windows.Logger;
 
 public class WindowManager extends GridPane {
-	private Workspace workspace;
 	private Stage primaryStage;
 
+	private Workspace workspace;
 	private GridBounds grid;
 	private Themes themes;
 	private Layouts layouts;
 	private Settings settings;
 
 	private CPU cpu = null;
+	private LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 
@@ -49,6 +54,10 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
+
+		// Creates CPU Simulation
+		io = new LoggerIO(workspace);
+		cpu = new CPU(io);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -116,33 +125,49 @@ public class WindowManager extends GridPane {
 		}
 	}
 
-	public void runProgram(Program p) {
-		Logger io = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
-		stopCPU();
+	public void runProgram() {
+		AceEditor editor = (AceEditor) getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
+		StoreProblemLogger log = new StoreProblemLogger();
+		Program p = Assembler.assemble(editor.getText(), log);
+		if (p != null) {
+			stopCPU();
 
-		cpu = new CPU(io);
-		HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-		if (hlv != null)
-			hlv.attachCPU(cpu);
-		cpu.loadProgram(p);
-		cpu.registerListener(simListener);
+			HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+			if (hlv != null)
+				hlv.attachCPU(cpu);
+			cpu.loadProgram(p);
+			cpu.registerListener(simListener);
 
-		io.clear();
+			io.clear();
 
-		cpuThread = new Thread(new Task<Object>() {
-			@Override
-			protected Object call() throws Exception {
-				try {
-					cpu.setClockSpeed(250);
-					cpu.runProgram();
-				} catch (Exception e) {
-					e.printStackTrace();
+			cpuThread = new Thread(new Task<Object>() {
+				@Override
+				protected Object call() throws Exception {
+					try {
+						cpu.setClockSpeed(250);
+						cpu.runProgram();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return null;
 				}
-				return null;
+			}, "CPU-Thread");
+			cpuThread.setDaemon(true);
+			cpuThread.start();
+		} else {
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Could Not Run");
+			int size = log.getProblems().size();
+			if (size == 1) {
+				alert.setHeaderText("The Program Contains An Error!");
+			} else {
+				alert.setHeaderText("The Program Contains " + size + " Errors!");
 			}
-		}, "CPU-Thread");
-		cpuThread.setDaemon(true);
-		cpuThread.start();
+			alert.setContentText("You must fix them before you can\nexecute the program.");
+			alert.show();
+
+			editor.setProblems(log.getProblems());
+		}
 	}
 
 	public Word[] getRegisters() {
@@ -161,4 +186,9 @@ public class WindowManager extends GridPane {
 		return settings;
 
 	}
+
+	public LoggerIO getIO() {
+		return io;
+	}
+
 }

@@ -131,12 +131,12 @@ public class Workspace extends Observable implements Themeable {
 			return w;
 
 		// Not found -> Create a new one
-		w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(wm);
-		wm.getLayouts().setWindowDimentions(w);
-		addWindows(w);
-		return w;
+		InternalWindow w2 = window.createNewWindow();
+		assert w2 != null;
+		w2.setWindowManager(wm);
+		wm.getLayouts().setWindowDimentions(w2);
+		Platform.runLater(() -> addWindows(w2));
+		return w2;
 	}
 
 	/**
@@ -240,5 +240,5 @@ public class Workspace extends Observable implements Themeable {
 	public Settings getSettings() {
 		return wm.getSettings();
 	}
-	
+
 }
