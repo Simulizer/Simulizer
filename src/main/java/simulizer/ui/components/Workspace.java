@@ -30,31 +30,33 @@ public class Workspace extends Observable implements Themeable {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
 		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
-			wm.widthProperty().addListener(resizeEvent);
-			wm.heightProperty().addListener(resizeEvent);
+			ChangeListener<Object> resizeEvent = new ChangeListener<Object>() {
+				// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
+				final Timer timer = new Timer();
+				TimerTask task = null;
+				int delay = -1;
+
+				@Override
+				public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+					if (delay < 0)
+						delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
+
+					timer.purge();
+					task = new TimerTask() {
+						@Override
+						public void run() {
+							resizeInternalWindows();
+						}
+					};
+					timer.schedule(task, delay);
+				}
+			};
+			wm.getPrimaryStage().widthProperty().addListener(resizeEvent);
+			wm.getPrimaryStage().heightProperty().addListener(resizeEvent);
+			wm.getPrimaryStage().maximizedProperty().addListener(resizeEvent);
 		}
 	}
 
-	private ChangeListener<Number> resizeEvent = new ChangeListener<Number>() {
-		// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
-		final Timer timer = new Timer();
-		TimerTask task = null;
-
-		@Override
-		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			if (task != null)
-				task.cancel();
-			task = new TimerTask() {
-				@Override
-				public void run() {
-					resizeInternalWindows();
-					task.cancel();
-				}
-			};
-			timer.schedule(task, (int) wm.getSettings().get("workspace.scale-ui.delay"));
-		}
-
-	};
 
 	public void resizeInternalWindows() {
 		double width = pane.getWidth(), height = pane.getHeight();

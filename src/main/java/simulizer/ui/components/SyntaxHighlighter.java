@@ -240,4 +240,8 @@ public class SyntaxHighlighter {
 		return errorSpansBuilder.create();
 	}
 
+	public void stop() {
+		executor.shutdown();
+	}
+
 }

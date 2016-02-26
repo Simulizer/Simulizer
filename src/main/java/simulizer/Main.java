@@ -72,7 +72,7 @@ public class Main extends Application {
 
 		Task<Boolean> startupTask = new Task<Boolean>() {
 			@Override
-			protected Boolean call() throws Exception {
+			public Boolean call() throws Exception {
 				// TODO: Remove this code, simple check for if we are running within the work folder
 				String cwd = System.getProperty("user.dir");
 				if (!cwd.endsWith("work"))
@@ -97,6 +97,10 @@ public class Main extends Application {
 			};
 		};
 
+//		Settings settings = Settings.loadSettings(new File("settings.json"));
+//		wm = new WindowManager(primaryStage, settings, 1024, 705);
+//		wm.show();
+		
 		showSplash(startupTask);
 		new Thread(startupTask).start();
 	}
