@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import category.UnitTests;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
@@ -34,6 +36,7 @@ import simulizer.simulation.exceptions.StackException;
  * @author Charlie Street
  *
  */
+@Category({UnitTests.class})
 public class ExecuteTest {
 
 	public IOTest io = new IOTest();
