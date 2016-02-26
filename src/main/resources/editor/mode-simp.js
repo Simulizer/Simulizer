@@ -73,7 +73,7 @@ var SimpHighlightRules = function() {
         'comment' : [
             { token: 'comment',
               regex: '[^@]*$', // comment body up until EOL
-              next:  'pop'
+              next:  'start'
             },
             { token: 'comment',
               regex: '([^@]|(@[^\{]))*' // normal comment body up to an annotation
@@ -201,15 +201,35 @@ var DocumentHighlightRules = function() {
     var endRules = [
         { token: 'keyword',
           regex: '\}@$', // annotation right up to EOL
-          next: 'start'
+          next:  'start'
         },
         { token: 'keyword',
           regex: '\}@', // annotation with comment after
-          next: 'pop'
+          next:  'comment'
+        },
+        // this isn't allowed, but if it happens, indicates to the user that
+        // they are back in Simp
+        { token: '',
+          regex: '$',
+          next:  'start'
         }
     ];
 
-    this.embedRules(JavaScriptHighlightRules, 'js-', endRules, ['start']);
+    // cannot use embedRules because that lets the JS rules take precedence,
+    // which is not appropriate as newlines and } have to be superseded.
+
+    //this.embedRules(JavaScriptHighlightRules, 'js-', endRules, ['start']);
+
+    // this manually performs an action like embedRules, but placing the end rules
+    // before the javascript ones
+    {
+        var jsRules = new JavaScriptHighlightRules().getRules();
+        for(var r in jsRules) {
+            jsRules[r].unshift(endRules); // prepend
+        }
+        this.addRules(jsRules, 'js-');
+    }
+
 
     // able to enter js mode from comments only
     this.$rules['comment'].unshift.apply(this.$rules['comment'], startRules);
