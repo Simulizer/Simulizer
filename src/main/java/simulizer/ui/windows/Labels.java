@@ -4,10 +4,14 @@ import java.util.Scanner;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 
@@ -28,12 +32,22 @@ public class Labels extends InternalWindow {
 			}
 		});
 
+		// Jump to the label on click
 		table.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-			int line = table.getSelectionModel().getSelectedItem().getLine();
-			((AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR)).gotoLine(line);;
+			Label label = table.getSelectionModel().getSelectedItem();
+			if (label != null) {
+				AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+				editor.gotoLine(label.getLine());
+				// To highlight the label
+				editor.findNext(label.label);
+			}
+
 		});
 	}
 
+	/**
+	 * Refreshes the data in the table
+	 */
 	public void refreshData() {
 		AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
 
@@ -42,7 +56,15 @@ public class Labels extends InternalWindow {
 		table.setItems(labels);
 	}
 
-	private void populateLabels(ObservableList<Label> list, String text) {
+	/**
+	 * Populates the given list of labels with the list of labes in the given text
+	 *
+	 * @param list
+	 *            the list to populate
+	 * @param text
+	 *            the text to analyse
+	 */
+	private static void populateLabels(ObservableList<Label> list, String text) {
 		Scanner reader = new Scanner(text);
 
 		for (int line = 1; reader.hasNext(); ++line) {
@@ -81,8 +103,39 @@ public class Labels extends InternalWindow {
 		table.getColumns().addAll(label, line);
 		table.setEditable(false);
 
-		getContentPane().getChildren().add(table);
+		BorderPane pane = new BorderPane();
+		setContentPane(pane);
+		pane.setCenter(table);
+
+		Button btnNext = new ActionButton("Next", (editor, s) -> editor.findNext(s));
+		Button btnPrevious = new ActionButton("Previous", (editor, s) -> editor.findPrevious(s));
+		Button btnAll = new ActionButton("Select All", (editor, s) -> editor.findAll(s));
+
+		HBox buttonContainer = new HBox();
+		buttonContainer.getChildren().addAll(btnPrevious, btnNext, btnAll);
+
+		pane.setBottom(buttonContainer);
 		super.ready();
+	}
+
+	private class ActionButton extends Button {
+		public ActionButton(String text, Action action) {
+			super(text);
+
+			setMaxWidth(Double.MAX_VALUE);
+			HBox.setHgrow(this, Priority.ALWAYS);
+
+			setOnAction(e -> {
+				AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+				Label selectedLabel = table.getSelectionModel().getSelectedItem();
+
+				if (selectedLabel != null) action.run(editor, selectedLabel.getLabel());
+			});
+		}
+	}
+
+	private static interface Action {
+		public void run(AceEditor editor, String s);
 	}
 
 	public static class Label {

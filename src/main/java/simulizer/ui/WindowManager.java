@@ -77,6 +77,18 @@ public class WindowManager extends GridPane {
 	public void show() {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
+		primaryStage.setOnShown((e) -> {
+			new Thread(() -> {
+				try {
+					for (int i = 0; i < 3; i++) {
+						Thread.sleep(50);
+						Platform.runLater(() -> workspace.resizeInternalWindows());
+					}
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}).start();
+		});
 		primaryStage.show();
 		Platform.runLater(() -> workspace.resizeInternalWindows());
 
