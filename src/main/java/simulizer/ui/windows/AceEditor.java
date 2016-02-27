@@ -71,7 +71,7 @@ public class AceEditor extends InternalWindow {
 	private Bridge bridge;
 
 	public AceEditor() {
-		setStyle("-fx-background-color: black;");
+		//setStyle("-fx-background-color: black;");
 
 		view = new WebView();
 		currentFile = null;
