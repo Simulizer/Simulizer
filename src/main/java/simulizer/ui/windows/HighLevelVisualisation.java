@@ -1,17 +1,21 @@
 package simulizer.ui.windows;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.highlevel.visualisation.DataStructureVisualiser;
-import simulizer.highlevel.visualisation.PresentationTowerOfHanoiVisualiser;
-import simulizer.highlevel.visualisation.listeners.PresentationTowerOfHanoiListener;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.ui.components.highlevel.DataStructureVisualiser;
+import simulizer.ui.components.highlevel.ListVisualiser;
+import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.listeners.PresentationTowerOfHanoiListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
 public class HighLevelVisualisation extends InternalWindow {
-	private double width = 600;
-	private double height = 350;
+	private double width = 400;
+	private double height = 300;
 
 	private DataStructureVisualiser visualiser;
 	private Pane drawingPane = new Pane();
@@ -27,7 +31,8 @@ public class HighLevelVisualisation extends InternalWindow {
 		setMinHeight(getMinimalHeight());
 
 		// TODO remove this line so that the visualiser is set depending on code
-		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		// this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		this.visualiser = new ListVisualiser<Integer>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
@@ -72,7 +77,7 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	@Override
 	protected double getMinimalHeight() {
-		return 400;
+		return 200;
 	}
 
 	public void setVisualiser(DataStructureVisualiser visualiser) {
@@ -93,6 +98,7 @@ public class HighLevelVisualisation extends InternalWindow {
 	 * @param cpu
 	 */
 	public void attachCPU(CPU cpu) {
+		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
 		cpu.registerListener(new PresentationTowerOfHanoiListener((PresentationTowerOfHanoiVisualiser) visualiser));
 		setResizableWindow(false);
 	}

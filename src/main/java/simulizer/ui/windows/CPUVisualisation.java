@@ -4,8 +4,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.cpu.visualisation.CPU;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.CPU;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -14,10 +14,11 @@ public class CPUVisualisation extends InternalWindow {
     double width;
     double height;
     Pane pane;
+	private CPU cpu;
 
 	public CPUVisualisation() {
-        width = 600;
-        height = 350;
+        width = 530;
+        height = 415;
         pane = new Pane();
         pane.setPrefWidth(width);
         pane.setMinWidth(width);
@@ -26,7 +27,7 @@ public class CPUVisualisation extends InternalWindow {
         pane.setMinHeight(height);
         pane.setMaxHeight(height);
         getChildren().add(pane);
-        setMinWidth(600);
+        setMinWidth(530);
         setMinHeight(getMinimalHeight());
 		drawVisualisation();
 	}
@@ -77,7 +78,7 @@ public class CPUVisualisation extends InternalWindow {
 
 	private void drawVisualisation() {
 
-		CPU cpu = new CPU(this, width, height);
+		cpu = new CPU(this, width, height);
 		cpu.drawCPU();
 
 		widthProperty().addListener(new ChangeListener<Number>() {
@@ -104,6 +105,12 @@ public class CPUVisualisation extends InternalWindow {
 	
 	@Override
 	protected double getMinimalHeight() {
-		return 400;
+		return 415;
+	}
+	
+	@Override
+	public void close() {
+		cpu.closeAllThreads();
+		super.close();
 	}
 }

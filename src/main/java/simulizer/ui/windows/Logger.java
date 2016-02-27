@@ -1,5 +1,7 @@
 package simulizer.ui.windows;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 
 import javafx.scene.control.Button;
@@ -7,10 +9,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.interfaces.InternalWindow;
 
-public class Logger extends InternalWindow implements IO {
+public class Logger extends InternalWindow implements Observer {
 
 	private TextArea output = new TextArea();
 	private TextField input = new TextField();
@@ -37,7 +38,7 @@ public class Logger extends InternalWindow implements IO {
 		submit.setOnAction((e) -> {
 			lastInput = input.getText();
 			input.setText("");
-			output.appendText("\n" + lastInput);
+			output.appendText(lastInput + "\n");
 			cdl.countDown();
 		});
 		pane.add(submit, 1, 1);
@@ -49,7 +50,23 @@ public class Logger extends InternalWindow implements IO {
 	}
 
 	@Override
-	public String readString() {
+	public void ready() {
+		getWindowManager().getIO().addObserver(this);
+		super.ready();
+	}
+	
+	@Override
+	public void close() {
+		super.close();
+		getWindowManager().getIO().deleteObserver(this);
+	}
+
+	public void clear() {
+		lastInput = "";
+		output.setText("");
+	}
+
+	public String nextMessage() {
 		try {
 			cdl = new CountDownLatch(1);
 			cdl.await();
@@ -60,45 +77,8 @@ public class Logger extends InternalWindow implements IO {
 	}
 
 	@Override
-	public int readInt() {
-		try {
-			cdl = new CountDownLatch(1);
-			cdl.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return Integer.parseInt(lastInput);
-	}
-
-	@Override
-	public char readChar() {
-		try {
-			cdl = new CountDownLatch(1);
-			cdl.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return lastInput.charAt(0);
-	}
-
-	@Override
-	public void printString(String str) {
-		output.appendText("\n" + str);
-	}
-
-	@Override
-	public void printInt(int num) {
-		output.appendText("\n" + num);
-	}
-
-	@Override
-	public void printChar(char letter) {
-		output.appendText("\n" + letter);
-	}
-
-	public void clear() {
-		lastInput = "";
-		output.setText("");
+	public void update(Observable o, Object message) {
+		output.appendText((String) message);
 	}
 
 }

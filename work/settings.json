@@ -1,3 +1,36 @@
 {
-  "defaultTheme": "default"
+  "window": {
+  	"width": 1366,
+  	"height": 768
+  },
+  "workspace": {
+    "theme": "default",
+    "layout": "default.json",
+    "scale-ui": {
+      "enabled": true,
+      "delay": 10
+    },
+    "grid": {
+      "enabled": false,
+      "horizontal": 6,
+      "vertical": 3,
+      "sensitivity": 30,
+      "delay": 200
+    },
+    "lock-to-window": false
+  },
+  "simulation": {
+    "clock-speed": 250,
+    "zero-memory": true
+  },
+  "code_editor": {
+    "word-wrap": true,
+    "open-file" : null
+  },
+  "splash-screen": {
+    "enabled": false,
+    "delay": 750,
+    "width": 676,
+    "height": 235
+  }
 }

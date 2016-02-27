@@ -158,10 +158,9 @@ PRINT_MOVE:
     # print newline
     li $v0, 4               # 4: print string
     la $a0, newline
-    syscall
+    syscall #@
 
     # return
     lw   $a0, 0($sp)        # restore $a0 from the stack
     addi $sp, $sp, 4        # shrink the stack by 4 bytes
     jr   $ra                # return to caller
-

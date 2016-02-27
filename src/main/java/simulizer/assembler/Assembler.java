@@ -1,24 +1,28 @@
 package simulizer.assembler;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import simulizer.assembler.extractor.ProgramExtractor;
-import simulizer.assembler.extractor.problem.ProblemCountLogger;
-import simulizer.assembler.extractor.problem.ProblemLogger;
-import simulizer.assembler.extractor.problem.StoreProblemLogger;
-import simulizer.assembler.representation.*;
-import simulizer.parser.SimpLexer;
-import simulizer.parser.SimpParser;
-import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.data.representation.Word;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import simulizer.assembler.extractor.ProgramExtractor;
+import simulizer.assembler.extractor.problem.ProblemCountLogger;
+import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Label;
+import simulizer.assembler.representation.Program;
+import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.Variable;
+import simulizer.parser.SimpLexer;
+import simulizer.parser.SimpParser;
+import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.data.representation.Word;
 
 
 public class Assembler {
@@ -28,7 +32,7 @@ public class Assembler {
      * @param log the logger to send the error messages (may be null)
      * @return the assembled program (or null if errors are encountered)
      */
-    public Program assemble(String input, ProblemLogger log) {
+    public static Program assemble(String input, ProblemLogger log) {
 
         input += '\n'; // to parse correctly, must end with a newline
 

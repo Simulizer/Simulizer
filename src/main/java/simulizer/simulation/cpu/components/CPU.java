@@ -1,10 +1,19 @@
 package simulizer.simulation.cpu.components;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BrokenBarrierException;
 
-import simulizer.assembler.representation.*;
+import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Annotation;
+import simulizer.assembler.representation.Instruction;
+import simulizer.assembler.representation.Label;
+import simulizer.assembler.representation.Program;
+import simulizer.assembler.representation.Register;
+import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.operand.AddressOperand;
 import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
@@ -27,7 +36,13 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
-import simulizer.simulation.listeners.*;
+import simulizer.simulation.listeners.AnnotationMessage;
+import simulizer.simulation.listeners.DataMovementMessage;
+import simulizer.simulation.listeners.ExecuteStatementMessage;
+import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.ProblemMessage;
+import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.listeners.StageEnterMessage;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -70,7 +85,7 @@ public class CPU {
      *
      * @param io the io type being used
      */
-    public CPU(Program program,IO io)
+    public CPU(IO io)
     {
         listeners = new ArrayList<>();
         this.clearRegisters();
@@ -144,6 +159,8 @@ public class CPU {
 				l.processAnnotationMessage((AnnotationMessage) m);
 			} else if(m instanceof DataMovementMessage) {
                 l.processDataMovementMessage((DataMovementMessage) m);
+            } else if(m instanceof ExecuteStatementMessage) {
+                l.processExecuteStatementMessage((ExecuteStatementMessage) m);
             } else if(m instanceof ProblemMessage) {
                 l.processProblemMessage((ProblemMessage) m);
             } else if(m instanceof StageEnterMessage) {
@@ -194,6 +211,10 @@ public class CPU {
 
         this.Alu = new ALU();//initialising Alu
         this.getLastAddress();
+    }
+
+    public Program getProgram() {
+        return program;
     }
 
     /**this method resets the registers in the memory
@@ -621,7 +642,8 @@ public class CPU {
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
         fetch();
-        InstructionFormat instruction = decode(this.instructionRegister.getInstruction(),this.instructionRegister.getOperandList());
+        sendMessage(new ExecuteStatementMessage(programCounter));
+		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(),this.instructionRegister.getOperandList());
         execute(instruction);
 		if(annotations.containsKey(programCounter)) {
 			for(Annotation a : annotations.get(programCounter)) {

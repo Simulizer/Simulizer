@@ -1,6 +1,11 @@
 // Full user guide available at:
 // https://docs.gradle.org/2.10/userguide/tutorial_java_projects.html
-/*
+/* Groovy notes:
+- double quotes are necessary to embed variables using "$myvar" or "${myvar.thing}"
+ */
+
+
+/* Task Overview:
 
     run a task by running:
         gradle TASK_NAME
@@ -54,9 +59,12 @@ Custom tasks:
 
 // from https://plugins.gradle.org/
 plugins {
+    // git dependencies
+        id 'org.ajoberstar.grgit' version '1.4.2'
 
+    // HTTP download dependencies
+        id "de.undercouch.download" version "2.1.0"
 }
-
 
 
 /////////////////////////////////////////////////
@@ -112,11 +120,14 @@ defaultTasks 'build', 'run'
 //
 /////////////////////////////////////////////////
 
-def name = 'Simulizer'
-version  = '0.01'
 
-mainClassName = 'simulizer.Main'
+def name = rootProject.name // defined in settings.gradle
+version = '0.01'
 
+description = 'MIPS-like assembly language interpreter' +
+        ' with CPU and high-level algorithm visualisations'
+
+mainClassName = 'simulizer.Simulizer'
 
 
 /////////////////////////////////////////////////
@@ -125,9 +136,16 @@ mainClassName = 'simulizer.Main'
 //
 /////////////////////////////////////////////////
 
+def generatedSrcDir = file('src/generated/')
+// extends the clean task
+clean {
+    delete generatedSrcDir
+}
+
+// Antlr
+
 // where to place generated files such as Antlr parsers
-def generatedOutput = 'src/generated/'
-def antlrOutput     = generatedOutput + 'antlr/'
+def antlrOutput     = "$generatedSrcDir/antlr/"
 
 sourceSets.main.java.srcDirs += antlrOutput
 
@@ -139,9 +157,82 @@ generateGrammarSource {
     arguments += ['-listener', '-visitor']
 }
 
-// extends the clean task
+
+
+/////////////////////////////////////////////////
+//
+// Generated Resources Configuration
+//
+/////////////////////////////////////////////////
+
+def ExternalResDir = file("$projectDir/src/main/resources/external")
+
 clean {
-    delete antlrOutput
+    delete ExternalResDir
+}
+
+/////////////////////////////////////////////////
+//
+// External Resources > Git Dependencies
+//
+/////////////////////////////////////////////////
+
+// Grgit API reference: http://ajoberstar.org/grgit/docs/groovydoc/index.html?org/ajoberstar/grgit/Grgit.html
+
+// Ace editor
+// where to clone the repository into
+def aceDLDir = file("$buildDir/ace")
+
+// clone the ace editor git repository
+// to refresh, download manually or execute `gradle clean build`
+task downloadAce << {
+    def ref  = 'v1.2.3' // the reference to checkout. Set to HEAD to use latest
+
+    if (!aceDLDir.exists()) {
+        println 'cloning ace editor git repo. May take a while...'
+        org.ajoberstar.grgit.Grgit.clone(
+            dir: aceDLDir,
+            uri: 'https://github.com/ajaxorg/ace-builds.git',
+            refToCheckout: ref
+        )
+    } else {
+        println 'ace repo already cloned'
+    }
+}
+
+// extract the required files to the resources path
+task copyAceFiles(dependsOn: downloadAce, type: Copy) {
+    mkdir ExternalResDir
+
+    from file("$aceDLDir/src-min-noconflict")
+    into ExternalResDir
+
+    // files to copy
+    include 'ace.js'
+    include 'theme-monokai.js'
+    include 'theme-ambiance.js'
+    include 'theme-tomorrow_night_eighties.js'
+    include 'mode-javascript.js'
+}
+
+/////////////////////////////////////////////////
+//
+// Generated Resources > HTTP Dependencies
+//
+/////////////////////////////////////////////////
+
+
+// download web dependencies once. must clean to get new copies
+task downloadExternalDependencies << {
+    mkdir ExternalResDir
+    // dest can either be a directory or a filename
+
+    download {
+        src 'http://requirejs.org/docs/release/2.1.22/minified/require.js'
+        dest ExternalResDir
+        overwrite false
+    }
+
 }
 
 
@@ -169,26 +260,22 @@ dependencies {
         // version for generating parsers during build
         antlr   'org.antlr:antlr4:4.5'
 
-    // JFExtras
-        compile 'org.jfxtras:jfxtras-controls:8.0-r4'
-        compile 'org.jfxtras:jfxtras-labs:8.0-r4'    // for experimental features
+    // JFXtras (internal window only)
+        compile 'org.jfxtras:jfxtras-window:8.0-r4'
 
     // Rich Text FX
         compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-        
+
     // GSON: JSON Parsing
     	compile 'com.google.code.gson:gson:2.5'
 
     // Testing
         testCompile 'junit:junit:4.12'
-    
-    mkdir('work')
 }
 
-
-clean{
-    // delete "work" // Disabled until copying out of jar works
-}
+// Ace Editor
+compileJava.dependsOn copyAceFiles
+compileJava.dependsOn downloadExternalDependencies
 
 
 /////////////////////////////////////////////////
@@ -209,7 +296,7 @@ test {
         //excludeCategories 'category.InProgressTests'
     }
     testLogging {
-        events "passed", "skipped", "failed", "standardOut", "standardError"
+        events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
     }
 }
 
@@ -228,7 +315,7 @@ run {
 jar {
     // Include all dependencies in the jar file
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    
+
     manifest {
         attributes 'Implementation-Title':   name,
                    'Implementation-Version': version,
