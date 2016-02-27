@@ -45,7 +45,7 @@ public enum Register {
     fp    (30),  // frame pointer
     ra    (31);  // return address (used by function call)
 
-    private int id;
+    private final int id;
 
     Register(int id) {
         this.id = id;

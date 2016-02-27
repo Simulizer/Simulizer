@@ -30,7 +30,7 @@ public class OperandExtractor {
     /**
      * The logger to send encountered problems to
      */
-    ProblemLogger log;
+    final ProblemLogger log;
 
     /**
      * when accessing a sub-rule from a grammar rule, the result may be null
@@ -376,10 +376,14 @@ public class OperandExtractor {
             return null;
         }
 
-        AddressOperand a = new AddressOperand();
+        Optional<String> labelName;
+        Optional<Integer> constant;
+        Optional<Register> register;
 
         if(goodMatch(ctx.labelID())) {
-            a.labelName = Optional.of(ctx.labelID().IDENTIFIER().getText());
+            labelName = Optional.of(ctx.labelID().IDENTIFIER().getText());
+        } else {
+            labelName = Optional.empty();
         }
 
         if(goodMatch(ctx.integer())) {
@@ -392,25 +396,27 @@ public class OperandExtractor {
             }
 
             int x = extractInteger(ctx.integer());
-            a.constant = Optional.of(x);
+            constant = Optional.of(x);
         } else {
             // case of "+/- offset"
 
             if(goodMatch(ctx.unsignedInteger())) {
                 int x = extractUnsignedInteger(ctx.unsignedInteger());
-                a.constant = Optional.of(x);
+                constant = Optional.of(x);
+            } else {
+                constant = Optional.empty();
             }
 
             if(goodMatch(ctx.SIGN())) {
-                if(!a.constant.isPresent()) {
+                if(!constant.isPresent()) {
                     // must have a constant if a sign is included because the sign
                     // is attached to the constant and is lost otherwise
                     log.logParseError("address", ctx);
                     return null;
                 }
                 if(ctx.SIGN().getText().equals("-")) { // negative otherwise positive
-                    int x = a.constant.get();
-                    a.constant = Optional.of(-x);
+                    int x = constant.get();
+                    constant = Optional.of(-x);
                 }
             }
         }
@@ -418,23 +424,25 @@ public class OperandExtractor {
         if(goodMatch(ctx.baseAddress()) && goodMatch(ctx.baseAddress().register())) {
             Register r = extractRegister(ctx.baseAddress().register());
             if(r != null) {
-                a.register = Optional.of(r);
+                register = Optional.of(r);
             } else {
                 log.logParseError("address", ctx); // propagate error
                 return null;
             }
+        } else {
+            register = Optional.empty();
         }
 
         // I don't think this case is reachable because the grammar
         // doesn't match the situation that would produce this.
-        if(a.labelName.isPresent() && !a.constant.isPresent() && a.register.isPresent()) {
+        if(labelName.isPresent() && !constant.isPresent() && register.isPresent()) {
             // "label ($register)" not allowed
             log.logParseError("address", ctx);
             return null;
         }
 
-        if(a.labelName.isPresent() || a.constant.isPresent() || a.register.isPresent()) {
-            return a;
+        if(labelName.isPresent() || constant.isPresent() || register.isPresent()) {
+            return new AddressOperand(labelName, constant, register);
         } else {
             log.logParseError("address", ctx); // parse error because nothing matched
             return null;

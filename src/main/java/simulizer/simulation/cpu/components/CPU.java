@@ -57,7 +57,7 @@ public class CPU {
     private Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
 
-	private Map<Address, List<Annotation>> annotations;
+	private Map<Address, Annotation> annotations;
 
     private boolean isRunning;//for program status
     private Address lastAddress;//used to determine end of program
@@ -601,9 +601,7 @@ public class CPU {
         InstructionFormat instruction = decode();
         execute(instruction);
 		if(annotations.containsKey(programCounter)) {
-			for(Annotation a : annotations.get(programCounter)) {
-				sendMessage(new AnnotationMessage(a));
-			}
+			sendMessage(new AnnotationMessage(annotations.get(programCounter)));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached

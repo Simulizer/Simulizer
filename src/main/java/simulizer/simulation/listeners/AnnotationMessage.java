@@ -7,9 +7,9 @@ import simulizer.assembler.representation.Annotation;
  * @author mbway
  */
 public class AnnotationMessage extends Message {
-	public Annotation a; // the annotation that was met
+	public Annotation annotation; // the annotation that was met
 
-	public AnnotationMessage(Annotation a) {
-		this.a = a;
+	public AnnotationMessage(Annotation annotation) {
+		this.annotation = annotation;
 	}
 }

@@ -9,7 +9,7 @@ import simulizer.assembler.representation.Register;
  */
 public class RegisterOperand extends Operand {
 
-    public Register value;
+    public final Register value;
 
     @Override
     public Type getType() {

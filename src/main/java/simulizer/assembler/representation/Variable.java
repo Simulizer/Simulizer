@@ -20,10 +20,10 @@ public class Variable {
         Space
     }
 
-    private Type type;
-    private int size;
-    private Optional<Operand> initialValue;
-    private int lineNumber;
+    private final Type type;
+    private final int size;
+    private final Optional<Operand> initialValue;
+    private final int lineNumber;
 
     public Variable(Type type, int size, Optional<Operand> initialValue, int lineNumber) {
         this.type = type;

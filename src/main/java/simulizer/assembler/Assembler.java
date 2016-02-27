@@ -32,7 +32,7 @@ public class Assembler {
      * @param log the logger to send the error messages (may be null)
      * @return the assembled program (or null if errors are encountered)
      */
-    public Program assemble(String input, ProblemLogger log) {
+    public static Program assemble(String input, ProblemLogger log) {
 
         input += '\n'; // to parse correctly, must end with a newline
 

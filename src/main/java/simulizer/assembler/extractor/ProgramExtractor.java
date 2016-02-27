@@ -19,8 +19,10 @@ import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.Variable;
 import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
+import simulizer.assembler.representation.operand.StringOperand;
 import simulizer.parser.SimpBaseListener;
 import simulizer.parser.SimpParser;
+import simulizer.utils.StringUtils;
 
 /**
  * extract the required information from a parse tree of a Simp program.
@@ -36,23 +38,39 @@ public class ProgramExtractor extends SimpBaseListener {
     }
 
     private State currentState;
-    ProblemLogger log;
+    final ProblemLogger log;
 
-    public Map<String, Integer> textSegmentLabels;
-    public List<Statement> textSegment;
+    public final Map<String, Integer> textSegmentLabels;
+    public final List<Statement> textSegment;
 
-    public Map<String, Integer> dataSegmentLabels;
-    public List<Variable> dataSegment;
+    public final Map<String, Integer> dataSegmentLabels;
+    public final List<Variable> dataSegment;
 
     /**
      * store annotations relating to statements in the text segment
      */
-    public Map<Integer, List<Annotation>> annotations;
+    public final Map<Integer, Annotation> annotations;
 
     /**
      * keep track of labels that are waiting to be assigned to a line
      */
-    public List<String> outstandingLabels;
+    public final List<String> outstandingLabels;
+
+	/**
+     * keep track of annotations which are yet to be bound to a statement. This
+     * happens when an annotation is reached when there are outstanding labels.
+     * This means that between the annotation and the last statement is a label.
+     * In this case the annotation should bind to whatever the label binds to
+     * and this has yet to be determined.
+	 * eg
+	 *
+	 * 	add s0 s1 s1
+	 * 	myLabel:	  # @{ //annotation }@
+	 * 	add s0 s1 s1
+	 *
+	 * 	the annotation binds to the second statement
+	 */
+	public final List<String> outstandingAnnotations;
 
 
     public ProgramExtractor(ProblemLogger log) {
@@ -67,6 +85,7 @@ public class ProgramExtractor extends SimpBaseListener {
         annotations = new HashMap<>();
 
         outstandingLabels = new ArrayList<>();
+		outstandingAnnotations = new ArrayList<>();
     }
 
 
@@ -108,10 +127,18 @@ public class ProgramExtractor extends SimpBaseListener {
     @Override
     public void enterDataSegment(SimpParser.DataSegmentContext ctx) {
         currentState = State.DATA_SEGMENT;
+		if(!outstandingLabels.isEmpty()) {
+			log.logProblem("the following labels cross this segment boundary: " +
+					StringUtils.joinList(outstandingLabels), ctx);
+		}
     }
     @Override
     public void enterTextSegment(SimpParser.TextSegmentContext ctx) {
         currentState = State.TEXT_SEGMENT;
+		if(!outstandingLabels.isEmpty()) {
+			log.logProblem("the following labels cross this segment boundary: " +
+					StringUtils.joinList(outstandingLabels), ctx);
+		}
     }
 
 
@@ -178,10 +205,15 @@ public class ProgramExtractor extends SimpBaseListener {
             log.logProblem("The program has no 'main' label", Problem.NO_LINE_NUM);
         }
         if(!outstandingLabels.isEmpty()) {
-            log.logProblem("These labels could not be assigned to addresses" +
-                "because the end of the program was reached: \"" +
-                String.join("\", \"", outstandingLabels) + "\"", Problem.NO_LINE_NUM);
+			log.logProblem("These labels could not be assigned to addresses" +
+					"because the end of the program was reached: " +
+					StringUtils.joinList(outstandingLabels), Problem.NO_LINE_NUM);
         }
+		if(!outstandingAnnotations.isEmpty()) {
+			log.logProblem("These annotations could not be assigned to addresses" +
+					"because the end of the program was reached: " +
+					StringUtils.joinList(outstandingAnnotations), Problem.NO_LINE_NUM);
+		}
     }
 
     @Override
@@ -245,7 +277,7 @@ public class ProgramExtractor extends SimpBaseListener {
                         log.logProblem("invalid operand(s) to .asciiz directive. format: .asciiz STRING", ctx.directiveOperandList());
                     } else {
                         Operand op = operands.get(0); // only one argument permitted
-                        op.asStringOp().value = op.asStringOp().value + '\0'; // add the null terminator
+                        op = new StringOperand(op.asStringOp().value + '\0'); // add the null terminator
 
                         pushVariable(new Variable(
                             Variable.Type.ASCIIZ, op.asStringOp().value.length(), Optional.of(op), ctx.getStart().getLine()));
@@ -362,22 +394,51 @@ public class ProgramExtractor extends SimpBaseListener {
 
     @Override
     public void enterComment(SimpParser.CommentContext ctx) {
-        if(ctx.getText().contains("@")) {
-            int lastInstruction = textSegment.size() - 1;
-            if(lastInstruction < 0) {
-                log.logProblem("annotation before the first instruction", ctx);
-                return;
-            }
+		String text = ctx.getText();
 
-            if(annotations.containsKey(lastInstruction)) {
-                annotations.get(lastInstruction).add(new Annotation());
-            } else {
-                List<Annotation> a = new ArrayList<>();
-                a.add(new Annotation());
-                annotations.put(lastInstruction, a);
-            }
-        }
+		String startMark = "@{";
+		String endMark   = "}@";
+
+		int aStart = text.indexOf(startMark);
+		if(aStart != -1) {
+			if(currentState != State.TEXT_SEGMENT) {
+				log.logProblem("Annotations must be placed inside the text segment", ctx);
+				return;
+			}
+			// annotation before first statement or label
+			if(textSegment.isEmpty() && outstandingLabels.isEmpty()) {
+				log.logProblem("Annotations must be placed after a statement or label", ctx);
+				return;
+			}
+
+			while(aStart != -1) {
+				int aEnd = text.indexOf(endMark, aStart);
+
+				if(aEnd == -1) {
+					log.logProblem("Annotation not closed", ctx);
+					return;
+				}
+				outstandingAnnotations.add(text.substring(aStart+startMark.length(), aEnd));
+
+				aStart = text.indexOf(startMark, aEnd);
+			}
+
+			// no labels => attach to last statement
+			if(outstandingLabels.isEmpty()) {
+				pushAnnotations();
+			}
+			// else: wait for labels to be bound (see pushStatement)
+
+		}
+
     }
+
+	public void pushAnnotations() {
+		String annotationCode = String.join("\n", outstandingAnnotations);
+		int index = textSegment.size() - 1; // already checked for < 0
+		annotations.put(index, new Annotation(annotationCode));
+		outstandingAnnotations.clear();
+	}
 
     public void pushStatement(Statement s) {
         textSegment.add(s);
@@ -394,6 +455,10 @@ public class ProgramExtractor extends SimpBaseListener {
         for(String labelName : outstandingLabels) {
             dataSegmentLabels.put(labelName, index);
         }
+		if(!outstandingAnnotations.isEmpty()) {
+			Annotation a = new Annotation(String.join("\n", outstandingAnnotations));
+			annotations.put(index, a);
+		}
         outstandingLabels.clear();
     }
 }
