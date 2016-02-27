@@ -72,7 +72,7 @@ var SimpHighlightRules = function() {
         ],
         'comment' : [
             { token: 'comment',
-              regex: '[^@]*$', // comment body up until EOL
+              regex: '([^@]*|@)$', // comment body up until EOL
               next:  'start'
             },
             { token: 'comment',

@@ -30,10 +30,6 @@ public abstract class InternalWindow extends Window {
 
 		setCursor(Cursor.DEFAULT);
 
-		// Using caching to smooth window movement
-		setCache(true);
-		setCacheHint(CacheHint.SPEED);
-
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
