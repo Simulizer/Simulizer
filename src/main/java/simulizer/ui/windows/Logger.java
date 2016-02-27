@@ -4,6 +4,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -89,7 +90,7 @@ public class Logger extends InternalWindow implements Observer {
 
 	@Override
 	public void update(Observable o, Object message) {
-		output.appendText((String) message);
+		Platform.runLater(() -> output.appendText((String) message));
 	}
 
 }
