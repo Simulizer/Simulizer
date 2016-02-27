@@ -33,4 +33,12 @@ public class DoubleSetting extends SettingValue<Double> {
 		return SettingType.DOUBLE;
 	}
 
+	public double getLowBound() {
+		return lowBound;
+	}
+
+	public double getHighBound() {
+		return highBound;
+	}
+
 }
