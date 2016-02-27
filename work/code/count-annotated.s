@@ -4,7 +4,7 @@
 
 .text
 main:
-	li $s0 0
+	li $s0 0 #
 	li $t0 100
 
 LOOP:   addi $s0 $s0 1 # not @ {} an annotation

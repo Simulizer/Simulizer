@@ -12,6 +12,8 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.AceEditor;
 
+import javax.script.ScriptException;
+
 /**
  * Listen to messages from the simulation which concern the UI
  */
@@ -24,6 +26,11 @@ public class UISimulationListener extends SimulationListener {
 
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
 		System.out.println(m.annotation.code);
+		try {
+			wm.getHLVisManager().ex.exec(m.annotation);
+		} catch (ScriptException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

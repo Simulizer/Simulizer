@@ -13,6 +13,7 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.components.highlevel.HighLevelVisualisationManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
@@ -32,6 +33,7 @@ public class WindowManager extends GridPane {
 	private CPU cpu = null;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
+	private HighLevelVisualisationManager hlVisManager = new HighLevelVisualisationManager(this);
 
 	public WindowManager(Stage primaryStage, Settings settings) {
 		this.primaryStage = primaryStage;
@@ -159,5 +161,9 @@ public class WindowManager extends GridPane {
 	public Settings getSettings() {
 		return settings;
 
+	}
+
+	public HighLevelVisualisationManager getHLVisManager() {
+		return hlVisManager;
 	}
 }
