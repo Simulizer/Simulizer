@@ -101,10 +101,17 @@ public class CPU {
         }
     }
 
+    /**sets the speed in ms of the clock
+     * 
+     * @param tickMillis the time for one clock cycle
+     */
     public void setClockSpeed(int tickMillis) {
         clock.tickMillis = tickMillis;
     }
 
+    /**stop the running of a program
+     * 
+     */
     public void stopRunning() {
         isRunning = false;
         if(clock != null) {
@@ -428,15 +435,11 @@ public class CPU {
                     int v0 = (int)DataConverter.decodeAsSigned(this.registers[Register.v0.getID()].getWord());//getting code for syscall
                     syscall(v0);//carry out specified syscall op
                 }
-                else if(instruction.getInstruction().equals(Instruction.nop))//no operation
-                {
-                    //just do nothing
-                }
                 else if(instruction.getInstruction().equals(Instruction.BREAK))
                 {
                 	this.pauseClock();//stop clock for now
                 }
-                else
+                else if(!instruction.getInstruction().equals(Instruction.nop))
                 {
                     throw new ExecuteException("Error with zero argument instruction", instruction);
                 }
@@ -588,8 +591,7 @@ public class CPU {
     			this.registers[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
     			break;
     		case 10://exit program
-    			this.pauseClock();//probably reasonable for now
-    			this.isRunning = false;//stop execution all together
+    			this.stopRunning();
     			break;
     		case 11://print char
     			char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
