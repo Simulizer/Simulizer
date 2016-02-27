@@ -16,6 +16,15 @@ public class Registers extends InternalWindow {
 	private TableView<Data> table = new TableView<Data>();
 	private CPU cpu;
 
+	public Registers() {
+		widthProperty().addListener((o, old, newValue) -> {
+			int numColumns = table.getColumns().size();
+			for (TableColumn<Data, ?> column : table.getColumns()) {
+				column.setPrefWidth(getWidth() / numColumns);
+			}
+		});
+	}
+
 	public void refreshData() {
 		// Create Listener for Register Changes
 		CPU cpu = getWindowManager().getCPU();
