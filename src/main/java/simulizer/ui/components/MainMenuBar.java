@@ -3,6 +3,7 @@ package simulizer.ui.components;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -25,6 +26,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.AceEditor;
+import simulizer.ui.windows.Labels;
 import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -227,6 +229,14 @@ public class MainMenuBar extends MenuBar {
 			reg.refreshData();
 		});
 
+		// Labels
+		MenuItem labelRefresh = new MenuItem("Refresh Labels");
+		labelRefresh.setOnAction(e -> {
+			Labels labels = (Labels) wm.getWorkspace().findInternalWindow(WindowEnum.LABELS);
+			labels.refreshData();
+		});
+		// End labels
+
 		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
 		//TODO: extract this information from settings. Cannot get from editor until editor
 		// loaded so getting from settings would be the sensible alternative
@@ -250,7 +260,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram);
+		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram, labelRefresh);
 		return debugMenu;
 	}
 

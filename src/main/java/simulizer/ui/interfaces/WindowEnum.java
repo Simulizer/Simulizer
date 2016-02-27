@@ -4,9 +4,10 @@ public enum WindowEnum {
 	CODE_EDITOR("CodeEditor", "Code Editor"),
 	ACE_EDITOR("AceEditor", "Ace Editor"),
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
+	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
+	LABELS("Labels"),
 	LOGGER("Logger"),
-	REGISTERS("Registers"),
-	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation");
+	REGISTERS("Registers");
 
 	private final String pkg = "simulizer.ui.windows.";
 	private final String className;
