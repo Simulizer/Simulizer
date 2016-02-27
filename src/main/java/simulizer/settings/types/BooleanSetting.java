@@ -1,5 +1,6 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class BooleanSetting extends SettingValue<Boolean> {
@@ -18,8 +19,8 @@ public class BooleanSetting extends SettingValue<Boolean> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Boolean";
+	public SettingType getSettingType() {
+		return SettingType.BOOLEAN;
 	}
 
 }

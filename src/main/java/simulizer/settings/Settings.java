@@ -3,11 +3,9 @@ package simulizer.settings;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import simulizer.settings.types.BooleanSetting;
 import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
@@ -72,28 +70,27 @@ public class Settings {
 		JsonElement element = jsonObject.get(setting.getJsonName());
 
 		// If element doesn't exist in json file, ignore it
-		if (element == null)
-			return;
+		if (element == null) return;
 
 		switch (setting.getSettingType()) {
-			case "Boolean":
+			case BOOLEAN:
 				((BooleanSetting) setting).setValue(element.getAsBoolean());
 				break;
 
-			case "Double":
+			case DOUBLE:
 				((DoubleSetting) setting).setValue(element.getAsDouble());
 				break;
 
-			case "Integer":
+			case INTEGER:
 				((IntegerSetting) setting).setValue(element.getAsInt());
 				break;
 
-			case "Object":
+			case OBJECT:
 				for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
 					loadFromJson(element.getAsJsonObject(), s);
 				break;
 
-			case "String":
+			case STRING:
 				((StringSetting) setting).setValue(element.getAsString());
 				break;
 
@@ -107,10 +104,13 @@ public class Settings {
 		SettingValue<?> setting = settings;
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
-			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
-				return null;
+			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting))) return null;
 		}
 		return setting.getValue();
+	}
+
+	public ObjectSetting getAllSettings() {
+		return settings;
 	}
 
 }

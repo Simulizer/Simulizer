@@ -1,5 +1,6 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class IntegerSetting extends SettingValue<Integer> {
@@ -30,8 +31,8 @@ public class IntegerSetting extends SettingValue<Integer> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Integer";
+	public SettingType getSettingType() {
+		return SettingType.INTEGER;
 	}
 
 }

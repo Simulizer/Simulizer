@@ -20,8 +20,6 @@ public class Logger extends InternalWindow implements IO {
 	private CountDownLatch cdl = new CountDownLatch(1);
 
 	public Logger() {
-		setTitle("Program I/O");
-
 		GridPane pane = new GridPane();
 
 		// Output Console

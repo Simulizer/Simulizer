@@ -33,6 +33,6 @@ public abstract class SettingValue<E> {
 
 	public abstract boolean isValid(E value);
 
-	public abstract String getSettingType();
+	public abstract SettingType getSettingType();
 
 }

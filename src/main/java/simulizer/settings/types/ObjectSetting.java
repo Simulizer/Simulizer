@@ -2,7 +2,7 @@ package simulizer.settings.types;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
@@ -26,15 +26,14 @@ public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Object";
+	public SettingType getSettingType() {
+		return SettingType.OBJECT;
 	}
 
 	public SettingValue<?> get(String jsonSetting) {
 		List<SettingValue<?>> subs = getValue();
 		for (SettingValue<?> sub : subs) {
-			if (sub.getJsonName().equals(jsonSetting))
-				return sub;
+			if (sub.getJsonName().equals(jsonSetting)) return sub;
 		}
 		return null;
 	}

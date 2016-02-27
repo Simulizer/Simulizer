@@ -228,10 +228,8 @@ public class MainMenuBar extends MenuBar {
 		});
 
 		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
-		//TODO: extract this information from settings. Cannot get from editor until editor
-		// loaded so getting from settings would be the sensible alternative
-		lineWrap.setSelected(false);
-		lineWrap.setOnAction(e -> getEditor().setWrap(!getEditor().getWrap()));
+		lineWrap.setSelected((boolean) wm.getSettings().get("code_editor.word-wrap"));
+		lineWrap.setOnAction(e -> getEditor().setWrap(lineWrap.isSelected()));
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
