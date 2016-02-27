@@ -3,7 +3,6 @@ package simulizer.ui.components;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -11,6 +10,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
@@ -46,6 +48,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
 		newItem.setOnAction(e -> getEditor().newFile());
+		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
@@ -55,6 +58,7 @@ public class MainMenuBar extends MenuBar {
 				getEditor().loadFile(f);
 			}
 		});
+		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
@@ -67,6 +71,7 @@ public class MainMenuBar extends MenuBar {
 			}
 			getEditor().saveFile();
 		});
+		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
