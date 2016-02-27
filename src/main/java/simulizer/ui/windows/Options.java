@@ -1,9 +1,8 @@
 package simulizer.ui.windows;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.TextAlignment;
@@ -15,12 +14,12 @@ import simulizer.ui.interfaces.InternalWindow;
 public class Options extends InternalWindow {
 
 	private GridPane pane, values;
-	private ListView<String> folders;
+	private TreeView<String> folders;
 
 	public Options() {
 		pane = new GridPane();
 
-		folders = new ListView<String>();
+		folders = new TreeView<String>();
 		GridPane.setVgrow(folders, Priority.ALWAYS);
 		GridPane.setHgrow(folders, Priority.SOMETIMES);
 		pane.add(folders, 0, 0);
@@ -42,15 +41,26 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void ready() {
-		ObservableList<String> items = FXCollections.observableArrayList();
+		TreeItem<String> options = new TreeItem<String>("Options");
+		options.setExpanded(true);
+
 		ObjectSetting settings = (ObjectSetting) getWindowManager().getSettings().getAllSettings();
+		createTree(options, settings);
+		folders.setRoot(options);
+		folders.getSelectionModel().select(options);
+		super.ready();
+	}
+
+	private void createTree(TreeItem<String> root, ObjectSetting settings) {
 		for (SettingValue<?> value : settings.getValue()) {
 			if (value.getSettingType() == SettingType.OBJECT) {
-				items.add(value.getHumanName());
+				TreeItem<String> innerItem = new TreeItem<String>(value.getHumanName());
+				createTree(innerItem, (ObjectSetting) value);
+				innerItem.setExpanded(true);
+				root.getChildren().add(innerItem);
 			}
 		}
-		folders.setItems(items);
-		super.ready();
+		root.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 
 }
