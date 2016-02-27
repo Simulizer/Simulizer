@@ -25,9 +25,11 @@ var session;
 var doc;
 var markers = null;
 var Range;
+var Search;
 
 function init() {
     Range = ace.require("ace/range").Range;
+    Search = ace.require("ace/search").Search;
 
     editor  = ace.edit('editor');
     session = editor.getSession();
@@ -56,6 +58,34 @@ function loadText(text) {
     session.setValue(text, cursorPos);
     session.setMode("ace/mode/simp");
     //editor.getSession().foldAll();
+}
+
+function getLine() {
+	return editor.getSelectionRange().start.row;
+}
+
+function getColumn() {
+	return editor.getSelectionRange().start.column;
+}
+
+function find(pattern, backwards) {
+	var s = new Search();
+	
+	s.needle = pattern;
+	s.wrap = true;
+	s.caseSensitive = true;
+	s.wholeWord = true;
+	
+	if (backwards) 
+		editor.findPrevious(s, false);
+	else
+		editor.findNext(s, false);
+}
+function findAll(pattern) {
+	var s = new Search();
+	s.wholeWord = true;
+	
+	editor.findAll(pattern, s, false);
 }
 
 function refreshProblems() {
