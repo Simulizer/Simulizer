@@ -1,23 +1,29 @@
 package simulizer.ui.windows;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.w3c.dom.Document;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.CacheHint;
-import javafx.scene.input.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import org.w3c.dom.Document;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)
@@ -203,6 +209,14 @@ public class AceEditor extends InternalWindow {
 		return (String) jsEditor.call("getValue");
 	}
 
+	public int getLine() {
+		return (int) jsWindow.call("getLine");
+	}
+
+	public int getColumn() {
+		return (int) jsWindow.call("getColumn");
+	}
+
 	public File getCurrentFile() {
 		return currentFile;
 	}
@@ -242,6 +256,20 @@ public class AceEditor extends InternalWindow {
 		String editedSymbol = edited ? " *" : "";
 		setTitle(WindowEnum.getName(this) + " - " + filename + editedSymbol);
 		changedSinceLastSave = edited;
+	}
+
+	public void findNext(String pattern) {
+		jsWindow.call("find", pattern, false);
+	}
+	public void findPrevious(String pattern) {
+		jsWindow.call("find", pattern, true);
+	}
+	public void findAll(String pattern) {
+		jsWindow.call("findAll", pattern);
+	}
+
+	public void setHighlightActiveLine(boolean highlight) {
+		jsEditor.call("setHighlightActiveLine", highlight);
 	}
 
 	public void setReadOnly(boolean readOnly) {
