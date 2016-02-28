@@ -8,7 +8,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -101,7 +101,8 @@ public class Registers extends InternalWindow {
 
 	private class RegisterListener extends SimulationListener {
 		@Override
-		public void processMessage(Message m) {
+		public void processRegisterChangedMessage(RegisterChangedMessage m) {
+			// TODO: Be less wasteful, only update changed register
 			refreshData();
 		}
 	}

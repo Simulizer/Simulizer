@@ -12,7 +12,6 @@ import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
