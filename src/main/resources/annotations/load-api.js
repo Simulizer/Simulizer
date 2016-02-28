@@ -5,15 +5,36 @@
 // for internal use
 _internal = {}
 
-_internal.nop = function(){};
+// global objects
+Register = Java.type('simulizer.assembler.representation.Register');
+r = Register
 
+
+// debug bridge
 log   = function(msg){debug.log(''+msg);};
 alert = function(msg){debug.alert(''+msg);};
 
+// simulation bridge
+stop   = function(){simulation.stop();};
+reg    = function(name){return simulation.getRegister(Register.fromString(name));};
+regNum = function(id){return simulation.getRegister(Register.fromID(id));};
+// global bindings for each register are added later
+// eg $s0 = {id:Register.s0, get: function to get the current s0 value}
+
+
+// visualisation bridge
+loadVis = function(name){return visualisation.load(name);};
+
+// Utility functions
+
+
+
 // override globals (from debugger watch private attribute: engine.global for a full list)
 _internal.disabled = function(){print("disabled");};
+
 print = log;
-exit = _internal.disabled;
-quit = _internal.disabled;
-load = _internal.disabled; // loads a script file
+exit  = stop;
+quit  = stop;
+
+load  = _internal.disabled; // loads a script file
 loadWithNewGlobal = _internal.disabled;

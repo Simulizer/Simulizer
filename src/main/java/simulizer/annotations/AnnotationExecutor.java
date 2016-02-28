@@ -5,6 +5,7 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import simulizer.assembler.representation.Annotation;
+import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.utils.FileUtils;
 
@@ -29,14 +30,21 @@ public class AnnotationExecutor {
 
 
 	private class AnnotationClassFilter implements ClassFilter {
+		boolean apiLoaded = false;
+
 		@Override public boolean exposeToScripts(String s) {
-			throw new SecurityException("Access to Java objects from annotations (other than designated bridges) is disabled");
+			if(apiLoaded) {
+				throw new SecurityException("Access to Java objects from annotations (other than designated bridges) is disabled");
+			} else {
+				return true; // allow anything during the API load
+			}
 		}
 	}
 
 	public AnnotationExecutor() {
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-		engine = (NashornScriptEngine) factory.getScriptEngine(new AnnotationClassFilter());
+		AnnotationClassFilter filter = new AnnotationClassFilter();
+		engine = (NashornScriptEngine) factory.getScriptEngine(filter);
 
 		// the context to run in, defines the global and engine scopes
 		ScriptContext context = new SimpleScriptContext();
@@ -56,11 +64,25 @@ public class AnnotationExecutor {
 			engine.eval(""); // force the creation of NASHORN_GLOBAL
 			nhGlobals = (ScriptObjectMirror) engineLocals.get(NashornScriptEngine.NASHORN_GLOBAL);
 
-			exec(FileUtils.getResourceContent("/annotations/load-api.js"));
+			loadAPI();
+			filter.apiLoaded = true; // from now on restrict access to Java classes
 
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void loadAPI() throws ScriptException {
+		exec(FileUtils.getResourceContent("/annotations/load-api.js"));
+
+		// bind Register.xx to $xx with a get method to get the current value from the simulator
+		StringBuilder registerGlobals = new StringBuilder();
+		for(Register r : Register.values()) {
+			String name = r.getName();
+			registerGlobals.append('$').append(name).append("={id:Register.")
+					.append(name).append(",get:function(){return simulation.getRegister(this.id);}};");
+		}
+		exec(registerGlobals.toString());
 	}
 
 	/**
@@ -82,9 +104,10 @@ public class AnnotationExecutor {
 		return tClass.cast(globals.get(name));
 	}
 
-	public void exec(Annotation annotation) throws ScriptException, SecurityException {
-		engine.eval(annotation.code);
+	public Object exec(Annotation annotation) throws ScriptException, SecurityException {
+		Object res = engine.eval(annotation.code);
 		promoteToGlobal();
+		return res;
 	}
 
 	private void exec(String script) throws ScriptException, SecurityException {
@@ -114,7 +137,10 @@ public class AnnotationExecutor {
 			while(!getGlobal("stop", Boolean.class)) {
 				io.printString("js> ");
 				line = io.readString();
-				exec(new Annotation(line));
+				Object res = exec(new Annotation(line));
+				if(res != null) {
+					io.printString(res.toString() + "\n");
+				}
 			}
 			io.printString("REPL stopped\n");
 		} catch (RuntimeException | ScriptException e) {

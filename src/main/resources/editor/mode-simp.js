@@ -201,9 +201,13 @@ var DocumentHighlightRules = function() {
         }
     ];
 
-    var endRules = [
+    var addedJSRules = [
         { token: 'paren.rparen',
           regex: '\}[^@]', // un-matched curly brace (not an annotation end marker)
+        },
+        { token: ['variable.parameter.register.assembly', // match (literally) $
+                  'variable.parameter.register.assembly'],// match register name
+          regex: registerRegex,
         },
         { token: 'keyword',
           regex: '\}@$', // annotation right up to EOL
@@ -231,7 +235,7 @@ var DocumentHighlightRules = function() {
     {
         var jsRules = new JavaScriptHighlightRules().getRules();
         for(var r in jsRules) {
-            jsRules[r].unshift(endRules); // prepend
+            jsRules[r].unshift(addedJSRules); // prepend
         }
         this.addRules(jsRules, 'js-');
     }

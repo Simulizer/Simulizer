@@ -251,6 +251,11 @@ public class MainMenuBar extends MenuBar {
 		jsREPL.setOnAction(e -> {
 			Logger logger = (Logger) wm.getWorkspace().findInternalWindow(WindowEnum.LOGGER);
 			new Thread(() -> {
+				// if there is an executor (eg simulation running) then use that
+				if(wm.getHLVisManager().getExecutor() == null) {
+					// this does not bridge with the visualisations or simulation
+					wm.getHLVisManager().newExecutor();
+				}
 				wm.getHLVisManager().getExecutor().debugREPL(logger);
 			}).start();
 		});

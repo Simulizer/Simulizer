@@ -9,12 +9,13 @@ import simulizer.simulation.cpu.user_interaction.IO;
  */
 @SuppressWarnings("unused")
 public class DebugBridge {
-	// set using DataSetter
+	// package-visible Attributes not visible from JavaScript
+	// set package-visible attributes using BridgeFactory
 	IO io = null;
 
 	public void log(String string) {
 		if(io != null) {
-			io.printString(string + "\n");
+			io.printString("js: " + string + "\n");
 		} else {
 			System.out.println("js: " + string);
 		}

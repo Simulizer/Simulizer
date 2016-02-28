@@ -1,24 +1,22 @@
 package simulizer.ui.windows;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
-import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
-import simulizer.ui.components.highlevel.listeners.PresentationTowerOfHanoiListener;
+import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HighLevelVisualisation extends InternalWindow {
 	private double width = 400;
 	private double height = 300;
 
 	private DataStructureVisualiser visualiser;
-	private Pane drawingPane = new Pane();
+	private Pane drawingPane;
 
 	private void init() {
 		this.drawingPane = new Pane();
@@ -30,21 +28,30 @@ public class HighLevelVisualisation extends InternalWindow {
 		setMinWidth(width);
 		setMinHeight(getMinimalHeight());
 
-		// TODO remove this line so that the visualiser is set depending on code
-		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
-		//this.visualiser = new ListVisualiser<Integer>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
 			setPaneWidth(width);
-			visualiser.resize();
+			if(visualiser != null) {
+				visualiser.resize();
+			}
 		});
 
 		heightProperty().addListener((o, old, newValue) -> {
 			height = newValue.doubleValue();
 			setPaneHeight(height);
-			visualiser.resize();
+			if(visualiser != null) {
+				visualiser.resize();
+			}
 		});
+	}
+
+	//TODO: have these not be mutually exclusive
+	public void loadTowerOfHanoiVisualisation() {
+		this.visualiser = new TowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+	}
+	public void loadListVisualisation() {
+		this.visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
 	}
 
     public void add(Node e){
@@ -80,27 +87,12 @@ public class HighLevelVisualisation extends InternalWindow {
 		return 200;
 	}
 
-	public void setVisualiser(DataStructureVisualiser visualiser) {
-		this.visualiser = visualiser;
-	}
-
 	public DataStructureVisualiser getVisualiser() {
 		return this.visualiser;
 	}
 
 	public Pane getDrawingPane() {
 		return drawingPane;
-	}
-
-	/**
-	 * Sets the CPU and adds a listener to the CPU
-	 *
-	 * @param cpu
-	 */
-	public void attachCPU(CPU cpu) {
-		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
-		cpu.registerListener(new PresentationTowerOfHanoiListener((PresentationTowerOfHanoiVisualiser) visualiser));
-		setResizableWindow(false);
 	}
 
 	@Override

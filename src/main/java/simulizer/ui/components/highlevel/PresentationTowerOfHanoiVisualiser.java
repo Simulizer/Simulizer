@@ -2,6 +2,7 @@ package simulizer.ui.components.highlevel;
 
 import simulizer.ui.windows.HighLevelVisualisation;
 
+//TODO: remove
 public class PresentationTowerOfHanoiVisualiser extends TowerOfHanoiVisualiser {
 	private int[][] moves = { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 1 }, { 2, 0 }, { 2, 1 }, { 0, 1 }, { 0, 2 }, { 1, 2 }, { 1, 0 }, { 2, 0 },
 			{ 1, 2 }, { 0, 1 }, { 0, 2 }, { 1, 2 } };

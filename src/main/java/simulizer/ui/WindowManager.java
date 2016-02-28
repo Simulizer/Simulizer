@@ -19,7 +19,6 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
 
 public class WindowManager extends GridPane {
@@ -146,9 +145,7 @@ public class WindowManager extends GridPane {
 		stopCPU();
 
 		cpu = new CPU(p, io);
-		HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-		if (hlv != null)
-			hlv.attachCPU(cpu);
+		hlVisManager.onStartProgram(cpu);
 		cpu.registerListener(simListener);
 
 		io.clear();
