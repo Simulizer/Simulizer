@@ -3,6 +3,7 @@ package simulizer.ui.components;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -54,7 +55,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
 			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
+			if (f != null) {
 				getEditor().loadFile(f);
 			}
 		});
@@ -63,9 +64,9 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
-			if(getEditor().getCurrentFile() == null) {
+			if (getEditor().getCurrentFile() == null) {
 				File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-				if(f != null) {
+				if (f != null) {
 					getEditor().saveAs(f);
 				}
 			}
@@ -77,7 +78,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
 			File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
+			if (f != null) {
 				getEditor().saveAs(f);
 			}
 		});
@@ -163,13 +164,13 @@ public class MainMenuBar extends MenuBar {
 			StoreProblemLogger log = new StoreProblemLogger();
 			Assembler a = new Assembler();
 			Program p = a.assemble(getEditor().getText(), log);
-			if(p != null) {
+			if (p != null) {
 				wm.runProgram(p);
 			} else {
 				Alert alert = new Alert(Alert.AlertType.ERROR);
 				alert.setTitle("Could Not Run");
 				int size = log.getProblems().size();
-				if(size == 1) {
+				if (size == 1) {
 					alert.setHeaderText("The Program Contains An Error!");
 				} else {
 					alert.setHeaderText("The Program Contains " + size + " Errors!");

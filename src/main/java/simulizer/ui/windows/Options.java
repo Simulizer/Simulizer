@@ -1,6 +1,7 @@
 package simulizer.ui.windows;
 
 import javafx.geometry.HPos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
@@ -17,8 +18,10 @@ import simulizer.settings.types.BooleanSetting;
 import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
+import simulizer.settings.types.StringSetting;
 import simulizer.ui.components.settings.BooleanControl;
 import simulizer.ui.components.settings.NumberControl;
+import simulizer.ui.components.settings.StringControl;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -35,11 +38,13 @@ public class Options extends InternalWindow {
 		GridPane.setVgrow(folders, Priority.ALWAYS);
 		GridPane.setHgrow(folders, Priority.SOMETIMES);
 		folders.getStyleClass().add("tree");
+		folders.setCursor(Cursor.DEFAULT);
 		pane.add(folders, 0, 0);
 
 		values = new GridPane();
 		GridPane.setVgrow(values, Priority.ALWAYS);
 		GridPane.setHgrow(values, Priority.ALWAYS);
+		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
 		pane.add(values, 1, 0);
 
@@ -48,22 +53,27 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void ready() {
-		TreeItem<String> options = new TreeItem<String>("Options");
-		options.setExpanded(true);
-
 		ObjectSetting settings = (ObjectSetting) getWindowManager().getSettings().getAllSettings();
+
+		FolderItem options = new FolderItem(settings);
+		options.setExpanded(true);
 		createTree(options, settings);
+
 		folders.setRoot(options);
 		folders.getSelectionModel().select(options);
+		folders.getSelectionModel().selectedItemProperty().addListener((e) -> {
+			FolderItem item = (FolderItem) folders.getSelectionModel().getSelectedItem();
+			showComponents(item.getObjectSetting());
+		});
 
-		showComponents((ObjectSetting) settings.getValue().get(0));
+		showComponents(settings);
 		super.ready();
 	}
 
-	private void createTree(TreeItem<String> root, ObjectSetting settings) {
+	private void createTree(FolderItem root, ObjectSetting settings) {
 		for (SettingValue<?> value : settings.getValue()) {
 			if (value.getSettingType() == SettingType.OBJECT) {
-				TreeItem<String> innerItem = new TreeItem<String>(value.getHumanName());
+				FolderItem innerItem = new FolderItem((ObjectSetting) value);
 				createTree(innerItem, (ObjectSetting) value);
 				innerItem.setExpanded(true);
 				root.getChildren().add(innerItem);
@@ -114,6 +124,10 @@ public class Options extends InternalWindow {
 					control = new NumberControl<Integer>((IntegerSetting) value);
 					break;
 
+				case STRING:
+					control = new StringControl((StringSetting) value);
+					break;
+
 				default:
 					break;
 			}
@@ -161,4 +175,18 @@ public class Options extends InternalWindow {
 		}
 	}
 
+	private class FolderItem extends TreeItem<String> {
+
+		private final ObjectSetting setting;
+
+		public FolderItem(ObjectSetting setting) {
+			super(setting.getHumanName());
+			this.setting = setting;
+		}
+
+		public ObjectSetting getObjectSetting() {
+			return setting;
+		}
+
+	}
 }
