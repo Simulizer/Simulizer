@@ -23,6 +23,7 @@ public class Clock extends Thread {
 	 */
 	public Clock(int tickMillis) {
 		super("CPU-Clock");
+		setDaemon(true);
 		this.tickMillis = tickMillis;
 		this.isRunning = false;// not running on initial creation
 		ticks = 0;
