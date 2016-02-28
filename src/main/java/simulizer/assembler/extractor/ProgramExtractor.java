@@ -57,18 +57,21 @@ public class ProgramExtractor extends SimpBaseListener {
     public final List<String> outstandingLabels;
 
 	/**
-     * keep track of annotations which are yet to be bound to a statement. This
-     * happens when an annotation is reached when there are outstanding labels.
-     * This means that between the annotation and the last statement is a label.
-     * In this case the annotation should bind to whatever the label binds to
-     * and this has yet to be determined.
+     * keep track of annotations which are yet to be bound to a statement.
+	 * The method for doing this is as follows
 	 * eg
 	 *
-	 * 	add s0 s1 s1
-	 * 	myLabel:	  # @{ //annotation }@
-	 * 	add s0 s1 s1
+	 *                # @{ }@ error, nothing to bind to
+	 *  firstLabel:   # @{ }@ binds to instruction 1 (enter (instruction 1) with outstanding annotations and labels)
+	 * 	add s0 s1 s1  # @{ }@ binds to instruction 1 (enter (instruction 2) with outstanding annotations)
+	 * 	add s0 s1 s1  # @{ }@ binds to instruction 2 (enter (myLabel) with no outstanding labels)
+	 * 	              # @{ }@ binds to instruction 2 (enter (myLabel) with no outstanding labels)
+	 * 	myLabel:	  # @{ }@ binds to instruction 3 (enter (myOtherLabel) with outstanding labels, not pushed)
+	 * 	              #                                then (instruction 3) with outstanding annotations and labels)
+	 * 	myOtherLabel: # @{ }@ binds to instruction 3 (enter (instruction 3) with outstanding annotations and labels)
+	 * 	add s0 s1 s1  # @{ }@ binds to instruction 3 (exit text segment with outstanding annotations)
+	 * 	# end
 	 *
-	 * 	the annotation binds to the second statement
 	 */
 	public final List<String> outstandingAnnotations;
 
@@ -141,8 +144,11 @@ public class ProgramExtractor extends SimpBaseListener {
 		}
     }
 
+	@Override public void exitTextSegment(SimpParser.TextSegmentContext ctx) {
+		pushAnnotations();
+	}
 
-    /**
+	/**
      * check the operands of a .text or .data segment. They are allowed either
      * no operands, or a single address (which must be a positive integer)
      * @param ctx the operand list to check
@@ -209,11 +215,6 @@ public class ProgramExtractor extends SimpBaseListener {
 					"because the end of the program was reached: " +
 					StringUtils.joinList(outstandingLabels), Problem.NO_LINE_NUM);
         }
-		if(!outstandingAnnotations.isEmpty()) {
-			log.logProblem("These annotations could not be assigned to addresses" +
-					"because the end of the program was reached: " +
-					StringUtils.joinList(outstandingAnnotations), Problem.NO_LINE_NUM);
-		}
     }
 
     @Override
@@ -236,6 +237,13 @@ public class ProgramExtractor extends SimpBaseListener {
             log.logProblem("The 'main' label must be inside the .text segment", ctx);
         }
 
+
+		if(!outstandingAnnotations.isEmpty()) {
+			// see outstandingAnnotations documentation for logic behind this
+			if(outstandingLabels.isEmpty()) {
+				pushAnnotations();
+			}
+		}
         outstandingLabels.add(labelName);
     }
 
@@ -423,10 +431,6 @@ public class ProgramExtractor extends SimpBaseListener {
 				aStart = text.indexOf(startMark, aEnd);
 			}
 
-			// no labels => attach to last statement
-			if(outstandingLabels.isEmpty()) {
-				pushAnnotations();
-			}
 			// else: wait for labels to be bound (see pushStatement)
 
 		}
@@ -434,20 +438,51 @@ public class ProgramExtractor extends SimpBaseListener {
     }
 
 	public void pushAnnotations() {
-		String annotationCode = String.join("\n", outstandingAnnotations);
-		int index = textSegment.size() - 1; // already checked for < 0
-		annotations.put(index, new Annotation(annotationCode));
-		outstandingAnnotations.clear();
+		if(!outstandingAnnotations.isEmpty()) {
+			String annotationCode = String.join("\n", outstandingAnnotations);
+			if(textSegment.isEmpty()) {
+				// could happen if text segment is: "label: # @{}@" with no instructions
+				log.logProblem("annotation could not be bound to an instruction: \"" + annotationCode + "\"", Problem.NO_LINE_NUM);
+				return;
+			}
+			int index = textSegment.size() - 1;
+			if(annotations.containsKey(index)) {
+				Annotation a = annotations.get(index);
+				annotationCode = a.code + "\n" + annotationCode;
+			}
+			annotations.put(index, new Annotation(annotationCode));
+			outstandingAnnotations.clear();
+		}
 	}
 
     public void pushStatement(Statement s) {
-        textSegment.add(s);
-        int index = textSegment.size() - 1;
-        for(String labelName : outstandingLabels) {
-            textSegmentLabels.put(labelName, index);
-        }
-        outstandingLabels.clear();
+		if(outstandingLabels.isEmpty()) {
+			// instruction # @{}@
+			// this_instruction
+
+			// bind annotations to the last instruction
+			pushAnnotations();
+			textSegment.add(s);
+		} else {
+			// instruction
+			// label: # @{}@
+			// this_instruction
+
+			// bind annotations to this instruction
+			textSegment.add(s);
+			pushAnnotations();
+		}
+		pushLabels(); // attach outstanding labels to this instruction
     }
+	public void pushLabels() {
+		if(!outstandingLabels.isEmpty()) {
+			int index = textSegment.size() - 1;
+			for (String labelName : outstandingLabels) {
+				textSegmentLabels.put(labelName, index);
+			}
+			outstandingLabels.clear();
+		}
+	}
 
     public void pushVariable(Variable v) {
         dataSegment.add(v);

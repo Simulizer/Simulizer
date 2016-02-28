@@ -3,6 +3,7 @@ package simulizer.ui;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
@@ -13,6 +14,7 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.components.highlevel.HighLevelVisualisationManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
@@ -32,6 +34,7 @@ public class WindowManager extends GridPane {
 	private CPU cpu = null;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
+	private HighLevelVisualisationManager hlVisManager;
 
 	public WindowManager(Stage primaryStage, Settings settings) {
 		this.primaryStage = primaryStage;
@@ -70,6 +73,16 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
+
+		// Disable ALT Key to prevent menu bar from stealing
+		// the editor's focus
+		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
+			if (e.isAltDown())
+				e.consume();
+		});
+
+
+		hlVisManager = new HighLevelVisualisationManager(this);
 	}
 
 	public void show() {
@@ -171,5 +184,9 @@ public class WindowManager extends GridPane {
 	public Settings getSettings() {
 		return settings;
 
+	}
+
+	public HighLevelVisualisationManager getHLVisManager() {
+		return hlVisManager;
 	}
 }

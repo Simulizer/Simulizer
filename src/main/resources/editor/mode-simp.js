@@ -24,9 +24,12 @@ ace.define(
 var SimpHighlightRules = function() {
     this.$rules = {
         'start' : [
+            { token: 'comment.assembly', // comment without @ (definitely does not contain an annotation)
+              regex: '#[^@]*$',
+            },
             { token: 'comment.assembly',
               regex: '#',
-              next:  'comment'
+              next:  'comment' // check for annotations in comment body
             },
             { token: 'keyword.control.assembly',
               regex: keywordRegex,
@@ -199,6 +202,9 @@ var DocumentHighlightRules = function() {
     ];
 
     var endRules = [
+        { token: 'paren.rparen',
+          regex: '\}[^@]', // un-matched curly brace (not an annotation end marker)
+        },
         { token: 'keyword',
           regex: '\}@$', // annotation right up to EOL
           next:  'start'

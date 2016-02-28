@@ -27,6 +27,7 @@ import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.AceEditor;
 import simulizer.ui.windows.Labels;
+import simulizer.ui.windows.Logger;
 import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -167,8 +168,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem runProgram = new MenuItem("Run Program");
 		runProgram.setOnAction(e -> {
 			StoreProblemLogger log = new StoreProblemLogger();
-			Assembler a = new Assembler();
-			Program p = a.assemble(getEditor().getText(), log);
+			Program p = Assembler.assemble(getEditor().getText(), log);
 			if(p != null) {
 				wm.runProgram(p);
 			} else {
@@ -247,10 +247,17 @@ public class MainMenuBar extends MenuBar {
 		lineWrap.setSelected(false);
 		lineWrap.setOnAction(e -> getEditor().setWrap(!getEditor().getWrap()));
 
+		MenuItem jsREPL = new MenuItem("Start javascript REPL");
+		jsREPL.setOnAction(e -> {
+			Logger logger = (Logger) wm.getWorkspace().findInternalWindow(WindowEnum.LOGGER);
+			new Thread(() -> {
+				wm.getHLVisManager().getExecutor().debugREPL(logger);
+			}).start();
+		});
+
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-			Assembler a = new Assembler();
-			Program p = a.assemble(getEditor().getText(), null);
+			Program p = Assembler.assemble(getEditor().getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
@@ -264,7 +271,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram, labelRefresh);
+		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram, labelRefresh, jsREPL);
 		return debugMenu;
 	}
 
