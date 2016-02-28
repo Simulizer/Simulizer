@@ -96,7 +96,6 @@ public class Labels extends InternalWindow implements Observer {
 	private static void getLabels(ObservableList<Label> answer, String text) {
 		Scanner reader = new Scanner(text);
 
-
 		for (int line = 1; reader.hasNext(); ++line) {
 			String s = reader.nextLine().trim();
 			int indexOfColon = s.indexOf(":");

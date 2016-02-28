@@ -1,12 +1,14 @@
 package simulizer.ui.windows;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observer;
 import java.util.Set;
 
+import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
@@ -50,6 +52,7 @@ public class AceEditor extends InternalWindow {
 	private File currentFile;
 
 	private boolean changedSinceLastSave;
+	private boolean editedSinceLabelUpdate;
 
 	// handle key combos for copy and paste
 	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
@@ -158,7 +161,14 @@ public class AceEditor extends InternalWindow {
 			}
 		});
 
-		addEventHandler(KeyEvent.KEY_RELEASED, e -> informObservers());
+		addEventHandler(KeyEvent.KEY_RELEASED, e -> editedSinceLabelUpdate = true);
+
+		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
+			if (editedSinceLabelUpdate) {
+				editedSinceLabelUpdate = false;
+				informObservers();
+			}
+		});
 
 		setTitle("Ace");
 		getContentPane().getChildren().add(view);
@@ -226,7 +236,7 @@ public class AceEditor extends InternalWindow {
 	}
 
 	/**
-	 * Notifies all observers that a change has taken place
+	 * Fires a message to all observers.
 	 */
 	private void informObservers() {
 		for (Observer observer : observers) {
@@ -272,6 +282,7 @@ public class AceEditor extends InternalWindow {
 		currentFile = file;
 		jsWindow.call("loadText", FileUtils.getFileContent(file));
 		setEdited(false);
+		editedSinceLabelUpdate = false;
 
 		informObservers();
 	}
@@ -280,6 +291,7 @@ public class AceEditor extends InternalWindow {
 		currentFile = null;
 		jsWindow.call("loadText", "");
 		setEdited(false);
+		editedSinceLabelUpdate = false;
 
 		informObservers();
 	}
