@@ -15,9 +15,10 @@ log   = function(msg){debug.log(''+msg);};
 alert = function(msg){debug.alert(''+msg);};
 
 // simulation bridge
-stop   = function(){simulation.stop();};
-reg    = function(name){return simulation.getRegister(Register.fromString(name));};
-regNum = function(id){return simulation.getRegister(Register.fromID(id));};
+stop     = function(){simulation.stop();};
+setSpeed = function(s){simulation.setClockSpeed(s);};
+reg      = function(name){return simulation.getRegister(Register.fromString(name));};
+regNum   = function(id){return simulation.getRegister(Register.fromID(id));};
 // global bindings for each register are added later
 // eg $s0 = {id:Register.s0, get: function to get the current s0 value}
 
