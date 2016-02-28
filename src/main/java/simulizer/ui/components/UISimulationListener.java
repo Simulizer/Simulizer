@@ -25,12 +25,7 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
-		System.out.println(m.annotation.code);
-		try {
-			wm.getHLVisManager().ex.exec(m.annotation);
-		} catch (ScriptException e) {
-			e.printStackTrace();
-		}
+		wm.getHLVisManager().processAnnotation(m.annotation);
 	}
 
 	@Override

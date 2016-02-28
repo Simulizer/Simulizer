@@ -2,14 +2,21 @@ package simulizer.annotations;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import simulizer.simulation.cpu.user_interaction.IO;
 
 /**
  * A collection of methods for debugging, accessible from annotations
  */
 @SuppressWarnings("unused")
 public class DebugBridge {
-	public void debugPrint(String string) {
-		System.out.println(string);
+	IO io = null;
+
+	public void log(String string) {
+		if(io != null) {
+			io.printString("js: " + string + "\n");
+		} else {
+			System.out.println("js: " + string);
+		}
 	}
 
 	public void alert(String msg) {

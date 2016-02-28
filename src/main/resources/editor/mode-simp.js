@@ -202,6 +202,9 @@ var DocumentHighlightRules = function() {
     ];
 
     var endRules = [
+        { token: 'paren.rparen',
+          regex: '\}[^@]', // un-matched curly brace (not an annotation end marker)
+        },
         { token: 'keyword',
           regex: '\}@$', // annotation right up to EOL
           next:  'start'

@@ -1,7 +1,5 @@
 package simulizer.annotations;
 
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -10,10 +8,6 @@ import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.utils.FileUtils;
 
 import javax.script.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.function.Function;
 
 /**
  * A JavaScript interpreter for executing annotations and coordinating the high level visualisations.
@@ -43,6 +37,10 @@ public class AnnotationExecutor {
 		engine = factory.getScriptEngine(new AnnotationClassFilter());
 		context = new SimpleScriptContext();
 
+		context.setReader(null); // prevent access to stdin
+		context.setWriter(null); // prevent access to stdout
+		// setErrorWriter not altered
+
 		debugBridge = new DebugBridge();
 		simulationBridge = new SimulationBridge();
 		visualisationBridge = new VisualisationBridge();
@@ -61,6 +59,10 @@ public class AnnotationExecutor {
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void redirectOutput(IO io) {
+		debugBridge.io = io;
 	}
 
 	public void exec(Annotation annotation) throws ScriptException, SecurityException {

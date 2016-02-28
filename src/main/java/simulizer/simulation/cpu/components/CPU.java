@@ -596,16 +596,22 @@ public class CPU {
      */
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
     {
+        // PC holds next instriction and is advanced by fetch,
+        // messages should be sent about this instruction instead
+        Address thisInstruction = programCounter;
+
         fetch();
-        sendMessage(new ExecuteStatementMessage(programCounter));
+        sendMessage(new ExecuteStatementMessage(thisInstruction));
         InstructionFormat instruction = decode();
         execute(instruction);
-		if(annotations.containsKey(programCounter)) {
-			sendMessage(new AnnotationMessage(annotations.get(programCounter)));
+		if(annotations.containsKey(thisInstruction)) {
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4)//if end of program reached
         {
+            //TODO: this needs to crash, but with an informative message (unlike spim does)
+            //TODO: syscall 10 is the only valid way of ending
             this.isRunning = false;//stop running
         }
     }

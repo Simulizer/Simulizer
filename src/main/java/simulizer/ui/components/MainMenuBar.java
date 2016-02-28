@@ -247,7 +247,7 @@ public class MainMenuBar extends MenuBar {
 		jsREPL.setOnAction(e -> {
 			Logger logger = (Logger) wm.getWorkspace().findInternalWindow(WindowEnum.LOGGER);
 			new Thread(() -> {
-				wm.getHLVisManager().ex.debugREPL(logger);
+				wm.getHLVisManager().getExecutor().debugREPL(logger);
 			}).start();
 		});
 

@@ -33,7 +33,7 @@ public class WindowManager extends GridPane {
 	private CPU cpu = null;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
-	private HighLevelVisualisationManager hlVisManager = new HighLevelVisualisationManager(this);
+	private HighLevelVisualisationManager hlVisManager;
 
 	public WindowManager(Stage primaryStage, Settings settings) {
 		this.primaryStage = primaryStage;
@@ -72,6 +72,9 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
+
+
+		hlVisManager = new HighLevelVisualisationManager(this);
 	}
 
 	public void show() {

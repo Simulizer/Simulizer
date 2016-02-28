@@ -1,9 +1,6 @@
+// un-qualified abbreviations for the bridges' methods
+// cannot assign methods directly, must wrap with lambda
 // debug, simulation, visualisation
 
-nop = function() {} // do nothing
-
-exit = nop;
-load = visualisation.load;
-
-print = debug.print;
-alert = function(msg){debug.alert(msg);};
+log   = function(msg){debug.log(''+msg);};
+alert = function(msg){debug.alert(''+msg);};
