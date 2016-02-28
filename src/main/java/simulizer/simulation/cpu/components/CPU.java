@@ -44,6 +44,7 @@ import simulizer.simulation.listeners.ProblemMessage;
 import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.simulation.listeners.StageEnterMessage;
+import simulizer.simulation.listeners.StageEnterMessage.Stage;
 
 /**this is the central CPU class
  * this is how the following components fit into this class
@@ -202,7 +203,7 @@ public class CPU {
         try {
             this.programCounter = getEntryPoint();//set the program counter to the entry point to the program
         } catch(Exception e) {//if entry point load fails
-            //SEND TO LOGGER HERE
+            sendMessage(new ProblemMessage(e.getMessage()));//send problem to logger
         }
 
         this.registers[Register.gp.getID()] = this.program.initialGP;//setting global pointer
@@ -263,6 +264,7 @@ public class CPU {
      *
      */
     protected void fetch() throws MemoryException {
+    	sendMessage(new StageEnterMessage(Stage.Fetch));//signal start of stage
         this.instructionRegister = this.memory.readFromTextSegment(this.programCounter);
         this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing the program counter
     }
@@ -276,6 +278,7 @@ public class CPU {
      */
     protected InstructionFormat decode(Instruction instruction, List<Operand> operandList) throws DecodeException {
 
+    	sendMessage(new StageEnterMessage(Stage.Decode));//signal start of decode
         Operand op1 = null;
         OperandType op1Type = null;
         Operand op2 = null;
@@ -408,7 +411,8 @@ public class CPU {
      * @throws StackException 
      */
     protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
-        switch(instruction.mode) {//switch based on instruction format
+        sendMessage(new StageEnterMessage(Stage.Execute));//signal start of execution
+    	switch(instruction.mode) {//switch based on instruction format
             case RTYPE:
                 Word result = this.Alu.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2());
                 this.registers[instruction.asRType().getDestReg().getID()] = result;//storing result
@@ -617,19 +621,17 @@ public class CPU {
 
     /**this method will run the program given to the CPU, it will operate under the clock cycle
      *
-     * @throws MemoryException if problem with memory
-     * @throws DecodeException if problem during decode
-     * @throws InstructionException if bad instruction
-     * @throws ExecuteException if problem during execution
-     * @throws HeapException if problem accessing the heap
-     * @throws StackException if problem accessing stack
      */
-    public void runProgram() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+    public void runProgram() {
     	this.startClock();
         System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         while(isRunning) {//need something to stop this
-            this.runSingleCycle();//run one loop of Fetch,Decode,Execute
+        	try {
+        		this.runSingleCycle();//run one loop of Fetch,Decode,Execute
+        	} catch(MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
+        		sendMessage(new ProblemMessage(e.getMessage()));
+        	}
             try {
                 if(isRunning) {
                     clock.waitForNextTick();
