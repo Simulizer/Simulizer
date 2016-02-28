@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Observer;
 import java.util.Set;
 
 import org.reactfx.util.FxTimer;
@@ -26,6 +25,7 @@ import netscape.javascript.JSObject;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
+import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
@@ -62,7 +62,7 @@ public class AceEditor extends InternalWindow {
 	private JSObject jsWindow;
 	private JSObject jsEditor;
 
-	private Set<Observer> observers = new HashSet<>();
+	private Set<TemporaryObserver> observers = new HashSet<>();
 
 	/**
 	 * Communication between this class and the javascript running in the webview
@@ -86,13 +86,6 @@ public class AceEditor extends InternalWindow {
 
 	public AceEditor() {
 		// setStyle("-fx-background-color: black;");
-
-		// Tell the Labels window to listen to this
-		try {
-			Labels labelsWindow = (Labels) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.LABELS);
-			addObserver(labelsWindow);
-		} catch (NullPointerException whenSomethingIsNotOpen) {
-		}
 
 		view = new WebView();
 		currentFile = null;
@@ -166,12 +159,27 @@ public class AceEditor extends InternalWindow {
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
 				editedSinceLabelUpdate = false;
-				informObservers();
+				updateObservers();
 			}
 		});
 
+		setOnClosedAction(e -> detachObservers());
+
 		setTitle("Ace");
 		getContentPane().getChildren().add(view);
+	}
+
+	@Override
+	public void ready() {
+		String[] observersToAdd = { Labels.class.getSimpleName() };
+
+		for (String className : observersToAdd) {
+			TemporaryObserver obs =
+				(TemporaryObserver) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ofString(className));
+			if (obs != null) addObserver(obs);
+		}
+
+		super.ready();
 	}
 
 	private void enableFirebug() {
@@ -225,27 +233,42 @@ public class AceEditor extends InternalWindow {
 	}
 
 	/**
-	 * The observer's update method will be called with <code>update(null, null)</code> when a key is pressed.
-	 * If the same observer is added twice, it will only be informed once.
+	 * Adds an observer of this class.
 	 *
 	 * @param obs
 	 *            the observer to add
 	 */
-	public void addObserver(Observer obs) {
+	public void addObserver(TemporaryObserver obs) {
 		observers.add(obs);
 	}
 
 	/**
-	 * Fires a message to all observers.
+	 * Calls the <code>update</code> method on all observers.
+	 *
+	 * @param object
 	 */
-	private void informObservers() {
-		for (Observer observer : observers) {
-			observer.update(null, null);
-		}
+	private void updateObservers() {
+		for (TemporaryObserver observer : observers)
+			observer.update();
 	}
 
+	/**
+	 * Calls the <code>stopObserving</code> method on all observers and clears the list of observers.
+	 */
+	private void detachObservers() {
+		for (TemporaryObserver observer : observers) {
+			observer.stopObserving();
+		}
+
+		observers.clear();
+	}
+
+
+
 	public String getText() {
-		return (String) jsEditor.call("getValue");
+		if (jsEditor != null) {
+			return (String) jsEditor.call("getValue");
+		} else return null;
 	}
 
 	public int getLine() {
@@ -284,7 +307,7 @@ public class AceEditor extends InternalWindow {
 		setEdited(false);
 		editedSinceLabelUpdate = false;
 
-		informObservers();
+		updateObservers();
 	}
 
 	public void newFile() {
@@ -293,7 +316,7 @@ public class AceEditor extends InternalWindow {
 		setEdited(false);
 		editedSinceLabelUpdate = false;
 
-		informObservers();
+		updateObservers();
 	}
 
 	private void setEdited(boolean edited) {

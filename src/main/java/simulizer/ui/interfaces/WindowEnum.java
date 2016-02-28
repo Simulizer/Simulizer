@@ -44,6 +44,13 @@ public enum WindowEnum {
 		return null;
 	}
 
+	public static WindowEnum ofString(String name) {
+		for (WindowEnum we : WindowEnum.values())
+			if (we.className.equals(name))
+				return we;
+		return null;
+	}
+
 	public static String getName(InternalWindow w) {
 		WindowEnum e = toEnum(w);
 		if(e != null) {
