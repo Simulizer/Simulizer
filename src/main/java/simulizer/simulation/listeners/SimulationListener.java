@@ -17,4 +17,5 @@ public abstract class SimulationListener {
     public void processProblemMessage(ProblemMessage m) {}
     public void processStageEnterMessage(StageEnterMessage m) {}
     public void processRegisterChangedMessage(RegisterChangedMessage m) {}
+    public void processInstructionTypeMessage(InstructionTypeMessage m) {}
 }

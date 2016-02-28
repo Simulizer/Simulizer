@@ -30,6 +30,7 @@ import simulizer.simulation.exceptions.InstructionException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.exceptions.StackException;
+import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.ITypeInstruction;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
@@ -39,6 +40,7 @@ import simulizer.simulation.instructions.SpecialInstruction;
 import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.DataMovementMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
+import simulizer.simulation.listeners.InstructionTypeMessage;
 import simulizer.simulation.listeners.Message;
 import simulizer.simulation.listeners.ProblemMessage;
 import simulizer.simulation.listeners.RegisterChangedMessage;
@@ -166,6 +168,8 @@ public class CPU {
                 l.processStageEnterMessage((StageEnterMessage) m);
             } else if(m instanceof RegisterChangedMessage) {
             	l.processRegisterChangedMessage((RegisterChangedMessage) m);
+            } else if(m instanceof InstructionTypeMessage) {
+            	l.processInstructionTypeMessage((InstructionTypeMessage) m);
             }
         }
     }
@@ -266,6 +270,7 @@ public class CPU {
     protected void fetch() throws MemoryException {
     	sendMessage(new StageEnterMessage(Stage.Fetch));//signal start of stage
         this.instructionRegister = this.memory.readFromTextSegment(this.programCounter);
+        sendMessage(new DataMovementMessage(Optional.empty(),Optional.of(this.instructionRegister)));
         this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing the program counter
     }
 
@@ -313,7 +318,9 @@ public class CPU {
             Optional<Word> dest = Optional.empty();//destination always empty to start
             Register destinationRegister = op1.asRegisterOp().value;//store destination register
             Optional<Word> src1 = Optional.of(decodeRegister(op2.asRegisterOp()));
+            sendMessage(new DataMovementMessage(src1,Optional.empty()));
             Optional<Word> src2 = Optional.of(decodeRegister(op3.asRegisterOp()));
+            sendMessage(new DataMovementMessage(src2,Optional.empty()));
             return new RTypeInstruction(instruction, dest, destinationRegister, src1, src2);
         }
         else if(instruction.getOperandFormat() == OperandFormat.destSrcImm || instruction.getOperandFormat() == OperandFormat.destSrcImmU) {//immediate arithmetic operations (signed and unsigned)
@@ -322,6 +329,7 @@ public class CPU {
             Optional<Word> dest = Optional.empty();
             Register destinationRegister = op1.asRegisterOp().value;
             Optional<Word> srcRegister = Optional.of(this.decodeRegister(op2.asRegisterOp()));
+            sendMessage(new DataMovementMessage(srcRegister,Optional.empty()));
             Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(op3.asIntegerOp()));
             return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, immValue);
         }
@@ -331,6 +339,7 @@ public class CPU {
             Optional<Word> dest = Optional.empty();
             Register destinationRegister = op1.asRegisterOp().value;
             Optional<Word> srcRegister = Optional.of(this.decodeRegister(op2.asRegisterOp()));
+            sendMessage(new DataMovementMessage(srcRegister,Optional.empty()));
             Optional<Word> fakeSecondRegister = Optional.empty(); //dummy word to pass into the alu (dealt with in the alu easily)
             return new RTypeInstruction(instruction, dest, destinationRegister, srcRegister, fakeSecondRegister);
         }
@@ -358,6 +367,7 @@ public class CPU {
             assert (op1 != null) && (op2 == null) && (op3 == null);
 
             Word registerContents = this.decodeRegister(op1.asRegisterOp());//getting register contents
+            sendMessage(new DataMovementMessage(Optional.of(registerContents),Optional.empty()));
             Optional<Address> registerAddress = Optional.of(new Address((int)decodeU(registerContents.getWord())));//put into correct format
             Optional<Word> fakeCurrentWord = Optional.empty();
             return new JTypeInstruction(instruction,registerAddress,fakeCurrentWord);
@@ -366,7 +376,9 @@ public class CPU {
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
             Optional<Word> cmp1 = Optional.of(this.decodeRegister(op1.asRegisterOp()));//first comparison value
+            sendMessage(new DataMovementMessage(cmp1,Optional.empty()));
             Optional<Word> cmp2 = Optional.of(this.decodeRegister(op2.asRegisterOp()));//second comparison value
+            sendMessage(new DataMovementMessage(cmp2,Optional.empty()));
             Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(op3.asAddressOp()));//where to branch to if comparison returns true
             return new ITypeInstruction(instruction,cmp1,cmp2,branchAddr);
         }
@@ -374,6 +386,7 @@ public class CPU {
             assert (op1 != null) && (op2 != null) && (op3 == null);
 
             Optional<Word> cmp = Optional.of(this.decodeRegister(op1.asRegisterOp()));//value to compare
+            sendMessage(new DataMovementMessage(cmp,Optional.empty()));
             Optional<Word> fakeCmp = Optional.empty();//used to make ALU calculations easier
             Optional<Address> branchAddr = Optional.of(this.decodeAddressOperand(op2.asAddressOp()));//branch address
             return new ITypeInstruction(instruction,cmp,fakeCmp,branchAddr);
@@ -382,6 +395,7 @@ public class CPU {
             assert (op1 != null) && (op2 != null) && (op3 == null);
 
             Optional<Word> src = Optional.of(this.decodeRegister(op1.asRegisterOp()));//word to store
+            sendMessage(new DataMovementMessage(src,Optional.empty()));
             Optional<Register> destReg = Optional.empty();
             Optional<Address> toStore = Optional.of(this.decodeAddressOperand(op2.asAddressOp()));
             Optional<Word> immVal = Optional.empty();
@@ -414,17 +428,26 @@ public class CPU {
         sendMessage(new StageEnterMessage(Stage.Execute));//signal start of execution
     	switch(instruction.mode) {//switch based on instruction format
             case RTYPE:
+            	sendMessage(new InstructionTypeMessage(AddressMode.RTYPE));//send message giving idea of datapath selected
                 Word result = this.Alu.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2());
+                sendMessage(new DataMovementMessage(instruction.asRType().getSrc1(),Optional.empty()));//moved into alu
+                sendMessage(new DataMovementMessage(instruction.asRType().getSrc2(),Optional.empty()));
                 this.registers[instruction.asRType().getDestReg().getID()] = result;//storing result
+                sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asRType().getDestReg().getID()]),Optional.empty()));
                 sendMessage(new RegisterChangedMessage(instruction.asRType().getDestReg()));
                 break;
             case ITYPE:
+            	sendMessage(new InstructionTypeMessage(AddressMode.ITYPE));
+            	sendMessage(new DataMovementMessage(instruction.asIType().getCmp1(),Optional.empty()));
+            	sendMessage(new DataMovementMessage(instruction.asIType().getCmp2(),Optional.empty()));
                 Word branchTest = this.Alu.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
                 if(equalByteArrays(branchTest.getWord(), ALU.branchTrue)) {
                     this.programCounter = instruction.asIType().getBranchAddress().get();//set the program counter
+                    sendMessage(new DataMovementMessage(Optional.of(encodeU((long)this.programCounter.getValue())),Optional.empty()));
                 }
                 break;
             case SPECIAL:
+            	sendMessage(new InstructionTypeMessage(AddressMode.SPECIAL));
                 if(instruction.getInstruction().equals(Instruction.syscall)) {//syscall
                     int v0 = (int)DataConverter.decodeAsSigned(this.registers[Register.v0.getID()].getWord());//getting code for syscall
                     syscall(v0);//carry out specified syscall op
@@ -437,16 +460,21 @@ public class CPU {
                 }
                 break;
             case JTYPE:
+            	sendMessage(new InstructionTypeMessage(AddressMode.JTYPE));
                 if(instruction.getInstruction().equals(Instruction.jal)) {//making sure i put current address in ra
                     this.registers[Register.ra.getID()] = instruction.asJType().getCurrentAddress().get();
+                    sendMessage(new DataMovementMessage(Optional.of(this.registers[Register.ra.getID()]),Optional.empty()));
                     sendMessage(new RegisterChangedMessage(Register.ra));
                 }
 
                 this.programCounter = instruction.asJType().getJumpAddress().get();//loading new address into the PC
+                sendMessage(new DataMovementMessage(Optional.of(encodeU((long)this.programCounter.getValue())),Optional.empty()));
                 break;
             case LSTYPE:
+            	sendMessage(new InstructionTypeMessage(AddressMode.LSTYPE));
                 if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destImm)) {//li
                     this.registers[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+                    sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr)) {//load
@@ -455,40 +483,51 @@ public class CPU {
                     if(instruction.getInstruction().equals(Instruction.la)) {//have to be careful with la
                     	Word address = new Word(DataConverter.encodeAsSigned((long)retrieveAddress));
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = address;
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                 	}
                     else if(instruction.getInstruction().equals(Instruction.lw)) {
                     	int length = 4;//this may be wrong, hence outside, may depend on instruction
                     	byte[] read = this.memory.readFromMem(retrieveAddress, length);
+                    	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                     }
                     else if(instruction.getInstruction().equals(Instruction.lb)) {
                     	byte[] read = this.memory.readFromMem(retrieveAddress, 1);
+                    	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
                     	long val = DataConverter.decodeAsSigned(read);
                     	byte[] signed = DataConverter.encodeAsSigned(val);
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(signed);
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                     }
                     else if(instruction.getInstruction().equals(Instruction.lbu)) {
                     	byte[] read = this.memory.readFromMem(retrieveAddress, 1);
+                    	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
                     	long val = DataConverter.decodeAsUnsigned(read);
                     	byte[] unsigned = DataConverter.encodeAsUnsigned(val);
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(unsigned);
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                     }
                     else if(instruction.getInstruction().equals(Instruction.lh)) {
                     	byte[] read = this.memory.readFromMem(retrieveAddress, 2);
+                    	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
                     	long val = DataConverter.decodeAsSigned(read);
                     	byte[] signed = DataConverter.encodeAsSigned(val);
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(signed);
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                     }
                     else if(instruction.getInstruction().equals(Instruction.lhu)) {
                     	byte[] read = this.memory.readFromMem(retrieveAddress, 2);
+                    	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
                     	long val = DataConverter.decodeAsUnsigned(read);
                     	byte[] unsigned = DataConverter.encodeAsUnsigned(val);
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = new Word(unsigned);
+                    	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                     }
                 }
@@ -497,18 +536,21 @@ public class CPU {
                 	if(instruction.getInstruction().equals(Instruction.sb)) {
                 		byte toStore = instruction.asLSType().getRegister().get().getWord()[3];//lowest byte
                 		int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
-	                    this.memory.writeToMem(storeAddress, new byte[]{toStore});//this might be better though still naive
+	                    this.memory.writeToMem(storeAddress, new byte[]{toStore});
+	                    sendMessage(new DataMovementMessage(Optional.of(new Word(new byte[]{toStore})),Optional.empty()));
                 	}
                 	else if(instruction.getInstruction().equals(Instruction.sh)) {
                 		byte[] toStore = instruction.asLSType().getRegister().get().getWord();
                 		toStore = new byte[]{toStore[2],toStore[3]};
                 		int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
-	                    this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+	                    this.memory.writeToMem(storeAddress, toStore);
+	                    sendMessage(new DataMovementMessage(Optional.of(new Word(toStore)),Optional.empty()));
                 	}
                 	else {//sw
 	                    byte[] toStore = instruction.asLSType().getRegister().get().getWord();//all 4 bytes
 	                    int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
-	                    this.memory.writeToMem(storeAddress, toStore);//this might be better though still naive
+	                    this.memory.writeToMem(storeAddress, toStore);
+	                    sendMessage(new DataMovementMessage(Optional.of(new Word(toStore)),Optional.empty()));
                 	}
                 }
                 else {
@@ -544,12 +586,14 @@ public class CPU {
     				addressPStr += 1;//incrementing address to next byte
     				currentByte = this.memory.readFromMem(addressPStr, 1);//next word to read
     			}
+    			sendMessage(new DataMovementMessage(Optional.of(new Word(currentByte)),Optional.empty()));
     			this.io.printString(toPrint);
     			break;
     		case 5://read int
     			int read = this.io.readInt();//reading in from console
     			Word readAsWord = new Word(DataConverter.encodeAsSigned((long)read));
     			this.registers[Register.v0.getID()] = readAsWord;//storing in v0
+    			sendMessage(new DataMovementMessage(Optional.of(this.registers[Register.v0.getID()]),Optional.empty()));
     			sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		case 8://read string
@@ -568,10 +612,12 @@ public class CPU {
     			
     			byte[] nullTerminator = new byte[]{0x00,0x00,0x00,0x00};//null terminator for string
     			this.memory.writeToMem(addressIBuf, nullTerminator);//adding terminator signals end of string
+    			sendMessage(new DataMovementMessage(Optional.of(new Word(nullTerminator)),Optional.empty()));
     			break;
     		case 9://sbrk
     			Address newBreak = this.memory.getHeap().sbrk(a0);
     			this.registers[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
+    			sendMessage(new DataMovementMessage(Optional.of(this.registers[Register.v0.getID()]),Optional.empty()));
     			sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		case 10://exit program
@@ -587,6 +633,7 @@ public class CPU {
     			long asLong = DataConverter.decodeAsSigned(asBytes);
     			Word toWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage
     			this.registers[Register.v0.getID()] = toWord;
+    			sendMessage(new DataMovementMessage(Optional.of(this.registers[Register.v0.getID()]),Optional.empty()));
     			sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		default://if invalid syscall code
