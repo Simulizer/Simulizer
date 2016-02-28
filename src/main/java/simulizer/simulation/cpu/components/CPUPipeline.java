@@ -189,11 +189,11 @@ public class CPUPipeline extends CPU {
 			}
 		}
 
-        if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
+        /*if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
             this.isRunning = false;//stop running
             IF = createNopStatement();//flushing pipeline for next program to run
             ID = createNopInstruction();
-        }
+        }*/
 	}
 
 }
