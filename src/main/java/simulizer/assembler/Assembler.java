@@ -59,6 +59,10 @@ public class Assembler {
 
         p.textSegmentStart = address;
 
+        if(!extractor.initAnnotationCode.isEmpty()) {
+            p.initAnnotation = new Annotation(extractor.initAnnotationCode);
+        }
+
         for(int i = 0; i < extractor.textSegment.size(); i++) {
             Statement s = extractor.textSegment.get(i);
 

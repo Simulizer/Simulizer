@@ -27,9 +27,6 @@ public class AnnotationExecutor {
 	 */
 	private ScriptObjectMirror nhGlobals;
 
-	DebugBridge debugBridge;
-	SimulationBridge simulationBridge;
-	VisualisationBridge visualisationBridge;
 
 	private class AnnotationClassFilter implements ClassFilter {
 		@Override public boolean exposeToScripts(String s) {
@@ -48,16 +45,8 @@ public class AnnotationExecutor {
 		context.setWriter(null); // prevent access to stdout
 		context.setErrorWriter(null); // prevent access to stdout
 
-		debugBridge = new DebugBridge();
-		simulationBridge = new SimulationBridge();
-		visualisationBridge = new VisualisationBridge();
-
 		globals = new SimpleBindings();
 		context.setBindings(globals, ScriptContext.GLOBAL_SCOPE);
-
-		globals.put("debug", debugBridge);
-		globals.put("simulation", simulationBridge);
-		globals.put("visualisation", visualisationBridge);
 
 		engine.setContext(context);
 
@@ -74,8 +63,23 @@ public class AnnotationExecutor {
 		}
 	}
 
-	public void redirectOutput(IO io) {
-		debugBridge.io = io;
+	/**
+	 * bind an object to a name accessible from JavaScript
+	 * @param name the name to bind the object to
+	 * @param obj the object to bind
+	 */
+	public void bindGlobal(String name, Object obj) {
+		globals.put(name, obj);
+	}
+
+	/**
+	 * retrieve a global object
+	 * @param name the name the object is bound to
+	 * @param tClass the class of the object eg Boolean.class
+	 * @return the object, casted to the correct class
+	 */
+	public <T> T getGlobal(String name, Class<T> tClass) {
+		return tClass.cast(globals.get(name));
 	}
 
 	public void exec(Annotation annotation) throws ScriptException, SecurityException {
@@ -102,12 +106,12 @@ public class AnnotationExecutor {
 	public void debugREPL(IO io) {
 		try {
 			io.printString("REPL start (call exit() to finish)\n");
-			globals.put("io", io);
+			bindGlobal("io", io);
 			exec("print = function(s){io.printString(''+s+'\\n');};");
 			exec("exit = function(){stop = true;}; stop = false;");
 
 			String line;
-			while(!(Boolean)globals.get("stop")) {
+			while(!getGlobal("stop", Boolean.class)) {
 				io.printString("js> ");
 				line = io.readString();
 				exec(new Annotation(line));

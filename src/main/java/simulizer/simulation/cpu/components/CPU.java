@@ -630,6 +630,12 @@ public class CPU {
     	this.startClock();
         System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
+
+        // used for setting up the annotation environment eg loading visualisations
+        if(program.initAnnotation != null) {
+            sendMessage(new AnnotationMessage(program.initAnnotation));
+        }
+
         while(isRunning)//need something to stop this
         {
             this.runSingleCycle();//run one loop of Fetch,Decode,Execute

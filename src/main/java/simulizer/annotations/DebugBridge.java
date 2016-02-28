@@ -9,6 +9,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
  */
 @SuppressWarnings("unused")
 public class DebugBridge {
+	// set using DataSetter
 	IO io = null;
 
 	public void log(String string) {

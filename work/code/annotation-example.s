@@ -1,3 +1,6 @@
+# @{ log('setup code'); }@
+# @{ print("this is run before the first instruction is run") }@
+
 .data
 .text
 main:    # @{var x = 10}@ binds to first nop

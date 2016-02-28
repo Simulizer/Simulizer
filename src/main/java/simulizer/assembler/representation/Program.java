@@ -36,6 +36,7 @@ public class Program {
 
     public final Map<Label, Address> labels;
     public final Map<Address, Annotation> annotations;
+    public Annotation initAnnotation;
     public final Map<Address, Integer> lineNumbers;
 
     /**
@@ -62,6 +63,7 @@ public class Program {
         dynamicSegmentStart = Address.NULL;
         labels = new HashMap<>();
         annotations = new HashMap<>();
+        initAnnotation = null;
         lineNumbers = new HashMap<>();
         initialGP = null;
         initialSP = null;

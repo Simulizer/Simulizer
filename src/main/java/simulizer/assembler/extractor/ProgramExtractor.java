@@ -60,7 +60,9 @@ public class ProgramExtractor extends SimpBaseListener {
 	 * The method for doing this is as follows
 	 * eg
 	 *
-	 *                # @{ }@ error, nothing to bind to
+	 *				  # @{ }@ outside .text, binds to initAnnotation (run before program starts)
+	 * .text
+	 *                # @{ }@ error, in the text segment but nothing to bind to
 	 *  firstLabel:   # @{ }@ binds to instruction 1 (enter (instruction 1) with outstanding annotations and labels)
 	 * 	add s0 s1 s1  # @{ }@ binds to instruction 1 (enter (instruction 2) with outstanding annotations)
 	 * 	add s0 s1 s1  # @{ }@ binds to instruction 2 (enter (myLabel) with no outstanding labels)
@@ -73,6 +75,13 @@ public class ProgramExtractor extends SimpBaseListener {
 	 *
 	 */
 	public final List<String> outstandingAnnotations;
+	/**
+     * annotation code which comes before either the data or text segment is run
+     * before the program starts execution. This code can be used to setup the
+     * environment to use throughout the program, for example loading the
+     * appropriate visualisations.
+	 */
+	public String initAnnotationCode;
 
 
     public ProgramExtractor(ProblemLogger log) {
@@ -88,6 +97,7 @@ public class ProgramExtractor extends SimpBaseListener {
 
         outstandingLabels = new ArrayList<>();
 		outstandingAnnotations = new ArrayList<>();
+		initAnnotationCode = "";
     }
 
 
@@ -408,13 +418,8 @@ public class ProgramExtractor extends SimpBaseListener {
 
 		int aStart = text.indexOf(startMark);
 		if(aStart != -1) {
-			if(currentState != State.TEXT_SEGMENT) {
-				log.logProblem("Annotations must be placed inside the text segment", ctx);
-				return;
-			}
-			// annotation before first statement or label
-			if(textSegment.isEmpty() && outstandingLabels.isEmpty()) {
-				log.logProblem("Annotations must be placed after a statement or label", ctx);
+			if(currentState == State.DATA_SEGMENT) {
+				log.logProblem("Annotations must be placed inside the text segment, or before any segment", ctx);
 				return;
 			}
 
@@ -430,8 +435,14 @@ public class ProgramExtractor extends SimpBaseListener {
 				aStart = text.indexOf(startMark, aEnd);
 			}
 
-			// else: wait for labels to be bound (see pushStatement)
 
+			if(currentState == State.OUTSIDE) {
+				pushAnnotations();
+			}
+			// annotation before first statement or label
+			else if(textSegment.isEmpty() && outstandingLabels.isEmpty()) {
+				log.logProblem("Annotations must be placed after a statement or label", ctx);
+			}
 		}
 
     }
@@ -439,18 +450,23 @@ public class ProgramExtractor extends SimpBaseListener {
 	public void pushAnnotations() {
 		if(!outstandingAnnotations.isEmpty()) {
 			String annotationCode = String.join("\n", outstandingAnnotations);
-			if(textSegment.isEmpty()) {
-				// could happen if text segment is: "label: # @{}@" with no instructions
-				log.logProblem("annotation could not be bound to an instruction: \"" + annotationCode + "\"", Problem.NO_LINE_NUM);
-				return;
+			if(currentState == State.OUTSIDE) {
+				initAnnotationCode += annotationCode + '\n';
+				outstandingAnnotations.clear();
+			} else {
+				if (textSegment.isEmpty()) {
+					// could happen if text segment is: "label: # @{}@" with no instructions
+					log.logProblem("annotation could not be bound to an instruction: \"" + annotationCode + "\"", Problem.NO_LINE_NUM);
+					return;
+				}
+				int index = textSegment.size() - 1;
+				if (annotations.containsKey(index)) {
+					String code = annotations.get(index);
+					annotationCode = code + "\n" + annotationCode;
+				}
+				annotations.put(index, annotationCode);
+				outstandingAnnotations.clear();
 			}
-			int index = textSegment.size() - 1;
-			if(annotations.containsKey(index)) {
-				String code = annotations.get(index);
-				annotationCode = code + "\n" + annotationCode;
-			}
-			annotations.put(index, annotationCode);
-			outstandingAnnotations.clear();
 		}
 	}
 
