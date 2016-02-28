@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
@@ -44,7 +45,7 @@ public class Registers extends InternalWindow {
 			data.add(new Data(r.getName(), hex, unsigned, signed));
 			i++;
 		}
-		table.setItems(data);
+		Platform.runLater(() -> table.setItems(data));
 	}
 
 	@Override

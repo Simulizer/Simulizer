@@ -21,7 +21,8 @@
   },
   "simulation": {
     "clock-speed": 250,
-    "zero-memory": true
+    "zero-memory": true,
+    "pipelined": true
   },
   "code_editor": {
     "word-wrap": true,
