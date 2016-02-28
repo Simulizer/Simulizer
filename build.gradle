@@ -263,8 +263,8 @@ dependencies {
     // JFXtras (internal window only)
         compile 'org.jfxtras:jfxtras-window:8.0-r4'
 
-    // Rich Text FX
-        compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
+    // Reactfx
+        compile group: 'org.reactfx', name: 'reactfx', version: '1.4.1'
 
     // GSON: JSON Parsing
     	compile 'com.google.code.gson:gson:2.5'

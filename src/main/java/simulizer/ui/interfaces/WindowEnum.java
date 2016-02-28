@@ -1,7 +1,6 @@
 package simulizer.ui.interfaces;
 
 public enum WindowEnum {
-	CODE_EDITOR("CodeEditor", "Code Editor"),
 	ACE_EDITOR("AceEditor", "Ace Editor"),
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),

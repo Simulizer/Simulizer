@@ -2,6 +2,7 @@ package simulizer.ui.windows;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -23,6 +24,7 @@ public class Registers extends InternalWindow {
 				column.setPrefWidth(getWidth() / numColumns);
 			}
 		});
+		table.setCursor(Cursor.DEFAULT);
 	}
 
 	public void refreshData() {

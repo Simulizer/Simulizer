@@ -1,9 +1,13 @@
 package simulizer.ui.windows;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Scanner;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -21,8 +25,9 @@ import simulizer.ui.interfaces.WindowEnum;
  * @author Kelsey McKenna
  *
  */
-public class Labels extends InternalWindow {
+public class Labels extends InternalWindow implements Observer {
 	private TableView<Label> table = new TableView<Label>();
+	private AceEditor editor;
 
 	public Labels() {
 		widthProperty().addListener((o, old, newValue) -> {
@@ -36,24 +41,52 @@ public class Labels extends InternalWindow {
 		table.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
 			Label label = table.getSelectionModel().getSelectedItem();
 			if (label != null) {
-				AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
-				editor.gotoLine(label.getLine());
-				// To highlight the label
-				editor.findNext(label.label);
+				refreshEditor();
+				if (editor != null) {
+					editor.gotoLine(label.getLine());
+					editor.findNext(label.label); // Now highlight the label
+				}
 			}
-
 		});
+		
+		// Fix table cursor
+		table.setCursor(Cursor.DEFAULT);
+	}
+
+	/**
+	 * If the current editor is null, then it tries to get hold of the current editor, and then tries to
+	 * add this as an observer.
+	 */
+	private void refreshEditor() {
+		if (editor == null) {
+			editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+			if (editor != null) editor.addObserver(this);
+		}
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		refreshData();
 	}
 
 	/**
 	 * Refreshes the data in the table
 	 */
 	public void refreshData() {
-		AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
-
 		ObservableList<Label> labels = FXCollections.observableArrayList();
-		populateLabels(labels, editor.getText());
-		table.setItems(labels);
+
+		refreshEditor();
+		// editor shouldn't be null because it is the only one that should call this method
+		final String text = editor.getText();
+		Thread labelGetting = new Thread(() -> getLabels(labels, text));
+
+		try {
+			labelGetting.start();
+			labelGetting.join();
+			Platform.runLater(() -> table.setItems(labels));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -64,7 +97,7 @@ public class Labels extends InternalWindow {
 	 * @param text
 	 *            the text to analyse
 	 */
-	private static void populateLabels(ObservableList<Label> list, String text) {
+	private static void getLabels(ObservableList<Label> answer, String text) {
 		Scanner reader = new Scanner(text);
 
 		for (int line = 1; reader.hasNext(); ++line) {
@@ -81,9 +114,7 @@ public class Labels extends InternalWindow {
 					}
 				}
 
-				if (isLabel) {
-					list.add(new Label(s.substring(0, indexOfColon), line));
-				}
+				if (isLabel) answer.add(new Label(s.substring(0, indexOfColon), line));
 			}
 		}
 
@@ -126,10 +157,12 @@ public class Labels extends InternalWindow {
 			HBox.setHgrow(this, Priority.ALWAYS);
 
 			setOnAction(e -> {
-				AceEditor editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
-				Label selectedLabel = table.getSelectionModel().getSelectedItem();
+				refreshEditor();
 
-				if (selectedLabel != null) action.run(editor, selectedLabel.getLabel());
+				if (editor != null) {
+					Label selectedLabel = table.getSelectionModel().getSelectedItem();
+					if (selectedLabel != null) action.run(editor, selectedLabel.getLabel());
+				}
 			});
 		}
 	}
@@ -160,4 +193,5 @@ public class Labels extends InternalWindow {
 			return String.format("(%s,%d)", label, line);
 		}
 	}
+
 }

@@ -3,6 +3,7 @@ package simulizer.ui;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
@@ -72,6 +73,13 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
+
+		// Disable ALT Key to prevent menu bar from stealing
+		// the editor's focus
+		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
+			if (e.isAltDown())
+				e.consume();
+		});
 
 
 		hlVisManager = new HighLevelVisualisationManager(this);

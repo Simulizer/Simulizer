@@ -112,7 +112,8 @@ public class MainMenuBar extends MenuBar {
 		menu.getItems().clear();
 
 		for (Layout l : wm.getLayouts()) {
-			MenuItem item = new MenuItem(l.getName());
+			String name = l.getName();
+			MenuItem item = new MenuItem(name.endsWith(".json") ? name.substring(0,name.length()-5) : name);
 			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
@@ -122,6 +123,9 @@ public class MainMenuBar extends MenuBar {
 		saveLayoutItem.setOnAction(e -> {
 			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
+				if (!saveFile.getName().endsWith(".json"))
+					saveFile = new File(saveFile.getAbsolutePath() + ".json");
+
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
 				layoutMenu(menu);
