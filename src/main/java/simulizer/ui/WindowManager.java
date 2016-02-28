@@ -22,6 +22,7 @@ import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
 import simulizer.ui.windows.AceEditor;
+import simulizer.ui.windows.CPUVisualisation;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class WindowManager extends GridPane {
@@ -137,6 +138,11 @@ public class WindowManager extends GridPane {
 				hlv.attachCPU(cpu);
 			cpu.loadProgram(p);
 			cpu.registerListener(simListener);
+
+			CPUVisualisation cpuVisualisation = (CPUVisualisation) workspace.findInternalWindow(WindowEnum.CPU_VISUALISATION);
+			if(cpuVisualisation != null)
+				cpuVisualisation.attachCPU(cpu);
+
 
 			io.clear();
 

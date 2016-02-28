@@ -1,12 +1,16 @@
 package simulizer.ui.components.cpu;
 
 import javafx.animation.FillTransition;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import simulizer.ui.windows.CPUVisualisation;
 
 
 public class ComponentStackPane extends StackPane {
@@ -17,12 +21,10 @@ public class ComponentStackPane extends StackPane {
     double y;
     double width;
     double height;
+    CPUVisualisation vis;
 
-    public ComponentStackPane(double x, double y, double width, double height, String label){
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public ComponentStackPane(CPUVisualisation vis, String label){
+        this.vis = vis;
         this.text = new Text(label);
     }
 
@@ -73,6 +75,34 @@ public class ComponentStackPane extends StackPane {
         ft.setCycleCount(n);
         ft.setAutoReverse(true);
         ft.play();
+    }
+
+    public void setTooltip(String text){
+        final ComponentStackPane instance = this;
+        final Tooltip tooltip = new Tooltip(text);
+        Tooltip.install(instance, tooltip);
+        tooltip.setAutoHide(true);
+        tooltip.setWrapText(true);
+
+        vis.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double eventX = event.getX();
+                double eventY = event.getY();
+                double xMax = getLayoutX() + width;
+                double yMax = getLayoutY() + height;
+
+                if( eventX > getLayoutX() && eventX < xMax && eventY > getLayoutY() && eventY < yMax){
+                    tooltip.setMaxWidth(vis.getWidth() - 40);
+                    tooltip.setMaxHeight(vis.getHeight());
+                    tooltip.show(instance, vis.getLayoutX() + eventX, vis.getLayoutY() + eventY);
+                } else {
+                    tooltip.hide();
+                }
+
+            }
+        });
+
     }
 
 }

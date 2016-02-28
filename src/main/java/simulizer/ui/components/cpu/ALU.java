@@ -2,11 +2,12 @@ package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.TextAlignment;
+import simulizer.ui.windows.CPUVisualisation;
 
 public class ALU extends ComponentStackPane {
 
-    public ALU(int x, int y, int width, int height, String label){
-        super(x, y, width, height, label);
+    public ALU(CPUVisualisation vis, String label){
+        super(vis, label);
         drawShape(new Polyline());
         setAttributes();
         text.setTextAlignment(TextAlignment.RIGHT);

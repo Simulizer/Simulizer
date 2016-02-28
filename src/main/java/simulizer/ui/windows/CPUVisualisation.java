@@ -6,6 +6,9 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
+import simulizer.ui.components.cpu.listeners.CPUListener;
+import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.listeners.PresentationTowerOfHanoiListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -112,5 +115,14 @@ public class CPUVisualisation extends InternalWindow {
 	public void close() {
 		cpu.closeAllThreads();
 		super.close();
+	}
+
+	/**
+	 * Sets the CPU and adds a listener to the CPU
+	 *
+	 * @param simCpu The simulated cpu
+	 */
+	public void attachCPU(simulizer.simulation.cpu.components.CPU simCpu) {
+		simCpu.registerListener(new CPUListener(cpu, simCpu, this));
 	}
 }

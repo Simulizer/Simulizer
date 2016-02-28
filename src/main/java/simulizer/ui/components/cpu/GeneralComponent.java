@@ -1,11 +1,12 @@
 package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Rectangle;
+import simulizer.ui.windows.CPUVisualisation;
 
 public class GeneralComponent extends ComponentStackPane {
 
-    public GeneralComponent(double x, double y, double width, double height, String label){
-        super(x, y, width, height, label);
+    public GeneralComponent(CPUVisualisation vis, String label){
+        super(vis, label);
         this.shape = new Rectangle(x, y, width, height);
         setAttributes();
     }

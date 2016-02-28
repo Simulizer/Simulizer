@@ -21,37 +21,37 @@ public class CPU {
     CPUVisualisation vis;
 
     // Items needed to set widths
-    GeneralComponent controlUnit;
-    GeneralComponent programCounter;
-    GeneralComponent instructionMemory;
-    GeneralComponent register;
-    ALU alu;
-    GeneralComponent mainMemory;
-    GeneralComponent ir;
-    GeneralComponent unknown;
-    Group generalWires;
-    CustomWire memToRes;
-    CustomWire IrTOPC;
-    CustomWire PCToPlusFour;
-    CustomWire registerToMemory;
-    CustomWire IMToALU;
-    CustomWire IMToIR;
-    CustomWire IMToRegister1;
-    CustomWire IMToRegister2;
-    CustomWire IMToRegister3;
-    ConnectorWire controlUnitToIr;
-    ConnectorWire controlUnitToPC;
-    ConnectorWire controlUnitToPlusFour;
-    ConnectorWire controlUnitToIM1;
-    ConnectorWire controlUnitToIM2;
-    ConnectorWire controlUnitToRegisters;
-    ConnectorWire controlUnitToALU;
-    ConnectorWire controlUnitToDataMemory;
-    ConnectorWire plusFourToIr;
-    ConnectorWire PCToIM;
-    ConnectorWire aluToMemory;
-    ConnectorWire registerToALU1;
-    ConnectorWire registerToALU2;
+    public GeneralComponent controlUnit;
+    public GeneralComponent programCounter;
+    public GeneralComponent instructionMemory;
+    public GeneralComponent register;
+    public ALU alu;
+    public GeneralComponent mainMemory;
+    public GeneralComponent ir;
+    public GeneralComponent unknown;
+    public Group generalWires;
+    public CustomWire memToRes;
+    public CustomWire IrTOPC;
+    public CustomWire PCToPlusFour;
+    public CustomWire registerToMemory;
+    public CustomWire IMToALU;
+    public CustomWire IMToIR;
+    public CustomWire IMToRegister1;
+    public CustomWire IMToRegister2;
+    public CustomWire IMToRegister3;
+    public ConnectorWire controlUnitToIr;
+    public ConnectorWire controlUnitToPC;
+    public ConnectorWire controlUnitToPlusFour;
+    public ConnectorWire controlUnitToIM1;
+    public ConnectorWire controlUnitToIM2;
+    public ConnectorWire controlUnitToRegisters;
+    public ConnectorWire controlUnitToALU;
+    public ConnectorWire controlUnitToDataMemory;
+    public ConnectorWire plusFourToIr;
+    public ConnectorWire PCToIM;
+    public ConnectorWire aluToMemory;
+    public ConnectorWire registerToALU1;
+    public ConnectorWire registerToALU2;
 
     public CPU(CPUVisualisation vis, double width, double height){
         this.width = width;
@@ -61,14 +61,26 @@ public class CPU {
 
     public void drawCPU(){
         Group components = new Group();
-        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
-        programCounter = new GeneralComponent(20, 60, (width * 0.06), 100, "PC");
-        instructionMemory = new GeneralComponent(90, 60, 100, 100, "Instruction Memory");
-        register = new GeneralComponent(220, 60, 100, 100, "Registers");
-        alu = new ALU(350, 60, 100, 100, "ALU");
-        mainMemory = new GeneralComponent(480, 60, 100, 150, "Data Memory");
-        ir = new GeneralComponent(15, 220, 20, 50, "");
-        unknown = new GeneralComponent(60, 210, 40, 40, "+4");
+        controlUnit = new GeneralComponent(vis, "Controller");
+        programCounter = new GeneralComponent(vis, "PC");
+        instructionMemory = new GeneralComponent(vis, "Instruction Memory");
+        register = new GeneralComponent(vis, "Registers");
+        alu = new ALU(vis, "ALU");
+        mainMemory = new GeneralComponent(vis, "Data Memory");
+        ir = new GeneralComponent(vis, "");
+        unknown = new GeneralComponent(vis, "+4");
+
+        controlUnit.setTooltip("The control unit (CU) is a component of a computer's central processing unit (CPU) that directs operation of the processor. It tells the computer's memory, arithmetic/logic unit and input and output devices how to respond to a program's instructions.");
+
+        programCounter.setTooltip("A program counter is a register in a computer processor that contains the address (location) of the instruction being executed at the current time. As each instruction gets fetched, the program counter increases its stored value by 1.");
+
+        register.setTooltip("In computer architecture, a processor register is a small amount of storage available as part of a digital processor, such as a central processing unit (CPU). Such registers are typically addressed by mechanisms other than main memory and can be accessed faster.");
+
+        alu.setTooltip("An arithmetic logic unit (ALU) is a digital circuit used to perform arithmetic and logic operations. It represents the fundamental building block of the central processing unit (CPU) of a computer. Modern CPUs contain very powerful and complex ALUs. In addition to ALUs, modern CPUs contain a control unit (CU).");
+
+        mainMemory.setTooltip("PC memory is more easily referred to as RAM (Random Access Memory) and performs very different tasks to storage memory which is found on a hard drive or SSD. RAM, in the form of a memory module, is a component in your computer which enables short-term or temporary data access.");
+
+        ir.setTooltip("In computing, an instruction register (IR) is the part of a CPU's control unit that stores the instruction currently being executed or decoded.");
 
         generalWires = new Group();
 
@@ -125,80 +137,8 @@ public class CPU {
                 IMToRegister3
         );
 
-        vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                double x = event.getX();
-                double y = event.getY();
-                double xMin = register.getLayoutX();
-                double xMax = xMin + register.getShapeWidth();
-                double yMin = register.getLayoutY();
-                double yMax = yMin + register.getShapeHeight();
-
-                if( x > xMin && x < xMax && y > yMin && y < yMax){
-                    // In register box, highlight register window somehow?
-                    vis.getMainWindowManager().getWorkspace().openInternalWindow(WindowEnum.REGISTERS).emphasise();
-                } else {
-                	demoVis();
-                }
-            }
-        });
-
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
         vis.addAll(controlUnit, components, generalWires, complexWires);
-
-    }
-
-    public void demoVis(){
-    	
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> controlUnit.highlight(2));
-                	Platform.runLater(() -> controlUnitToIr.animateData(2, true));
-                	Thread.sleep(3000);
-
-                	Platform.runLater(() -> ir.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> IrTOPC.animateData(4, false));
-                	Thread.sleep(4000);
-
-                	Platform.runLater(() -> programCounter.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> PCToIM.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> instructionMemory.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> IMToRegister1.animateData(3, false));
-                	Thread.sleep(3000);
-
-                	Platform.runLater(() -> register.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> registerToALU1.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> alu.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> aluToMemory.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> mainMemory.highlight(2));
-
-                } catch(InterruptedException e){
-                    System.out.println(e.getMessage());
-                }
-
-            }
-        }, "Demo-Vis").start();
 
     }
 
