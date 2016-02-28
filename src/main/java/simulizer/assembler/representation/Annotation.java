@@ -9,6 +9,10 @@ public class Annotation {
 
     public final String code;
 
+	/**
+	 * Create a new annotation with the given code.
+	 * @param code the code to be run
+	 */
 	public Annotation(String code) {
 		this.code = code;
 	}

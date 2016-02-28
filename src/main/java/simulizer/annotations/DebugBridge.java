@@ -13,7 +13,7 @@ public class DebugBridge {
 
 	public void log(String string) {
 		if(io != null) {
-			io.printString("js: " + string + "\n");
+			io.printString(string + "\n");
 		} else {
 			System.out.println("js: " + string);
 		}

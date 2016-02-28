@@ -1,6 +1,7 @@
 package simulizer.annotations;
 
 import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import simulizer.assembler.representation.Annotation;
@@ -18,9 +19,13 @@ import javax.script.*;
  */
 public class AnnotationExecutor {
 
-	private ScriptEngine engine;
-	private ScriptContext context; // the scope to run in
-	private Bindings globals;
+	private final NashornScriptEngine engine;
+	private final Bindings globals;
+	/**
+	 * Nashorn globals object. flushed every time eval is called.
+	 * elements are manually promoted to globals (which is persistent).
+	 */
+	private ScriptObjectMirror nhGlobals;
 
 	DebugBridge debugBridge;
 	SimulationBridge simulationBridge;
@@ -28,34 +33,42 @@ public class AnnotationExecutor {
 
 	private class AnnotationClassFilter implements ClassFilter {
 		@Override public boolean exposeToScripts(String s) {
-			throw new SecurityException("Access to Java objects is restricted from annotations");
+			throw new SecurityException("Access to Java objects from annotations (other than designated bridges) is disabled");
 		}
 	}
 
 	public AnnotationExecutor() {
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
-		engine = factory.getScriptEngine(new AnnotationClassFilter());
-		context = new SimpleScriptContext();
+		engine = (NashornScriptEngine) factory.getScriptEngine(new AnnotationClassFilter());
+
+		// the context to run in, defines the global and engine scopes
+		ScriptContext context = new SimpleScriptContext();
 
 		context.setReader(null); // prevent access to stdin
 		context.setWriter(null); // prevent access to stdout
-		// setErrorWriter not altered
+		context.setErrorWriter(null); // prevent access to stdout
 
 		debugBridge = new DebugBridge();
 		simulationBridge = new SimulationBridge();
 		visualisationBridge = new VisualisationBridge();
 
 		globals = new SimpleBindings();
+		context.setBindings(globals, ScriptContext.GLOBAL_SCOPE);
 
 		globals.put("debug", debugBridge);
 		globals.put("simulation", simulationBridge);
 		globals.put("visualisation", visualisationBridge);
-		context.setBindings(globals, ScriptContext.GLOBAL_SCOPE);
 
 		engine.setContext(context);
 
+		Bindings engineLocals = context.getBindings(ScriptContext.ENGINE_SCOPE);
+
 		try {
-			engine.eval(FileUtils.getResourceContent("/annotations/load-api.js"));
+			engine.eval(""); // force the creation of NASHORN_GLOBAL
+			nhGlobals = (ScriptObjectMirror) engineLocals.get(NashornScriptEngine.NASHORN_GLOBAL);
+
+			exec(FileUtils.getResourceContent("/annotations/load-api.js"));
+
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		}
@@ -70,13 +83,17 @@ public class AnnotationExecutor {
 		promoteToGlobal();
 	}
 
+	private void exec(String script) throws ScriptException, SecurityException {
+		engine.eval(script);
+		promoteToGlobal();
+	}
+
 	/**
 	 * set all variables local to a script become global
 	 */
 	private void promoteToGlobal() {
-		Bindings e = context.getBindings(ScriptContext.ENGINE_SCOPE);
-		globals.putAll((ScriptObjectMirror)e.get("nashorn.global"));
-		e.clear();
+		globals.putAll(nhGlobals);
+		nhGlobals.clear();
 	}
 
 	/**
@@ -84,11 +101,10 @@ public class AnnotationExecutor {
 	 */
 	public void debugREPL(IO io) {
 		try {
-			io.printString("REPL start\n");
+			io.printString("REPL start (call exit() to finish)\n");
 			globals.put("io", io);
-			engine.eval("print = function(o) {io.printString('' + o + '\\n');};");
-			engine.eval("exit = function() {stop = true;}; stop = false;");
-			promoteToGlobal();
+			exec("print = function(s){io.printString(''+s+'\\n');};");
+			exec("exit = function(){stop = true;}; stop = false;");
 
 			String line;
 			while(!(Boolean)globals.get("stop")) {
@@ -96,9 +112,10 @@ public class AnnotationExecutor {
 				line = io.readString();
 				exec(new Annotation(line));
 			}
-			io.printString("REPL stop\n");
-		} catch (ScriptException e) {
+			io.printString("REPL stopped\n");
+		} catch (RuntimeException | ScriptException e) {
 			e.printStackTrace();
+			io.printString("REPL stopped due to exception\n");
 		}
 	}
 }

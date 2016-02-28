@@ -11,14 +11,11 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import simulizer.annotations.AnnotationExecutor;
 import simulizer.assembler.extractor.ProgramExtractor;
 import simulizer.assembler.extractor.problem.ProblemCountLogger;
 import simulizer.assembler.extractor.problem.ProblemLogger;
-import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Label;
-import simulizer.assembler.representation.Program;
-import simulizer.assembler.representation.Statement;
-import simulizer.assembler.representation.Variable;
+import simulizer.assembler.representation.*;
 import simulizer.parser.SimpLexer;
 import simulizer.parser.SimpParser;
 import simulizer.simulation.data.representation.DataConverter;
@@ -72,7 +69,7 @@ public class Assembler {
             }
 
             if(extractor.annotations.containsKey(i)) {
-                p.annotations.put(address, extractor.annotations.get(i));
+                p.annotations.put(address, new Annotation(extractor.annotations.get(i)));
             }
 
             p.textSegment.put(address, s);

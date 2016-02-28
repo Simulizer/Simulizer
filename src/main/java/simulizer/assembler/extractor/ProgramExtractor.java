@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemLogger;
-import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.Variable;
@@ -49,7 +48,7 @@ public class ProgramExtractor extends SimpBaseListener {
     /**
      * store annotations relating to statements in the text segment
      */
-    public final Map<Integer, Annotation> annotations;
+    public final Map<Integer, String> annotations;
 
     /**
      * keep track of labels that are waiting to be assigned to a line
@@ -447,10 +446,10 @@ public class ProgramExtractor extends SimpBaseListener {
 			}
 			int index = textSegment.size() - 1;
 			if(annotations.containsKey(index)) {
-				Annotation a = annotations.get(index);
-				annotationCode = a.code + "\n" + annotationCode;
+				String code = annotations.get(index);
+				annotationCode = code + "\n" + annotationCode;
 			}
-			annotations.put(index, new Annotation(annotationCode));
+			annotations.put(index, annotationCode);
 			outstandingAnnotations.clear();
 		}
 	}
@@ -472,9 +471,8 @@ public class ProgramExtractor extends SimpBaseListener {
 			textSegment.add(s);
 			pushAnnotations();
 		}
-		pushLabels(); // attach outstanding labels to this instruction
-    }
-	public void pushLabels() {
+
+		// attach outstanding labels to this instruction
 		if(!outstandingLabels.isEmpty()) {
 			int index = textSegment.size() - 1;
 			for (String labelName : outstandingLabels) {
@@ -482,18 +480,16 @@ public class ProgramExtractor extends SimpBaseListener {
 			}
 			outstandingLabels.clear();
 		}
-	}
+    }
 
     public void pushVariable(Variable v) {
         dataSegment.add(v);
-        int index = dataSegment.size() - 1;
-        for(String labelName : outstandingLabels) {
-            dataSegmentLabels.put(labelName, index);
-        }
-		if(!outstandingAnnotations.isEmpty()) {
-			Annotation a = new Annotation(String.join("\n", outstandingAnnotations));
-			annotations.put(index, a);
+		if(!outstandingLabels.isEmpty()) {
+			int index = dataSegment.size() - 1;
+			for (String labelName : outstandingLabels) {
+				dataSegmentLabels.put(labelName, index);
+			}
+			outstandingLabels.clear();
 		}
-        outstandingLabels.clear();
     }
 }
