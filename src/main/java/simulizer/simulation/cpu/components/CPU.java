@@ -180,7 +180,7 @@ public class CPU {
      */
     public void loadProgram(Program program) {
         this.program = program;
-
+        this.clock = new Clock(100);//re-initialise clock
         this.instructionRegister = null;//nothing to put in yet so null
 
         this.clearRegisters();//reset the registers
