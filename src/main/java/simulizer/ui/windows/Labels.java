@@ -26,7 +26,7 @@ import simulizer.ui.interfaces.WindowEnum;
  */
 public class Labels extends InternalWindow implements TemporaryObserver {
 	private TableView<Label> table = new TableView<Label>();
-	private AceEditor editor;
+	private Editor editor;
 
 	public Labels() {
 		widthProperty().addListener((o, old, newValue) -> {
@@ -58,7 +58,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	 */
 	private void refreshEditor() {
 		if (editor == null) {
-			editor = (AceEditor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+			editor = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
 			if (editor != null) editor.addObserver(this);
 		}
 	}
@@ -176,7 +176,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	}
 
 	private static interface Action {
-		public void run(AceEditor editor, String s);
+		public void run(Editor editor, String s);
 	}
 
 	public static class Label {

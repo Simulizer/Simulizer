@@ -25,7 +25,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
-import simulizer.ui.windows.AceEditor;
+import simulizer.ui.windows.Editor;
 import simulizer.ui.windows.Labels;
 import simulizer.ui.windows.Logger;
 import simulizer.ui.windows.Registers;
@@ -40,8 +40,8 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
 	}
 
-	private AceEditor getEditor() {
-		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
+	private Editor getEditor() {
+		return (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 	}
 
 	private Menu fileMenu() {

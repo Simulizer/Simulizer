@@ -10,9 +10,7 @@ import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.ui.windows.AceEditor;
-
-import javax.script.ScriptException;
+import simulizer.ui.windows.Editor;
 
 /**
  * Listen to messages from the simulation which concern the UI
@@ -39,7 +37,7 @@ public class UISimulationListener extends SimulationListener {
 					int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
 					// editor.setReadOnly(true);
 					Platform.runLater(() -> {
-						AceEditor editor = (AceEditor) wm.getWorkspace().findInternalWindow(WindowEnum.ACE_EDITOR);
+						Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
 						if (editor != null)
 							editor.gotoLine(lineNum-1);
 					});

@@ -35,16 +35,14 @@ import simulizer.utils.FileUtils;
  *
  * @author mbway
  */
-public class AceEditor extends InternalWindow {
+public class Editor extends InternalWindow {
 
 	// TODO: confirm exit or load if file edited
-	// TODO: annotations
 	// TODO: refresh current file if not edited
 	// TODO: become read-only and hide cursor when executing
 	// TODO: mechanism for loading and saving settings
 	// TODO: update problems as the user types. maybe do this using ace's worker
 	// TODO: vim keybindings
-	// TODO: remove requirejs dependency because ace already provides it
 	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
 
 	private WebView view;
@@ -67,11 +65,12 @@ public class AceEditor extends InternalWindow {
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
+	@SuppressWarnings("unused")
 	public class Bridge {
-		private AceEditor editor;
+		private Editor editor;
 		public List<Problem> problems;
 
-		public Bridge(AceEditor editor) {
+		public Bridge(Editor editor) {
 			this.editor = editor;
 		}
 
@@ -84,9 +83,7 @@ public class AceEditor extends InternalWindow {
 
 	private Bridge bridge;
 
-	public AceEditor() {
-		// setStyle("-fx-background-color: black;");
-
+	public Editor() {
 		view = new WebView();
 		currentFile = null;
 		bridge = new Bridge(this);
@@ -110,12 +107,9 @@ public class AceEditor extends InternalWindow {
 					jsWindow = (JSObject) engine.executeScript("window");
 					jsWindow.setMember("bridge", bridge);
 
-					// engine.executeScript(FileUtils.getResourceContent("/external/require.js"));
 					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
 					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
 					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
-					// engine.executeScript(FileUtils.getResourceContent("/external/theme-ambiance.js"));
-					// engine.executeScript(FileUtils.getResourceContent("/external/theme-tomorrow_night_eighties.js"));
 					initSyntaxHighlighter();
 
 					jsWindow.call("init");
@@ -152,9 +146,9 @@ public class AceEditor extends InternalWindow {
 					jsEditor.call("insert", clip);
 				}
 			}
-		});
 
-		addEventHandler(KeyEvent.KEY_RELEASED, e -> editedSinceLabelUpdate = true);
+			editedSinceLabelUpdate = true;
+		});
 
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
@@ -165,7 +159,6 @@ public class AceEditor extends InternalWindow {
 
 		setOnClosedAction(e -> detachObservers());
 
-		setTitle("Ace");
 		getContentPane().getChildren().add(view);
 	}
 
@@ -235,8 +228,7 @@ public class AceEditor extends InternalWindow {
 	/**
 	 * Adds an observer of this class.
 	 *
-	 * @param obs
-	 *            the observer to add
+	 * @param obs the observer to add
 	 */
 	public void addObserver(TemporaryObserver obs) {
 		observers.add(obs);
@@ -244,22 +236,16 @@ public class AceEditor extends InternalWindow {
 
 	/**
 	 * Calls the <code>update</code> method on all observers.
-	 *
-	 * @param object
 	 */
 	private void updateObservers() {
-		for (TemporaryObserver observer : observers)
-			observer.update();
+		observers.forEach(TemporaryObserver::update);
 	}
 
 	/**
 	 * Calls the <code>stopObserving</code> method on all observers and clears the list of observers.
 	 */
 	private void detachObservers() {
-		for (TemporaryObserver observer : observers) {
-			observer.stopObserving();
-		}
-
+		observers.forEach(TemporaryObserver::stopObserving);
 		observers.clear();
 	}
 

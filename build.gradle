@@ -227,11 +227,15 @@ task downloadExternalDependencies << {
     mkdir ExternalResDir
     // dest can either be a directory or a filename
 
+    // not needed as Ace bundles with require.js already
+    // keeping here for reference if another dependency is required
+    /*
     download {
         src 'http://requirejs.org/docs/release/2.1.22/minified/require.js'
         dest ExternalResDir
         overwrite false
     }
+    */
 
 }
 
