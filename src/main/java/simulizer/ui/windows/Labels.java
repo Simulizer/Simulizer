@@ -1,7 +1,5 @@
 package simulizer.ui.windows;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Scanner;
 
 import javafx.application.Platform;
@@ -16,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 
@@ -25,7 +24,7 @@ import simulizer.ui.interfaces.WindowEnum;
  * @author Kelsey McKenna
  *
  */
-public class Labels extends InternalWindow implements Observer {
+public class Labels extends InternalWindow implements TemporaryObserver {
 	private TableView<Label> table = new TableView<Label>();
 	private AceEditor editor;
 
@@ -65,8 +64,14 @@ public class Labels extends InternalWindow implements Observer {
 	}
 
 	@Override
-	public void update(Observable o, Object arg) {
+	public void update() {
 		refreshData();
+	}
+
+	@Override
+	public void stopObserving() {
+		editor = null;
+		table.setItems(FXCollections.observableArrayList());
 	}
 
 	/**
@@ -76,16 +81,19 @@ public class Labels extends InternalWindow implements Observer {
 		ObservableList<Label> labels = FXCollections.observableArrayList();
 
 		refreshEditor();
-		// editor shouldn't be null because it is the only one that should call this method
-		final String text = editor.getText();
-		Thread labelGetting = new Thread(() -> getLabels(labels, text));
+		if (editor != null) {
+			final String text = editor.getText();
+			if (text == null) return;
 
-		try {
-			labelGetting.start();
-			labelGetting.join();
-			Platform.runLater(() -> table.setItems(labels));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Thread labelGetting = new Thread(() -> getLabels(labels, text));
+
+			try {
+				labelGetting.start();
+				labelGetting.join();
+				Platform.runLater(() -> table.setItems(labels));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
