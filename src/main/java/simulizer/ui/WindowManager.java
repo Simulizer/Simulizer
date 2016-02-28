@@ -7,6 +7,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.assembler.Assembler;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
@@ -19,7 +21,9 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.Editor;
 import simulizer.ui.windows.Logger;
+import simulizer.utils.UIUtils;
 
 public class WindowManager extends GridPane {
 	private Workspace workspace;
@@ -137,6 +141,28 @@ public class WindowManager extends GridPane {
 			}
 			cpuThread = null;
 			System.out.println("Running program terminated");
+		}
+	}
+
+
+	public void assembleAndRun() {
+		StoreProblemLogger log = new StoreProblemLogger();
+		Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+
+		Program p = Assembler.assemble(editor.getText(), log);
+
+		// if no problems, has the effect of clearing
+		editor.setProblems(log.getProblems());
+
+		if(p != null) {
+			runProgram(p);
+		} else {
+			int size = log.getProblems().size();
+			UIUtils.showErrorDialog(
+				"Could Not Run",
+				"The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"),
+				"You must fix them before you can\nexecute the program."
+			);
 		}
 	}
 

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -17,7 +16,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
-import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
@@ -166,26 +164,7 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Run Code");
 
 		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> {
-			StoreProblemLogger log = new StoreProblemLogger();
-			Program p = Assembler.assemble(getEditor().getText(), log);
-			if(p != null) {
-				wm.runProgram(p);
-			} else {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Could Not Run");
-				int size = log.getProblems().size();
-				if(size == 1) {
-					alert.setHeaderText("The Program Contains An Error!");
-				} else {
-					alert.setHeaderText("The Program Contains " + size + " Errors!");
-				}
-				alert.setContentText("You must fix them before you can\nexecute the program.");
-				alert.show();
-
-				getEditor().setProblems(log.getProblems());
-			}
-		});
+		runProgram.setOnAction(e -> wm.assembleAndRun());
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
