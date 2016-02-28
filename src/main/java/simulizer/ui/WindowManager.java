@@ -1,5 +1,7 @@
 package simulizer.ui;
 
+import java.io.IOException;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -39,7 +41,7 @@ public class WindowManager extends GridPane {
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private HighLevelVisualisationManager hlVisManager;
 
-	public WindowManager(Stage primaryStage, Settings settings) {
+	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
 		this.settings = settings;
 		workspace = new Workspace(this);
@@ -83,7 +85,6 @@ public class WindowManager extends GridPane {
 			if (e.isAltDown())
 				e.consume();
 		});
-
 
 		hlVisManager = new HighLevelVisualisationManager(this);
 	}
@@ -144,7 +145,6 @@ public class WindowManager extends GridPane {
 		}
 	}
 
-
 	public void assembleAndRun() {
 		StoreProblemLogger log = new StoreProblemLogger();
 		Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
@@ -154,15 +154,11 @@ public class WindowManager extends GridPane {
 		// if no problems, has the effect of clearing
 		editor.setProblems(log.getProblems());
 
-		if(p != null) {
+		if (p != null) {
 			runProgram(p);
 		} else {
 			int size = log.getProblems().size();
-			UIUtils.showErrorDialog(
-				"Could Not Run",
-				"The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"),
-				"You must fix them before you can\nexecute the program."
-			);
+			UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
 		}
 	}
 
