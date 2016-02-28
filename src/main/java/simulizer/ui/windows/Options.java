@@ -1,6 +1,7 @@
 package simulizer.ui.windows;
 
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
@@ -20,7 +21,8 @@ import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
 import simulizer.ui.components.settings.BooleanControl;
-import simulizer.ui.components.settings.NumberControl;
+import simulizer.ui.components.settings.DoubleControl;
+import simulizer.ui.components.settings.IntegerControl;
 import simulizer.ui.components.settings.StringControl;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
@@ -46,6 +48,7 @@ public class Options extends InternalWindow {
 		GridPane.setHgrow(values, Priority.ALWAYS);
 		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
+		values.setPadding(new Insets(0, 10, 0, 10));
 		pane.add(values, 1, 0);
 
 		getContentPane().getChildren().add(pane);
@@ -117,11 +120,11 @@ public class Options extends InternalWindow {
 					break;
 
 				case DOUBLE:
-					control = new NumberControl<Double>((DoubleSetting) value);
+					control = new DoubleControl((DoubleSetting) value);
 					break;
 
 				case INTEGER:
-					control = new NumberControl<Integer>((IntegerSetting) value);
+					control = new IntegerControl((IntegerSetting) value);
 					break;
 
 				case STRING:
@@ -143,6 +146,12 @@ public class Options extends InternalWindow {
 		// Give the new components the theme
 		if (!theme.equals(""))
 			updateChildrenThemes(pane, this.theme);
+	}
+
+	@Override
+	public void close() {
+		super.close();
+		getWindowManager().getSettings().save();
 	}
 
 	@Override

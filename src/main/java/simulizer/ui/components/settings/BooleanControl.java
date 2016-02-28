@@ -11,6 +11,6 @@ public class BooleanControl extends CheckBox {
 		setSelected(setting.getValue());
 		setTooltip(new Tooltip(setting.getDescription()));
 
-		onActionProperty().addListener((e) -> setting.setValue(isSelected()));
+		selectedProperty().addListener((e) -> setting.setValue(isSelected()));
 	}
 }

@@ -113,4 +113,8 @@ public class Settings {
 		return settings;
 	}
 
+	public void save() {
+		// TODO: Save settings to json file
+	}
+
 }

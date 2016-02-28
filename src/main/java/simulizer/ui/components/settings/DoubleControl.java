@@ -2,14 +2,14 @@ package simulizer.ui.components.settings;
 
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Spinner;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import simulizer.settings.types.StringSetting;
+import simulizer.settings.types.DoubleSetting;
 
-public class StringControl extends GridPane {
+public class DoubleControl extends GridPane {
 
-	public StringControl(StringSetting setting) {
+	public DoubleControl(DoubleSetting setting) {
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		GridPane.setHgrow(title, Priority.SOMETIMES);
@@ -23,13 +23,13 @@ public class StringControl extends GridPane {
 		add(desc, 0, 1);
 
 		// Option Value
-		TextField value = new TextField();
-		value.setText(setting.getValue());
+		Spinner<Double> value = new Spinner<Double>(setting.getLowBound(), setting.getHighBound(), setting.getValue());
+		value.setEditable(true);
 		GridPane.setRowSpan(value, 2);
 		GridPane.setVgrow(value, Priority.SOMETIMES);
 		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.textProperty().addListener((e) -> setting.setValue(value.getText()));
+		value.valueProperty().addListener((e) -> setting.setValue(value.getValue()));
 		add(value, 1, 0);
 	}
 }
