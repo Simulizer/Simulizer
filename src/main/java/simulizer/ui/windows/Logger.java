@@ -54,9 +54,11 @@ public class Logger extends InternalWindow implements IO {
 
 	private void submitText() {
 		lastInput = input.getText();
-		input.setText("");
-		output.appendText(lastInput + "\n");
-		cdl.countDown();
+		if (!lastInput.equals("")) {
+			input.setText("");
+			output.appendText(lastInput + "\n");
+			cdl.countDown();
+		}
 	}
 
 	@Override
