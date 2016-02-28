@@ -42,10 +42,13 @@ public class Logger extends InternalWindow implements Observer {
 		submit.setText("Enter");
 		submit.setOnAction((e) -> submitText());
 		addEventHandler(KeyEvent.ANY, (e) -> {
-			if (e.getCode() == KeyCode.ENTER)
+			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
 				submitText();
 		});
-
+		input.focusedProperty().addListener((e) -> {
+			if (!input.isFocused())
+				requestFocus();
+		});
 		pane.add(submit, 1, 1);
 
 		widthProperty().addListener((e) -> pane.setPrefWidth(getContentPane().getWidth()));
@@ -66,7 +69,7 @@ public class Logger extends InternalWindow implements Observer {
 		getWindowManager().getIO().addObserver(this);
 		super.ready();
 	}
-	
+
 	@Override
 	public void close() {
 		super.close();
