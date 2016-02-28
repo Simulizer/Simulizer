@@ -7,6 +7,7 @@ import java.util.Scanner;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -47,6 +48,9 @@ public class Labels extends InternalWindow implements Observer {
 				}
 			}
 		});
+		
+		// Fix table cursor
+		table.setCursor(Cursor.DEFAULT);
 	}
 
 	/**
