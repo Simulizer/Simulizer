@@ -42,6 +42,7 @@ import simulizer.simulation.listeners.DataMovementMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.InstructionTypeMessage;
 import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.PipelineHazardMessage;
 import simulizer.simulation.listeners.ProblemMessage;
 import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.SimulationListener;
@@ -170,6 +171,8 @@ public class CPU {
             	l.processRegisterChangedMessage((RegisterChangedMessage) m);
             } else if(m instanceof InstructionTypeMessage) {
             	l.processInstructionTypeMessage((InstructionTypeMessage) m);
+            } else if(m instanceof PipelineHazardMessage) {
+            	l.processPipelineHazardMessage((PipelineHazardMessage) m);
             }
         }
     }

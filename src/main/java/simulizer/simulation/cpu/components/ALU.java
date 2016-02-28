@@ -11,13 +11,14 @@ import simulizer.simulation.exceptions.InstructionException;
 /**this class represents the ALU in the CPU
  * all it is capable of doing is carrying out various operations
  * and then returning the result
- * @author Charlie
+ * @author Charlie Street
  *
  */
 public class ALU {
 
     public static final byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
     public static final byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
+    public static boolean branchFlag = false;//flag to determine branching (true = successful branch has been executed)
 
     /**empty constructor
      *
@@ -134,64 +135,79 @@ public class ALU {
                 }
                 return new Word(resultXori);
             case b:
+            	branchFlag = true;
                 return new Word(branchTrue);
             case beq:
                 for(int i = 0; i < firstValue.length; i++) {
                     if(firstValue[i] != secondValue[i]) {
+                    	branchFlag = false;
                         return new Word(branchFalse);
                     }
                 }
+                branchFlag = true;
                 return new Word(branchTrue);//if all bytes equal
             case bne:
                 for(int i = 0; i < firstValue.length; i++) {
                     if(firstValue[i] != secondValue[i]) {//if a difference found
+                    	branchFlag = true;
                         return new Word(branchTrue);
                     }
                 }
+                branchFlag = false;
                 return new Word(branchFalse);//if all bytes equal then false
             case bgez:
                 if(decodeS(firstValue) >= 0)
                 {
+                	branchFlag = true;
                     return new Word(branchTrue);
                 }
                 else
                 {
+                	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case bgtz:
                 if(decodeS(firstValue) > 0)
                 {
+                	branchFlag = true;
                     return new Word(branchTrue);
                 }
                 else
                 {
+                	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case blez:
                 if(decodeS(firstValue) <= 0)
                 {
+                	branchFlag = true;
                     return new Word(branchTrue);
                 }
                 else
                 {
+                	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case bltz:
                 if(decodeS(firstValue) < 0)
                 {
+                	branchFlag = true;
                     return new Word(branchTrue);
                 }
                 else
                 {
+                	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case beqz:
                 if(decodeS(firstValue) == 0)
                 {
+                	branchFlag = true;
                     return new Word(branchTrue);
                 }
                 else
                 {
+                	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case move:

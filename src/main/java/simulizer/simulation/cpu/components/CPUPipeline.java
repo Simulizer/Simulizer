@@ -22,6 +22,8 @@ import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.SpecialInstruction;
 import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
+import simulizer.simulation.listeners.PipelineHazardMessage;
+import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
 
 /**this class is an extension of the original CPU class
  * the difference is that the order of execution follows a very 
@@ -38,6 +40,7 @@ public class CPUPipeline extends CPU {
 	private Statement IF;//used for storing between fetch and decode
 	private InstructionFormat ID;//user for storing between decode and execute
 	private boolean canFetch;//useful for pipeline stalling
+	private boolean isFinished;//used for testing end of program
 	
 	/**constructor calls the super constructor
 	 * as well as initialising the new pipeline related fields
@@ -48,6 +51,7 @@ public class CPUPipeline extends CPU {
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		this.canFetch = true;
+		this.isFinished = false;
 		
 		this.readInstructions = new ArrayList<OperandFormat>();//all operand formats that include reading registers
 		this.readInstructions.add(OperandFormat.register);
@@ -155,30 +159,39 @@ public class CPUPipeline extends CPU {
 	 * this method will mimic a primitive pipeline instead of a sequential execution
 	 */
 	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
-		if(this.canFetch){
+		if(this.canFetch&&!this.isFinished){
 			fetch();
-			 sendMessage(new ExecuteStatementMessage(programCounter));
-		} else {
+			sendMessage(new ExecuteStatementMessage(programCounter));
+		} else if (!this.canFetch) {
 			this.canFetch = true;
+		} else if(this.isFinished) {//ending termination
+			this.isRunning = false;
 		}
+		
+		if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
+			this.isFinished = true;//stop fetching essentially and begin to terminate program
+        }
 		
 		boolean needToBubble = needToBubble(registersRead(IF),registersBeingWritten(ID));
 		if (needToBubble) { //if we need to stall to prevent incorrect reads
+			sendMessage(new PipelineHazardMessage(Hazard.RAW));
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
 			this.canFetch = false;
+			System.out.println("BUBBLE");
 		} else {
 			ID = decode(IF.getInstruction(), IF.getOperandList());
 			IF = instructionRegister;//updating IF
 		}
 		
-		int preExecuteAddress = this.programCounter.getValue();
 		execute(ID);
-		int newPC = this.programCounter.getValue();
+		
 		//jumped checks if either an unconditional jump is made or, a branch returning true
-		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && (newPC - preExecuteAddress > 0));
-		if(jumped)//flush pipeline
+		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
+		if(jumped)//flush pipeline and allow continuation of running
 		{
+			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
+			this.isFinished = false;//considering edge case where jump on last instruction
 			IF = createNopStatement();
 			ID = createNopInstruction();
 		}
@@ -188,12 +201,18 @@ public class CPUPipeline extends CPU {
 				sendMessage(new AnnotationMessage(a));
 			}
 		}
-
-        /*if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
-            this.isRunning = false;//stop running
-            IF = createNopStatement();//flushing pipeline for next program to run
-            ID = createNopInstruction();
-        }*/
+	}
+	
+	/**overwriting the run program method of CPU but adding some field changes before execution
+	 * 
+	 */
+	public void runProgram()
+	{
+		this.canFetch = true;//resetting fields for new program
+		this.isFinished = false;
+		this.IF = createNopStatement();
+		this.ID = createNopInstruction();
+		super.runProgram();//calling original run program
 	}
 
 }

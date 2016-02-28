@@ -12,6 +12,7 @@ import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
@@ -57,7 +58,7 @@ public class WindowManager extends GridPane {
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
-		cpu = new CPU(io);
+		cpu = new CPUPipeline(io);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
