@@ -81,6 +81,7 @@ public class Assembler {
 
             address = new Address(address.getValue() + 4);
         }
+        p.textSegmentLast = new Address(address.getValue() - 4);
 
 
         address = new Address(0x10010000); // (static) data segment skip over the 64KB .extern segment

@@ -20,7 +20,7 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
-import simulizer.ui.components.highlevel.HighLevelVisualisationManager;
+import simulizer.annotations.AnnotationManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
@@ -41,7 +41,7 @@ public class WindowManager extends GridPane {
 	private LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
-	private HighLevelVisualisationManager hlVisManager;
+	private AnnotationManager annotationManager;
 
 	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
@@ -96,7 +96,7 @@ public class WindowManager extends GridPane {
 				e.consume();
 		});
 
-		hlVisManager = new HighLevelVisualisationManager(this);
+		annotationManager = new AnnotationManager(this);
 	}
 
 	public void show() {
@@ -223,7 +223,7 @@ public class WindowManager extends GridPane {
 		return io;
 	}
 
-	public HighLevelVisualisationManager getHLVisManager() {
-		return hlVisManager;
+	public AnnotationManager getAnnotationManager() {
+		return annotationManager;
 	}
 }

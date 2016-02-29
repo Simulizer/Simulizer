@@ -25,6 +25,7 @@ import netscape.javascript.JSObject;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
+import simulizer.settings.Settings;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -45,6 +46,7 @@ public class Editor extends InternalWindow {
 	// TODO: vim keybindings
 	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
 
+	Settings settings;
 	private WebView view;
 	private WebEngine engine;
 	private File currentFile;
@@ -55,13 +57,18 @@ public class Editor extends InternalWindow {
 	// handle key combos for copy and paste
 	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_plus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
 	// references to javascript objects
 	private JSObject jsWindow;
 	private JSObject jsEditor;
+	private JSObject jsSession;
+	// passed to js functions which take no arguments to keep the engine happy
+	private static final Integer dummyArgument = 0;
 
 	// execute mode = simulation running
-	private enum Mode { EDIT_MODE, EXECUTE_MODE };
+	private enum Mode { EDIT_MODE, EXECUTE_MODE }
 	private Mode mode;
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
@@ -118,10 +125,41 @@ public class Editor extends InternalWindow {
 
 					jsWindow.call("init");
 					jsEditor = (JSObject) engine.executeScript("editor"); // created by init() so must be set after
+					jsSession = (JSObject) engine.executeScript("session");
 
-					// enableFirebug();
+					//enableFirebug();
 
-					newFile();
+					// load settings
+					setWrap((boolean) settings.get("editor.wrap"));
+					String fontFamily = (String) settings.get("editor.font-family");
+					int fontSize = (int) settings.get("editor.font-size");
+					jsWindow.call("setFont", fontFamily, fontSize);
+
+					jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+					engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
+					jsEditor.call("setTheme", (String) settings.get("editor.theme"));
+
+					boolean vim = (boolean) settings.get("editor.vim-mode");
+					if(vim) {
+						engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
+						jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
+					}
+
+					boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
+					jsWindow.setMember("userInControl", userInControl);
+
+					String initialFile = (String) settings.get("editor.initial-file");
+					if(initialFile != null) {
+						File f = new File(initialFile);
+						if(f.exists()) {
+							loadFile(f);
+						} else {
+							//TODO: log failure properly
+							throw new IllegalArgumentException("file not found");
+						}
+					} else {
+						newFile();
+					}
 
 					engine.documentProperty().removeListener(this);
 				}
@@ -149,6 +187,10 @@ public class Editor extends InternalWindow {
 				if (clip != null) {
 					jsEditor.call("insert", clip);
 				}
+			} else if(C_plus.match(event)) {
+				jsWindow.call("changeFontSize", 1);
+			} else if(C_minus.match(event)) {
+				jsWindow.call("changeFontSize", -1);
 			}
 
 			editedSinceLabelUpdate = true;
@@ -168,6 +210,9 @@ public class Editor extends InternalWindow {
 
 	@Override
 	public void ready() {
+		settings = getWindowManager().getSettings();
+
+
 		String[] observersToAdd = { Labels.class.getSimpleName() };
 
 		for (String className : observersToAdd) {
@@ -371,17 +416,24 @@ public class Editor extends InternalWindow {
 	}
 
 	/**
+	 * @param size font size in px
+	 */
+	public void setFontSize(int size) {
+		jsEditor.call("setFontSize", size);
+	}
+
+	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void setWrap(boolean wrap) {
-		engine.executeScript("editor.getSession().setUseWrapMode(" + wrap + ")");
+		jsSession.call("setUseWrapMode", wrap);
 	}
 
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	public boolean getWrap() {
-		return (Boolean) engine.executeScript("editor.getSession().getUseWrapMode()");
+		return (boolean) jsSession.call("getUseWrapMode", dummyArgument);
 	}
 
 	/**

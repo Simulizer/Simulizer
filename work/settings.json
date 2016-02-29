@@ -24,9 +24,16 @@
     "zero-memory": true,
     "pipelined": true
   },
-  "code_editor": {
-    "word-wrap": true,
-    "open-file" : null
+  "editor": {
+    "font-family": "Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace",
+    "font-size": 20,
+    "initial-file" : "code/tower-of-hanoi.s",
+    "scroll-speed": 0.1,
+    "soft-tabs": true,
+    "theme" : "ace/theme/monokai",
+    "user-control-during-execution": true,
+    "vim-mode": false,
+    "wrap": true
   },
   "splash-screen": {
     "enabled": false,

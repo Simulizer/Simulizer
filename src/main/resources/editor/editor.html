@@ -30,6 +30,7 @@ var markers = null;
 var Range;
 var Search;
 var pipelineHighlights = [-1, -1, -1]; // line numbers for pipeline highlights
+var userInControl; // whether the user is in control during execution of the program
 
 function init() {
     Range = ace.require("ace/range").Range;
@@ -40,16 +41,18 @@ function init() {
     doc     = session.getDocument();
 
     editor.setOptions({
-        useSoftTabs    : true,
-        tabSize        : 4,
-        wrap           : false,
-        scrollSpeed    : 0.1,
-        animatedScroll : false,
-        fontSize       : '12pt',
-        scrollPastEnd  : true,
-        displayIndentGuides: false
+    // configurable
+          useSoftTabs    : true,
+          scrollSpeed    : 0.1,
+
+    // not configurable
+          tabSize        : 4,
+          animatedScroll : false,
+          scrollPastEnd  : true,
+          displayIndentGuides: false
     });
-    editor.setTheme("ace/theme/monokai");
+    session.setUseWrapMode(false);
+
     doc.on('change', function(e) {
         bridge.onChange();// a java method
         if(markers)
@@ -61,11 +64,16 @@ function init() {
     editor._backupPointerEvents = editor.container.style.pointerEvents;
 }
 
+// change by a relative amount (px)
+function changeFontSize(amount) {
+    var current = parseFloat(editor.container.style.fontSize);
+    editor.container.style.fontSize = (current + amount) + "px";
+}
+
 function loadText(text) {
     var cursorPos = -1; // indicates the beginning
     session.setValue(text, cursorPos);
     session.setMode("ace/mode/simp");
-    //editor.getSession().foldAll();
 }
 
 function getLine() {
@@ -153,13 +161,19 @@ function removeMarkers() {
 function executeMode() {
     editor.setReadOnly(true);
     editor.renderer.$cursorLayer.element.style.opacity=0;
-    editor.container.style.pointerEvents = 'none';
+    if(!userInControl) {
+        editor.container.style.pointerEvents = 'none';
+    }
 }
 function editMode() {
     editor.setReadOnly(false);
     clearPipelineHighlights();
     editor.renderer.$cursorLayer.element.style.opacity=1;
-    editor.container.style.pointerEvents = editor._backupPointerEvents;
+    // whether control was taken or not, reset (what if the setting was changed
+    // during execution)
+    if(editor._backupPointerEvents !== undefined) {
+        editor.container.style.pointerEvents = editor._backupPointerEvents;
+    }
 }
 
 function clearPipelineHighlights() {
@@ -176,7 +190,22 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
     session.addGutterDecoration(fetchLine, 'fetch');
     session.addGutterDecoration(decodeLine, 'decode');
     session.addGutterDecoration(executeLine, 'execute');
-    goto(executeLine);
+    if(!userInControl) {
+        goto(executeLine);
+    }
+}
+
+function setFont(family, size) {
+    if(family !== null) {
+        editor.setOptions({
+            fontFamily: family,
+            fontSize: size
+        });
+    } else {
+        editor.setOptions({
+            fontSize: size
+        });
+    }
 }
 
 </script>

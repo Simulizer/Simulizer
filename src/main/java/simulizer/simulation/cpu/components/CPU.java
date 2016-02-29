@@ -213,7 +213,7 @@ public class CPU {
         sendMessage(new RegisterChangedMessage(Register.gp));
 
         this.Alu = new ALU();//initialising Alu
-        this.getLastAddress();
+        this.lastAddress = program.textSegmentLast;
     }
 
     public Program getProgram() {
@@ -245,20 +245,6 @@ public class CPU {
         }
 
         throw new ProgramException("No main label found.", this.program);
-    }
-
-    /**method gets the last address for use of ending the FDE cycle
-     *
-     */
-    private void getLastAddress() {
-        Address maxAddress = new Address(0);//to store max (last)
-
-        for(Map.Entry<Address, Statement> entry : this.program.textSegment.entrySet()) {
-            if(entry.getKey().getValue() >= maxAddress.getValue()) {//if greater than current last address
-                maxAddress = entry.getKey();
-            }
-        }
-        this.lastAddress = maxAddress;
     }
 
     /**carries out the fetch part of the FDE cycle (non pipelined)

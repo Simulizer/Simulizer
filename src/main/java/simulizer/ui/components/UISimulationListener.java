@@ -26,7 +26,7 @@ public class UISimulationListener extends SimulationListener {
 	@Override public void processSimulationMessage(SimulationMessage m) {
 		switch(m.detail) {
 			case SIMULATION_STARTED: {
-				wm.getHLVisManager().onStartProgram(wm.getCPU());
+				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 				Platform.runLater(editor::executeMode);
 			} break;
@@ -40,7 +40,7 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
-		wm.getHLVisManager().processAnnotation(m.annotation);
+		wm.getAnnotationManager().processAnnotation(m.annotation);
 	}
 
 	@Override

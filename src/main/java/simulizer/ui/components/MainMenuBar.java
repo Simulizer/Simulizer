@@ -19,15 +19,11 @@ import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
-import simulizer.ui.windows.Labels;
-import simulizer.ui.windows.Logger;
-import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -217,11 +213,11 @@ public class MainMenuBar extends MenuBar {
 		jsREPL.setOnAction(e -> {
 			new Thread(() -> {
 				// if there is an executor (eg simulation running) then use that
-				if(wm.getHLVisManager().getExecutor() == null) {
+				if(wm.getAnnotationManager().getExecutor() == null) {
 					// this does not bridge with the visualisations or simulation
-					wm.getHLVisManager().newExecutor();
+					wm.getAnnotationManager().newExecutor();
 				}
-				wm.getHLVisManager().getExecutor().debugREPL(wm.getIO());
+				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
 			}).start();
 		});
 

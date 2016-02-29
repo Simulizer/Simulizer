@@ -18,6 +18,7 @@ public class Program {
      */
     public final Map<Address, Statement> textSegment;
     public Address textSegmentStart;
+    public Address textSegmentLast; // address of the last instruction
 
     /**
      * metadata and type information about areas of the static data segment

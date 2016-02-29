@@ -21,8 +21,7 @@ public class Settings {
 		JsonParser parser = new JsonParser();
 		JsonElement jsonElement = parser.parse(new FileReader(json));
 		JsonObject jsonObject = jsonElement.getAsJsonObject();
-		Settings settings = new Settings(jsonObject);
-		return settings;
+		return new Settings(jsonObject);
 	}
 
 	private Settings(JsonObject jsonObject) {
@@ -52,8 +51,16 @@ public class Settings {
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
-		settings.add(new ObjectSetting("code_editor", "Code Editor")
-					.add(new BooleanSetting("word-wrap", "Word Wrapping", "Toggles word wrap"))
+		settings.add(new ObjectSetting("editor", "Editor")
+					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas"))
+					.add(new IntegerSetting("font-size", "Font size", "Font size in px"))
+					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
+					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed"))
+					.add(new BooleanSetting("soft-tabs", "Soft tabs", "Soft tabs"))
+					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme) monokai, ambiance, tomorrow_night_eighties"))
+					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program"))
+					.add(new BooleanSetting("vim-mode", "Vim mode", "Vim keybindings for the editor"))
+					.add(new BooleanSetting("wrap", "Wrap long lines", "Wrap long lines"))
 					);
 		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
 					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
@@ -103,6 +110,11 @@ public class Settings {
 		}
 	}
 
+	/**
+	 * get a loaded value for a setting, specified using a path eg editor.font-size
+	 * @param settingPath the path to the option, separated by a dot
+	 * @return the requested setting
+	 */
 	public Object get(String settingPath) {
 		String[] path = settingPath.split("\\.");
 		SettingValue<?> setting = settings;

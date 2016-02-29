@@ -1,6 +1,8 @@
 package simulizer.annotations;
 
+import simulizer.ui.WindowManager;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.ThreadUtils;
 
@@ -13,10 +15,12 @@ import java.util.concurrent.ExecutionException;
 public class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
-	HighLevelVisualisation vis;
+	WindowManager wm;
 
 	public DataStructureVisualiser load(String visualisationName) {
 		try {
+			HighLevelVisualisation vis = (HighLevelVisualisation) wm.getWorkspace().openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+
 			switch (visualisationName) {
 				case "tower-of-hanoi":
 					ThreadUtils.platformRunAndWait(vis::loadTowerOfHanoiVisualisation);
