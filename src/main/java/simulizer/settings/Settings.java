@@ -51,8 +51,9 @@ public class Settings {
 						.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 					);
-		settings.add(new ObjectSetting("code_editor", "Code Editor")
+		settings.add(new ObjectSetting("editor", "Editor")
 					.add(new BooleanSetting("word-wrap", "Word Wrapping", "Toggles word wrap"))
+					.add(new StringSetting("open-file", "Initial File", "The initial file to load"))
 					);
 		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
 					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
@@ -75,30 +76,41 @@ public class Settings {
 		if (element == null)
 			return;
 
-		switch (setting.getSettingType()) {
-			case "Boolean":
-				((BooleanSetting) setting).setValue(element.getAsBoolean());
-				break;
+		// Handle null case
+		if (element.isJsonNull()) {
+			setting.setValue(null);
+			return;
+		}
 
-			case "Double":
-				((DoubleSetting) setting).setValue(element.getAsDouble());
-				break;
+		try {
+			switch (setting.getSettingType()) {
+				case "Boolean":
+					((BooleanSetting) setting).setValue(element.getAsBoolean());
+					break;
 
-			case "Integer":
-				((IntegerSetting) setting).setValue(element.getAsInt());
-				break;
+				case "Double":
+					((DoubleSetting) setting).setValue(element.getAsDouble());
+					break;
 
-			case "Object":
-				for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
-					loadFromJson(element.getAsJsonObject(), s);
-				break;
+				case "Integer":
+					((IntegerSetting) setting).setValue(element.getAsInt());
+					break;
 
-			case "String":
-				((StringSetting) setting).setValue(element.getAsString());
-				break;
+				case "Object":
+					for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
+						loadFromJson(element.getAsJsonObject(), s);
+					break;
 
-			default:
-				System.err.println("Unknown: " + setting.getSettingType());
+				case "String":
+					((StringSetting) setting).setValue(element.getAsString());
+					break;
+
+				default:
+					System.err.println("Unknown: " + setting.getSettingType());
+			}
+		} catch (Exception e) {
+			// TODO: Find exact exception
+			// Setting was of invalid type, ignoring
 		}
 	}
 

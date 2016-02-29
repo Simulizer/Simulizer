@@ -23,7 +23,7 @@
     "clock-speed": 250,
     "zero-memory": true
   },
-  "code_editor": {
+  "editor": {
     "word-wrap": true,
     "open-file" : null
   },
