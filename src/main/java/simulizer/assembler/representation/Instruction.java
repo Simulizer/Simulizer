@@ -96,7 +96,7 @@ public enum Instruction {
     BREAK   (new OperandFormat().allowed1(OperandFormat.OperandType.UNSIGNED_IMMEDIATE), "break into the debugger");
 
 
-    private OperandFormat f;
+    private final OperandFormat f;
 
     Instruction(OperandFormat f, String purpose) {
         this.f = f;

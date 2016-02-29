@@ -17,12 +17,12 @@ import java.util.Optional;
 public class AddressOperand extends Operand {
 
     // either as an base or as the only part
-    public Optional<String> labelName;
+    public final Optional<String> labelName;
     // because of the way the grammar works, this is never on its own, it is always an offset
     // may be positive or negative
-    public Optional<Integer> constant;
+    public final Optional<Integer> constant;
     // either as a base, offset, or as the only part
-    public Optional<Register> register;
+    public final Optional<Register> register;
 
     @Override
     public Type getType() {
@@ -47,10 +47,10 @@ public class AddressOperand extends Operand {
         return this;
     }
 
-    public AddressOperand() {
-        labelName = Optional.empty();
-        constant = Optional.empty();
-        register = Optional.empty();
+    public AddressOperand(Optional<String> labelName, Optional<Integer> constant, Optional<Register> register) {
+        this.labelName = labelName;
+        this.constant  = constant;
+        this.register  = register;
     }
 
     public boolean labelOnly() {

@@ -1,6 +1,7 @@
 package simulizer;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +47,13 @@ public class Simulizer extends Application {
 	public void init() throws Exception {
 		ImageView splash = null;
 
-		settings = Settings.loadSettings(new File("settings.json"));
+		try {
+			settings = Settings.loadSettings(new File("settings.json"));
+		} catch (IOException ex) {
+			System.err.println("Failed to launch: settings.json was missing");
+			System.exit(1);
+		}
+
 		SPLASH_WIDTH = (int) settings.get("splash-screen.width");
 		SPLASH_HEIGHT = (int) settings.get("splash-screen.height");
 
@@ -91,16 +98,16 @@ public class Simulizer extends Application {
 	}
 
 	private void launchWindowManager(Stage primaryStage) {
-		// TODO: Remove this code, simple check for if we are running within the work folder
-		String cwd = System.getProperty("user.dir");
-		if (!cwd.endsWith("work"))
-			System.out.println("Working from: " + cwd + "\nPLEASE RUN FROM GRADLE");
-
 		// Close application
 		primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
 
 		// Just show the main window for now
-		wm = new WindowManager(primaryStage, settings);
+		try {
+			wm = new WindowManager(primaryStage, settings);
+		} catch (IOException ex) {
+			System.err.println("Failed to launch: " + ex.getMessage());
+			System.exit(1);
+		}
 	}
 
 	private void showSplash(Task<?> task) throws URISyntaxException, MalformedURLException {

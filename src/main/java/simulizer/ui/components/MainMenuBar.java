@@ -19,11 +19,15 @@ import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
-import simulizer.ui.windows.AceEditor;
+import simulizer.ui.windows.Editor;
+import simulizer.ui.windows.Labels;
+import simulizer.ui.windows.Logger;
+import simulizer.ui.windows.Registers;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -35,8 +39,8 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
 	}
 
-	private AceEditor getEditor() {
-		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
+	private Editor getEditor() {
+		return (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 	}
 
 	private Menu fileMenu() {
@@ -107,7 +111,8 @@ public class MainMenuBar extends MenuBar {
 		menu.getItems().clear();
 
 		for (Layout l : wm.getLayouts()) {
-			MenuItem item = new MenuItem(l.getName());
+			String name = l.getName();
+			MenuItem item = new MenuItem(name.endsWith(".json") ? name.substring(0,name.length()-5) : name);
 			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
@@ -117,6 +122,9 @@ public class MainMenuBar extends MenuBar {
 		saveLayoutItem.setOnAction(e -> {
 			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
+				if (!saveFile.getName().endsWith(".json"))
+					saveFile = new File(saveFile.getAbsolutePath() + ".json");
+
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
 				layoutMenu(menu);
@@ -157,7 +165,7 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Run Code");
 
 		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> wm.runProgram());
+		runProgram.setOnAction(e -> wm.assembleAndRun());
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -205,6 +213,18 @@ public class MainMenuBar extends MenuBar {
 		lineWrap.setSelected(false);
 		lineWrap.setOnAction(e -> getEditor().setWrap(!getEditor().getWrap()));
 
+		MenuItem jsREPL = new MenuItem("Start javascript REPL");
+		jsREPL.setOnAction(e -> {
+			new Thread(() -> {
+				// if there is an executor (eg simulation running) then use that
+				if(wm.getHLVisManager().getExecutor() == null) {
+					// this does not bridge with the visualisations or simulation
+					wm.getHLVisManager().newExecutor();
+				}
+				wm.getHLVisManager().getExecutor().debugREPL(wm.getIO());
+			}).start();
+		});
+
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
 			Program p = Assembler.assemble(getEditor().getText(), null);
@@ -221,7 +241,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(delWindows, lineWrap, dumpProgram);
+		debugMenu.getItems().addAll(delWindows, lineWrap, dumpProgram, jsREPL);
 		return debugMenu;
 	}
 

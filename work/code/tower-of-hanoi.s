@@ -12,6 +12,8 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n−1 discs from pole 2 to pole 3 so they sit on disc n
 #
+# @{ setSpeed(100) }@
+# @{ var h = loadVis('tower-of-hanoi') }@
 
 
     .data    # variables section
@@ -135,6 +137,8 @@ MOVE_RETURN:
 
 # PRINT_MOVE(src, dest)
 PRINT_MOVE:
+
+    # @{ h.move($a0.get()-1, $a1.get()-1); h.commit(); }@
 
     # save/push arguments that may be modified onto the stack (spill)
     addi $sp, $sp, -4       # grow the stack by 4 bytes

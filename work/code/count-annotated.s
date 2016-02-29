@@ -4,10 +4,11 @@
 
 .text
 main:
-	li $s0 0
+	li $s0 0 #
 	li $t0 100
 
 LOOP:   addi $s0 $s0 1 # not @ {} an annotation
+                       # asdf@
 
 	move $a0 $s0       # comment @{}@ comment
 	li $v0 1           # comment@{var x;}@comment

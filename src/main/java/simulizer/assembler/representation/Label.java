@@ -12,10 +12,10 @@ public class Label {
         VARIABLE
     }
 
-    private String name;
-    private int lineNumber;
+    private final String name;
+    private final int lineNumber;
 
-    private Type type;
+    private final Type type;
 
     public Label(String name, int lineNumber, Type type) {
         this.name = name;

@@ -9,7 +9,7 @@ package simulizer.assembler.representation.operand;
  */
 public class IntegerOperand extends Operand {
 
-    public int value;
+    public final int value;
 
     @Override
     public Type getType() {

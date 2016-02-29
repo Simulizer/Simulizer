@@ -3,6 +3,7 @@ package simulizer.ui.windows;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -16,6 +17,16 @@ import simulizer.ui.interfaces.InternalWindow;
 public class Registers extends InternalWindow {
 	private TableView<Data> table = new TableView<Data>();
 	private CPU cpu;
+
+	public Registers() {
+		widthProperty().addListener((o, old, newValue) -> {
+			int numColumns = table.getColumns().size();
+			for (TableColumn<Data, ?> column : table.getColumns()) {
+				column.setPrefWidth(getWidth() / numColumns);
+			}
+		});
+		table.setCursor(Cursor.DEFAULT);
+	}
 
 	public void refreshData() {
 		// Create Listener for Register Changes

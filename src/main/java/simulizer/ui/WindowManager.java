@@ -1,9 +1,11 @@
 package simulizer.ui;
 
+import java.io.IOException;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
@@ -18,12 +20,13 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.components.highlevel.HighLevelVisualisationManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.AceEditor;
-import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.ui.windows.Editor;
+import simulizer.utils.UIUtils;
 
 public class WindowManager extends GridPane {
 	private Stage primaryStage;
@@ -38,8 +41,9 @@ public class WindowManager extends GridPane {
 	private LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
+	private HighLevelVisualisationManager hlVisManager;
 
-	public WindowManager(Stage primaryStage, Settings settings) {
+	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
 		this.settings = settings;
 		workspace = new Workspace(this);
@@ -83,13 +87,35 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
+
+		// Disable ALT Key to prevent menu bar from stealing
+		// the editor's focus
+		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
+			if (e.isAltDown())
+				e.consume();
+		});
+
+		hlVisManager = new HighLevelVisualisationManager(this);
 	}
 
 	public void show() {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
+
+		// a hack to make the layout load properly
+		primaryStage.setOnShown((e) -> {
+			new Thread(() -> {
+				try {
+					for (int i = 0; i < 3; i++) {
+						Thread.sleep(50);
+						Platform.runLater(workspace::resizeInternalWindows);
+					}
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}).start();
+		});
 		primaryStage.show();
-		Platform.runLater(() -> workspace.resizeInternalWindows());
 
 		if (grid != null) {
 			grid.setWindowSize(workspace.getWidth(), workspace.getHeight());
@@ -129,17 +155,30 @@ public class WindowManager extends GridPane {
 		}
 	}
 
-	public void runProgram() {
-		AceEditor editor = (AceEditor) getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
+	public void assembleAndRun() {
 		StoreProblemLogger log = new StoreProblemLogger();
+		Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+
 		Program p = Assembler.assemble(editor.getText(), log);
+
+		// if no problems, has the effect of clearing
+		editor.setProblems(log.getProblems());
+
+		if (p != null) {
+			runProgram(p);
+		} else {
+			int size = log.getProblems().size();
+			UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+		}
+	}
+
+	public void runProgram(Program p) {
 		if (p != null) {
 			stopCPU();
 
-			HighLevelVisualisation hlv = (HighLevelVisualisation) workspace.findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-			if (hlv != null)
-				hlv.attachCPU(cpu);
+			hlVisManager.onStartProgram(cpu);
 			cpu.loadProgram(p);
+			//TODO: maybe don't re-register the listeners
 			cpu.registerListener(simListener);
 
 			io.clear();
@@ -159,18 +198,7 @@ public class WindowManager extends GridPane {
 			cpuThread.setDaemon(true);
 			cpuThread.start();
 		} else {
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("Could Not Run");
-			int size = log.getProblems().size();
-			if (size == 1) {
-				alert.setHeaderText("The Program Contains An Error!");
-			} else {
-				alert.setHeaderText("The Program Contains " + size + " Errors!");
-			}
-			alert.setContentText("You must fix them before you can\nexecute the program.");
-			alert.show();
-
-			editor.setProblems(log.getProblems());
+			throw new NullPointerException();
 		}
 	}
 
@@ -195,4 +223,7 @@ public class WindowManager extends GridPane {
 		return io;
 	}
 
+	public HighLevelVisualisationManager getHLVisManager() {
+		return hlVisManager;
+	}
 }
