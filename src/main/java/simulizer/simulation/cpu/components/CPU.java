@@ -37,16 +37,7 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
-import simulizer.simulation.listeners.AnnotationMessage;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.ExecuteStatementMessage;
-import simulizer.simulation.listeners.InstructionTypeMessage;
-import simulizer.simulation.listeners.Message;
-import simulizer.simulation.listeners.PipelineHazardMessage;
-import simulizer.simulation.listeners.ProblemMessage;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.SimulationListener;
-import simulizer.simulation.listeners.StageEnterMessage;
+import simulizer.simulation.listeners.*;
 import simulizer.simulation.listeners.StageEnterMessage.Stage;
 
 /**this is the central CPU class
@@ -139,6 +130,7 @@ public class CPU {
                 e.printStackTrace();
             }
         }
+        sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
     }
 
     /**
@@ -163,16 +155,18 @@ public class CPU {
                 l.processDataMovementMessage((DataMovementMessage) m);
             } else if(m instanceof ExecuteStatementMessage) {
                 l.processExecuteStatementMessage((ExecuteStatementMessage) m);
+            } else if(m instanceof InstructionTypeMessage) {
+                l.processInstructionTypeMessage((InstructionTypeMessage) m);
+            } else if(m instanceof PipelineHazardMessage) {
+                l.processPipelineHazardMessage((PipelineHazardMessage) m);
             } else if(m instanceof ProblemMessage) {
                 l.processProblemMessage((ProblemMessage) m);
+            } else if(m instanceof RegisterChangedMessage) {
+                l.processRegisterChangedMessage((RegisterChangedMessage) m);
+            } else if(m instanceof SimulationMessage) {
+                l.processSimulationMessage((SimulationMessage) m);
             } else if(m instanceof StageEnterMessage) {
                 l.processStageEnterMessage((StageEnterMessage) m);
-            } else if(m instanceof RegisterChangedMessage) {
-            	l.processRegisterChangedMessage((RegisterChangedMessage) m);
-            } else if(m instanceof InstructionTypeMessage) {
-            	l.processInstructionTypeMessage((InstructionTypeMessage) m);
-            } else if(m instanceof PipelineHazardMessage) {
-            	l.processPipelineHazardMessage((PipelineHazardMessage) m);
             }
         }
     }
@@ -684,6 +678,7 @@ public class CPU {
     	this.startClock();
         System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
+        sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
         // used for setting up the annotation environment eg loading visualisations
         if(program.initAnnotation != null) {

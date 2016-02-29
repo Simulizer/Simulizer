@@ -176,7 +176,6 @@ public class WindowManager extends GridPane {
 		if (p != null) {
 			stopCPU();
 
-			hlVisManager.onStartProgram(cpu);
 			cpu.loadProgram(p);
 			//TODO: maybe don't re-register the listeners
 			cpu.registerListener(simListener);
