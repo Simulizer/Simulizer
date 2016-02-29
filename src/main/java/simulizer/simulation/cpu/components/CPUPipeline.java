@@ -9,6 +9,7 @@ import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.exceptions.ExecuteException;
 import simulizer.simulation.exceptions.HeapException;
@@ -17,6 +18,7 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
+import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
 import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
@@ -201,13 +203,18 @@ public class CPUPipeline extends CPU {
 			IF = instructionRegister;//updating IF
 		}
 		
+		if(ID.getInstruction().equals(Instruction.jal)) {//jal by default will take incorrect PC value, this needs to be dealt with
+			long newCurrentAddress = DataConverter.decodeAsUnsigned(ID.asJType().getCurrentAddress().get().getWord())-4;
+			Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
+			ID = new JTypeInstruction(Instruction.jal,ID.asJType().getJumpAddress(),trueCurrent);
+		}
+		
 		execute(ID);
-		System.out.println(ID.getInstruction().toString());
+		
 		//jumped checks if either an unconditional jump is made or, a branch returning true
 		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		if(jumped)//flush pipeline and allow continuation of running
 		{
-			System.out.println("JUMPED");
 			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
 			this.isFinished = false;//considering edge case where jump on last instruction
 			this.isRunning = true;//keep the program running

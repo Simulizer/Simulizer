@@ -659,7 +659,8 @@ public class CPU {
         fetch();
         sendMessage(new ExecuteStatementMessage(thisInstruction));
 		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
-        execute(instruction);
+		
+		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
@@ -690,6 +691,7 @@ public class CPU {
         		this.runSingleCycle();//run one loop of Fetch,Decode,Execute
         	} catch(MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
         		sendMessage(new ProblemMessage(e.getMessage()));
+        		this.isRunning = false;
         	}
             try {
                 if(isRunning) {
