@@ -40,7 +40,6 @@ public class CPU {
     public CustomWire dataMemoryToRegisters;
     public CustomWire aluToRegisters;
     public CustomWire aluToControlUnit;
-
     public ConnectorWire irToControlUnit;
     public ConnectorWire controlUnitToPlusFour;
     public ConnectorWire controlUnitToIM1;
@@ -106,21 +105,21 @@ public class CPU {
         aluToControlUnit = new CustomWire(0,0);
 
         generalWires.getChildren().addAll(
-                irToControlUnit,
-                controlUnitToPlusFour,
-                controlUnitToIM1,
-                controlUnitToRegisters,
-                controlUnitToDataMemory,
-                PCToIM,
-                aluToMemory,
-                registerToALU1,
-                registerToALU2,
-                codeMemoryToIR
+            irToControlUnit,
+            controlUnitToPlusFour,
+            controlUnitToIM1,
+            controlUnitToRegisters,
+            controlUnitToDataMemory,
+            PCToIM,
+            aluToMemory,
+            registerToALU1,
+            registerToALU2,
+            codeMemoryToIR
         );
 
         Group complexWires = new Group();
         complexWires.getChildren().addAll(
-                irToPlusFour,
+            irToPlusFour,
             irToRegister1,
             irToRegister2,
             irToRegister3,
@@ -226,27 +225,26 @@ public class CPU {
     }
     
     public void closeAllThreads(){
-//    	memToRes.closeThread();
-//    	IrTOPC.closeThread();
-//    	PCToPlusFour.closeThread();
-//    	registerToMemory.closeThread();
-//    	IMToALU.closeThread();
-//    	IMToIR.closeThread();
-//    	IMToRegister1.closeThread();
-//    	IMToRegister2.closeThread();
-//    	IMToRegister3.closeThread();
-//    	controlUnitToIr.closeThread();
-//    	controlUnitToPC.closeThread();
-//    	controlUnitToPlusFour.closeThread();
-//    	controlUnitToIM1.closeThread();
-//    	controlUnitToIM2.closeThread();
-//    	controlUnitToRegisters.closeThread();
-//    	controlUnitToALU.closeThread();
-//    	controlUnitToDataMemory.closeThread();
-//    	plusFourToIr.closeThread();
-//    	PCToIM.closeThread();
-//    	aluToMemory.closeThread();
-//    	registerToALU1.closeThread();
-//    	registerToALU2.closeThread();
+        irToControlUnit.closeThread();
+        controlUnitToPlusFour.closeThread();
+        controlUnitToIM1.closeThread();
+        controlUnitToRegisters.closeThread();
+        controlUnitToDataMemory.closeThread();
+        PCToIM.closeThread();
+        aluToMemory.closeThread();
+        codeMemoryToIR.closeThread();
+    	registerToALU1.closeThread();
+    	registerToALU2.closeThread();
+
+        irToPlusFour.closeThread();
+        irToRegister1.closeThread();
+        irToRegister2.closeThread();
+        irToRegister3.closeThread();
+        pcToPlusFour.closeThread();
+        plusFourToPc.closeThread();
+        registerToDataMemory.closeThread();
+        dataMemoryToRegisters.closeThread();
+        aluToRegisters.closeThread();
+        aluToControlUnit.closeThread();
     }
 }
