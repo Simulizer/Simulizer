@@ -8,6 +8,7 @@ import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.exceptions.ExecuteException;
 import simulizer.simulation.exceptions.HeapException;
@@ -171,6 +172,7 @@ public class CPUPipeline extends CPU {
 		} else if (!this.canFetch) {
 			this.canFetch = true;
 		} else if(this.isFinished) {//ending termination
+			//TODO: this should probably throw an error going by what matt said
 			this.isRunning = false;
 		}
 		
@@ -200,12 +202,15 @@ public class CPUPipeline extends CPU {
 		}
 		
 		execute(ID);
+		System.out.println(ID.getInstruction().toString());
 		//jumped checks if either an unconditional jump is made or, a branch returning true
 		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		if(jumped)//flush pipeline and allow continuation of running
 		{
+			System.out.println("JUMPED");
 			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
 			this.isFinished = false;//considering edge case where jump on last instruction
+			this.isRunning = true;//keep the program running
 			IF = createNopStatement();
 			ID = createNopInstruction();
 		}
