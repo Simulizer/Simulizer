@@ -645,15 +645,18 @@ public class CPU {
         fetch();
         sendMessage(new ExecuteStatementMessage(thisInstruction));
 		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
-        execute(instruction);
+		
+		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
-            //TODO: this needs to crash, but with an informative message (unlike spim does)
-            //TODO: syscall 10 is the only valid way of ending
+        	//clean exit but representing in reality an error would be thrown
             this.isRunning = false;//stop running
+            sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. "
+					+ "This could be because you forgot to exit cleanly."
+					+ " To exit cleanly please call syscall with code 10."));
         }
     }
 
@@ -676,6 +679,7 @@ public class CPU {
         		this.runSingleCycle();//run one loop of Fetch,Decode,Execute
         	} catch(MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
         		sendMessage(new ProblemMessage(e.getMessage()));
+        		this.isRunning = false;
         	}
             try {
                 if(isRunning) {
