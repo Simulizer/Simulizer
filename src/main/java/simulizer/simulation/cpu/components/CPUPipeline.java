@@ -128,13 +128,37 @@ public class CPUPipeline extends CPU {
 		return registers;
 	}
 	
+	
+	/**method will check for all addresses being read in a statement
+	 * 
+	 * @param statement the statement to be checked
+	 * @return the list of addresses being read 
+	 * (will mainly be 1, but to make it more extensible make it a list to account for more exotic instructions in the future)
+	 */
+	private List<Address> addressesRead(Statement statement) {
+		return new ArrayList<Address>();
+		//TODO: FINISH METHOD
+	}
+	
+	/**method will check for all addresses being written in an instruction
+	 * 
+	 * @param instruction the instruction that will be executed
+	 * @return the list of addresses being written (again, the majority of the time this will be 1, but not in all cases
+	 * if more exotic instructions are added)
+	 */
+	private List<Address> addressesBeingWritten(InstructionFormat instruction) {
+		return new ArrayList<Address>();
+		//TODO:Finish method
+	}
+	
 	/**method will take the registers being read and the registers being written
 	 * and determine whether or not any stalling needs to be done in the pipeline
+	 * @param <A> the type of list being read, need multiple times so generics is appropriate
 	 * @param reads the registers being read
 	 * @param writes the registers being written
 	 * @return whether or not there is a crossover between the two lists
 	 */
-	private boolean needToBubble(List<Register> reads, List<Register> writes) {
+	private <A> boolean needToBubble(List<A> reads, List<A> writes) {
 		for(int i = 0; i < writes.size(); i++) {
 			for(int j = 0; j < reads.size(); j++) {
 				if(writes.get(i).equals(reads.get(j))) {
@@ -190,13 +214,11 @@ public class CPUPipeline extends CPU {
         }
 		
 		boolean needToBubbleRAWReg = needToBubble(registersRead(IF),registersBeingWritten(ID));//detecting pipeline hazards
-		boolean needToBubbleRAWMem = false;//TODO: Read After Write Checks with Memory Addresses
+		boolean needToBubbleRAWMem = needToBubble(addressesRead(IF),addressesBeingWritten(ID));
 		
 		if (needToBubbleRAWReg||needToBubbleRAWMem) { //if we need to stall to prevent incorrect reads
 			
-			if(needToBubbleRAWReg||needToBubbleRAWMem) {
-				sendMessage(new PipelineHazardMessage(Hazard.RAW));
-			}
+			sendMessage(new PipelineHazardMessage(Hazard.RAW));
 		
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
