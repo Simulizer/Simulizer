@@ -14,9 +14,10 @@ public abstract class SimulationListener {
     public void processAnnotationMessage(AnnotationMessage m) {}
     public void processDataMovementMessage(DataMovementMessage m) {}
     public void processExecuteStatementMessage(ExecuteStatementMessage m) {}
-    public void processProblemMessage(ProblemMessage m) {}
-    public void processStageEnterMessage(StageEnterMessage m) {}
-    public void processRegisterChangedMessage(RegisterChangedMessage m) {}
     public void processInstructionTypeMessage(InstructionTypeMessage m) {}
     public void processPipelineHazardMessage(PipelineHazardMessage m) {}
+    public void processProblemMessage(ProblemMessage m) {}
+    public void processRegisterChangedMessage(RegisterChangedMessage m) {}
+    public void processSimulationMessage(SimulationMessage m) {}
+    public void processStageEnterMessage(StageEnterMessage m) {}
 }

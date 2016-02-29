@@ -14,6 +14,9 @@
     border-radius: 2px;
     border: 1px solid red;
 }
+.fetch   {background-color: white;}
+.decode  {background-color: orange;}
+.execute {background-color: red;}
 </style>
 </head>
 <body>
@@ -26,6 +29,7 @@ var doc;
 var markers = null;
 var Range;
 var Search;
+var pipelineHighlights = [-1, -1, -1]; // line numbers for pipeline highlights
 
 function init() {
     Range = ace.require("ace/range").Range;
@@ -51,6 +55,10 @@ function init() {
         if(markers)
             removeMarkers();
     });
+
+
+    // for disabling, then re-enabling selection when switching modes
+    editor._backupPointerEvents = editor.container.style.pointerEvents;
 }
 
 function loadText(text) {
@@ -132,6 +140,34 @@ function removeMarkers() {
         }
         markers = null;
     }
+}
+
+function executeMode() {
+    editor.setReadOnly(true);
+    editor.renderer.$cursorLayer.element.style.opacity=0;
+    editor.container.style.pointerEvents = 'none';
+}
+function editMode() {
+    editor.setReadOnly(false);
+    clearPipelineHighlights();
+    editor.renderer.$cursorLayer.element.style.opacity=1;
+    editor.container.style.pointerEvents = editor._backupPointerEvents;
+}
+
+function clearPipelineHighlights() {
+    session.removeGutterDecoration(pipelineHighlights[0], 'fetch');
+    session.removeGutterDecoration(pipelineHighlights[1], 'decode');
+    session.removeGutterDecoration(pipelineHighlights[2], 'execute');
+}
+
+function highlightPipeline(fetchLine, decodeLine, executeLine) {
+    clearPipelineHighlights();
+
+    pipelineHighlights = [fetchLine, decodeLine, executeLine];
+
+    session.addGutterDecoration(pipelineHighlights[0], 'fetch');
+    session.addGutterDecoration(pipelineHighlights[1], 'decode');
+    session.addGutterDecoration(pipelineHighlights[2], 'execute');
 }
 
 </script>

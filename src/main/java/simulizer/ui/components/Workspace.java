@@ -1,12 +1,6 @@
 package simulizer.ui.components;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Observable;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -111,6 +105,10 @@ public class Workspace extends Observable implements Themeable {
 	 * @return The internal window if already open
 	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
+        //TODO: I (Matt) have (very occasionally) gotten a
+        //ConcurrentModificationException here, stemming from getting the editor in
+        //UISimulationListener just after the simulation starts (it might be the
+        //HLVis window opening at the same time which might be the problem)
 		for (InternalWindow w : openWindows)
 			if (window.equals(w))
 				return w;

@@ -60,6 +60,10 @@ public class Editor extends InternalWindow {
 	private JSObject jsWindow;
 	private JSObject jsEditor;
 
+	// execute mode = simulation running
+	private enum Mode { EDIT_MODE, EXECUTE_MODE };
+	private Mode mode;
+
 	private Set<TemporaryObserver> observers = new HashSet<>();
 
 	/**
@@ -252,17 +256,14 @@ public class Editor extends InternalWindow {
 
 
 	public String getText() {
-		if (jsEditor != null) {
+		if (jsEditor != null)
 			return (String) jsEditor.call("getValue");
-		} else return null;
+		else
+			return null;
 	}
 
 	public int getLine() {
 		return (int) jsWindow.call("getLine");
-	}
-
-	public int getColumn() {
-		return (int) jsWindow.call("getColumn");
 	}
 
 	public File getCurrentFile() {
@@ -305,47 +306,97 @@ public class Editor extends InternalWindow {
 		updateObservers();
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	private void setEdited(boolean edited) {
-		String filename = currentFile != null ? currentFile.getName() : "New File";
-		String editedSymbol = edited ? " *" : "";
-		setTitle(WindowEnum.getName(this) + " - " + filename + editedSymbol);
 		changedSinceLastSave = edited;
+		refreshTitle();
 	}
 
+	private void refreshTitle() {
+		String filename = currentFile != null ? currentFile.getName() : "New File";
+		String editedSymbol = changedSinceLastSave ? " *" : "";
+		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
+		setTitle(WindowEnum.getName(this) + modeString + " - " + filename + editedSymbol);
+	}
+
+	/**
+	 * call when starting the simulation. Transitions into a read-only state
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void executeMode() {
+		jsWindow.call("executeMode");
+		mode = Mode.EXECUTE_MODE;
+		refreshTitle();
+	}
+
+	/**
+	 * call after the simulation has finished. Transitions into edit mode
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void editMode() {
+		jsWindow.call("editMode");
+		mode = Mode.EDIT_MODE;
+		refreshTitle();
+	}
+
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findNext(String pattern) {
 		jsWindow.call("find", pattern, false);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findPrevious(String pattern) {
 		jsWindow.call("find", pattern, true);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findAll(String pattern) {
 		jsWindow.call("findAll", pattern);
 	}
 
-	public void setHighlightActiveLine(boolean highlight) {
-		jsEditor.call("setHighlightActiveLine", highlight);
-	}
-
-	public void setReadOnly(boolean readOnly) {
-		jsEditor.call("setReadOnly", readOnly);
-	}
-
+	/**
+	 * @param line starting from 0
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void gotoLine(int line) {
 		gotoLine(line, 0);
 	}
 
+	/**
+	 * @param line starting from 0
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void gotoLine(int line, int col) {
-		jsEditor.call("gotoLine", line, col, false);
+		jsEditor.call("gotoLine", line+1, col, false);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void setWrap(boolean wrap) {
 		engine.executeScript("editor.getSession().setUseWrapMode(" + wrap + ")");
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public boolean getWrap() {
 		return (Boolean) engine.executeScript("editor.getSession().getUseWrapMode()");
 	}
 
+	/**
+	 * lines start from 0
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void highlightPipeline(int fetchLine, int decodeLine, int executeLine) {
+		jsWindow.call("highlightPipeline", fetchLine, decodeLine, executeLine);
+	}
 }
