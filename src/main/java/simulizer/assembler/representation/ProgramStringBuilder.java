@@ -99,7 +99,11 @@ public class ProgramStringBuilder {
 
         sb.append("# Annotations #\n");
         {
-            for(Map.Entry<Address, List<Annotation>> e : p.annotations.entrySet()) {
+            List<Map.Entry<Address, Annotation>> entries = new ArrayList<>(p.annotations.entrySet());
+            entries.sort((e1, e2) ->
+                    Integer.compare(e1.getKey().getValue(), e2.getKey().getValue()));
+
+            for(Map.Entry<Address, Annotation> e : entries) {
                 sb.append("\t").append(e.getKey()).append(" --> ").append(e.getValue()).append("\n");
             }
             sb.append("\n\n");

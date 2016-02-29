@@ -3,7 +3,7 @@ package simulizer.utils;
 import java.io.*;
 
 /**
- * Wrapper for accessing files including bundled resources
+ * Wrappers for accessing files including bundled resources
  * @author mbway
  */
 public class FileUtils {

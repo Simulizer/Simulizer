@@ -6,7 +6,7 @@ package simulizer.assembler.representation.operand;
  */
 public class StringOperand extends Operand {
 
-    public String value;
+    public final String value;
 
     @Override
     public Type getType() {

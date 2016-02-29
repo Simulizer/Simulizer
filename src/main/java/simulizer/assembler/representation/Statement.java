@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
  */
 public class Statement {
 
-    private Instruction instruction;
-    private List<Operand> operandList;
-    private int lineNumber;
+    private final Instruction instruction;
+    private final List<Operand> operandList;
+    private final int lineNumber;
 
     public Statement(Instruction instruction, List<Operand> operandList, int lineNumber) {
         this.instruction = instruction;

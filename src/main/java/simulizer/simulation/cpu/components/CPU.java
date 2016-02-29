@@ -78,7 +78,7 @@ public class CPU {
     public Map<String, Address> labels;
     private Map<String, Label> labelMetaData;
 
-	protected Map<Address, List<Annotation>> annotations;
+	protected Map<Address, Annotation> annotations;
 
     protected boolean isRunning;//for program status
     protected Address lastAddress;//used to determine end of program
@@ -119,7 +119,7 @@ public class CPU {
     }
 
     /**sets the speed in ms of the clock
-     * 
+     *
      * @param tickMillis the time for one clock cycle
      */
     public void setClockSpeed(int tickMillis) {
@@ -127,7 +127,7 @@ public class CPU {
     }
 
     /**stop the running of a program
-     * 
+     *
      */
     public void stopRunning() {
         isRunning = false;
@@ -273,7 +273,7 @@ public class CPU {
     protected void fetch() throws MemoryException {
     	sendMessage(new StageEnterMessage(Stage.Fetch));//signal start of stage
         this.instructionRegister = this.memory.readFromTextSegment(this.programCounter);
-        sendMessage(new DataMovementMessage(Optional.empty(),Optional.of(this.instructionRegister)));
+        sendMessage(new DataMovementMessage(Optional.empty(), Optional.of(this.instructionRegister)));
         this.programCounter = new Address(this.programCounter.getValue() + 4);//incrementing the program counter
     }
 
@@ -309,7 +309,7 @@ public class CPU {
         if(operandList.size() > 3) {
             throw new DecodeException("Too many operands.",op1);
         }
-        if(!instruction.getOperandFormat().valid(op1Type,op2Type,op3Type)) {
+        if(!instruction.getOperandFormat().valid(op1Type, op2Type, op3Type)) {
             throw new DecodeException("Not valid set of operands.", op1);//if invalid operands given
         }
 
@@ -326,7 +326,8 @@ public class CPU {
             sendMessage(new DataMovementMessage(src2,Optional.empty()));
             return new RTypeInstruction(instruction, dest, destinationRegister, src1, src2);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm || instruction.getOperandFormat() == OperandFormat.destSrcImmU) {//immediate arithmetic operations (signed and unsigned)
+        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm
+                || instruction.getOperandFormat() == OperandFormat.destSrcImmU) { //immediate arithmetic operations (signed and unsigned)
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
             Optional<Word> dest = Optional.empty();
@@ -413,7 +414,8 @@ public class CPU {
             Optional<Word> immValue = Optional.empty();
             return new LSInstruction(instruction,dest,loadInto,toRetrieve,immValue);
         }
-        else {//invalid instruction format or BREAK
+        else {
+            //invalid instruction format or BREAK
             throw new DecodeException("Invalid instruction format.", op1);
         }
     }
@@ -427,7 +429,8 @@ public class CPU {
      * @throws MemoryException if problem accessing memory
      * @throws StackException 
      */
-    protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
+    protected void execute(InstructionFormat instruction)
+            throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
         sendMessage(new StageEnterMessage(Stage.Execute));//signal start of execution
     	switch(instruction.mode) {//switch based on instruction format
             case RTYPE:
@@ -479,17 +482,17 @@ public class CPU {
                     this.registers[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
                     sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
-                }
-                else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr)) {//load
 
+                } else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr)) {//load
                     int retrieveAddress = instruction.asLSType().getMemAddress().get().getValue();
+
                     if(instruction.getInstruction().equals(Instruction.la)) {//have to be careful with la
                     	Word address = new Word(DataConverter.encodeAsSigned((long)retrieveAddress));
                     	this.registers[instruction.asLSType().getRegisterName().get().getID()] = address;
                     	sendMessage(new DataMovementMessage(Optional.of(this.registers[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     	sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                 	}
-                    else if(instruction.getInstruction().equals(Instruction.lw)) {
+                	else if(instruction.getInstruction().equals(Instruction.lw)) {
                     	int length = 4;//this may be wrong, hence outside, may depend on instruction
                     	byte[] read = this.memory.readFromMem(retrieveAddress, length);
                     	sendMessage(new DataMovementMessage(Optional.of(new Word(read)),Optional.empty()));
@@ -535,7 +538,7 @@ public class CPU {
                     }
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.srcAddr)) {//store
-                	
+
                 	if(instruction.getInstruction().equals(Instruction.sb)) {
                 		byte toStore = instruction.asLSType().getRegister().get().getWord()[3];//lowest byte
                 		int storeAddress = instruction.asLSType().getMemAddress().get().getValue();
@@ -654,17 +657,22 @@ public class CPU {
      *
      */
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+
+        // PC holds next instruction and is advanced by fetch,
+        // messages should be sent about this instruction instead
+        Address thisInstruction = programCounter;
+
         fetch();
-        sendMessage(new ExecuteStatementMessage(programCounter));
-		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(),this.instructionRegister.getOperandList());
+        sendMessage(new ExecuteStatementMessage(thisInstruction));
+		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
         execute(instruction);
-		if(annotations.containsKey(programCounter)) {
-			for(Annotation a : annotations.get(programCounter)) {
-				sendMessage(new AnnotationMessage(a));
-			}
+		if(annotations.containsKey(thisInstruction)) {
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
+            //TODO: this needs to crash, but with an informative message (unlike spim does)
+            //TODO: syscall 10 is the only valid way of ending
             this.isRunning = false;//stop running
         }
     }
@@ -676,7 +684,13 @@ public class CPU {
     	this.startClock();
         System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
-        while(isRunning) {//need something to stop this
+
+        // used for setting up the annotation environment eg loading visualisations
+        if(program.initAnnotation != null) {
+            sendMessage(new AnnotationMessage(program.initAnnotation));
+        }
+
+        while(isRunning) { //need something to stop this
         	try {
         		this.runSingleCycle();//run one loop of Fetch,Decode,Execute
         	} catch(MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {

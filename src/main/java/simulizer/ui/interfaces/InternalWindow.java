@@ -28,11 +28,8 @@ public abstract class InternalWindow extends Window {
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
 
+		// TODO figure out why this isn't working
 		setCursor(Cursor.DEFAULT);
-
-		// Using caching to smooth window movement
-		setCache(true);
-		setCacheHint(CacheHint.SPEED);
 
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
@@ -67,7 +64,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Sets the normalised dimensions
-	 * 
+	 *
 	 * @param x
 	 *            the normalised x location within the workspace
 	 * @param y
@@ -86,7 +83,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * This method should be overridden if a minimum height is set
-	 * 
+	 *
 	 * @return the minimum height when not minimised
 	 */
 	protected double getMinimalHeight() {
@@ -95,7 +92,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * An easy way for the InternalWindow to get access to the WindowManager
-	 * 
+	 *
 	 * @return the WindowManager
 	 */
 	protected final WindowManager getWindowManager() {
@@ -104,7 +101,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Sets the WindowManager (used when creating the Window)
-	 * 
+	 *
 	 * @param wm
 	 *            the WindowManager
 	 */
@@ -132,7 +129,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Sets the theme to use
-	 * 
+	 *
 	 * @param theme
 	 *            the theme to use
 	 */
@@ -143,7 +140,7 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Sets the GridBounds (used when creating the window)
-	 * 
+	 *
 	 * @param grid
 	 *            the GridBounds to snap to
 	 */

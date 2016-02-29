@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import simulizer.assembler.representation.Annotation;
-import simulizer.assembler.representation.Instruction;
-import simulizer.assembler.representation.Register;
-import simulizer.assembler.representation.Statement;
+import simulizer.assembler.representation.*;
 import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.simulation.cpu.user_interaction.IO;
@@ -162,9 +159,15 @@ public class CPUPipeline extends CPU {
 	 * this method will mimic a primitive pipeline instead of a sequential execution
 	 */
 	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+
+		//TODO: charlie I (matt) only changed this here and in the un-pipelined CPU, could you fix everywhere else?
+		// PC holds next instruction and is advanced by fetch,
+		// messages should be sent about this instruction instead
+		Address thisInstruction = programCounter;
+
 		if(this.canFetch&&!this.isFinished){
 			fetch();
-			sendMessage(new ExecuteStatementMessage(programCounter));
+			sendMessage(new ExecuteStatementMessage(thisInstruction));
 		} else if (!this.canFetch) {
 			this.canFetch = true;
 		} else if(this.isFinished) {//ending termination
@@ -207,10 +210,8 @@ public class CPUPipeline extends CPU {
 			ID = createNopInstruction();
 		}
 		
-		if(annotations.containsKey(programCounter)) {
-			for(Annotation a : annotations.get(programCounter)) {
-				sendMessage(new AnnotationMessage(a));
-			}
+		if(annotations.containsKey(thisInstruction)) {
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
 	}
 	

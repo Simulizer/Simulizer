@@ -18,7 +18,6 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
-import simulizer.ui.layout.Layouts;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themeable;
@@ -30,7 +29,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * A workspace holds all the Internal Windows
-	 * 
+	 *
 	 * @param wm
 	 *            The stage to listen for resize events
 	 */
@@ -106,7 +105,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Finds an Internal Window if it is already open. Returns null if window is not open
-	 * 
+	 *
 	 * @param window
 	 *            The Internal Window to find
 	 * @return The internal window if already open
@@ -120,7 +119,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open
-	 * 
+	 *
 	 * @param window
 	 *            The Internal Window to find
 	 * @return The internal window
@@ -141,7 +140,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Adds Internal Windows to the workspace (use openInternalWindow instead)
-	 * 
+	 *
 	 * @param windows
 	 *            List of windows to add to the workspace
 	 */
@@ -162,7 +161,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Removes Internal Windows from the workspace
-	 * 
+	 *
 	 * @param windows
 	 *            List of Internal Windows to close
 	 */
@@ -184,7 +183,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Closes all open Internal Windows except theseWindows
-	 * 
+	 *
 	 * @param theseWindows
 	 *            The Internal Windows to keep open
 	 */
@@ -204,7 +203,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Will generate a Layout of the current workspace
-	 * 
+	 *
 	 * @param name
 	 *            The name of the layout
 	 * @return The layout of the current workspace
@@ -214,10 +213,10 @@ public class Workspace extends Observable implements Themeable {
 		WindowLocation[] wls = new WindowLocation[openWindows.size()];
 		for (InternalWindow window : openWindows) {
 			// @formatter:off
-			wls[i] = new WindowLocation(WindowEnum.toEnum(window), 
-										window.getLayoutX() / getWidth(), 
-										window.getLayoutY() / getHeight(), 
-										window.getWidth() / getWidth(), 
+			wls[i] = new WindowLocation(WindowEnum.toEnum(window),
+										window.getLayoutX() / getWidth(),
+										window.getLayoutY() / getHeight(),
+										window.getWidth() / getWidth(),
 										window.getHeight() / getHeight());
 			// @formatter:on
 			i++;

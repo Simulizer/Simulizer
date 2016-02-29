@@ -62,12 +62,12 @@ public class DecodeTest {
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
 		RegisterOperand op3 = new RegisterOperand(Register.t2);
-		List<Operand> list = new ArrayList<Operand>();
+		List<Operand> list = new ArrayList<>();
 		list.add(op1);
 		list.add(op2);
 		list.add(op3);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,list);
 		RTypeInstruction rtype= instr.asRType();
@@ -102,12 +102,12 @@ public class DecodeTest {
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
 		IntegerOperand op3 = new IntegerOperand(5);
-		List<Operand> list = new ArrayList<Operand>();
+		List<Operand> list = new ArrayList<>();
 		list.add(op1);
 		list.add(op2);
 		list.add(op3);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});//accesing private method
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);//accesing private method
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,list);
 		RTypeInstruction rtype= instr.asRType();
@@ -142,12 +142,12 @@ public class DecodeTest {
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
 		IntegerOperand op3 = new IntegerOperand(5);
-		List<Operand> list = new ArrayList<Operand>();
+		List<Operand> list = new ArrayList<>();
 		list.add(op1);
 		list.add(op2);
 		list.add(op3);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,list);
 		RTypeInstruction rtype= instr.asRType();
@@ -181,11 +181,11 @@ public class DecodeTest {
 		Instruction instruction = Instruction.abs;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t0);
-		List<Operand> opList = new ArrayList<Operand>();
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		RTypeInstruction rtype = instr.asRType();
@@ -216,11 +216,11 @@ public class DecodeTest {
 		Instruction instruction = Instruction.li;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		IntegerOperand op2 = new IntegerOperand(7);
-		List<Operand> opList = new ArrayList<Operand>();
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		LSInstruction lstype = instr.asLSType();
@@ -250,14 +250,14 @@ public class DecodeTest {
 		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.syscall;
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,new ArrayList<Operand>());
 		SpecialInstruction special = instr.asSpecial();
 		assertTrue(special.mode.equals(AddressMode.SPECIAL));
 		assertTrue(special.getInstruction().equals(Instruction.syscall));
 	}
-	
+
 	/**will test the label operand format
 	 * instruction tested: j
 	 * @throws DecodeException
@@ -276,20 +276,19 @@ public class DecodeTest {
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
 		labels.setAccessible(true);
-		Map<String,Address> map = new HashMap<String,Address>();
+		Map<String,Address> map = new HashMap<>();
 		map.put("testName", new Address(10));
 		labels.set(cpu, map);
 		
 		Field pc = cpu.getClass().getDeclaredField("programCounter");//accessing private PC
 		pc.setAccessible(true);
 		pc.set(cpu, new Address(15));
-		
-		AddressOperand op1 = new AddressOperand();
-		op1.labelName = Optional.of("testName");//test label name
-		List<Operand> opList = new ArrayList<Operand>();
+
+		AddressOperand op1 = new AddressOperand(Optional.of("testName"), Optional.empty(), Optional.empty());
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});//accessing private method
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);//accessing private method
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		JTypeInstruction jtype = instr.asJType();
@@ -315,10 +314,10 @@ public class DecodeTest {
 		Instruction instruction = Instruction.jr;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
-		List<Operand> opList = new ArrayList<Operand>();
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		JTypeInstruction jtype = instr.asJType();
@@ -346,20 +345,19 @@ public class DecodeTest {
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
 		labels.setAccessible(true);
-		Map<String,Address> map = new HashMap<String,Address>();
+		Map<String,Address> map = new HashMap<>();
 		map.put("testName", new Address(17));
 		labels.set(cpu, map);
 		
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
-		AddressOperand op3 = new AddressOperand();
-		op3.labelName = Optional.of("testName");
-		List<Operand> opList = new ArrayList<Operand>();
+		AddressOperand op3 = new AddressOperand(Optional.of("testName"), Optional.empty(), Optional.empty());
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		opList.add(op3);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		
@@ -395,18 +393,17 @@ public class DecodeTest {
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
 		labels.setAccessible(true);
-		Map<String,Address> map = new HashMap<String,Address>();
+		Map<String,Address> map = new HashMap<>();
 		map.put("testName", new Address(25));
 		labels.set(cpu, map);
 		
 		RegisterOperand op1 = new RegisterOperand(Register.s0);
-		AddressOperand op2 = new AddressOperand();
-		op2.labelName = Optional.of("testName");
-		List<Operand> opList = new ArrayList<Operand>();
+		AddressOperand op2 = new AddressOperand(Optional.of("testName"), Optional.empty(), Optional.empty());
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		
@@ -438,14 +435,12 @@ public class DecodeTest {
 		Instruction instruction = Instruction.sw;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.s0);
-		AddressOperand op2 = new AddressOperand();
-		op2.constant = Optional.of(18);
-		op2.register = Optional.of(Register.s1);
-		List<Operand> opList = new ArrayList<Operand>();
+		AddressOperand op2 = new AddressOperand(Optional.empty(), Optional.of(18), Optional.of(Register.s1));
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		
@@ -475,14 +470,12 @@ public class DecodeTest {
 		Instruction instruction = Instruction.lw;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.s0);
-		AddressOperand op2 = new AddressOperand();
-		op2.constant = Optional.of(23);
-		op2.register = Optional.of(Register.s1);
-		List<Operand> opList = new ArrayList<Operand>();
+		AddressOperand op2 = new AddressOperand(Optional.empty(), Optional.of(23), Optional.of(Register.s1));
+		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
 		opList.add(op2);
 		
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		
@@ -510,13 +503,13 @@ public class DecodeTest {
 		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.add;
 		
-		List<Operand> opList = new ArrayList<Operand>();//should take 3 operands giving it none
-		Method decoder = cpu.getClass().getDeclaredMethod("decode",new Class[]{Instruction.class,List.class});
+		List<Operand> opList = new ArrayList<>();//should take 3 operands giving it none
+		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
 		decoder.setAccessible(true);
 		
 		try
 		{
-			InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);//should throw exception
+			decoder.invoke(cpu,instruction,opList);//should throw exception
 			fail();
 		} catch(Exception e) {
 			assertTrue(true);

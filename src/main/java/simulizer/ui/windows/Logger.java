@@ -59,9 +59,11 @@ public class Logger extends InternalWindow implements Observer {
 
 	private void submitText() {
 		lastInput = input.getText();
-		input.setText("");
-		output.appendText(lastInput + "\n");
-		cdl.countDown();
+		if (!lastInput.equals("")) {
+			input.setText("");
+			output.appendText(lastInput + "\n");
+			cdl.countDown();
+		}
 	}
 
 	@Override
@@ -93,6 +95,8 @@ public class Logger extends InternalWindow implements Observer {
 
 	@Override
 	public void update(Observable o, Object message) {
+		// TODO: this should handle race conditions, perhaps with a buffer or
+		// TODO: don't return to the caller until the write is made
 		Platform.runLater(() -> output.appendText((String) message));
 	}
 

@@ -50,6 +50,7 @@ public class Settings {
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
 						.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
+						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
 		settings.add(new ObjectSetting("code_editor", "Code Editor")
 					.add(new BooleanSetting("word-wrap", "Word Wrapping", "Toggles word wrap"))
