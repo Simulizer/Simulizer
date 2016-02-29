@@ -31,6 +31,7 @@ public class UISimulationListener extends SimulationListener {
 				Platform.runLater(editor::executeMode);
 			} break;
 			case SIMULATION_STOPPED: {
+				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
 				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 				Platform.runLater(editor::editMode);
 			} break;
@@ -57,7 +58,6 @@ public class UISimulationListener extends SimulationListener {
 						if (editor != null) {
 							// these lines
 							editor.highlightPipeline(-1, -1, lineNum);
-							editor.gotoLine(lineNum);
 						}
 					});
 				}

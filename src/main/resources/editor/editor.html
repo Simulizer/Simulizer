@@ -76,6 +76,14 @@ function getColumn() {
 	return editor.getSelectionRange().start.column;
 }
 
+// 0-based line index
+function goto(line) {
+    editor.gotoLine(line+1); // expects 1-based index
+    // line, center, animate, callback
+    // centers between two lines so 1/0-based index makes no difference really
+    editor.scrollToLine(line, true, false, function() {});
+}
+
 function find(pattern, backwards) {
 	var s = new Search();
 
@@ -165,9 +173,10 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
 
     pipelineHighlights = [fetchLine, decodeLine, executeLine];
 
-    session.addGutterDecoration(pipelineHighlights[0], 'fetch');
-    session.addGutterDecoration(pipelineHighlights[1], 'decode');
-    session.addGutterDecoration(pipelineHighlights[2], 'execute');
+    session.addGutterDecoration(fetchLine, 'fetch');
+    session.addGutterDecoration(decodeLine, 'decode');
+    session.addGutterDecoration(executeLine, 'execute');
+    goto(executeLine);
 }
 
 </script>

@@ -367,15 +367,7 @@ public class Editor extends InternalWindow {
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void gotoLine(int line) {
-		gotoLine(line, 0);
-	}
-
-	/**
-	 * @param line starting from 0
-	 * @warning must be called from a JavaFX thread
-	 */
-	public void gotoLine(int line, int col) {
-		jsEditor.call("gotoLine", line+1, col, false);
+		jsWindow.call("goto", line);
 	}
 
 	/**
