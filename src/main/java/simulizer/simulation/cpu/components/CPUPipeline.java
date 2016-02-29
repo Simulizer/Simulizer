@@ -24,6 +24,7 @@ import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.PipelineHazardMessage;
 import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
+import simulizer.simulation.listeners.ProblemMessage;
 
 /**this class is an extension of the original CPU class
  * the difference is that the order of execution follows a very 
@@ -32,7 +33,6 @@ import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
  * then we will stall the pipeline for one cycle
  * if a successful branch is executed, the pipeline will be flushed
  * @author Charlie Street
- *
  */
 public class CPUPipeline extends CPU {
 
@@ -61,6 +61,7 @@ public class CPUPipeline extends CPU {
 	 */
 	private List<Register> registersRead(Statement statement) {
 		ArrayList<Register> registers = new ArrayList<Register>();
+		
 		//now to get all registers read out from the statement
 		OperandFormat opForm = statement.getInstruction().getOperandFormat();
 		boolean readZero = opForm.equals(OperandFormat.register) || opForm.equals(OperandFormat.srcAddr) ||
@@ -84,7 +85,8 @@ public class CPUPipeline extends CPU {
 		if(readTwo) {//formats with a read in third operand
 			registers.add(statement.getOperandList().get(2).asRegisterOp().value);
 		}
-		if(readRegAddress) {
+		
+		if(readRegAddress) {//formats with an address represented as a base and offset
 			if(!statement.getOperandList().get(1).asAddressOp().labelOnly()) {//if base and offset 
 				registers.add(statement.getOperandList().get(1).asAddressOp().register.get());
 			}
@@ -104,15 +106,16 @@ public class CPUPipeline extends CPU {
 	private List<Register> registersBeingWritten(InstructionFormat instruction) {
 		ArrayList<Register> registers = new ArrayList<Register>();
 		switch(instruction.mode) {
-			case RTYPE:
+			case RTYPE://all rtype instructions have a destination register
 				registers.add(instruction.asRType().getDestReg());
 				break;
-			case JTYPE:
+			case JTYPE://jal will write to the return address register
 				if(instruction.getInstruction().equals(Instruction.jal))
 				{
 					registers.add(Register.ra);
 				}
-			case LSTYPE:
+				break;
+			case LSTYPE://load instructions write to registers
 				Optional<Register> dest = instruction.asLSType().getRegisterName();
 				if(dest.isPresent()) {
 					registers.add(dest.get());
@@ -174,8 +177,12 @@ public class CPUPipeline extends CPU {
 		} else if (!this.canFetch) {
 			this.canFetch = true;
 		} else if(this.isFinished) {//ending termination
-			//TODO: this should probably throw an error going by what matt said
+			//exiting cleanly but representing that in reality an error would be thrown
 			this.isRunning = false;
+			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. "
+					+ "This could be because you forgot to exit cleanly."
+					+ " To exit cleanly please call syscall with code 10."));
+			
 		}
 		
 		if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
@@ -183,18 +190,14 @@ public class CPUPipeline extends CPU {
         }
 		
 		boolean needToBubbleRAWReg = needToBubble(registersRead(IF),registersBeingWritten(ID));//detecting pipeline hazards
-		boolean needToBubbleRAWMem = false;
-		boolean needToBubbleWAWMem = false;
+		boolean needToBubbleRAWMem = false;//TODO: Read After Write Checks with Memory Addresses
 		
-		if (needToBubbleRAWReg||needToBubbleRAWMem||needToBubbleWAWMem) { //if we need to stall to prevent incorrect reads
+		if (needToBubbleRAWReg||needToBubbleRAWMem) { //if we need to stall to prevent incorrect reads
 			
 			if(needToBubbleRAWReg||needToBubbleRAWMem) {
 				sendMessage(new PipelineHazardMessage(Hazard.RAW));
 			}
-			if(needToBubbleWAWMem) {
-				sendMessage(new PipelineHazardMessage(Hazard.WAW));
-			}
-			
+		
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
 			this.canFetch = false;
@@ -203,16 +206,11 @@ public class CPUPipeline extends CPU {
 			IF = instructionRegister;//updating IF
 		}
 		
-		if(ID.getInstruction().equals(Instruction.jal)) {//jal by default will take incorrect PC value, this needs to be dealt with
-			long newCurrentAddress = DataConverter.decodeAsUnsigned(ID.asJType().getCurrentAddress().get().getWord())-4;
-			Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
-			ID = new JTypeInstruction(Instruction.jal,ID.asJType().getJumpAddress(),trueCurrent);
-		}
-		
 		execute(ID);
 		
 		//jumped checks if either an unconditional jump is made or, a branch returning true
 		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
+		
 		if(jumped)//flush pipeline and allow continuation of running
 		{
 			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
@@ -222,7 +220,7 @@ public class CPUPipeline extends CPU {
 			ID = createNopInstruction();
 		}
 		
-		if(annotations.containsKey(thisInstruction)) {
+		if(annotations.containsKey(thisInstruction)) {//checking for annotations
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
 		}
 	}
@@ -234,9 +232,28 @@ public class CPUPipeline extends CPU {
 	{
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = false;
+		this.isRunning = true;//allow the program to start
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program
 	}
 
+	/**overwriting instruction for pipeline due to problem with jal instruction getting incorrect program counter value
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws MemoryException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * 
+	 */
+	protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
+		if(instruction.getInstruction().equals(Instruction.jal)) {//jal by default will take incorrect PC value, this needs to be dealt with
+			long newCurrentAddress = DataConverter.decodeAsUnsigned(instruction.asJType().getCurrentAddress().get().getWord())-4;
+			Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
+			instruction = new JTypeInstruction(Instruction.jal,instruction.asJType().getJumpAddress(),trueCurrent);
+		}
+		
+		super.execute(instruction);
+	}
+	
 }
