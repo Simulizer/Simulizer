@@ -58,7 +58,7 @@ public class WindowManager extends GridPane {
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
-		cpu = new CPUPipeline(io);
+		cpu = new CPU(io);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));

@@ -36,7 +36,6 @@ import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
  */
 public class CPUPipeline extends CPU {
 
-	private final ArrayList<OperandFormat> readInstructions;//list of formats which will read from 
 	private Statement IF;//used for storing between fetch and decode
 	private InstructionFormat ID;//user for storing between decode and execute
 	private boolean canFetch;//useful for pipeline stalling
@@ -53,15 +52,6 @@ public class CPUPipeline extends CPU {
 		this.canFetch = true;
 		this.isFinished = false;
 		
-		this.readInstructions = new ArrayList<OperandFormat>();//all operand formats that include reading registers
-		this.readInstructions.add(OperandFormat.register);
-		this.readInstructions.add(OperandFormat.destSrc);
-		this.readInstructions.add(OperandFormat.destSrcImm);
-		this.readInstructions.add(OperandFormat.destSrcImmU);
-		this.readInstructions.add(OperandFormat.destSrcSrc);
-		this.readInstructions.add(OperandFormat.srcAddr);
-		this.readInstructions.add(OperandFormat.cmpCmpLabel);
-		this.readInstructions.add(OperandFormat.cmpLabel);
 	}
 	
 	/**method will go through a statement and extract the registers
@@ -82,6 +72,9 @@ public class CPUPipeline extends CPU {
 		
 		boolean readTwo = opForm.equals(OperandFormat.destSrcSrc);
 		
+		boolean readRegAddress = opForm.equals(OperandFormat.destAddr) || opForm.equals(OperandFormat.srcAddr);
+		
+		
 		if(readZero) {//formats with a read in first operand
 			registers.add(statement.getOperandList().get(0).asRegisterOp().value);
 		}
@@ -91,9 +84,14 @@ public class CPUPipeline extends CPU {
 		if(readTwo) {//formats with a read in third operand
 			registers.add(statement.getOperandList().get(2).asRegisterOp().value);
 		}
-		
+		if(readRegAddress) {
+			if(!statement.getOperandList().get(1).asAddressOp().labelOnly()) {//if base and offset 
+				registers.add(statement.getOperandList().get(1).asAddressOp().register.get());
+			}
+		}
 		return registers;
 	}
+	
 	
 	/**method will look at the instruction being executed and retrieving the names
 	 * of all instructions being written
@@ -109,6 +107,11 @@ public class CPUPipeline extends CPU {
 			case RTYPE:
 				registers.add(instruction.asRType().getDestReg());
 				break;
+			case JTYPE:
+				if(instruction.getInstruction().equals(Instruction.jal))
+				{
+					registers.add(Register.ra);
+				}
 			case LSTYPE:
 				Optional<Register> dest = instruction.asLSType().getRegisterName();
 				if(dest.isPresent()) {
@@ -172,20 +175,28 @@ public class CPUPipeline extends CPU {
 			this.isFinished = true;//stop fetching essentially and begin to terminate program
         }
 		
-		boolean needToBubble = needToBubble(registersRead(IF),registersBeingWritten(ID));
-		if (needToBubble) { //if we need to stall to prevent incorrect reads
-			sendMessage(new PipelineHazardMessage(Hazard.RAW));
+		boolean needToBubbleRAWReg = needToBubble(registersRead(IF),registersBeingWritten(ID));//detecting pipeline hazards
+		boolean needToBubbleRAWMem = false;
+		boolean needToBubbleWAWMem = false;
+		
+		if (needToBubbleRAWReg||needToBubbleRAWMem||needToBubbleWAWMem) { //if we need to stall to prevent incorrect reads
+			
+			if(needToBubbleRAWReg||needToBubbleRAWMem) {
+				sendMessage(new PipelineHazardMessage(Hazard.RAW));
+			}
+			if(needToBubbleWAWMem) {
+				sendMessage(new PipelineHazardMessage(Hazard.WAW));
+			}
+			
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
 			this.canFetch = false;
-			System.out.println("BUBBLE");
 		} else {
 			ID = decode(IF.getInstruction(), IF.getOperandList());
 			IF = instructionRegister;//updating IF
 		}
 		
 		execute(ID);
-		
 		//jumped checks if either an unconditional jump is made or, a branch returning true
 		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		if(jumped)//flush pipeline and allow continuation of running
