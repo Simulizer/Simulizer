@@ -25,8 +25,10 @@ public class GeneralComponent extends ComponentStackPane {
     public void setAttrs(double x, double y, double width, double height){
         setLayoutX(x);
         shape.setLayoutX(x);
+        shape.layoutXProperty().set(x);
         setLayoutY(y);
         shape.setLayoutY(y);
+        shape.layoutYProperty().set(y);
         setShapeWidth(width);
         setPrefWidth(width);
         setShapeHeight(height);

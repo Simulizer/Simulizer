@@ -20,11 +20,13 @@ public class ConnectorWire extends Wire {
         this.type = type;
         this.rightOrBottom = rightOrBottom;
 
-        this.reverse = (rightOrBottom && arrowStart);
+
         this.offset = offset;
         if(type == Type.HORIZONTAL){
+            this.reverse = (rightOrBottom && arrowStart);
             drawHorizontalWire();
         } else {
+            this.reverse = !(rightOrBottom && arrowStart);
             drawVerticalLine();
         }
 
@@ -110,7 +112,7 @@ public class ConnectorWire extends Wire {
 
         if(!rightOrBottom){
             //Bottom to top
-            yStart = from.layoutXProperty().add(0);
+            yStart = from.layoutYProperty().add(0);
             yEnd = to.layoutYProperty().add(to.getShapeHeight());
         }
 

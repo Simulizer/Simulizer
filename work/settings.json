@@ -5,7 +5,7 @@
   },
   "workspace": {
     "theme": "default",
-    "layout": "default.json",
+    "layout": "cpuvisualisation.json",
     "scale-ui": {
       "enabled": true,
       "delay": 10

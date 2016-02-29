@@ -43,8 +43,15 @@ public class CPUListener extends SimulationListener {
 
         switch (m.getStage()){
             case Fetch:
-                cpu.mainMemory.highlight(2);
-                cpu.memToRes.animateData(simCpu.getClockSpeed());
+                cpu.controlUnit.highlight(2);
+                cpu.controlUnitToIM1.animateData(simCpu.getClockSpeed());
+                cpu.instructionMemory.highlight(2);
+                cpu.codeMemoryToIR.animateData(simCpu.getClockSpeed());
+                cpu.ir.highlight(2);
+                cpu.irToPlusFour.animateData(simCpu.getClockSpeed());
+                cpu.unknown.highlight(2);
+                cpu.plusFourToPc.animateData(simCpu.getClockSpeed());
+                cpu.programCounter.highlight(2);
                 break;
             case Decode:
                 System.out.println("Decode");

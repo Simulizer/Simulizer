@@ -30,28 +30,27 @@ public class CPU {
     public GeneralComponent ir;
     public GeneralComponent unknown;
     public Group generalWires;
-    public CustomWire memToRes;
-    public CustomWire IrTOPC;
-    public CustomWire PCToPlusFour;
-    public CustomWire registerToMemory;
-    public CustomWire IMToALU;
-    public CustomWire IMToIR;
-    public CustomWire IMToRegister1;
-    public CustomWire IMToRegister2;
-    public CustomWire IMToRegister3;
-    public ConnectorWire controlUnitToIr;
-    public ConnectorWire controlUnitToPC;
+    public CustomWire irToPlusFour;
+    public CustomWire irToRegister1;
+    public CustomWire irToRegister2;
+    public CustomWire irToRegister3;
+    public CustomWire pcToPlusFour;
+    public CustomWire plusFourToPc;
+    public CustomWire registerToDataMemory;
+    public CustomWire dataMemoryToRegisters;
+    public CustomWire aluToRegisters;
+    public CustomWire aluToControlUnit;
+
+    public ConnectorWire irToControlUnit;
     public ConnectorWire controlUnitToPlusFour;
     public ConnectorWire controlUnitToIM1;
-    public ConnectorWire controlUnitToIM2;
     public ConnectorWire controlUnitToRegisters;
-    public ConnectorWire controlUnitToALU;
     public ConnectorWire controlUnitToDataMemory;
-    public ConnectorWire plusFourToIr;
     public ConnectorWire PCToIM;
     public ConnectorWire aluToMemory;
     public ConnectorWire registerToALU1;
     public ConnectorWire registerToALU2;
+    public ConnectorWire codeMemoryToIR;
 
     public CPU(CPUVisualisation vis, double width, double height){
         this.width = width;
@@ -63,12 +62,12 @@ public class CPU {
         Group components = new Group();
         controlUnit = new GeneralComponent(vis, "Controller");
         programCounter = new GeneralComponent(vis, "PC");
-        instructionMemory = new GeneralComponent(vis, "Instruction Memory");
+        instructionMemory = new GeneralComponent(vis, "Code Memory");
         register = new GeneralComponent(vis, "Registers");
         alu = new ALU(vis, "ALU");
         mainMemory = new GeneralComponent(vis, "Data Memory");
-        ir = new GeneralComponent(vis, "");
-        unknown = new GeneralComponent(vis, "+4");
+        ir = new GeneralComponent(vis, "IR");
+        unknown = new GeneralComponent(vis, "+");
 
         controlUnit.setTooltip("The control unit (CU) is a component of a computer's central processing unit (CPU) that directs operation of the processor. It tells the computer's memory, arithmetic/logic unit and input and output devices how to respond to a program's instructions.");
 
@@ -84,57 +83,53 @@ public class CPU {
 
         generalWires = new Group();
 
-        controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
-        controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
-        controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
-        plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
+        irToControlUnit = ir.verticalLineTo(controlUnit, false, false, 0);
+        controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, false, true, 0);
+        controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, false, true, 0);
+        controlUnitToRegisters = register.verticalLineTo(controlUnit, false, true, 0);
+        controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, false, true, 0);
         PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
-        aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
+        aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0.3);
         registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
         registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
+        codeMemoryToIR = instructionMemory.horizontalLineTo(ir, true, false, 0);
 
-        memToRes = new CustomWire(580, 80);
-        IrTOPC = new CustomWire(15, 230);
-        PCToPlusFour = new CustomWire(60, 110);
-        registerToMemory = new CustomWire(320, 145);
-        IMToALU = new CustomWire(190, 150);
-        IMToIR = new CustomWire(190, 150);
-        IMToRegister1 = new CustomWire(190, 150);
-        IMToRegister2 = new CustomWire(190, 150);
-        IMToRegister3 = new CustomWire(190, 150);
+        irToPlusFour = new CustomWire(0,0);
+        irToRegister1 = new CustomWire(0,0);
+        irToRegister2 = new CustomWire(0,0);
+        irToRegister3 = new CustomWire(0,0);
+        pcToPlusFour = new CustomWire(0,0);
+        plusFourToPc = new CustomWire(0,0);
+        registerToDataMemory = new CustomWire(0,0);
+        dataMemoryToRegisters = new CustomWire(0,0);
+        aluToRegisters = new CustomWire(0,0);
+        aluToControlUnit = new CustomWire(0,0);
 
         generalWires.getChildren().addAll(
-                controlUnitToIr,
-                controlUnitToPC,
+                irToControlUnit,
                 controlUnitToPlusFour,
                 controlUnitToIM1,
-                controlUnitToIM2,
                 controlUnitToRegisters,
-                controlUnitToALU,
                 controlUnitToDataMemory,
-                plusFourToIr,
                 PCToIM,
                 aluToMemory,
                 registerToALU1,
-                registerToALU2
+                registerToALU2,
+                codeMemoryToIR
         );
 
         Group complexWires = new Group();
         complexWires.getChildren().addAll(
-                memToRes,
-                IrTOPC,
-                PCToPlusFour,
-                registerToMemory,
-                IMToALU,
-                IMToIR,
-                IMToRegister1,
-                IMToRegister2,
-                IMToRegister3
+                irToPlusFour,
+            irToRegister1,
+            irToRegister2,
+            irToRegister3,
+            pcToPlusFour,
+            plusFourToPc,
+            registerToDataMemory,
+            dataMemoryToRegisters,
+            aluToRegisters,
+            aluToControlUnit
         );
 
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
@@ -146,14 +141,16 @@ public class CPU {
         double width = vis.getWindowWidth();
         double height = vis.getWindowHeight();
 
-        controlUnit.setAttrs(width * 0.03, height - (height * 0.2), width * 0.94, height * 0.1);
-        programCounter.setAttrs(width * 0.06, height * 0.15, width * 0.06, height * 0.25);
-        instructionMemory.setAttrs(width * 0.15, height * 0.15, width * 0.16, height * 0.25);
-        register.setAttrs(width * 0.367, height * 0.15, width * 0.16, height * 0.25);
-        alu.setAttrs(width * 0.58, height * 0.15, width * 0.11, height * 0.25);
-        mainMemory.setAttrs(width * 0.8, height * 0.15, width * 0.16, height * 0.4);
-        ir.setAttrs(width * 0.025, height * 0.55, width * 0.03, height * 0.125);
-        unknown.setAttrs(width * 0.1, height * 0.525, width * 0.06, height * 0.1);
+        controlUnit.setAttrs(width * 0.03, height * 0.1, width * 0.94, height * 0.1);
+        programCounter.setAttrs(width * 0.06, height * 0.5, width * 0.05, height * 0.25);
+        instructionMemory.setAttrs(width * 0.15, height * 0.5, width * 0.16, height * 0.25);
+        ir.setAttrs(width * 0.35, height * 0.5, width * 0.05, height * 0.25);
+
+        register.setAttrs(width * 0.48, height * 0.5, width * 0.16, height * 0.25);
+        alu.setAttrs(width * 0.68, height * 0.5, width * 0.065, height * 0.25);
+        mainMemory.setAttrs(width * 0.8, height * 0.65, width * 0.16, height * 0.25);
+
+        unknown.setAttrs(width * 0.415, height * 0.35, width * 0.04, height * 0.1);
 
         ObservableList<Node> wires = generalWires.getChildren();
 
@@ -161,85 +158,95 @@ public class CPU {
             ((ConnectorWire) wire).updateLine();
         }
 
-        memToRes.drawLine(width * 0.96, height * 0.2, new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.125, CustomLine.Direction.UP),
-                new CustomLine(width * 0.583, CustomLine.Direction.LEFT),
-                new CustomLine(height * 0.075, CustomLine.Direction.DOWN)
+        irToPlusFour.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.17, CustomLine.Direction.UP)
         );
 
-
-        IrTOPC.drawLine(width * 0.025, height * 0.575,
-                new CustomLine(width * 0.016, CustomLine.Direction.LEFT),
-                new CustomLine(height * 0.25, CustomLine.Direction.UP),
-                new CustomLine(width * 0.05, CustomLine.Direction.RIGHT)
-        );
-
-        PCToPlusFour.drawLine(width * 0.12, height * 0.275,
-                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.25, CustomLine.Direction.DOWN)
-        );
-
-        registerToMemory.drawLine(width * 0.53, height * 0.3625,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.125, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.25, CustomLine.Direction.RIGHT)
-        );
-
-        IMToALU.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.2333, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.31, CustomLine.Direction.UP)
-        );
-
-        IMToIR.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.272, CustomLine.Direction.LEFT)
-        );
-
-        IMToRegister1.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.175, CustomLine.Direction.UP),
-                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
-        );
-
-        IMToRegister2.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
+        irToRegister1.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.1, CustomLine.Direction.UP),
-                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister3.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.025, CustomLine.Direction.UP),
-                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
+        irToRegister2.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.06, CustomLine.Direction.UP),
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
         );
+
+        irToRegister3.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.02, CustomLine.Direction.UP),
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
+        );
+
+        pcToPlusFour.drawLine(programCounter.getLayoutX() + programCounter.getShapeWidth(), programCounter.getLayoutY() + programCounter.getShapeHeight() / 2,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.22, CustomLine.Direction.UP),
+                new CustomLine(width * 0.29, CustomLine.Direction.RIGHT)
+        );
+
+        plusFourToPc.drawLine(unknown.getLayoutX() + unknown.getShapeWidth(), unknown.getLayoutY() + unknown.getShapeHeight() / 2,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.12, CustomLine.Direction.UP),
+                new CustomLine(width * 0.44, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.345, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.03, CustomLine.Direction.RIGHT)
+        );
+
+        aluToControlUnit.drawLine(alu.getLayoutX() + alu.getShapeWidth(), alu.getLayoutY() + alu.getShapeHeight() * 0.3,
+                new CustomLine(width * 0.025, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.365, CustomLine.Direction.UP)
+        );
+
+        registerToDataMemory.drawLine(register.getLayoutX() + register.getShapeWidth(), register.getLayoutY() + register.getShapeHeight() * 0.8,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.16, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.145, CustomLine.Direction.RIGHT)
+        );
+
+        dataMemoryToRegisters.drawLine(mainMemory.getLayoutX() + mainMemory.getShapeWidth(), mainMemory.getLayoutY() + mainMemory.getShapeHeight() * 0.8,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.1, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.54, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.23, CustomLine.Direction.UP),
+                new CustomLine(width * 0.045, CustomLine.Direction.RIGHT)
+        );
+
+        aluToRegisters.drawLine(alu.getLayoutX() + alu.getShapeWidth(), alu.getLayoutY() + alu.getShapeHeight() * 0.8,
+                new CustomLine(width * 0.02, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.265, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.33, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.23, CustomLine.Direction.UP),
+                new CustomLine(width * 0.045, CustomLine.Direction.RIGHT)
+        );
+
 
     }
     
     public void closeAllThreads(){
-    	memToRes.closeThread();
-    	IrTOPC.closeThread();
-    	PCToPlusFour.closeThread();
-    	registerToMemory.closeThread();
-    	IMToALU.closeThread();
-    	IMToIR.closeThread();
-    	IMToRegister1.closeThread();
-    	IMToRegister2.closeThread();
-    	IMToRegister3.closeThread();
-    	controlUnitToIr.closeThread();
-    	controlUnitToPC.closeThread();
-    	controlUnitToPlusFour.closeThread();
-    	controlUnitToIM1.closeThread();
-    	controlUnitToIM2.closeThread();
-    	controlUnitToRegisters.closeThread();
-    	controlUnitToALU.closeThread();
-    	controlUnitToDataMemory.closeThread();
-    	plusFourToIr.closeThread();
-    	PCToIM.closeThread();
-    	aluToMemory.closeThread();
-    	registerToALU1.closeThread();
-    	registerToALU2.closeThread();
+//    	memToRes.closeThread();
+//    	IrTOPC.closeThread();
+//    	PCToPlusFour.closeThread();
+//    	registerToMemory.closeThread();
+//    	IMToALU.closeThread();
+//    	IMToIR.closeThread();
+//    	IMToRegister1.closeThread();
+//    	IMToRegister2.closeThread();
+//    	IMToRegister3.closeThread();
+//    	controlUnitToIr.closeThread();
+//    	controlUnitToPC.closeThread();
+//    	controlUnitToPlusFour.closeThread();
+//    	controlUnitToIM1.closeThread();
+//    	controlUnitToIM2.closeThread();
+//    	controlUnitToRegisters.closeThread();
+//    	controlUnitToALU.closeThread();
+//    	controlUnitToDataMemory.closeThread();
+//    	plusFourToIr.closeThread();
+//    	PCToIM.closeThread();
+//    	aluToMemory.closeThread();
+//    	registerToALU1.closeThread();
+//    	registerToALU2.closeThread();
     }
 }
