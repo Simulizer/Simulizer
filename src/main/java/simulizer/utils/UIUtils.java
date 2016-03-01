@@ -46,11 +46,7 @@ public class UIUtils {
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 
-		ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-		ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
-		ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-		alert.getButtonTypes().setAll(yes, no, cancel);
+		alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
 
 		Optional<ButtonType> res = alert.showAndWait();
 		if(res.isPresent()) {

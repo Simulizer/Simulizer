@@ -237,9 +237,13 @@ public class Editor extends InternalWindow {
 
 			if(save == ButtonType.YES) {
 				saveFile();
+			} else if(save == ButtonType.NO) {
+				// fall through and call super.close()
+			} else {
+				// don't call super.close() => stays open
+				return;
 			}
 		}
-
 		super.close();
 	}
 
