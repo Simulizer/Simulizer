@@ -223,7 +223,7 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		MenuItem runSpim = new MenuItem("Run in SPIM (no input)");
+		MenuItem runSpim = new MenuItem("Run in SPIM");
 		runSpim.setOnAction(e -> {
 			String program = getEditor().getText();
 			SpimRunner.runQtSpim(program);
