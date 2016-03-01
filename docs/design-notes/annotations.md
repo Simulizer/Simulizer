@@ -1,56 +1,129 @@
-Annotation Design
-=================
+Annotations
+===========
 
-Annotations will be written inside comments. They can have text before and after them, i.e. `# <prefix><annotation><suffix>`.
+The annotation system in Simulizer is a mechanism for tagging SIMP statements
+with JavaScript code which is executed _after_ the statement has executed.
 
-Annotations will specify actions for the high-level visualisation, i.e. the visualisation of data structures, such as lists, graphs, etc. The verbs describing annotations will include:
-- `watch` - For example, if you want to display the value of a register, you would specify the register in the `watch` command.
-- `animate` - If you want to specify a particular animation to be shown, e.g. swapping to values in a list, you can use the `animate` command.
+## Syntax ##
+The syntax is as follows:
 
-Style
------
-The annotations will be similar to the `LaTeX` style. Most commands will have the form
 ```
-@<verb>[<option>*]{<register>|<variable>}
+    add $s0 $s0 $s1   # comment @{ // annotation }@
 ```
 
-The only command that is slightly different is the `declare` command, which uses a C-style declaration between the curly braces: `@declare[type=<type>]{<name> = <value>}`
+The annotation begins with `@{` and ends with `}@`. These must be placed inside
+a comment of the assembly program (denoted using `#`).
 
-To cancel a particular command, use `@!` as the prefix, e.g. `@!watch{$v0}`. If you want to cancel the last command, you can use `@stop{}`.
+## Targets ##
+Annotations may be placed before any `.data` or `.text` segments, in which case
+they are executed before the first instruction of the program executes. This is
+useful for setting up the environment for the duration of the simulation, for
+example getting handles to high level visualisations or setting an appropriate
+clock speed.
 
-Command Usage
--------------
-### `watch`
-Usage: `@watch[showlabel=(true|false)]{<register>|<variable>}`
-- `<register>` or `<variable>` is the name of the register/variable to watch.
-- `showlabel` indicates whether or not the name of the register/variable will be shown. By default `showlabel=true`.
+Annotations may be placed after statement, and before any label or another
+statement. In this case the annotation is bound to that statement.
 
-Example: `@watch[showlabel=false]{mygraph}`
+Annotations may be placed after a label and before the next statement, in which
+case the annotation binds to the statement which the label binds to. This works
+with multiple labels. In the example below all 4 annotations are grouped and
+bound to the `nop` instruction
 
-### `animatelistswap`
-Usage: `@animatelistswap[index1=<int>,index2=<int>]{<variable>}`
-- `index1` and `index2` specify the indices of the list that are involved in the swap. If the algorithm is not actually swapping elements these elements, then the animation will still run, but immediately after the animation is finished, the list will be displayed in the correct order.
-- `<variable>` is the identifier for the list.
-
-Example: `@animatelistswap[index1=3,index2=4]{mylist}`
-
-### `declare`
-Usage: `@declare[type=(list|graph)]{<name> = <value>}`
-- `type` specifies the type of the variable as either a list or a graph.
-- `<name>` declares the name of the variable.
-- `<value>` specifies the value that will be bound to `<name>`. Graphs can be declared using the `\graph{...}` environment, using [Dot](http://www.graphviz.org/) syntax.
-
-Example: `@declare[type=list]{mylist = [1, 2, 3]}`
-
-Example: 
 ```
-@declare[type=graph]{
-  mygraph = \graph{
-    A -> B;
-    A -> C [label = "5"];
-    B -> C;
-  } 
-}
+    syscall
+label1: # @{ // annotation 1 }@
+label2: # @{ // annotation 2 }@
+        # @{ // annotation 3 }@
+    nop # @{ // annotation 4 }@
 ```
 
+
+## Grouping ##
+Annotations bound to the same target are concatenated with newline characters
+placed in between, this allows more complex expressions to be written clearly
+such as:
+
+```javascript
+# @{ function f(x) {   }@
+# @{     if(x)         }@
+# @{         return 1; }@
+# @{     else          }@
+# @{         return 0; }@
+# @{ }                 }@
+```
+
+## Scope ##
+Any variables defined at the scope of an annotation (ie not inside an inner code
+block or function, is accessible throughout the duration of the simulation
+(global). This is regardless of using `var`, ie `var x = 10; y = 20` both have
+the same scope.
+
+
+
+# Annotation API #
+
+## Debug Bridge ##
+The debug bridge (named `debug` in JS) gives the annotations access to
+components of the system that are useful for tracing the execution of the
+program and relaying information to the user for debugging purposes. Also during
+the development of Simulizer, the debug gives access to the runtime system which
+can be useful for introspection.
+
+Methods:
+- `log(msg)` write a message (implicitly converted to string) to the program I/O
+- `alert(msg)` show a popup message (implicitly converted to string)
+- `getCPU()` get the Java `CPU` object
+
+## Simulation Bridge ##
+The simulation bridge (named `simulation` in JS) gives limited access to the
+internals of the simulation, for example reading register values and setting the
+clock speed
+
+Methods:
+- `stop()` stop the simulation (not able to resume)
+- `setClockSpeed(tickMillis)` set the simulation speed
+- `Word[] getRegisters()`
+- `Word getRegister(Register)` get the current value of a register (identified
+  using its enum)
+
+## Visualisation Bridge ##
+The visualisation bridge (named `visualisation` in JS) manages the high level
+visualisation window, can load high level visualisations and feed them
+information about the state of the simulation so that they can visualise and
+animate the algorithm running in the simulation.
+
+Methods:
+- `DataStructureVisualiser load(name)` load a visualisation by a name
+    - 'tower-of-hanoi'
+    - 'list'
+
+
+## Global Variables ##
+Each of the 32 general purpose registers are assigned as global variables (named
+with the dollar prefix eg `$s0`) with the following members:
+- `id` the enum value of the register
+- `get()` a method which corresponds to `simulation.getRegister(this.id)`
+
+The variables `Register` and `reg` refer to the `Register` enum class in Java
+
+
+## Global Functions ##
+To increase brevity, certain commonly used methods from the bridges are assigned
+to global functions which can be called without qualification:
+
+```javascript
+// Debug Bridge
+log   = debug.log
+print = debug.log
+alert = debug.alert
+
+// Simulation Bridge
+stop     = simulation.stop
+exit     = simulation.stop
+quit     = simulation.stop
+setSpeed = simulation.setSpeed
+
+// Visualisation Bridge
+loadVis = visualisation.load
+```
 

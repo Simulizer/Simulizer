@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.scene.control.ButtonType;
 import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
@@ -26,10 +27,12 @@ import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
+import simulizer.ui.WindowManager;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)
@@ -46,7 +49,7 @@ public class Editor extends InternalWindow {
 	// TODO: vim keybindings
 	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
 
-	Settings settings;
+	WindowManager wm;
 	private WebView view;
 	private WebEngine engine;
 	private File currentFile;
@@ -148,7 +151,7 @@ public class Editor extends InternalWindow {
 		getContentPane().getChildren().add(view);
 	}
 
-	private void loadPage() {
+	private void loadPage(Settings settings) {
 		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
 
 		// can only execute scripts once the page has loaded
@@ -213,9 +216,9 @@ public class Editor extends InternalWindow {
 
 	@Override
 	public void ready() {
-		settings = getWindowManager().getSettings();
+		wm = getWindowManager();
 
-		loadPage();
+		loadPage(wm.getSettings());
 
 		String[] observersToAdd = { Labels.class.getSimpleName() };
 
@@ -226,6 +229,18 @@ public class Editor extends InternalWindow {
 		}
 
 		super.ready();
+	}
+
+	@Override public void close() {
+		if(hasOutstandingChanges()) {
+			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + currentFile.getName() + "\"", "");
+
+			if(save == ButtonType.YES) {
+				saveFile();
+			}
+		}
+
+		super.close();
 	}
 
 	private void enableFirebug() {
@@ -325,16 +340,17 @@ public class Editor extends InternalWindow {
 	public void saveFile() {
 		String currentText = getText();
 
-		if (currentFile != null && changedSinceLastSave) {
+		if(currentFile != null && changedSinceLastSave) {
 			FileUtils.writeToFile(currentFile, currentText);
-			setTitle(WindowEnum.getName(this) + " - " + currentFile.getName());
 			setEdited(false);
+			refreshTitle();
 		}
 	}
 
 	public void saveAs(File file) {
-		currentFile = file;
-		saveFile();
+		if(file == null) return;
+
+		FileUtils.writeToFile(file, getText());
 	}
 
 	public void loadFile(File file) {
@@ -361,6 +377,10 @@ public class Editor extends InternalWindow {
 	private void setEdited(boolean edited) {
 		changedSinceLastSave = edited;
 		refreshTitle();
+	}
+
+	public boolean hasOutstandingChanges() {
+		return changedSinceLastSave;
 	}
 
 	private void refreshTitle() {

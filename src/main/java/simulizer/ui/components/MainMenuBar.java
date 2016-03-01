@@ -4,12 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -24,6 +19,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.UIUtils;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -51,7 +47,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if(f != null) {
 				getEditor().loadFile(f);
 			}
@@ -62,26 +58,37 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
 			if(getEditor().getCurrentFile() == null) {
-				File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-				if(f != null) {
-					getEditor().saveAs(f);
-				}
+				Editor editor = getEditor();
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
+			} else {
+				getEditor().saveFile();
 			}
-			getEditor().saveFile();
 		});
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
-			File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
-				getEditor().saveAs(f);
-			}
+			Editor editor = getEditor();
+			UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
 		});
 
 		MenuItem exitItem = new MenuItem("Exit");
-		exitItem.setOnAction(e -> System.exit(0));
+		exitItem.setOnAction(e -> {
+			Editor editor = getEditor();
+			if(editor.hasOutstandingChanges()) {
+				ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + editor.getCurrentFile().getName() + "\"", "");
+
+				if(save == ButtonType.YES) {
+					editor.saveFile();
+					System.exit(0);
+				} else if(save == ButtonType.NO) {
+					System.exit(0);
+				} else {
+					// do nothing (cancel)
+				}
+			}
+		});
 
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
@@ -116,7 +123,8 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"),
+					new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
 				if (!saveFile.getName().endsWith(".json"))
 					saveFile = new File(saveFile.getAbsolutePath() + ".json");
@@ -241,21 +249,5 @@ public class MainMenuBar extends MenuBar {
 		return debugMenu;
 	}
 
-	private File saveFileSelector(String title, File folder, ExtensionFilter... filter) {
-		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(folder);
-		fc.setTitle(title);
-		fc.getExtensionFilters().addAll(filter);
-		return fc.showSaveDialog(wm.getPrimaryStage());
-	}
-
-	private File openFileSelector(String title, File folder, ExtensionFilter... filter) {
-		// Set the file chooser to open at the user's last directory
-		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(folder);
-		fc.setTitle(title);
-		fc.getExtensionFilters().addAll(filter);
-		return fc.showOpenDialog(wm.getPrimaryStage());
-	}
 
 }
