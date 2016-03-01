@@ -21,6 +21,7 @@ import simulizer.ui.theme.Theme;
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
+	private boolean isClosed = false;
 
 	public InternalWindow() {
 
@@ -192,6 +193,16 @@ public abstract class InternalWindow extends Window {
 		sc.setToX(1);
 		sc.setToY(1);
 		Platform.runLater(() -> sc.playFromStart());
+	}
+
+	@Override
+	public void close() {
+		super.close();
+		isClosed = true;
+	}
+
+	public boolean isClosed() {
+		return isClosed;
 	}
 
 	@Override
