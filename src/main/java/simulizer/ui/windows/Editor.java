@@ -105,6 +105,50 @@ public class Editor extends InternalWindow {
 		// calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));
 
+		// javascript does not have access to the outside clipboard
+		view.setContextMenuEnabled(false);
+
+		// handle copy and paste manually
+		addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+			if (C_c.match(event)) {
+				String clip = (String) jsEditor.call("getCopyText");
+
+				Clipboard clipboard = Clipboard.getSystemClipboard();
+				ClipboardContent content = new ClipboardContent();
+
+				content.putString(clip);
+				clipboard.setContent(content);
+
+			} else if (C_v.match(event)) {
+				Clipboard clipboard = Clipboard.getSystemClipboard();
+				String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
+
+				if (clip != null) {
+					jsEditor.call("insert", clip);
+				}
+			} else if(C_plus.match(event)) {
+				jsWindow.call("changeFontSize", 1);
+			} else if(C_minus.match(event)) {
+				jsWindow.call("changeFontSize", -1);
+			}
+
+			editedSinceLabelUpdate = true;
+		});
+
+		editedSinceLabelUpdate = false;
+		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
+			if (editedSinceLabelUpdate) {
+				editedSinceLabelUpdate = false;
+				updateObservers();
+			}
+		});
+
+		setOnClosedAction(e -> detachObservers());
+
+		getContentPane().getChildren().add(view);
+	}
+
+	private void loadPage() {
 		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
 
 		// can only execute scripts once the page has loaded
@@ -165,53 +209,13 @@ public class Editor extends InternalWindow {
 				}
 			}
 		});
-
-		// javascript does not have access to the outside clipboard
-		view.setContextMenuEnabled(false);
-
-		// handle copy and paste manually
-		addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-			if (C_c.match(event)) {
-				String clip = (String) jsEditor.call("getCopyText");
-
-				Clipboard clipboard = Clipboard.getSystemClipboard();
-				ClipboardContent content = new ClipboardContent();
-
-				content.putString(clip);
-				clipboard.setContent(content);
-
-			} else if (C_v.match(event)) {
-				Clipboard clipboard = Clipboard.getSystemClipboard();
-				String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
-
-				if (clip != null) {
-					jsEditor.call("insert", clip);
-				}
-			} else if(C_plus.match(event)) {
-				jsWindow.call("changeFontSize", 1);
-			} else if(C_minus.match(event)) {
-				jsWindow.call("changeFontSize", -1);
-			}
-
-			editedSinceLabelUpdate = true;
-		});
-
-		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
-			if (editedSinceLabelUpdate) {
-				editedSinceLabelUpdate = false;
-				updateObservers();
-			}
-		});
-
-		setOnClosedAction(e -> detachObservers());
-
-		getContentPane().getChildren().add(view);
 	}
 
 	@Override
 	public void ready() {
 		settings = getWindowManager().getSettings();
 
+		loadPage();
 
 		String[] observersToAdd = { Labels.class.getSimpleName() };
 
