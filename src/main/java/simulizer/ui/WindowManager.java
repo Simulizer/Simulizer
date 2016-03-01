@@ -231,4 +231,12 @@ public class WindowManager extends GridPane {
 	public AnnotationManager getAnnotationManager() {
 		return annotationManager;
 	}
+
+	public void setPipelined(boolean pipelined) {
+		if(pipelined){
+			cpu = new CPUPipeline(io);
+		} else {
+			cpu = new CPU(io);
+		}
+	}
 }

@@ -179,12 +179,8 @@ public class Workspace extends Observable implements Themeable {
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			window.close();
-			if (window.isClosed()) {
+			if (window.isClosed())
 				openWindows.remove(window);
-				System.out.println("Window Closed");
-			} else {
-				System.out.println("Window STILL Open");
-			}
 		}
 	}
 
