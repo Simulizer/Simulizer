@@ -19,6 +19,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.SpimRunner;
 import simulizer.utils.UIUtils;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
@@ -205,17 +206,6 @@ public class MainMenuBar extends MenuBar {
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
-		MenuItem jsREPL = new MenuItem("Start javascript REPL");
-		jsREPL.setOnAction(e -> {
-			new Thread(() -> {
-				// if there is an executor (eg simulation running) then use that
-				if (wm.getAnnotationManager().getExecutor() == null) {
-					// this does not bridge with the visualisations or simulation
-					wm.getAnnotationManager().newExecutor();
-				}
-				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			}).start();
-		});
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
@@ -233,10 +223,28 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
+		MenuItem runSpim = new MenuItem("Run in SPIM (no input)");
+		runSpim.setOnAction(e -> {
+			String program = getEditor().getText();
+			SpimRunner.runQtSpim(program);
+		});
+
+		MenuItem jsREPL = new MenuItem("Start javascript REPL");
+		jsREPL.setOnAction(e -> {
+			new Thread(() -> {
+				// if there is an executor (eg simulation running) then use that
+				if (wm.getAnnotationManager().getExecutor() == null) {
+					// this does not bridge with the visualisations or simulation
+					wm.getAnnotationManager().newExecutor();
+				}
+				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
+			}).start();
+		});
+
 		Menu themes = new Menu("Themes");
 		themeMenu(themes);
 
-		debugMenu.getItems().addAll(dumpProgram, jsREPL, themes);
+		debugMenu.getItems().addAll(dumpProgram, runSpim, jsREPL, themes);
 		return debugMenu;
 	}
 
