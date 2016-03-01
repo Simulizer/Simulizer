@@ -9,6 +9,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
@@ -20,7 +21,6 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
-import simulizer.annotations.AnnotationManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
@@ -59,10 +59,15 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
+		primaryStage.setOnCloseRequest((e) -> {
+			workspace.closeAll();
+			if (workspace.hasWindowsOpen())
+				e.consume();
+		});
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
-		
+
 		if ((boolean) settings.get("simulation.pipelined"))
 			cpu = new CPUPipeline(io);
 		else
@@ -178,7 +183,7 @@ public class WindowManager extends GridPane {
 			stopCPU();
 
 			cpu.loadProgram(p);
-			//TODO: maybe don't re-register the listeners
+			// TODO: maybe don't re-register the listeners
 			cpu.registerListener(simListener);
 
 			io.clear();
