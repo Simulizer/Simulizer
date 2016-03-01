@@ -15,7 +15,6 @@ public abstract class DataStructureVisualiser {
 		this.vis = vis;
 
 		// Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
-		// Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
 	}
 
 	/**
