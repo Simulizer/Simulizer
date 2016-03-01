@@ -65,7 +65,6 @@ public class Editor extends InternalWindow {
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings("unused")
 	public class Bridge {
 		private Editor editor;
 		public List<Problem> problems;

@@ -1,6 +1,5 @@
 package simulizer.ui.components.highlevel;
 
-import javafx.application.Platform;
 import javafx.scene.shape.Rectangle;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -15,13 +14,15 @@ public abstract class DataStructureVisualiser {
 		this.height = height;
 		this.vis = vis;
 
-		// Clear existing content
-		//Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
+		// Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
+		// Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
 	}
 
 	/**
 	 * Sets the rate of the animation in milliseconds
-	 * @param rate the rate of the animation
+	 *
+	 * @param rate
+	 *            the rate of the animation
 	 */
 	public void setRate(int rate) {
 		this.rate = rate;

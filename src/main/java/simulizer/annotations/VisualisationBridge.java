@@ -1,10 +1,10 @@
 package simulizer.annotations;
 
+import java.util.concurrent.ExecutionException;
+
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.ThreadUtils;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * A collection of methods for controlling high level visualisations from annotations

@@ -29,7 +29,6 @@ public class PresentationTowerOfHanoiVisualiser extends TowerOfHanoiVisualiser {
 			// if no IndexOutOfBounds error then increase moveIndex
 			++moveIndex;
 			move(i, j);
-			commit();
 		} catch (ArrayIndexOutOfBoundsException e) {
 
 		}

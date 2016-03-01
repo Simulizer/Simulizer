@@ -51,6 +51,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private Rectangle[] vPegs = new Rectangle[3];
 	private Rectangle[] discs;
 
+	private boolean queuing;
+
 	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDiscs) {
 		super(vis, width, height);
 
@@ -118,6 +120,11 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		return ((pegY0 + pegHeight) - numdiscsOnPeg * discHeight);
 	}
 
+	public TowerOfHanoiVisualiser batch() {
+		this.queuing = true;
+		return this;
+	}
+
 	/**
 	 * Calculates the animation for moving the disc at peg i to peg j. If there
 	 * is no disc on peg i, then it does nothing
@@ -127,19 +134,29 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 * @param j
 	 *            the index of the peg to move the disc to
 	 */
-	public void move(int i, int j) {
-		if (pegs.get(i).size() == 0 || i == j) return;
+	public TowerOfHanoiVisualiser move(int i, int j) {
+		if (pegs.get(i).size() == 0 || i == j) return this;
 
 		Rectangle disc = pegs.get(i).peek();
 
 		animationBuffer.add(getTransition(disc, getX(i), getY(i), getX(j), getY(j) - discHeight));
 		moveIndices.add(new MoveIndices(i, j));
+
+		if (queuing) return this;
+		else {
+			commit();
+			return this;
+		}
 	}
 
 	/**
 	 * Commits and animates any buffered animations.
 	 */
 	public void commit() {
+		queuing = false;
+
+		if (animationBuffer.isEmpty()) return;
+		// h.start().move(0,1).move(0,1).stop();
 		ParallelTransition animation = new ParallelTransition();
 		animation.getChildren().addAll(animationBuffer);
 		animation.play();

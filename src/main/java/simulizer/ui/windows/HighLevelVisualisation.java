@@ -1,15 +1,15 @@
 package simulizer.ui.windows;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
-import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HighLevelVisualisation extends InternalWindow {
 	private double width = 400;
@@ -21,13 +21,15 @@ public class HighLevelVisualisation extends InternalWindow {
 	private void init() {
 		this.drawingPane = new Pane();
 
+		// TODO remove this
+		setCache(false);
+
 		setPaneWidth(width);
 		setPaneHeight(height);
 		getChildren().add(drawingPane);
 
 		setMinWidth(width);
 		setMinHeight(getMinimalHeight());
-
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
@@ -48,7 +50,7 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
-		this.visualiser = new TowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, getWindowWidth(), getWindowHeight(), 0, 4);
 	}
 	public void loadListVisualisation() {
 		this.visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
