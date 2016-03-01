@@ -32,7 +32,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), debugMenu());
 	}
 
 	private Editor getEditor() {
@@ -52,7 +52,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
 			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
+			if (f != null) {
 				getEditor().loadFile(f);
 			}
 		});
@@ -61,9 +61,9 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
-			if(getEditor().getCurrentFile() == null) {
+			if (getEditor().getCurrentFile() == null) {
 				File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-				if(f != null) {
+				if (f != null) {
 					getEditor().saveAs(f);
 				}
 			}
@@ -75,11 +75,12 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
 			File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
+			if (f != null) {
 				getEditor().saveAs(f);
 			}
 		});
 
+		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> System.exit(0));
 
@@ -87,20 +88,11 @@ public class MainMenuBar extends MenuBar {
 		return fileMenu;
 	}
 
-	private Menu viewMenu() {
-		// | View
-		Menu viewMenu = new Menu("View");
-
+	private Menu layoutsMenu() {
 		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
 		layoutMenu(layoutMenu);
-
-		// | |-- Themes
-		Menu themeMenu = new Menu("Themes");
-		themeMenu(themeMenu);
-
-		viewMenu.getItems().addAll(layoutMenu, themeMenu);
-		return viewMenu;
+		return layoutMenu;
 	}
 
 	private void layoutMenu(Menu menu) {
@@ -108,7 +100,7 @@ public class MainMenuBar extends MenuBar {
 
 		for (Layout l : wm.getLayouts()) {
 			String name = l.getName();
-			MenuItem item = new MenuItem(name.endsWith(".json") ? name.substring(0,name.length()-5) : name);
+			MenuItem item = new MenuItem(name.endsWith(".json") ? name.substring(0, name.length() - 5) : name);
 			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
@@ -156,12 +148,21 @@ public class MainMenuBar extends MenuBar {
 		return menu;
 	}
 
-	private Menu runMenu() {
+	private Menu simulationMenu() {
 		// To be moved to separate buttons later
-		Menu runMenu = new Menu("Run Code");
+		Menu runMenu = new Menu("Simulation");
 
-		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> wm.assembleAndRun());
+		MenuItem runPause = new MenuItem("Run/Pause");
+		runPause.setOnAction(e -> wm.assembleAndRun());
+
+		MenuItem singleStep = new MenuItem("Next Step");
+		singleStep.setDisable(true);
+
+		MenuItem stop = new MenuItem("Stop");
+		stop.setOnAction(e -> wm.stopCPU());
+
+		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
+		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -174,46 +175,33 @@ public class MainMenuBar extends MenuBar {
 			}
 		});
 
-		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setDisable(true);
-
-		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
-		simplePipeline.setDisable(true);
-
-		MenuItem stop = new MenuItem("Stop Simulation");
-		stop.setOnAction(e -> wm.stopCPU());
-
-		runMenu.getItems().addAll(runProgram, setClockSpeed, singleStep, simplePipeline, stop);
+		runMenu.getItems().addAll(runPause, singleStep, stop, simplePipeline, setClockSpeed);
 		return runMenu;
 	}
 
 	private Menu windowsMenu() {
-		Menu windowsMenu = new Menu("Add Window");
+		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
 			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
+
+		MenuItem delWindows = new MenuItem("Close All");
+		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
+		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
+
 		return windowsMenu;
 	}
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
-		MenuItem delWindows = new MenuItem("Close All Windows");
-		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
-
-		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
-		//TODO: extract this information from settings. Cannot get from editor until editor
-		// loaded so getting from settings would be the sensible alternative
-		lineWrap.setSelected(false);
-		lineWrap.setOnAction(e -> getEditor().setWrap(!getEditor().getWrap()));
-
 		MenuItem jsREPL = new MenuItem("Start javascript REPL");
 		jsREPL.setOnAction(e -> {
 			new Thread(() -> {
 				// if there is an executor (eg simulation running) then use that
-				if(wm.getAnnotationManager().getExecutor() == null) {
+				if (wm.getAnnotationManager().getExecutor() == null) {
 					// this does not bridge with the visualisations or simulation
 					wm.getAnnotationManager().newExecutor();
 				}
@@ -237,7 +225,10 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(delWindows, lineWrap, dumpProgram, jsREPL);
+		Menu themes = new Menu("Themes");
+		themeMenu(themes);
+
+		debugMenu.getItems().addAll(dumpProgram, jsREPL, themes);
 		return debugMenu;
 	}
 
