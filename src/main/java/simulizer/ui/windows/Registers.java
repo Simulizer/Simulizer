@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
@@ -9,7 +10,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -55,7 +56,7 @@ public class Registers extends InternalWindow {
 			data.add(new Data(r.getName(), hex, unsigned, signed));
 			i++;
 		}
-		table.setItems(data);
+		Platform.runLater(() -> table.setItems(data));
 	}
 
 	@Override
@@ -112,7 +113,8 @@ public class Registers extends InternalWindow {
 
 	private class RegisterListener extends SimulationListener {
 		@Override
-		public void processMessage(Message m) {
+		public void processRegisterChangedMessage(RegisterChangedMessage m) {
+			// TODO: Be less wasteful, only update changed register
 			refreshData();
 		}
 	}

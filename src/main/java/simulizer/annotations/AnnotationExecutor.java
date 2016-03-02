@@ -129,6 +129,14 @@ public class AnnotationExecutor {
 	public void debugREPL(IO io) {
 		try {
 			io.printString("REPL start (call exit() to finish)\n");
+
+			SimulationBridge sim = (SimulationBridge) globals.get("simulation");
+			if(sim == null || sim.cpu == null) {
+				io.printString("Simulation not running, REPL running in its own engine\n");
+			} else {
+				io.printString("Simulation running, REPL has access equal to annotations\n");
+			}
+
 			bindGlobal("io", io);
 			exec("print = function(s){io.printString(''+s+'\\n');};");
 			exec("exit = function(){stop = true;}; stop = false;");

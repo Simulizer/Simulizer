@@ -7,7 +7,8 @@ _internal = {}
 
 // global objects
 Register = Java.type('simulizer.assembler.representation.Register');
-r = Register
+reg = Register
+convert = Java.type('simulizer.simulation.data.representation.DataConverter');
 
 
 // debug bridge
@@ -17,14 +18,11 @@ alert = function(msg){debug.alert(''+msg);};
 // simulation bridge
 stop     = function(){simulation.stop();};
 setSpeed = function(s){simulation.setClockSpeed(s);};
-reg      = function(name){return simulation.getRegister(Register.fromString(name));};
-regNum   = function(id){return simulation.getRegister(Register.fromID(id));};
 // global bindings for each register are added later
 // eg $s0 = {id:Register.s0, get: function to get the current s0 value}
 
 
 // visualisation bridge
-loadVis = function(name){return visualisation.load(name);};
 
 // Utility functions
 

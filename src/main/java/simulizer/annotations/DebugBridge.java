@@ -2,7 +2,11 @@ package simulizer.annotations;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.ui.WindowManager;
+
+import java.awt.*;
 
 /**
  * A collection of methods for debugging, accessible from annotations
@@ -11,6 +15,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
 public class DebugBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
+	WindowManager wm = null;
 	IO io = null;
 
 	public void log(String string) {
@@ -29,5 +34,9 @@ public class DebugBridge {
 			alert.setContentText(msg);
 			alert.show();
 		});
+	}
+
+	public CPU getCPU() {
+		return wm.getCPU();
 	}
 }

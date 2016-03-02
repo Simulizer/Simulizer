@@ -212,6 +212,7 @@ task copyAceFiles(dependsOn: downloadAce, type: Copy) {
     include 'theme-monokai.js'
     include 'theme-ambiance.js'
     include 'theme-tomorrow_night_eighties.js'
+    include 'keybinding-vim.js'
     include 'mode-javascript.js'
 }
 
@@ -267,6 +268,7 @@ dependencies {
     // JFXtras (internal window only)
         compile 'org.jfxtras:jfxtras-window:8.0-r4'
 
+    //TODO: do we actually need this?
     // Reactfx
         compile group: 'org.reactfx', name: 'reactfx', version: '1.4.1'
 

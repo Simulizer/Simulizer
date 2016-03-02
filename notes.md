@@ -8,3 +8,4 @@ Small Fixes
 ===========
 
 - use a mono-spaced font for the register values window
+    - also in the program I/O would be nice

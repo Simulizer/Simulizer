@@ -1,4 +1,4 @@
-package simulizer.assembler.spim_compliance;
+package simulizer.utils;
 
 import java.io.*;
 import java.util.List;
@@ -98,4 +98,34 @@ public class SpimRunner {
 
         return null;
     }
+
+    public static void runQtSpim(String program) {
+		File tmp = null;
+		try {
+			tmp = File.createTempFile("program", ".s");
+			FileWriter w = new FileWriter(tmp);
+			w.write(program);
+			w.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		assert tmp != null;
+		try {
+			//System.out.println(tmp.getAbsolutePath());
+
+			ProcessBuilder spimBuilder = new ProcessBuilder(
+					"qtspim", "-file", tmp.getAbsolutePath()
+			).redirectErrorStream(true);
+
+			Process spim = spimBuilder.start();
+
+			spim.waitFor();
+
+		} catch(IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits
+	}
 }

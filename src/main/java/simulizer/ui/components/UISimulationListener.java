@@ -8,6 +8,7 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.listeners.SimulationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
@@ -22,8 +23,25 @@ public class UISimulationListener extends SimulationListener {
 		this.wm = wm;
 	}
 
+	@Override public void processSimulationMessage(SimulationMessage m) {
+		switch(m.detail) {
+			case SIMULATION_STARTED: {
+				wm.getAnnotationManager().onStartProgram(wm.getCPU());
+				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+				Platform.runLater(editor::executeMode);
+			} break;
+			case SIMULATION_STOPPED: {
+				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
+				wm.getAnnotationManager().onEndProgram();
+				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+				Platform.runLater(editor::editMode);
+			} break;
+			default:break;
+		}
+	}
+
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
-		wm.getHLVisManager().processAnnotation(m.annotation);
+		wm.getAnnotationManager().processAnnotation(m.annotation);
 	}
 
 	@Override
@@ -38,8 +56,10 @@ public class UISimulationListener extends SimulationListener {
 					// editor.setReadOnly(true);
 					Platform.runLater(() -> {
 						Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-						if (editor != null)
-							editor.gotoLine(lineNum-1);
+						if (editor != null) {
+							// these lines
+							editor.highlightPipeline(-1, -1, lineNum);
+						}
 					});
 				}
 			}

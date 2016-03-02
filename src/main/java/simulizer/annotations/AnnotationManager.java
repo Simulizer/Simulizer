@@ -1,23 +1,16 @@
-package simulizer.ui.components.highlevel;
+package simulizer.annotations;
 
 import javax.script.ScriptException;
 
-import simulizer.annotations.AnnotationExecutor;
-import simulizer.annotations.BridgeFactory;
-import simulizer.annotations.DebugBridge;
-import simulizer.annotations.SimulationBridge;
-import simulizer.annotations.VisualisationBridge;
 import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.WindowManager;
-import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.HighLevelVisualisation;
-import simulizer.ui.windows.Logger;
 
 /**
  * Holds data regarding the processing of annotations and display of visualisations
  */
-public class HighLevelVisualisationManager {
+public class AnnotationManager {
 	private WindowManager wm;
 	private AnnotationExecutor ex;
 
@@ -27,7 +20,7 @@ public class HighLevelVisualisationManager {
 
 	HighLevelVisualisation vis;
 
-	public HighLevelVisualisationManager(WindowManager wm) {
+	public AnnotationManager(WindowManager wm) {
 		this.wm = wm;
 		ex = null;
 
@@ -47,28 +40,27 @@ public class HighLevelVisualisationManager {
 		newExecutor();
 
 		// set up access between the bridges and the components they talk to on the Java side
-		Logger logger = (Logger) wm.getWorkspace().findInternalWindow(WindowEnum.LOGGER);
-		BridgeFactory.setDebugIO(debugBridge, logger);
+		debugBridge.wm = wm;
+		debugBridge.io = wm.getIO();
 
-		BridgeFactory.setSimulation(simulationBridge, cpu);
+		simulationBridge.cpu = cpu;
 
-		HighLevelVisualisation temp = (HighLevelVisualisation) wm.getWorkspace().findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-
-		if (temp != null)
-			vis = temp;
-		else {
-			vis = (HighLevelVisualisation) wm.getWorkspace().openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-			vis.setVisible(false);
-		}
-
-		BridgeFactory.setVisualisation(visualisationBridge, vis);
+		visualisationBridge.wm = wm;
 	}
+	public void onEndProgram() {
+		simulationBridge.cpu = null;
+	}
+
 	public void newExecutor() {
 		ex = new AnnotationExecutor();
 
 		ex.bindGlobal("debug", debugBridge);
+
 		ex.bindGlobal("simulation", simulationBridge);
+		ex.bindGlobal("sim", simulationBridge);
+
 		ex.bindGlobal("visualisation", visualisationBridge);
+		ex.bindGlobal("vis", visualisationBridge);
 	}
 
 	public void processAnnotation(Annotation annotation) {

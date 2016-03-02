@@ -7,7 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
-import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -48,14 +48,13 @@ public class HighLevelVisualisation extends InternalWindow {
 		});
 	}
 
+
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
-		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, getWindowWidth(), getWindowHeight(), 0, 4);
-		setVisible(true);
+		this.visualiser = new TowerOfHanoiVisualiser(this, getWindowWidth(), getWindowHeight(), 0, 4);
 	}
 	public void loadListVisualisation() {
-		this.visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
-		setVisible(true);
+		visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>());
 	}
 
     public void add(Node e){

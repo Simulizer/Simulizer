@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.scene.control.ButtonType;
 import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
@@ -25,10 +26,13 @@ import netscape.javascript.JSObject;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
+import simulizer.settings.Settings;
+import simulizer.ui.WindowManager;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)
@@ -37,14 +41,11 @@ import simulizer.utils.FileUtils;
  */
 public class Editor extends InternalWindow {
 
-	// TODO: confirm exit or load if file edited
 	// TODO: refresh current file if not edited
-	// TODO: become read-only and hide cursor when executing
-	// TODO: mechanism for loading and saving settings
 	// TODO: update problems as the user types. maybe do this using ace's worker
-	// TODO: vim keybindings
-	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
+	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
 
+	WindowManager wm;
 	private WebView view;
 	private WebEngine engine;
 	private File currentFile;
@@ -55,10 +56,19 @@ public class Editor extends InternalWindow {
 	// handle key combos for copy and paste
 	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_plus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
 	// references to javascript objects
 	private JSObject jsWindow;
 	private JSObject jsEditor;
+	private JSObject jsSession;
+	// passed to js functions which take no arguments to keep the engine happy
+	private static final Integer dummyArgument = 0;
+
+	// execute mode = simulation running
+	private enum Mode { EDIT_MODE, EXECUTE_MODE }
+	private Mode mode;
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
 
@@ -93,36 +103,6 @@ public class Editor extends InternalWindow {
 		// calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));
 
-		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
-
-		// can only execute scripts once the page has loaded
-		engine.documentProperty().addListener(new ChangeListener<Document>() {
-			@Override
-			public void changed(ObservableValue<? extends Document> observableValue, Document oldDoc, Document newDoc) {
-				if (newDoc != null) {
-					// loaded, run this once then remove as a listener
-
-					// setup the javascript --> java bridge
-					jsWindow = (JSObject) engine.executeScript("window");
-					jsWindow.setMember("bridge", bridge);
-
-					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
-					initSyntaxHighlighter();
-
-					jsWindow.call("init");
-					jsEditor = (JSObject) engine.executeScript("editor"); // created by init() so must be set after
-
-					// enableFirebug();
-
-					newFile();
-
-					engine.documentProperty().removeListener(this);
-				}
-			}
-		});
-
 		// javascript does not have access to the outside clipboard
 		view.setContextMenuEnabled(false);
 
@@ -144,11 +124,16 @@ public class Editor extends InternalWindow {
 				if (clip != null) {
 					jsEditor.call("insert", clip);
 				}
+			} else if(C_plus.match(event)) {
+				jsWindow.call("changeFontSize", 1);
+			} else if(C_minus.match(event)) {
+				jsWindow.call("changeFontSize", -1);
 			}
 
 			editedSinceLabelUpdate = true;
 		});
 
+		editedSinceLabelUpdate = false;
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
 				editedSinceLabelUpdate = false;
@@ -161,8 +146,75 @@ public class Editor extends InternalWindow {
 		getContentPane().getChildren().add(view);
 	}
 
+	private void loadPage(Settings settings) {
+		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
+
+		// can only execute scripts once the page has loaded
+		engine.documentProperty().addListener(new ChangeListener<Document>() {
+			@Override
+			public void changed(ObservableValue<? extends Document> observableValue, Document oldDoc, Document newDoc) {
+				if (newDoc != null) {
+					// loaded, run this once then remove as a listener
+
+					// setup the javascript --> java bridge
+					jsWindow = (JSObject) engine.executeScript("window");
+					jsWindow.setMember("bridge", bridge);
+
+					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
+					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
+					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
+					initSyntaxHighlighter();
+
+					jsWindow.call("init");
+					jsEditor = (JSObject) engine.executeScript("editor"); // created by init() so must be set after
+					jsSession = (JSObject) engine.executeScript("session");
+
+					//enableFirebug();
+
+					// load settings
+					setWrap((boolean) settings.get("editor.wrap"));
+					String fontFamily = (String) settings.get("editor.font-family");
+					int fontSize = (int) settings.get("editor.font-size");
+					jsWindow.call("setFont", fontFamily, fontSize);
+
+					jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+					engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
+					jsEditor.call("setTheme", (String) settings.get("editor.theme"));
+
+					boolean vim = (boolean) settings.get("editor.vim-mode");
+					if(vim) {
+						engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
+						jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
+					}
+
+					boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
+					jsWindow.setMember("userInControl", userInControl);
+
+					String initialFile = (String) settings.get("editor.initial-file");
+					if(initialFile != null) {
+						File f = new File(initialFile);
+						if(f.exists()) {
+							loadFile(f);
+						} else {
+							//TODO: log failure properly
+							throw new IllegalArgumentException("file not found");
+						}
+					} else {
+						newFile();
+					}
+
+					engine.documentProperty().removeListener(this);
+				}
+			}
+		});
+	}
+
 	@Override
 	public void ready() {
+		wm = getWindowManager();
+
+		loadPage(wm.getSettings());
+
 		String[] observersToAdd = { Labels.class.getSimpleName() };
 
 		for (String className : observersToAdd) {
@@ -172,6 +224,22 @@ public class Editor extends InternalWindow {
 		}
 
 		super.ready();
+	}
+
+	@Override public void close() {
+		if(hasOutstandingChanges()) {
+			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + currentFile.getName() + "\"", "");
+
+			if(save == ButtonType.YES) {
+				saveFile();
+			} else if(save == ButtonType.NO) {
+				// fall through and call super.close()
+			} else {
+				// don't call super.close() => stays open
+				return;
+			}
+		}
+		super.close();
 	}
 
 	private void enableFirebug() {
@@ -251,17 +319,14 @@ public class Editor extends InternalWindow {
 
 
 	public String getText() {
-		if (jsEditor != null) {
+		if (jsEditor != null)
 			return (String) jsEditor.call("getValue");
-		} else return null;
+		else
+			return null;
 	}
 
 	public int getLine() {
 		return (int) jsWindow.call("getLine");
-	}
-
-	public int getColumn() {
-		return (int) jsWindow.call("getColumn");
 	}
 
 	public File getCurrentFile() {
@@ -274,16 +339,17 @@ public class Editor extends InternalWindow {
 	public void saveFile() {
 		String currentText = getText();
 
-		if (currentFile != null && changedSinceLastSave) {
+		if(currentFile != null && changedSinceLastSave) {
 			FileUtils.writeToFile(currentFile, currentText);
-			setTitle(WindowEnum.getName(this) + " - " + currentFile.getName());
 			setEdited(false);
+			refreshTitle();
 		}
 	}
 
 	public void saveAs(File file) {
-		currentFile = file;
-		saveFile();
+		if(file == null) return;
+
+		FileUtils.writeToFile(file, getText());
 	}
 
 	public void loadFile(File file) {
@@ -304,47 +370,100 @@ public class Editor extends InternalWindow {
 		updateObservers();
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	private void setEdited(boolean edited) {
-		String filename = currentFile != null ? currentFile.getName() : "New File";
-		String editedSymbol = edited ? " *" : "";
-		setTitle(WindowEnum.getName(this) + " - " + filename + editedSymbol);
 		changedSinceLastSave = edited;
+		refreshTitle();
 	}
 
+	public boolean hasOutstandingChanges() {
+		return changedSinceLastSave;
+	}
+
+	private void refreshTitle() {
+		String filename = currentFile != null ? currentFile.getName() : "New File";
+		String editedSymbol = changedSinceLastSave ? " *" : "";
+		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
+		setTitle(WindowEnum.getName(this) + modeString + " - " + filename + editedSymbol);
+	}
+
+	/**
+	 * call when starting the simulation. Transitions into a read-only state
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void executeMode() {
+		jsWindow.call("executeMode");
+		mode = Mode.EXECUTE_MODE;
+		refreshTitle();
+	}
+
+	/**
+	 * call after the simulation has finished. Transitions into edit mode
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void editMode() {
+		jsWindow.call("editMode");
+		mode = Mode.EDIT_MODE;
+		refreshTitle();
+	}
+
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findNext(String pattern) {
 		jsWindow.call("find", pattern, false);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findPrevious(String pattern) {
 		jsWindow.call("find", pattern, true);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void findAll(String pattern) {
 		jsWindow.call("findAll", pattern);
 	}
 
-	public void setHighlightActiveLine(boolean highlight) {
-		jsEditor.call("setHighlightActiveLine", highlight);
-	}
-
-	public void setReadOnly(boolean readOnly) {
-		jsEditor.call("setReadOnly", readOnly);
-	}
-
+	/**
+	 * @param line starting from 0
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void gotoLine(int line) {
-		gotoLine(line, 0);
+		jsWindow.call("goto", line);
 	}
 
-	public void gotoLine(int line, int col) {
-		jsEditor.call("gotoLine", line, col, false);
+	/**
+	 * @param size font size in px
+	 */
+	public void setFontSize(int size) {
+		jsEditor.call("setFontSize", size);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public void setWrap(boolean wrap) {
-		engine.executeScript("editor.getSession().setUseWrapMode(" + wrap + ")");
+		jsSession.call("setUseWrapMode", wrap);
 	}
 
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
 	public boolean getWrap() {
-		return (Boolean) engine.executeScript("editor.getSession().getUseWrapMode()");
+		return (boolean) jsSession.call("getUseWrapMode", dummyArgument);
 	}
 
+	/**
+	 * lines start from 0
+	 * @warning must be called from a JavaFX thread
+	 */
+	public void highlightPipeline(int fetchLine, int decodeLine, int executeLine) {
+		jsWindow.call("highlightPipeline", fetchLine, decodeLine, executeLine);
+	}
 }

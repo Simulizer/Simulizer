@@ -81,6 +81,7 @@ public class Assembler {
 
             address = new Address(address.getValue() + 4);
         }
+        p.textSegmentLast = new Address(address.getValue() - 4);
 
 
         address = new Address(0x10010000); // (static) data segment skip over the 64KB .extern segment
@@ -106,7 +107,9 @@ public class Assembler {
                 tmpDataSegment.add(b);
             }
 
-            p.lineNumbers.put(address, v.getLineNumber());
+            // Antlr line numbers start from 1
+            // the convention in simulizer is to start from 0
+            p.lineNumbers.put(address, v.getLineNumber()-1);
 
             address = new Address(address.getValue() + v.getSize());
         }

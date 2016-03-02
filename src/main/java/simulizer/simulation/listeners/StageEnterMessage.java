@@ -4,7 +4,7 @@ package simulizer.simulation.listeners;
  * A message which is sent when the simulation enters a pipeline stage
  */
 public class StageEnterMessage extends Message {
-    enum Stage {
+    public enum Stage {
         Fetch,
         Decode,
         Execute

@@ -25,7 +25,7 @@ import simulizer.ui.interfaces.WindowEnum;
  *
  */
 public class Labels extends InternalWindow implements TemporaryObserver {
-	private TableView<Label> table = new TableView<Label>();
+	private TableView<Label> table = new TableView<>();
 	private Editor editor;
 
 	public Labels() {
@@ -100,10 +100,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	/**
 	 * Populates the given list of labels with the list of labes in the given text
 	 *
-	 * @param list
-	 *            the list to populate
-	 * @param text
-	 *            the text to analyse
+	 * @param text the text to analyse
 	 */
 	private static void getLabels(ObservableList<Label> answer, String text) {
 		Scanner reader = new Scanner(text);
@@ -132,11 +129,11 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void ready() {
-		TableColumn<Label, String> label = new TableColumn<Label, String>("Label");
-		label.setCellValueFactory(new PropertyValueFactory<Label, String>("label"));
+		TableColumn<Label, String> label = new TableColumn<>("Label");
+		label.setCellValueFactory(new PropertyValueFactory<>("label"));
 
-		TableColumn<Label, Integer> line = new TableColumn<Label, Integer>("Line");
-		line.setCellValueFactory(new PropertyValueFactory<Label, Integer>("line"));
+		TableColumn<Label, Integer> line = new TableColumn<>("Line");
+		line.setCellValueFactory(new PropertyValueFactory<>("line"));
 
 		refreshData();
 		table.getColumns().addAll(label, line);
@@ -147,9 +144,9 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		pane.setCenter(table);
 		pane.setCursor(Cursor.DEFAULT);
 
-		Button btnNext = new ActionButton("Next", (editor, s) -> editor.findNext(s));
-		Button btnPrevious = new ActionButton("Previous", (editor, s) -> editor.findPrevious(s));
-		Button btnAll = new ActionButton("Select All", (editor, s) -> editor.findAll(s));
+		Button btnNext = new ActionButton("Next", Editor::findNext);
+		Button btnPrevious = new ActionButton("Previous", Editor::findPrevious);
+		Button btnAll = new ActionButton("Select All", Editor::findAll);
 
 		HBox buttonContainer = new HBox();
 		buttonContainer.getChildren().addAll(btnPrevious, btnNext, btnAll);
@@ -176,8 +173,8 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		}
 	}
 
-	private static interface Action {
-		public void run(Editor editor, String s);
+	private interface Action {
+		void run(Editor editor, String s);
 	}
 
 	public static class Label {

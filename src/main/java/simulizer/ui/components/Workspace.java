@@ -2,6 +2,7 @@ package simulizer.ui.components;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -97,10 +98,13 @@ public class Workspace extends Observable implements Themeable {
 	 * Closes all open Internal Windows
 	 */
 	public void closeAll() {
-		for (InternalWindow window : openWindows)
-			if (window.isVisible())
-				window.close();
-		openWindows.clear();
+		Iterator<InternalWindow> windows = openWindows.iterator();
+		while (windows.hasNext()) {
+			InternalWindow window = windows.next();
+			window.close();
+			if (window.isClosed())
+				windows.remove();
+		}
 	}
 
 	/**
@@ -111,9 +115,16 @@ public class Workspace extends Observable implements Themeable {
 	 * @return The internal window if already open
 	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
-		for (InternalWindow w : openWindows)
+		// TODO: I (Matt) have (very occasionally) gotten a
+		// ConcurrentModificationException here, stemming from getting the editor in
+		// UISimulationListener just after the simulation starts (it might be the
+		// HLVis window opening at the same time which might be the problem)
+		Iterator<InternalWindow> windows = openWindows.iterator();
+		while (windows.hasNext()) {
+			InternalWindow w = windows.next();
 			if (window.equals(w))
 				return w;
+		}
 		return null;
 	}
 
@@ -130,12 +141,12 @@ public class Workspace extends Observable implements Themeable {
 			return w;
 
 		// Not found -> Create a new one
-		w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(wm);
-		wm.getLayouts().setWindowDimentions(w);
-		addWindows(w);
-		return w;
+		InternalWindow w2 = window.createNewWindow();
+		assert w2 != null;
+		w2.setWindowManager(wm);
+		wm.getLayouts().setWindowDimentions(w2);
+		Platform.runLater(() -> addWindows(w2));
+		return w2;
 	}
 
 	/**
@@ -167,9 +178,9 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
-			if (window.isVisible())
-				window.close();
-			openWindows.remove(window);
+			window.close();
+			if (window.isClosed())
+				openWindows.remove(window);
 		}
 	}
 
@@ -238,6 +249,10 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	public Settings getSettings() {
 		return wm.getSettings();
+	}
+
+	public boolean hasWindowsOpen() {
+		return !openWindows.isEmpty();
 	}
 
 }

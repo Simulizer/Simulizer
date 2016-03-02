@@ -1,12 +1,14 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javafx.animation.Animation;
 import javafx.animation.FillTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
@@ -15,6 +17,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.data.representation.Word;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
@@ -49,8 +53,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	private final double YPAD = 10;
 
 	/**
-	 * @param contentPane
-	 *            the pane onto which the visualiser will draw
 	 * @param width
 	 *            the width of the area to draw on
 	 * @param height
@@ -70,8 +72,10 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 		calculateDimensions();
 
-		initRectsAndBoxes();
-		resize();
+		Platform.runLater(() -> {
+			initRectsAndBoxes();
+			resize();
+		});
 	}
 
 	private void initRectsAndBoxes() {
@@ -131,21 +135,23 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * emphasise the current element being examined in binary search.
 	 *
 	 * @param i
-	 *            the index of the element to be emphasised
+	 *            the index of the element to be emphasised (can be outside valid range)
 	 */
 	public void emphasise(int i) {
-		Rectangle rect = rectangles[i];
-		Text text = textLabels[i];
+		if(i >= 0 && i < rectangles.length) {
+			Rectangle rect = rectangles[i];
+			Text text = textLabels[i];
 
-		FillTransition ft = new FillTransition(Duration.millis(300), rect, Color.WHITE, Color.RED);
-		FillTransition tt = new FillTransition(Duration.millis(300), text, Color.BLACK, Color.WHITE);
-		ft.setCycleCount(2);
-		ft.setAutoReverse(true);
+			FillTransition ft = new FillTransition(Duration.millis(300), rect, Color.WHITE, Color.RED);
+			FillTransition tt = new FillTransition(Duration.millis(300), text, Color.BLACK, Color.WHITE);
+			ft.setCycleCount(2);
+			ft.setAutoReverse(true);
 
-		tt.setCycleCount(2);
-		tt.setAutoReverse(true);
+			tt.setCycleCount(2);
+			tt.setAutoReverse(true);
 
-		animationBuffer.add(new ParallelTransition(ft, tt));
+			animationBuffer.add(new ParallelTransition(ft, tt));
+		}
 	}
 
 	public void setLabel(int i, String label) {

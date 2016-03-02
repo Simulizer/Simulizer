@@ -21,11 +21,19 @@
   },
   "simulation": {
     "clock-speed": 250,
-    "zero-memory": true
+    "zero-memory": true,
+    "pipelined": false
   },
   "editor": {
-    "word-wrap": true,
-    "open-file" : null
+    "font-family": "Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace",
+    "font-size": 20,
+    "initial-file" : "code/binary-search.s",
+    "scroll-speed": 0.1,
+    "soft-tabs": true,
+    "theme" : "ace/theme/monokai",
+    "user-control-during-execution": false,
+    "vim-mode": false,
+    "wrap": false
   },
   "splash-screen": {
     "enabled": false,
