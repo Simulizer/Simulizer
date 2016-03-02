@@ -154,6 +154,14 @@ public class CPU {
     }
 
     /**
+     * Unregisters a listener from the list
+     * @param l the listener to be removed
+     */
+    public void unregisterListener(SimulationListener l){
+        listeners.remove(l);
+    }
+
+    /**
      * send a message to all of the registered listeners
      * @param m the message to send
      */
