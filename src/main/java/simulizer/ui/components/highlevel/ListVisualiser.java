@@ -1,7 +1,6 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javafx.animation.Animation;
@@ -17,8 +16,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.data.representation.Word;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
@@ -29,7 +26,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
  * @param <T>
  *            the data type stored in the list
  */
-public class ListVisualiser<T> extends DataStructureVisualiser {
+public class ListVisualiser extends DataStructureVisualiser {
 	private class Pair {
 		public int a;
 		public int b;
@@ -40,11 +37,12 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		}
 	}
 
-	private List<T> list;
+	private List<?> list;
 	private List<Animation> animationBuffer = new ArrayList<>();
 	private List<Pair> swapIndices = new ArrayList<>();
 	private Rectangle[] rectangles;
 	private Text[] textLabels;
+	private List<Text> markers = new ArrayList<>();
 
 	private double rectLength;
 	private double y0;
@@ -60,13 +58,13 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(HighLevelVisualisation vis, double width, double height, List<T> list) {
-		super(vis, width, height);
-		this.setList(list);
+	public ListVisualiser(HighLevelVisualisation vis) {
+		super(vis);
 	}
 
-	public void setList(List<T> list) {
+	public void setList(List<?> list) {
 		this.list = list;
+
 		this.rectangles = new Rectangle[list.size()];
 		this.textLabels = new Text[list.size()];
 
@@ -79,8 +77,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private void initRectsAndBoxes() {
-		HighLevelVisualisation vis = getHighLevelVisualisation();
-
 		for (int i = 0; i < rectangles.length; ++i) {
 			rectangles[i] = new Rectangle(getX(i), y0, rectLength, rectLength);
 			rectangles[i].getStyleClass().add("list-item");
@@ -94,7 +90,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 			vis.addAll(rectangles[i], textLabels[i]);
 		}
-
 	}
 
 	private double getX(int rectIndex) {
@@ -138,7 +133,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 *            the index of the element to be emphasised (can be outside valid range)
 	 */
 	public void emphasise(int i) {
-		if(i >= 0 && i < rectangles.length) {
+		if (i >= 0 && i < rectangles.length) {
 			Rectangle rect = rectangles[i];
 			Text text = textLabels[i];
 
@@ -240,12 +235,11 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private void calculateDimensions() {
-		calculateDimensions(getHighLevelVisualisation().getWindowWidth(), getHighLevelVisualisation().getWindowHeight());
-	}
+		double width = vis.getWindowWidth();
+		double height = vis.getWindowHeight();
 
-	private void calculateDimensions(double width, double height) {
 		double rectCalc;
-		if (height < height) rectCalc = height - 2 * YPAD;
+		if (height < width) rectCalc = height - 2 * YPAD;
 		else rectCalc = width - 2 * XPAD;
 		this.rectLength = rectCalc / rectangles.length;
 
@@ -256,7 +250,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	public void resize() {
 		calculateDimensions();
 
-		System.out.println("\nxs");
 		for (int i = 0; i < rectangles.length; ++i) {
 			setAttrs(rectangles[i], getX(i), y0, rectLength, rectLength);
 
@@ -264,8 +257,8 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			textLabels[i].setTranslateY(getTextY(i));
 		}
 
-		setWidth(getHighLevelVisualisation().getWidth());
-		setHeight(getHighLevelVisualisation().getHeight());
+		setWidth(vis.getWidth());
+		setHeight(vis.getHeight());
 	}
 
 }
