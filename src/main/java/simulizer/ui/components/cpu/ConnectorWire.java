@@ -19,14 +19,12 @@ public class ConnectorWire extends Wire {
         this.arrowStart = arrowStart;
         this.type = type;
         this.rightOrBottom = rightOrBottom;
-
+        this.reverse = (rightOrBottom && arrowStart);
 
         this.offset = offset;
         if(type == Type.HORIZONTAL){
-            this.reverse = (rightOrBottom && arrowStart);
             drawHorizontalWire();
         } else {
-            this.reverse = !(rightOrBottom && arrowStart);
             drawVerticalLine();
         }
 

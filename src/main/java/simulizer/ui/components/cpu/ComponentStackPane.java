@@ -70,9 +70,9 @@ public class ComponentStackPane extends StackPane {
         return new ConnectorWire(this, shape, ConnectorWire.Type.VERTICAL, bottom, arrowStart, offset);
     }
 
-    public void highlight(int n){
-        FillTransition ft = new FillTransition(Duration.millis(300), shape, Color.valueOf("#1e3c72"), Color.RED);
-        ft.setCycleCount(n);
+    public void highlight(){
+        FillTransition ft = new FillTransition(Duration.millis(100), shape, Color.valueOf("#1e3c72"), Color.RED);
+        ft.setCycleCount(2);
         ft.setAutoReverse(true);
         ft.play();
     }
