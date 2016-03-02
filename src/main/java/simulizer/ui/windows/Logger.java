@@ -20,6 +20,7 @@ public class Logger extends InternalWindow implements Observer {
 	private TextField input = new TextField();
 	private String lastInput = "";
 	private CountDownLatch cdl = new CountDownLatch(1);
+	private Button submit;
 
 	public Logger() {
 		setTitle("Program I/O");
@@ -35,15 +36,14 @@ public class Logger extends InternalWindow implements Observer {
 
 		// Input TextField
 		GridPane.setHgrow(input, Priority.ALWAYS);
-		input.setDisable(true);
 		pane.add(input, 0, 1);
 
-		// Enter Button
-		Button submit = new Button();
+		submit = new Button();
 		submit.setText("Enter");
 		submit.setOnAction((e) -> submitText());
+		submit.setDisable(true);
 		addEventHandler(KeyEvent.ANY, (e) -> {
-			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
+			if (input.isFocused() && e.getCode() == KeyCode.ENTER && !submit.isDisable())
 				submitText();
 		});
 		input.focusedProperty().addListener((e) -> {
@@ -86,10 +86,10 @@ public class Logger extends InternalWindow implements Observer {
 
 	public String nextMessage() {
 		try {
-			input.setDisable(false);
+			submit.setDisable(false);
 			cdl = new CountDownLatch(1);
 			cdl.await();
-			input.setDisable(true);
+			submit.setDisable(true);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
