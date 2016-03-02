@@ -55,10 +55,12 @@ public abstract class DataStructureVisualiser {
 	}
 
 	public void setAttrs(Rectangle rect, double x, double y, double width, double height) {
-		rect.setX(x);
-		rect.setY(y);
-		rect.setWidth(width);
-		rect.setHeight(height);
+		if(rect != null) {
+			rect.setX(x);
+			rect.setY(y);
+			rect.setWidth(width);
+			rect.setHeight(height);
+		}
 	}
 
 	public abstract void resize();

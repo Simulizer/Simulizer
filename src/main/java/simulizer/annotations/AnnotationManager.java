@@ -67,7 +67,8 @@ public class AnnotationManager {
 		try {
 			ex.exec(annotation);
 		} catch (ScriptException e) {
-			e.printStackTrace();
+			//TODO: send to error stream instead
+			wm.getIO().printString("Annotation error: " + e.getMessage());
 		}
 	}
 }

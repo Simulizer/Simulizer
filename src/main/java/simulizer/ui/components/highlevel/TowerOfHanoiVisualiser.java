@@ -7,6 +7,7 @@ import java.util.Stack;
 import javafx.animation.Animation;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
@@ -26,6 +27,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			this.b = b;
 		}
 	}
+
+	private HighLevelVisualisation vis;
 
 	private int startingPeg;
 	private int numDiscs;
@@ -53,16 +56,31 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 	private boolean queuing;
 
-	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDiscs) {
+	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg) {
 		super(vis, width, height);
+		this.vis = vis;
 
 		this.startingPeg = startingPeg;
-		this.numDiscs = numDiscs;
-		this.discs = new Rectangle[numDiscs];
-
 		calculateDimensions(width, height);
-		init();
-		resize();
+	}
+	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDiscs) {
+		super(vis, width, height);
+		this.vis = vis;
+
+		this.startingPeg = startingPeg;
+		setNumDisks(numDiscs);
+	}
+
+	public void setNumDisks(int n) {
+		numDiscs = n;
+		discs = new Rectangle[numDiscs];
+
+		//TODO: @kelsey: handle this correctly
+		calculateDimensions(vis.getWindowWidth(), vis.getWindowHeight());
+		Platform.runLater(() -> {
+			init();
+			resize();
+		});
 	}
 
 	/**

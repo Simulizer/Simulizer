@@ -12,8 +12,8 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n−1 discs from pole 2 to pole 3 so they sit on disc n
 #
-# @{ setSpeed(100) }@
-# @{ var h = loadVis('tower-of-hanoi') }@
+# @{ setSpeed(10) }@
+# @{ var h = vis.load('tower-of-hanoi', false) }@
 
 
     .data    # variables section
@@ -46,6 +46,9 @@ main:
     syscall
 
     blez $v0, ERROR_EXIT   # if input <= 0: exit
+
+    # @{ h.setNumDisks($v0.get()) }@
+    # @{ vis.show()               }@
 
     # call function: MOVE
     li   $a0, 1
@@ -162,7 +165,7 @@ PRINT_MOVE:
     # print newline
     li $v0, 4               # 4: print string
     la $a0, newline
-    syscall #@
+    syscall
 
     # return
     lw   $a0, 0($sp)        # restore $a0 from the stack
