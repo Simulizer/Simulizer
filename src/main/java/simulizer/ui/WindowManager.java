@@ -67,10 +67,13 @@ public class WindowManager extends GridPane {
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
 
-		if ((boolean) settings.get("simulation.pipelined"))
+		if ((boolean) settings.get("simulation.pipelined")) {
 			cpu = new CPUPipeline(io);
-		else
+			cpu.registerListener(simListener);
+		} else {
 			cpu = new CPU(io);
+			cpu.registerListener(simListener);
+		}
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -187,8 +190,6 @@ public class WindowManager extends GridPane {
 			stopSimulation();
 
 			cpu.loadProgram(p);
-			// TODO: maybe don't re-register the listeners
-			cpu.registerListener(simListener);
 
 			io.clear();
 
