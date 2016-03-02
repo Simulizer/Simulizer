@@ -7,13 +7,15 @@ public abstract class DataStructureVisualiser {
 	private double width;
 	private double height;
 	private int rate = 1000;
-	private HighLevelVisualisation vis;
+	protected HighLevelVisualisation vis;
 
-	public DataStructureVisualiser(HighLevelVisualisation vis, double width, double height) {
-		this.width = width;
-		this.height = height;
+	public DataStructureVisualiser(HighLevelVisualisation vis) {
+		this.width = vis.getWindowWidth();
+		this.height = vis.getWindowHeight();
 		this.vis = vis;
 
+		// TODO use Platform.runLater somehow
+		vis.getDrawingPane().getChildren().clear();
 		// Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
 	}
 
@@ -48,10 +50,6 @@ public abstract class DataStructureVisualiser {
 
 	public void setHeight(double height) {
 		this.height = height;
-	}
-
-	public HighLevelVisualisation getHighLevelVisualisation() {
-		return vis;
 	}
 
 	public void setAttrs(Rectangle rect, double x, double y, double width, double height) {

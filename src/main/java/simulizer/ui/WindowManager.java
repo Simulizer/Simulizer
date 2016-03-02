@@ -256,8 +256,10 @@ public class WindowManager extends GridPane {
 	public void setPipelined(boolean pipelined) {
 		if (pipelined) {
 			cpu = new CPUPipeline(io);
+			cpu.registerListener(simListener);
 		} else {
 			cpu = new CPU(io);
+			cpu.registerListener(simListener);
 		}
 	}
 

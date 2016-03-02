@@ -60,7 +60,7 @@ public class CPU {
     protected Statement instructionRegister;
 
     private ALU Alu;
-    private Clock clock;//clock cycle for IE cycle
+    protected Clock clock;//clock cycle for IE cycle
 
     private Word[] registers;
     private MainMemory memory;
@@ -111,11 +111,11 @@ public class CPU {
     }
 
     /**sets the speed in ms of the clock
-     *
+     * will be 3 times what it says to make it representative wrt. the pipeline
      * @param tickMillis the time for one clock cycle
      */
     public void setClockSpeed(int tickMillis) {
-        clock.tickMillis = tickMillis;
+        clock.tickMillis = 3 * tickMillis;
     }
 
     /**stop the running of a program

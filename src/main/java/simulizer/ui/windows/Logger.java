@@ -15,12 +15,16 @@ import javafx.scene.layout.Priority;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow implements Observer {
-
+	private static final long BUFFER_TIME = 20;
+	
 	private TextArea output = new TextArea();
 	private TextField input = new TextField();
-	private String lastInput = "";
-	private CountDownLatch cdl = new CountDownLatch(1);
 	private Button submit;
+
+	private CountDownLatch cdl = new CountDownLatch(1);
+	private String lastInput = "", buffer = "";
+	private long lastUpdate = 0;
+	private volatile boolean callUpdate = true;
 
 	public Logger() {
 		setTitle("Program I/O");
@@ -95,16 +99,28 @@ public class Logger extends InternalWindow implements Observer {
 		}
 		return lastInput;
 	}
-	
-	public void cancelNextMessage(){
+
+	public void cancelNextMessage() {
 		cdl.countDown();
 	}
 
 	@Override
 	public void update(Observable o, Object message) {
-		// TODO: this should handle race conditions, perhaps with a buffer or
-		// TODO: don't return to the caller until the write is made
-		Platform.runLater(() -> output.appendText((String) message));
-	}
+		synchronized (buffer) {
+			if (!callUpdate && (buffer == ""))
+				callUpdate = true;
+			buffer += (String) message;
+		}
 
+		if (callUpdate && System.currentTimeMillis() - lastUpdate > BUFFER_TIME) {
+			Platform.runLater(() -> {
+				synchronized (buffer) {
+					callUpdate = false;
+					output.appendText(buffer);
+					buffer = "";
+					lastUpdate = System.currentTimeMillis();
+				}
+			});
+		}
+	}
 }
