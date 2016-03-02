@@ -12,6 +12,8 @@ public class StageEnterMessage extends Message {
 
     Stage stage;
 
+    public Stage getStage(){ return stage; }
+
     public StageEnterMessage(Stage stage) {
         this.stage = stage;
     }

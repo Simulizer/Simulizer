@@ -4,8 +4,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
+import simulizer.ui.components.cpu.GeneralComponent;
+import simulizer.ui.components.cpu.listeners.CPUListener;
+import simulizer.ui.components.highlevel.PresentationTowerOfHanoiVisualiser;
+import simulizer.ui.components.highlevel.listeners.PresentationTowerOfHanoiListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -27,8 +32,8 @@ public class CPUVisualisation extends InternalWindow {
         pane.setMinHeight(height);
         pane.setMaxHeight(height);
         getChildren().add(pane);
-        setMinWidth(530);
-        setMinHeight(415);
+        setMinWidth(width);
+        setMinHeight(getMinimalHeight());
 		drawVisualisation();
 	}
 
@@ -76,6 +81,8 @@ public class CPUVisualisation extends InternalWindow {
 		return height;
 	}
 
+	public CPU getCpu(){ return cpu; }
+
 	private void drawVisualisation() {
 
 		cpu = new CPU(this, width, height);
@@ -87,6 +94,7 @@ public class CPUVisualisation extends InternalWindow {
 				width = newValue.doubleValue();
 				setPaneWidth(width);
 				setPaneHeight(height);
+				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
@@ -97,6 +105,7 @@ public class CPUVisualisation extends InternalWindow {
 				height = newValue.doubleValue();
 				setPaneHeight(height);
 				setPaneWidth(width);
+				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
@@ -104,8 +113,22 @@ public class CPUVisualisation extends InternalWindow {
 	}
 	
 	@Override
+	protected double getMinimalHeight() {
+		return 415;
+	}
+	
+	@Override
 	public void close() {
 		cpu.closeAllThreads();
 		super.close();
+	}
+
+	/**
+	 * Sets the CPU and adds a listener to the CPU
+	 *
+	 * @param simCpu The simulated cpu
+	 */
+	public void attachCPU(simulizer.simulation.cpu.components.CPU simCpu) {
+		simCpu.registerListener(new CPUListener(cpu, simCpu, this));
 	}
 }

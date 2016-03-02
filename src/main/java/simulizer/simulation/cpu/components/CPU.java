@@ -118,6 +118,11 @@ public class CPU {
         clock.tickMillis = 3 * tickMillis;
     }
 
+    /**gets the speed in ms of the clock
+     *
+     */
+    public int getClockSpeed(){ return clock.tickMillis; }
+
     /**stop the running of a program
      *
      */

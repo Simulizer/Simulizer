@@ -79,6 +79,7 @@ public class CustomWire extends Wire {
                 });
                 break;
         }
+        reanimateData();
     }
 
 }
