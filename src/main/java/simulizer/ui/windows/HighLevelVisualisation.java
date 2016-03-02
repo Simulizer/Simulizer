@@ -1,8 +1,5 @@
 package simulizer.ui.windows;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
@@ -24,6 +21,7 @@ public class HighLevelVisualisation extends InternalWindow {
 		// TODO remove this
 		setCache(false);
 
+		// TODO check if all this `setXWidth/Height()` stuff is needed
 		setPaneWidth(width);
 		setPaneHeight(height);
 		getChildren().add(drawingPane);
@@ -51,10 +49,10 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
-		this.visualiser = new TowerOfHanoiVisualiser(this, getWindowWidth(), getWindowHeight(), 0);
+		this.visualiser = new TowerOfHanoiVisualiser(this, 0);
 	}
 	public void loadListVisualisation() {
-		visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>());
+		visualiser = new ListVisualiser(this);
 	}
 
     public void add(Node e){
@@ -63,6 +61,14 @@ public class HighLevelVisualisation extends InternalWindow {
 
     public void addAll(Node... elements){
         drawingPane.getChildren().addAll(elements);
+    }
+
+    public void remove(Node e){
+        drawingPane.getChildren().remove(e);
+    }
+
+    public void removeAll(Node... elements){
+        drawingPane.getChildren().removeAll(elements);
     }
 
 	public void setPaneWidth(double width) {

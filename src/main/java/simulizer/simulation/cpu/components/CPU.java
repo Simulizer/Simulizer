@@ -668,7 +668,7 @@ public class CPU {
 		
 		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
-			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
@@ -690,7 +690,7 @@ public class CPU {
 
         // used for setting up the annotation environment eg loading visualisations
         if(program.initAnnotation != null) {
-            sendMessage(new AnnotationMessage(program.initAnnotation));
+            sendMessage(new AnnotationMessage(program.initAnnotation, null));
         }
 
         while(isRunning) { //need something to stop this
