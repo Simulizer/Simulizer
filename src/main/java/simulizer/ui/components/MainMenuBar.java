@@ -4,8 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.application.Platform;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -48,7 +52,8 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"),
+				new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
 				getEditor().loadFile(f);
 			}
@@ -102,10 +107,10 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"),
+				new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
-				if (!saveFile.getName().endsWith(".json"))
-					saveFile = new File(saveFile.getAbsolutePath() + ".json");
+				if (!saveFile.getName().endsWith(".json")) saveFile = new File(saveFile.getAbsolutePath() + ".json");
 
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
@@ -147,7 +152,10 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Simulation");
 
 		MenuItem runPause = new MenuItem("Run/Pause");
-		runPause.setOnAction(e -> wm.assembleAndRun());
+		runPause.setOnAction(e -> {
+			new AssemblingDialog(wm.getCPU());
+			wm.assembleAndRun();
+		});
 
 		MenuItem singleStep = new MenuItem("Next Step");
 		singleStep.setDisable(true);
