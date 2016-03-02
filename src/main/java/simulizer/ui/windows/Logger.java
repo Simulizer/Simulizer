@@ -35,6 +35,7 @@ public class Logger extends InternalWindow implements Observer {
 
 		// Input TextField
 		GridPane.setHgrow(input, Priority.ALWAYS);
+		input.setDisable(true);
 		pane.add(input, 0, 1);
 
 		// Enter Button
@@ -85,8 +86,10 @@ public class Logger extends InternalWindow implements Observer {
 
 	public String nextMessage() {
 		try {
+			input.setDisable(false);
 			cdl = new CountDownLatch(1);
 			cdl.await();
+			input.setDisable(true);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
