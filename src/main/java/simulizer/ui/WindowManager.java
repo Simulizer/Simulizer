@@ -59,10 +59,9 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
-		primaryStage.setOnCloseRequest((e) -> {
-			workspace.closeAll();
-			if (workspace.hasWindowsOpen())
-				e.consume();
+		primaryStage.setOnCloseRequest(e -> {
+			e.consume();
+			shutdown();
 		});
 
 		// Creates CPU Simulation
@@ -162,20 +161,25 @@ public class WindowManager extends GridPane {
 	}
 
 	public void assembleAndRun() {
-		StoreProblemLogger log = new StoreProblemLogger();
-		Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+		primaryStage.setTitle("Simulizer - Assembling Program");
+		new Thread(() -> {
+			StoreProblemLogger log = new StoreProblemLogger();
+			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
-		Program p = Assembler.assemble(editor.getText(), log);
+			Program p = Assembler.assemble(editor.getText(), log);
 
-		// if no problems, has the effect of clearing
-		editor.setProblems(log.getProblems());
-
-		if (p != null) {
-			runProgram(p);
-		} else {
-			int size = log.getProblems().size();
-			UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
-		}
+			// if no problems, has the effect of clearing
+			Platform.runLater(() -> {
+				editor.setProblems(log.getProblems());
+				if (p != null) {
+					runProgram(p);
+				} else {
+					int size = log.getProblems().size();
+					UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+				}
+				primaryStage.setTitle("Simulizer");
+			});
+		} , "Assemble").start();
 	}
 
 	public void runProgram(Program p) {
@@ -233,10 +237,16 @@ public class WindowManager extends GridPane {
 	}
 
 	public void setPipelined(boolean pipelined) {
-		if(pipelined){
+		if (pipelined) {
 			cpu = new CPUPipeline(io);
 		} else {
 			cpu = new CPU(io);
 		}
+	}
+
+	public void shutdown() {
+		workspace.closeAll();
+		if (!workspace.hasWindowsOpen())
+			primaryStage.close();
 	}
 }
