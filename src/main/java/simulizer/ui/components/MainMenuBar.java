@@ -1,9 +1,10 @@
 package simulizer.ui.components;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-
+import java.net.URI;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -33,7 +34,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
 	private Editor getEditor() {
@@ -52,8 +53,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"),
-				new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
 				getEditor().loadFile(f);
 			}
@@ -107,10 +107,10 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"),
-				new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
-				if (!saveFile.getName().endsWith(".json")) saveFile = new File(saveFile.getAbsolutePath() + ".json");
+				if (!saveFile.getName().endsWith(".json"))
+					saveFile = new File(saveFile.getAbsolutePath() + ".json");
 
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
@@ -185,9 +185,11 @@ public class MainMenuBar extends MenuBar {
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
-			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
-			windowsMenu.getItems().add(item);
+			if (wenum.showInWindowsMenu()) {
+				MenuItem item = new MenuItem(wenum.toString());
+				item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
+				windowsMenu.getItems().add(item);
+			}
 		}
 
 		MenuItem delWindows = new MenuItem("Close All");
@@ -195,6 +197,32 @@ public class MainMenuBar extends MenuBar {
 		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
 
 		return windowsMenu;
+	}
+
+	private Menu helpMenu() {
+		Menu helpMenu = new Menu("Help");
+
+		MenuItem guide = new MenuItem("Guide");
+		guide.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.GUIDE));
+
+		MenuItem syscall = new MenuItem("Syscall Reference");
+		syscall.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.SYSCALL_REFERENCE));
+
+		MenuItem instruction = new MenuItem("Instruction Reference");
+		instruction.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.INSTRUCTION_REFERENCE));
+
+		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
+		keyBinds.setOnAction(e -> {
+			try {
+				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		});
+
+		helpMenu.getItems().addAll(guide, syscall, instruction, new SeparatorMenuItem(), keyBinds);
+
+		return helpMenu;
 	}
 
 	private Menu debugMenu() {

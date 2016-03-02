@@ -97,14 +97,17 @@ public enum Instruction {
 
 
     private final OperandFormat f;
+	private final String purpose;
 
     Instruction(OperandFormat f, String purpose) {
         this.f = f;
+		this.purpose = purpose;
     }
 
     public OperandFormat getOperandFormat() {
         return this.f;
     }
+    
 
 
     /**
@@ -123,4 +126,8 @@ public enum Instruction {
             throw new NoSuchElementException();
         }
     }
+
+	public String getPurpose() {
+		return purpose;
+	}
 }
