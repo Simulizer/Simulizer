@@ -248,6 +248,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void resize() {
+		if (rectangles == null || textLabels == null) return;
+
 		calculateDimensions();
 
 		for (int i = 0; i < rectangles.length; ++i) {
