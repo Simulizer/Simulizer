@@ -216,8 +216,8 @@ public class CPUPipeline extends CPU {
 			ID = createNopInstruction();
 		}
 		
-		if(annotations.containsKey(new Address(thisInstruction.getValue()-12))) {//checking for annotations
-			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-12))));//has to be -12 to counter pipeline 
+		if(annotations.containsKey(new Address(thisInstruction.getValue()-8))) {//checking for annotations
+			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-8))));//has to be -12 to counter pipeline 
 		}
 	}
 	

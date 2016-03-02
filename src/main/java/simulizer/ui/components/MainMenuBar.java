@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -48,7 +49,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
 			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if(f != null) {
+			if (f != null) {
 				getEditor().loadFile(f);
 			}
 		});
@@ -57,7 +58,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
-			if(getEditor().getCurrentFile() == null) {
+			if (getEditor().getCurrentFile() == null) {
 				Editor editor = getEditor();
 				UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
 			} else {
@@ -75,21 +76,7 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
-		exitItem.setOnAction(e -> {
-			Editor editor = getEditor();
-			if(editor.hasOutstandingChanges()) {
-				ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + editor.getCurrentFile().getName() + "\"", "");
-
-				if(save == ButtonType.YES) {
-					editor.saveFile();
-					System.exit(0);
-				} else if(save == ButtonType.NO) {
-					System.exit(0);
-				} else {
-					// do nothing (cancel)
-				}
-			}
-		});
+		exitItem.setOnAction(e -> wm.shutdown());
 
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
@@ -115,8 +102,7 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"),
-					new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
 				if (!saveFile.getName().endsWith(".json"))
 					saveFile = new File(saveFile.getAbsolutePath() + ".json");
@@ -170,7 +156,7 @@ public class MainMenuBar extends MenuBar {
 		stop.setOnAction(e -> wm.stopSimulation());
 
 		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
-		simplePipeline.setSelected((boolean)wm.getSettings().get("simulation.pipelined"));
+		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
 		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
@@ -205,7 +191,6 @@ public class MainMenuBar extends MenuBar {
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
-
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
@@ -247,6 +232,5 @@ public class MainMenuBar extends MenuBar {
 		debugMenu.getItems().addAll(dumpProgram, runSpim, jsREPL, themes);
 		return debugMenu;
 	}
-
 
 }
