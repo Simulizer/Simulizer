@@ -567,7 +567,7 @@ public class CPU {
     			String toPrint = "";//initial string
     			byte[] currentByte;
     			int addressPStr = a0;
-    			currentByte = this.memory.readFromMem(a0, 1);//reading in blocks of 4 bytes, i.e 1 character
+    			currentByte = this.memory.readFromMem(a0, 1);//reading in bytes, i.e 1 character
     			while(DataConverter.decodeAsSigned(currentByte) != 0) {//while not at null terminator
     				toPrint += new String(currentByte);//converting to char
     				addressPStr += 1;//incrementing address to next byte
