@@ -1,15 +1,18 @@
 package simulizer.ui.components.highlevel;
 
-import simulizer.annotations.*;
+import javax.script.ScriptException;
+
+import simulizer.annotations.AnnotationExecutor;
+import simulizer.annotations.BridgeFactory;
+import simulizer.annotations.DebugBridge;
+import simulizer.annotations.SimulationBridge;
+import simulizer.annotations.VisualisationBridge;
 import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.ui.windows.Editor;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.ui.windows.Logger;
-
-import javax.script.ScriptException;
 
 /**
  * Holds data regarding the processing of annotations and display of visualisations
@@ -49,7 +52,15 @@ public class HighLevelVisualisationManager {
 
 		BridgeFactory.setSimulation(simulationBridge, cpu);
 
-		vis = (HighLevelVisualisation) wm.getWorkspace().openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+		HighLevelVisualisation temp = (HighLevelVisualisation) wm.getWorkspace().findInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+
+		if (temp != null)
+			vis = temp;
+		else {
+			vis = (HighLevelVisualisation) wm.getWorkspace().openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
+			vis.setVisible(false);
+		}
+
 		BridgeFactory.setVisualisation(visualisationBridge, vis);
 	}
 	public void newExecutor() {

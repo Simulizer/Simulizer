@@ -51,9 +51,11 @@ public class HighLevelVisualisation extends InternalWindow {
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
 		this.visualiser = new PresentationTowerOfHanoiVisualiser(this, getWindowWidth(), getWindowHeight(), 0, 4);
+		setVisible(true);
 	}
 	public void loadListVisualisation() {
 		this.visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
+		setVisible(true);
 	}
 
     public void add(Node e){

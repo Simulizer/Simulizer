@@ -9,7 +9,6 @@ import simulizer.utils.ThreadUtils;
 /**
  * A collection of methods for controlling high level visualisations from annotations
  */
-@SuppressWarnings("unused")
 public class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
