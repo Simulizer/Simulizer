@@ -47,7 +47,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 				}
 			}
 		});
-		
+
 		// Fix table cursor
 		table.setCursor(Cursor.DEFAULT);
 	}
@@ -145,6 +145,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		BorderPane pane = new BorderPane();
 		setContentPane(pane);
 		pane.setCenter(table);
+		pane.setCursor(Cursor.DEFAULT);
 
 		Button btnNext = new ActionButton("Next", (editor, s) -> editor.findNext(s));
 		Button btnPrevious = new ActionButton("Previous", (editor, s) -> editor.findPrevious(s));
