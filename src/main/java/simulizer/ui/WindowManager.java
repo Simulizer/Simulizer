@@ -148,15 +148,16 @@ public class WindowManager extends GridPane {
 
 	public void stopSimulation() {
 		if (cpuThread != null) {
-			System.out.println("Stopping the simulation");
 			cpu.stopRunning();
 			try {
+				System.out.println("Waiting for the simulation thread to close");
 				cpuThread.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			} finally {
+				cpuThread = null;
+				System.out.println("Simulation thread closed");
 			}
-			cpuThread = null;
-			System.out.println("Successfully stopped the simulation thread");
 		}
 	}
 
@@ -166,10 +167,13 @@ public class WindowManager extends GridPane {
 			StoreProblemLogger log = new StoreProblemLogger();
 			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
-			Program p = Assembler.assemble(editor.getText(), log);
 
 			// if no problems, has the effect of clearing
 			Platform.runLater(() -> {
+				String program = editor.getText();
+
+				Program p = Assembler.assemble(program, log);
+
 				editor.setProblems(log.getProblems());
 				if (p != null) {
 					runProgram(p);

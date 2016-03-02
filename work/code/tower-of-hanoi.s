@@ -16,7 +16,7 @@
 # @{ var h = vis.load('tower-of-hanoi', false) }@
 
 
-    .data    # variables section
+.data    # variables section
     .align 2
 
 # null terminated ASCII strings
@@ -30,7 +30,7 @@ done:          .asciiz "\ndone."
 
 
 
-    .text         # code section
+.text         # code section
     .globl main   # global name (can be referenced in other files)
 
 # must be lower case because the OS of spim looks for this symbol specifically

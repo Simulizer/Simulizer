@@ -39,14 +39,20 @@ public class AnnotationManager {
 		// refresh for each new program
 		newExecutor();
 
+		setupBridges();
+
+		simulationBridge.cpu = cpu;
+
+	}
+
+	private void setupBridges() {
 		// set up access between the bridges and the components they talk to on the Java side
 		debugBridge.wm = wm;
 		debugBridge.io = wm.getIO();
 
-		simulationBridge.cpu = cpu;
-
 		visualisationBridge.wm = wm;
 	}
+
 	public void onEndProgram() {
 		simulationBridge.cpu = null;
 	}
@@ -61,6 +67,8 @@ public class AnnotationManager {
 
 		ex.bindGlobal("visualisation", visualisationBridge);
 		ex.bindGlobal("vis", visualisationBridge);
+
+		setupBridges();
 	}
 
 	public void processAnnotation(Annotation annotation) {
