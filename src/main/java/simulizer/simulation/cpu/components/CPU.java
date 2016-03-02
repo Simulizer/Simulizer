@@ -122,6 +122,9 @@ public class CPU {
      *
      */
     public void stopRunning() {
+        // harmless to call multiple times, only want to send one message
+        boolean wasRunning = isRunning;
+
         isRunning = false;
         if(clock != null) {
             pauseClock();
@@ -131,7 +134,10 @@ public class CPU {
                 e.printStackTrace();
             }
         }
-        sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+
+        if(wasRunning) {
+            sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+        }
     }
 
     /**
@@ -666,7 +672,6 @@ public class CPU {
      */
     public void runProgram() {
     	this.startClock();
-        System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
@@ -687,10 +692,9 @@ public class CPU {
                     clock.waitForNextTick();
                 }
             } catch(InterruptedException | BrokenBarrierException e) {
-				System.out.println("CPU interrupted");
+                sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
             }
 		}
-        System.out.println("---- Program Execution Ended ----");
         stopRunning();
     }
 

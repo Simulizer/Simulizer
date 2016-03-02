@@ -147,9 +147,9 @@ public class WindowManager extends GridPane {
 		return grid;
 	}
 
-	public void stopCPU() {
+	public void stopSimulation() {
 		if (cpuThread != null) {
-			System.out.println("Terminating running program");
+			System.out.println("Stopping the simulation");
 			cpu.stopRunning();
 			try {
 				cpuThread.join();
@@ -157,7 +157,7 @@ public class WindowManager extends GridPane {
 				e.printStackTrace();
 			}
 			cpuThread = null;
-			System.out.println("Running program terminated");
+			System.out.println("Successfully stopped the simulation thread");
 		}
 	}
 
@@ -180,7 +180,7 @@ public class WindowManager extends GridPane {
 
 	public void runProgram(Program p) {
 		if (p != null) {
-			stopCPU();
+			stopSimulation();
 
 			cpu.loadProgram(p);
 			// TODO: maybe don't re-register the listeners

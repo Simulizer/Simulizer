@@ -8,7 +8,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
@@ -168,7 +167,7 @@ public class MainMenuBar extends MenuBar {
 		singleStep.setDisable(true);
 
 		MenuItem stop = new MenuItem("Stop");
-		stop.setOnAction(e -> wm.stopCPU());
+		stop.setOnAction(e -> wm.stopSimulation());
 
 		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
 		simplePipeline.setSelected((boolean)wm.getSettings().get("simulation.pipelined"));
