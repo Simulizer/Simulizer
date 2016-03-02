@@ -11,4 +11,5 @@ public interface IO {
 	void printString(String str);
 	void printInt(int num);
 	void printChar(char letter);
+	void cancelRead();
 }

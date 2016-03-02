@@ -92,6 +92,10 @@ public class Logger extends InternalWindow implements Observer {
 		}
 		return lastInput;
 	}
+	
+	public void cancelNextMessage(){
+		cdl.countDown();
+	}
 
 	@Override
 	public void update(Observable o, Object message) {

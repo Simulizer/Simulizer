@@ -84,4 +84,9 @@ public class IOConsole implements IO
 	{
 		scan.close();
 	}
+
+	@Override
+	public void cancelRead() {
+		// TODO Cancel Read
+	}
 }

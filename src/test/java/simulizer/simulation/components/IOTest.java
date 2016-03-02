@@ -50,4 +50,9 @@ public class IOTest implements IO {
 		
 	}
 
+	@Override
+	public void cancelRead() {
+		// TODO Cancel Read
+	}
+
 }

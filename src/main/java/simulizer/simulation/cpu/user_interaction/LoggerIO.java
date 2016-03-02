@@ -35,6 +35,13 @@ public class LoggerIO extends Observable implements IO {
 	}
 
 	@Override
+	public void cancelRead() {
+		Logger logger = (Logger) workspace.findInternalWindow(WindowEnum.LOGGER);
+		if (logger != null)
+			logger.cancelNextMessage();
+	}
+
+	@Override
 	public void printString(String str) {
 		setChanged();
 		notifyObservers(str);

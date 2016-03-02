@@ -106,6 +106,7 @@ public class CPU {
     public void pauseClock() {
         if(clock != null) {
             clock.stopRunning();
+            io.cancelRead();
         }
     }
 
