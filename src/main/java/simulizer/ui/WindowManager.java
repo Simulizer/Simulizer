@@ -1,6 +1,8 @@
 package simulizer.ui;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -170,22 +172,32 @@ public class WindowManager extends GridPane {
 			StoreProblemLogger log = new StoreProblemLogger();
 			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
+			final FutureTask<String> getProgramText = new FutureTask<>(editor::getText);
 
-			// if no problems, has the effect of clearing
-			Platform.runLater(() -> {
-				String program = editor.getText();
+			Platform.runLater(getProgramText);
 
-				Program p = Assembler.assemble(program, log);
+			try {
+				final Program p = Assembler.assemble(getProgramText.get(), log);
 
-				editor.setProblems(log.getProblems());
-				if (p != null) {
-					runProgram(p);
-				} else {
-					int size = log.getProblems().size();
-					UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+				// doing as little as possible in the FX thread
+				Platform.runLater(() -> {
+					// if no problems, has the effect of clearing
+					editor.setProblems(log.getProblems());
+					if (p == null) {
+						int size = log.getProblems().size();
+						UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+					}
+				});
+
+				if(p != null) {
+					runProgram(p); // spawns another thread
 				}
-				primaryStage.setTitle("Simulizer");
-			});
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			} finally {
+				Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
+			}
+
 		} , "Assemble").start();
 	}
 
@@ -201,7 +213,7 @@ public class WindowManager extends GridPane {
 				@Override
 				protected Object call() throws Exception {
 					try {
-						cpu.setClockSpeed(250);
+						cpu.setClockSpeed((Integer) settings.get("simulation.default-clock-speed"));
 						cpu.runProgram();
 					} catch (Exception e) {
 						e.printStackTrace();
