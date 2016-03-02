@@ -27,7 +27,7 @@ public class HighLevelVisualisation extends InternalWindow {
 		getChildren().add(drawingPane);
 
 		setMinWidth(width);
-		setMinHeight(getMinimalHeight());
+		setMinHeight(200);
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
@@ -89,11 +89,6 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	public double getWindowHeight() {
 		return height;
-	}
-
-	@Override
-	protected double getMinimalHeight() {
-		return 200;
 	}
 
 	public DataStructureVisualiser getVisualiser() {

@@ -47,7 +47,7 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
+						.add(new IntegerSetting("default-clock-speed", "Default Clock Speed", "Default value of the simulation clock delay (in milliseconds)", 250, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);

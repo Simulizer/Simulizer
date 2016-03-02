@@ -54,6 +54,13 @@ public class CPUPipeline extends CPU {
 		
 	}
 	
+	/**overwrites the normal cpu clock speed to make it representative of pipeline speed
+	 * 
+	 */
+	public void setClockSpeed(int millis) {
+		clock.tickMillis = millis;
+	}
+	
 	/**method will go through a statement and extract the registers
 	 * that will be read by this instruction
 	 * @param statement the statement to be decoded and then executed
@@ -217,7 +224,7 @@ public class CPUPipeline extends CPU {
 		}
 		
 		if(annotations.containsKey(new Address(thisInstruction.getValue()-8))) {//checking for annotations
-			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-8))));//has to be -12 to counter pipeline 
+			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-8))));//has to be -8 to counter pipeline 
 		}
 	}
 	

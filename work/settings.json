@@ -20,7 +20,7 @@
     "lock-to-window": false
   },
   "simulation": {
-    "clock-speed": 250,
+    "default-clock-speed": 250,
     "zero-memory": true,
     "pipelined": false
   },

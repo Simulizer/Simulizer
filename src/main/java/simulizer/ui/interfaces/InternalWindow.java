@@ -35,16 +35,6 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
-		// Adds minimise icon
-		MinimizeIcon minimize = new MinimizeIcon(this);
-		minimize.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-			if (getHeight() > 30)
-				setMinHeight(0.0); // Minimising
-			else
-				setMinHeight(getMinimalHeight()); // Maximising
-		});
-		getRightIcons().add(minimize);
-
 		// Adds close icon
 		CloseIcon close = new CloseIcon(this);
 		getRightIcons().add(close);
@@ -80,15 +70,6 @@ public abstract class InternalWindow extends Window {
 		this.layY = layY;
 		this.layWidth = layWidth;
 		this.layHeight = layHeight;
-	}
-
-	/**
-	 * This method should be overridden if a minimum height is set
-	 *
-	 * @return the minimum height when not minimised
-	 */
-	protected double getMinimalHeight() {
-		return 0.0;
 	}
 
 	/**
