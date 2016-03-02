@@ -23,10 +23,12 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.CPUVisualisation;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
