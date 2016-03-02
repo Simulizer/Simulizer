@@ -11,13 +11,13 @@ public class GeneralComponent extends ComponentStackPane {
         setAttributes();
     }
 
-    public void setShapeWidth(double width){
+    public void setShapeWidthAndDraw(double width){
         ((Rectangle) shape).setWidth(width);
         text.setWrappingWidth(width * 0.9);
         super.setShapeWidth(width);
     }
 
-    public void setShapeHeight(double height){
+    public void setShapeHeightAndDraw(double height){
         ((Rectangle) shape).setHeight(height);
         super.setShapeHeight(height);
     }
@@ -27,11 +27,13 @@ public class GeneralComponent extends ComponentStackPane {
         shape.setLayoutX(x);
         shape.layoutXProperty().set(x);
         setLayoutY(y);
+        setX(x);
+        setY(y);
         shape.setLayoutY(y);
         shape.layoutYProperty().set(y);
-        setShapeWidth(width);
+        setShapeWidthAndDraw(width);
         setPrefWidth(width);
-        setShapeHeight(height);
+        setShapeHeightAndDraw(height);
         setPrefHeight(height);
     }
 

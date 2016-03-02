@@ -3,11 +3,7 @@ package simulizer.ui.components;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import simulizer.ui.components.cpu.ALU;
-import simulizer.ui.components.cpu.ConnectorWire;
-import simulizer.ui.components.cpu.CustomLine;
-import simulizer.ui.components.cpu.CustomWire;
-import simulizer.ui.components.cpu.GeneralComponent;
+import simulizer.ui.components.cpu.*;
 import simulizer.ui.windows.CPUVisualisation;
 
 public class CPU {
@@ -65,6 +61,9 @@ public class CPU {
     public ConnectorWire registerToALU2;
     public ConnectorWire codeMemoryToIR;
 
+    public Group allItems;
+    public Group components;
+
     public CPU(CPUVisualisation vis, double width, double height){
         this.width = width;
         this.height = height;
@@ -72,7 +71,7 @@ public class CPU {
     }
 
     public void drawCPU(){
-        Group components = new Group();
+        components = new Group();
         controlUnit = new GeneralComponent(vis, "Controller");
         programCounter = new GeneralComponent(vis, "PC");
         instructionMemory = new GeneralComponent(vis, "Code Memory");
@@ -99,15 +98,18 @@ public class CPU {
 
         ir.setTooltip("In computing, an instruction register (IR) is the part of a CPU's control unit that stores the instruction currently being executed or decoded.");
 
-        instructionMemory.setTooltip("Instruction memory");
+        instructionMemory.setTooltip("Instruction memory, this is where the instructions of the program are stored.");
 
-        signExtender.setTooltip("Sign extender");
+        signExtender.setTooltip("Sign extension is the operation, in computer arithmetic, of increasing the number of bits of a binary number while preserving the number's sign (positive/negative) and value.");
 
-        adder.setTooltip("Adder");
+        adder.setTooltip("Computes the sum of 2 values together and outputs the result.");
 
-        muxAdder.setTooltip("Mux");
+        muxAdder.setTooltip("A multiplexer (or mux) is a device that selects one of several analog or digital input signals and forwards the selected input into a single line.");
 
-        shiftLeftIR.setTooltip("Shift left");
+        shiftLeftIR.setTooltip("A shift left logical of two positions moves each bit to the left by two.");
+        shiftLeft.setTooltip("A shift left logical of two positions moves each bit to the left by two.");
+
+        plusFour.setTooltip("Changes the value of the program counter by +4.");
 
         generalWires = new Group();
 
@@ -180,13 +182,19 @@ public class CPU {
         );
 
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, plusFour, signExtender, shiftLeft, adder, muxAdder, shiftLeftIR);
-        vis.addAll(components, generalWires, complexWires);
 
         double width = vis.getWindowWidth();
         double height = vis.getWindowHeight();
-        components.setLayoutY(0 - (height * 0.1));
-        generalWires.setLayoutY(0 - (height * 0.1));
-        complexWires.setLayoutY(0 - (height * 0.1));
+
+        alu.zoomOnHover();
+
+
+        allItems = new Group();
+        allItems.getChildren().addAll(components, generalWires, complexWires);
+        vis.add(allItems);
+
+
+
     }
 
     public void resizeShapes(){

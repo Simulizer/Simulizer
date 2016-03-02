@@ -22,6 +22,7 @@ public class ComponentStackPane extends StackPane {
     double width;
     double height;
     CPUVisualisation vis;
+    boolean focused = false;
 
     public ComponentStackPane(CPUVisualisation vis, String label){
         this.vis = vis;
@@ -53,6 +54,14 @@ public class ComponentStackPane extends StackPane {
     public double getShapeWidth(){
         return width;
     }
+
+    public double getX(){ return x; }
+
+    public double getY(){ return y; }
+
+    public void setX(double x){ this.x = x; }
+
+    public void setY(double y){ this.y = y; }
 
     public void setShapeWidth(double width) {
         this.width = width;
@@ -89,10 +98,10 @@ public class ComponentStackPane extends StackPane {
             public void handle(MouseEvent event) {
                 double eventX = event.getX();
                 double eventY = event.getY();
-                double xMax = getLayoutX() + width;
-                double yMax = getLayoutY() + height;
+                double xMax = getX() + getShapeWidth();
+                double yMax = getY() + getShapeHeight();
 
-                if( eventX > getLayoutX() && eventX < xMax && eventY > getLayoutY() && eventY < yMax){
+                if( eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
                     tooltip.setMaxWidth(vis.getWidth() - 40);
                     tooltip.setMaxHeight(vis.getHeight());
                     tooltip.show(instance, vis.getLayoutX() + eventX, vis.getLayoutY() + eventY);
