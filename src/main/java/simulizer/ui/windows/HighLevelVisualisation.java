@@ -51,7 +51,7 @@ public class HighLevelVisualisation extends InternalWindow {
 		this.visualiser = new TowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
 	}
 	public void loadListVisualisation() {
-		this.visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7)));
+		visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>());
 	}
 
     public void add(Node e){

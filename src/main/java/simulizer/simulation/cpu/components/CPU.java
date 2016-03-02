@@ -826,4 +826,8 @@ public class CPU {
 	public Word[] getRegisters() {
 		return registers;
 	}
+
+    public MainMemory getMainMemory() {
+        return memory;
+    }
 }

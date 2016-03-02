@@ -2,8 +2,15 @@ package simulizer.annotations;
 
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.components.MainMemory;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
+import simulizer.simulation.exceptions.HeapException;
+import simulizer.simulation.exceptions.MemoryException;
+import simulizer.simulation.exceptions.StackException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A collection of methods for accessing information about the simulation from annotations
@@ -29,6 +36,21 @@ public class SimulationBridge {
 	public long getRegister(Register r) {
 		Word[] regs = getRegisters();
 		return DataConverter.decodeAsUnsigned(regs[r.getID()].getWord());
+	}
+
+	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) {
+		MainMemory mem = cpu.getMainMemory();
+		List<Long> words = new ArrayList<>();
+
+		assert (lastAddress > firstAddress) && ((lastAddress - firstAddress) % 4 == 0);
+		for(int i = firstAddress; i <= lastAddress; i+=4) {
+			try {
+				words.add(DataConverter.decodeAsUnsigned(mem.readFromMem(i, 4)));
+			} catch (MemoryException | HeapException | StackException e) {
+				e.printStackTrace();
+			}
+		}
+		return words;
 	}
 
 }

@@ -78,7 +78,11 @@ Each of the 32 general purpose registers are assigned as global variables (named
 - `id` the enum value of the register
 - `get()` a method which corresponds to `simulation.getRegister(this.id)`
 
-The variables `Register` and `reg` refer to the `Register` enum class in Java
+Other variables
+- The variables `Register` and `reg` refer to the `Register` enum class in Java.
+- `convert` refers to the `DataConverter` class in java which encodes and decodes from signed/unsigned integer representations
+
+
 
 
 ## Global Functions ##

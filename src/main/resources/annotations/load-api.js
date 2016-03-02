@@ -8,6 +8,7 @@ _internal = {}
 // global objects
 Register = Java.type('simulizer.assembler.representation.Register');
 reg = Register
+convert = Java.type('simulizer.simulation.data.representation.DataConverter');
 
 
 // debug bridge

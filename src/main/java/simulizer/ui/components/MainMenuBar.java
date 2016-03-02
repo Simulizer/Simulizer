@@ -171,6 +171,7 @@ public class MainMenuBar extends MenuBar {
 		stop.setOnAction(e -> wm.stopCPU());
 
 		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
+		simplePipeline.setSelected((boolean)wm.getSettings().get("simulation.pipelined"));
 		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");

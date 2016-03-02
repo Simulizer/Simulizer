@@ -41,13 +41,9 @@ import simulizer.utils.UIUtils;
  */
 public class Editor extends InternalWindow {
 
-	// TODO: confirm exit or load if file edited
 	// TODO: refresh current file if not edited
-	// TODO: become read-only and hide cursor when executing
-	// TODO: mechanism for loading and saving settings
 	// TODO: update problems as the user types. maybe do this using ace's worker
-	// TODO: vim keybindings
-	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?
+	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
 
 	WindowManager wm;
 	private WebView view;
