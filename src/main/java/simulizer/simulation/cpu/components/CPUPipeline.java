@@ -224,7 +224,7 @@ public class CPUPipeline extends CPU {
 		}
 		
 		if(annotations.containsKey(new Address(thisInstruction.getValue()-8))) {//checking for annotations
-			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-8))));//has to be -12 to counter pipeline 
+			sendMessage(new AnnotationMessage(annotations.get(new Address(thisInstruction.getValue()-8))));//has to be -8 to counter pipeline 
 		}
 	}
 	
