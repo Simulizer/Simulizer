@@ -42,7 +42,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 			if (label != null) {
 				refreshEditor();
 				if (editor != null) {
-					editor.gotoLine(label.getLine());
+					editor.gotoLine(label.getLine() - 1);
 					editor.findNext(label.label); // Now highlight the label
 				}
 			}
