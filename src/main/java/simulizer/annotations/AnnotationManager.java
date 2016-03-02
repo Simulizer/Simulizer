@@ -4,6 +4,8 @@ import javax.script.ScriptException;
 
 import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -50,6 +52,8 @@ public class AnnotationManager {
 		debugBridge.wm = wm;
 		debugBridge.io = wm.getIO();
 
+		simulationBridge.cpu = null;
+
 		visualisationBridge.wm = wm;
 	}
 
@@ -71,12 +75,19 @@ public class AnnotationManager {
 		setupBridges();
 	}
 
-	public void processAnnotation(Annotation annotation) {
+	public void processAnnotationMessage(AnnotationMessage msg) {
 		try {
-			ex.exec(annotation);
+			ex.exec(msg.annotation);
 		} catch (ScriptException e) {
 			//TODO: send to error stream instead
-			wm.getIO().printString("Annotation error: " + e.getMessage());
+			IO io = wm.getIO();
+			io.printString("Annotation error: " + e.getMessage());
+			if(msg.boundAddress != null) {
+				int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
+				io.printString("\nFrom the annotation bound to line: " + lineNum + ".");
+			} else {
+				io.printString("\nFrom the initial annotation.");
+			}
 		}
 	}
 }

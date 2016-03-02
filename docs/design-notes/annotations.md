@@ -62,7 +62,8 @@ Methods:
 - `stop()` stop the simulation (not able to resume)
 - `setClockSpeed(tickMillis)` set the simulation speed
 - `Word[] getRegisters()`
-- `Word getRegister(Register)` get the current value of a register (identified using its enum)
+- `long getRegisterS(Register)` get the current signed value of a register (identified using its enum)
+- `long getRegisterU(Register)` get the current unsigned value of a register (identified using its enum)
 
 ## Visualisation Bridge ##
 The visualisation bridge (named `visualisation` and `vis` in JS) manages the high level visualisation window, can load high level visualisations and feed them information about the state of the simulation so that they can visualise and animate the algorithm running in the simulation.
@@ -80,7 +81,9 @@ Methods:
 ## Global Variables ##
 Each of the 32 general purpose registers are assigned as global variables (named with the dollar prefix eg `$s0`) with the following members:
 - `id` the enum value of the register
-- `get()` a method which corresponds to `simulation.getRegister(this.id)`
+- `long getS()` a method which corresponds to `simulation.getRegisterS(this.id)`
+- `long getU()` a method which corresponds to `simulation.getRegisterU(this.id)`
+- `long get()` a method which corresponds to `simulation.getRegisterS(this.id)`
 
 Other variables
 - The variables `Register` and `reg` refer to the `Register` enum class in Java.
@@ -105,5 +108,8 @@ quit     = simulation.stop
 setSpeed = simulation.setSpeed
 
 // Visualisation Bridge
+
+// Misc
+ret() // behaves like a return statement, stops execution of the current annotation
 ```
 
