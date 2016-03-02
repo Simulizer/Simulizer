@@ -24,9 +24,12 @@ ace.define(
 var SimpHighlightRules = function() {
     this.$rules = {
         'start' : [
+            { token: 'comment.assembly', // comment without @ (definitely does not contain an annotation)
+              regex: '#[^@]*$',
+            },
             { token: 'comment.assembly',
               regex: '#',
-              next:  'comment'
+              next:  'comment' // check for annotations in comment body
             },
             { token: 'keyword.control.assembly',
               regex: keywordRegex,
@@ -72,7 +75,7 @@ var SimpHighlightRules = function() {
         ],
         'comment' : [
             { token: 'comment',
-              regex: '[^@]*$', // comment body up until EOL
+              regex: '([^@]*|@)$', // comment body up until EOL
               next:  'start'
             },
             { token: 'comment',
@@ -198,7 +201,14 @@ var DocumentHighlightRules = function() {
         }
     ];
 
-    var endRules = [
+    var addedJSRules = [
+        { token: 'paren.rparen',
+          regex: '\}[^@]', // un-matched curly brace (not an annotation end marker)
+        },
+        { token: ['variable.parameter.register.assembly', // match (literally) $
+                  'variable.parameter.register.assembly'],// match register name
+          regex: registerRegex,
+        },
         { token: 'keyword',
           regex: '\}@$', // annotation right up to EOL
           next:  'start'
@@ -225,7 +235,7 @@ var DocumentHighlightRules = function() {
     {
         var jsRules = new JavaScriptHighlightRules().getRules();
         for(var r in jsRules) {
-            jsRules[r].unshift(endRules); // prepend
+            jsRules[r].unshift(addedJSRules); // prepend
         }
         this.addRules(jsRules, 'js-');
     }

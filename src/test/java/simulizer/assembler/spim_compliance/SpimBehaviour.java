@@ -4,6 +4,7 @@ package simulizer.assembler.spim_compliance;
 import category.SpimTests;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import simulizer.utils.SpimRunner;
 
 import java.math.BigInteger;
 

@@ -3,8 +3,7 @@ package simulizer.ui.components;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -14,10 +13,8 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import simulizer.assembler.Assembler;
-import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
@@ -25,8 +22,9 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
-import simulizer.ui.windows.AceEditor;
-import simulizer.ui.windows.Registers;
+import simulizer.ui.windows.Editor;
+import simulizer.utils.SpimRunner;
+import simulizer.utils.UIUtils;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 public class MainMenuBar extends MenuBar {
@@ -35,11 +33,11 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), viewMenu(), runMenu(), windowsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), debugMenu());
 	}
 
-	private AceEditor getEditor() {
-		return (AceEditor) wm.getWorkspace().openInternalWindow(WindowEnum.ACE_EDITOR);
+	private Editor getEditor() {
+		return (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 	}
 
 	private Menu fileMenu() {
@@ -54,7 +52,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setOnAction(e -> {
-			File f = openFileSelector("Open an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
 				getEditor().loadFile(f);
 			}
@@ -65,52 +63,56 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setOnAction(e -> {
 			if (getEditor().getCurrentFile() == null) {
-				File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-				if (f != null) {
-					getEditor().saveAs(f);
-				}
+				Editor editor = getEditor();
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
+			} else {
+				getEditor().saveFile();
 			}
-			getEditor().saveFile();
 		});
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setOnAction(e -> {
-			File f = saveFileSelector("Save an assembly file", new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if (f != null) {
-				getEditor().saveAs(f);
-			}
+			Editor editor = getEditor();
+			UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
 		});
 
+		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
-		exitItem.setOnAction(e -> System.exit(0));
+		exitItem.setOnAction(e -> {
+			Editor editor = getEditor();
+			if (editor.hasOutstandingChanges()) {
+				ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + editor.getCurrentFile().getName() + "\"", "");
+
+				if (save == ButtonType.YES) {
+					editor.saveFile();
+					System.exit(0);
+				} else if (save == ButtonType.NO) {
+					System.exit(0);
+				} else {
+					// do nothing (cancel)
+				}
+			}
+		});
 
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
 
-	private Menu viewMenu() {
-		// | View
-		Menu viewMenu = new Menu("View");
-
+	private Menu layoutsMenu() {
 		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
 		layoutMenu(layoutMenu);
-
-		// | |-- Themes
-		Menu themeMenu = new Menu("Themes");
-		themeMenu(themeMenu);
-
-		viewMenu.getItems().addAll(layoutMenu, themeMenu);
-		return viewMenu;
+		return layoutMenu;
 	}
 
 	private void layoutMenu(Menu menu) {
 		menu.getItems().clear();
 
 		for (Layout l : wm.getLayouts()) {
-			MenuItem item = new MenuItem(l.getName());
+			String name = l.getName();
+			MenuItem item = new MenuItem(name.endsWith(".json") ? name.substring(0, name.length() - 5) : name);
 			item.setOnAction(e -> wm.getLayouts().setLayout(l));
 			menu.getItems().add(item);
 		}
@@ -118,8 +120,10 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = saveFileSelector("Save layout", new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
+				if (!saveFile.getName().endsWith(".json")) saveFile = new File(saveFile.getAbsolutePath() + ".json");
+
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
 				layoutMenu(menu);
@@ -155,32 +159,23 @@ public class MainMenuBar extends MenuBar {
 		return menu;
 	}
 
-	private Menu runMenu() {
+	private Menu simulationMenu() {
 		// To be moved to separate buttons later
-		Menu runMenu = new Menu("Run Code");
 
-		MenuItem runProgram = new MenuItem("Run Program");
-		runProgram.setOnAction(e -> {
-			StoreProblemLogger log = new StoreProblemLogger();
-			Assembler a = new Assembler();
-			Program p = a.assemble(getEditor().getText(), log);
-			if (p != null) {
-				wm.runProgram(p);
-			} else {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Could Not Run");
-				int size = log.getProblems().size();
-				if (size == 1) {
-					alert.setHeaderText("The Program Contains An Error!");
-				} else {
-					alert.setHeaderText("The Program Contains " + size + " Errors!");
-				}
-				alert.setContentText("You must fix them before you can\nexecute the program.");
-				alert.show();
+		Menu runMenu = new Menu("Simulation");
 
-				getEditor().setProblems(log.getProblems());
-			}
-		});
+		MenuItem runPause = new MenuItem("Run/Pause");
+		runPause.setOnAction(e -> wm.assembleAndRun());
+
+		MenuItem singleStep = new MenuItem("Next Step");
+		singleStep.setDisable(true);
+
+		MenuItem stop = new MenuItem("Stop");
+		stop.setOnAction(e -> wm.stopCPU());
+
+		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
+		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
+		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -193,49 +188,31 @@ public class MainMenuBar extends MenuBar {
 			}
 		});
 
-		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setDisable(true);
-
-		MenuItem simplePipeline = new MenuItem("Single Step (pipeline)");
-		simplePipeline.setDisable(true);
-
-		MenuItem stop = new MenuItem("Stop Simulation");
-		stop.setOnAction(e -> wm.stopCPU());
-
-		runMenu.getItems().addAll(runProgram, setClockSpeed, singleStep, simplePipeline, stop);
+		runMenu.getItems().addAll(runPause, singleStep, stop, simplePipeline, setClockSpeed);
 		return runMenu;
 	}
 
 	private Menu windowsMenu() {
-		Menu windowsMenu = new Menu("Add Window");
+		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
 			MenuItem item = new MenuItem(wenum.toString());
 			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
 			windowsMenu.getItems().add(item);
 		}
+
+		MenuItem delWindows = new MenuItem("Close All");
+		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
+		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
+
 		return windowsMenu;
 	}
 
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
-		MenuItem delWindows = new MenuItem("Close All Windows");
-		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
-
-		MenuItem emphWindow = new MenuItem("Refresh Registers");
-		emphWindow.setOnAction(e -> {
-			Registers reg = (Registers) wm.getWorkspace().openInternalWindow(WindowEnum.REGISTERS);
-			reg.refreshData();
-		});
-
-		CheckMenuItem lineWrap = new CheckMenuItem("Line Wrap");
-		lineWrap.setSelected((boolean) wm.getSettings().get("code_editor.word-wrap"));
-		lineWrap.setOnAction(e -> getEditor().setWrap(lineWrap.isSelected()));
-
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-			Assembler a = new Assembler();
-			Program p = a.assemble(getEditor().getText(), null);
+			Program p = Assembler.assemble(getEditor().getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
@@ -249,25 +226,29 @@ public class MainMenuBar extends MenuBar {
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
 		});
 
-		debugMenu.getItems().addAll(delWindows, emphWindow, lineWrap, dumpProgram);
+		MenuItem runSpim = new MenuItem("Run in SPIM");
+		runSpim.setOnAction(e -> {
+			String program = getEditor().getText();
+			SpimRunner.runQtSpim(program);
+		});
+
+		MenuItem jsREPL = new MenuItem("Start javascript REPL");
+		jsREPL.setOnAction(e -> {
+			new Thread(() -> {
+				// if there is an executor (eg simulation running) then use that
+				if (wm.getAnnotationManager().getExecutor() == null) {
+					// this does not bridge with the visualisations or simulation
+					wm.getAnnotationManager().newExecutor();
+				}
+				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
+			}).start();
+		});
+
+		Menu themes = new Menu("Themes");
+		themeMenu(themes);
+
+		debugMenu.getItems().addAll(dumpProgram, runSpim, jsREPL, themes);
 		return debugMenu;
-	}
-
-	private File saveFileSelector(String title, File folder, ExtensionFilter... filter) {
-		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(folder);
-		fc.setTitle(title);
-		fc.getExtensionFilters().addAll(filter);
-		return fc.showSaveDialog(wm.getPrimaryStage());
-	}
-
-	private File openFileSelector(String title, File folder, ExtensionFilter... filter) {
-		// Set the file chooser to open at the user's last directory
-		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(folder);
-		fc.setTitle(title);
-		fc.getExtensionFilters().addAll(filter);
-		return fc.showOpenDialog(wm.getPrimaryStage());
 	}
 
 }

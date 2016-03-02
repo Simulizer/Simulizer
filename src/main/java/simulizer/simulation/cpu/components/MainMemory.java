@@ -148,14 +148,7 @@ public class MainMemory {
 		}
 		else if(address <= this.startOfStack.getValue() && address > this.startOfDynamicData.getValue() + this.megabyte.getValue())//stack write
 		{
-			if(!(false))//this.startOfStack.getValue() - address > this.stack.size()))
-			{
-				this.stack.setBytes(this.startOfStack.getValue()-address, toWrite);//writing to the stack
-			}
-			else
-			{
-				throw new MemoryException("Writing to an invalid area of memory", new Address(address));
-			}
+			this.stack.setBytes(this.startOfStack.getValue()-address, toWrite);//writing to the stack
 		}
 		else//invalid memory write
 		{

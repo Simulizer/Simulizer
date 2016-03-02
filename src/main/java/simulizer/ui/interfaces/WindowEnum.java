@@ -1,13 +1,13 @@
 package simulizer.ui.interfaces;
 
 public enum WindowEnum {
-	CODE_EDITOR("CodeEditor", "Code Editor"),
-	ACE_EDITOR("AceEditor", "Ace Editor"),
+	EDITOR("Editor", "Editor"),
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
-	LOGGER("Logger", "Program I/O"),
-	REGISTERS("Registers"),
+	OPTIONS("Options"),
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
-	OPTIONS("Options");
+	LABELS("Labels"),
+	LOGGER("Logger"),
+	REGISTERS("Registers");
 
 	private final String pkg = "simulizer.ui.windows.";
 	private final String className;
@@ -41,6 +41,13 @@ public enum WindowEnum {
 	public static WindowEnum toEnum(InternalWindow w) {
 		for (WindowEnum we : WindowEnum.values())
 			if (we.equals(w))
+				return we;
+		return null;
+	}
+
+	public static WindowEnum ofString(String name) {
+		for (WindowEnum we : WindowEnum.values())
+			if (we.className.equals(name))
 				return we;
 		return null;
 	}

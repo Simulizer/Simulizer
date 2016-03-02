@@ -21,7 +21,7 @@ public class OperandFormat {
         LABEL       (null),                   // label
         BASE_OFFSET (null);                   // of the form (regex) `label? (+|-)? offset? ( register )`
 
-        private OperandType shouldAlsoAccept;
+        private final OperandType shouldAlsoAccept;
 
         OperandType(OperandType shouldAlsoAccept) {
             this.shouldAlsoAccept = shouldAlsoAccept;
@@ -33,50 +33,50 @@ public class OperandFormat {
     }
 
 
-    public static OperandFormat noArguments = new OperandFormat();
+    public static final OperandFormat noArguments = new OperandFormat();
 
-    public static OperandFormat register = new OperandFormat()
+    public static final OperandFormat register = new OperandFormat()
         .allowed1(OperandType.REGISTER);
 
-    public static OperandFormat label = new OperandFormat()
+    public static final OperandFormat label = new OperandFormat()
         .allowed1(OperandType.LABEL);
 
-    public static OperandFormat cmpLabel = new OperandFormat()
+    public static final OperandFormat cmpLabel = new OperandFormat()
         .allowed1(OperandType.REGISTER)
         .allowed2(OperandType.LABEL);
 
-    public static OperandFormat srcAddr = new OperandFormat()
+    public static final OperandFormat srcAddr = new OperandFormat()
         .allowed1(OperandType.SRC_REGISTER)
         .allowed2(OperandType.LABEL, OperandType.BASE_OFFSET);
 
-    public static OperandFormat destAddr = new OperandFormat()
+    public static final OperandFormat destAddr = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.LABEL, OperandType.BASE_OFFSET);
 
-    public static OperandFormat destImm = new OperandFormat()
+    public static final OperandFormat destImm = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.IMMEDIATE);
 
-    public static OperandFormat destSrc = new OperandFormat()
+    public static final OperandFormat destSrc = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.SRC_REGISTER);
 
-    public static OperandFormat destSrcSrc = new OperandFormat()
+    public static final OperandFormat destSrcSrc = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.SRC_REGISTER)
         .allowed3(OperandType.SRC_REGISTER);
 
-    public static OperandFormat destSrcImm = new OperandFormat()
+    public static final OperandFormat destSrcImm = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.SRC_REGISTER)
         .allowed3(OperandType.IMMEDIATE);
 
-    public static OperandFormat destSrcImmU = new OperandFormat()
+    public static final OperandFormat destSrcImmU = new OperandFormat()
         .allowed1(OperandType.DEST_REGISTER)
         .allowed2(OperandType.SRC_REGISTER)
         .allowed3(OperandType.UNSIGNED_IMMEDIATE);
 
-    public static OperandFormat cmpCmpLabel = new OperandFormat()
+    public static final OperandFormat cmpCmpLabel = new OperandFormat()
         .allowed1(OperandType.REGISTER)
         .allowed2(OperandType.REGISTER)
         .allowed3(OperandType.LABEL);
@@ -96,8 +96,8 @@ public class OperandFormat {
     @Override
     public String toString() {
         return Arrays.toString(allowedPos1) +
-            Arrays.toString(allowedPos2) +
-            Arrays.toString(allowedPos3);
+               Arrays.toString(allowedPos2) +
+               Arrays.toString(allowedPos3);
     }
 
     public int getNumArgs() {

@@ -2,6 +2,7 @@ package simulizer.ui.components;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * A workspace holds all the Internal Windows
-	 * 
+	 *
 	 * @param wm
 	 *            The stage to listen for resize events
 	 */
@@ -97,29 +98,39 @@ public class Workspace extends Observable implements Themeable {
 	 * Closes all open Internal Windows
 	 */
 	public void closeAll() {
-		for (InternalWindow window : openWindows)
-			if (window.isVisible())
-				window.close();
-		openWindows.clear();
+		Iterator<InternalWindow> windows = openWindows.iterator();
+		while (windows.hasNext()) {
+			InternalWindow window = windows.next();
+			window.close();
+			if (window.isClosed())
+				windows.remove();
+		}
 	}
 
 	/**
 	 * Finds an Internal Window if it is already open. Returns null if window is not open
-	 * 
+	 *
 	 * @param window
 	 *            The Internal Window to find
 	 * @return The internal window if already open
 	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
-		for (InternalWindow w : openWindows)
+		// TODO: I (Matt) have (very occasionally) gotten a
+		// ConcurrentModificationException here, stemming from getting the editor in
+		// UISimulationListener just after the simulation starts (it might be the
+		// HLVis window opening at the same time which might be the problem)
+		Iterator<InternalWindow> windows = openWindows.iterator();
+		while (windows.hasNext()) {
+			InternalWindow w = windows.next();
 			if (window.equals(w))
 				return w;
+		}
 		return null;
 	}
 
 	/**
 	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open
-	 * 
+	 *
 	 * @param window
 	 *            The Internal Window to find
 	 * @return The internal window
@@ -130,17 +141,17 @@ public class Workspace extends Observable implements Themeable {
 			return w;
 
 		// Not found -> Create a new one
-		w = window.createNewWindow();
-		assert w != null;
-		w.setWindowManager(wm);
-		wm.getLayouts().setWindowDimentions(w);
-		addWindows(w);
-		return w;
+		InternalWindow w2 = window.createNewWindow();
+		assert w2 != null;
+		w2.setWindowManager(wm);
+		wm.getLayouts().setWindowDimentions(w2);
+		Platform.runLater(() -> addWindows(w2));
+		return w2;
 	}
 
 	/**
 	 * Adds Internal Windows to the workspace (use openInternalWindow instead)
-	 * 
+	 *
 	 * @param windows
 	 *            List of windows to add to the workspace
 	 */
@@ -161,15 +172,15 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Removes Internal Windows from the workspace
-	 * 
+	 *
 	 * @param windows
 	 *            List of Internal Windows to close
 	 */
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
-			if (window.isVisible())
-				window.close();
-			openWindows.remove(window);
+			window.close();
+			if (window.isClosed())
+				openWindows.remove(window);
 		}
 	}
 
@@ -183,7 +194,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Closes all open Internal Windows except theseWindows
-	 * 
+	 *
 	 * @param theseWindows
 	 *            The Internal Windows to keep open
 	 */
@@ -203,7 +214,7 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Will generate a Layout of the current workspace
-	 * 
+	 *
 	 * @param name
 	 *            The name of the layout
 	 * @return The layout of the current workspace
@@ -213,10 +224,10 @@ public class Workspace extends Observable implements Themeable {
 		WindowLocation[] wls = new WindowLocation[openWindows.size()];
 		for (InternalWindow window : openWindows) {
 			// @formatter:off
-			wls[i] = new WindowLocation(WindowEnum.toEnum(window), 
-										window.getLayoutX() / getWidth(), 
-										window.getLayoutY() / getHeight(), 
-										window.getWidth() / getWidth(), 
+			wls[i] = new WindowLocation(WindowEnum.toEnum(window),
+										window.getLayoutX() / getWidth(),
+										window.getLayoutY() / getHeight(),
+										window.getWidth() / getWidth(),
 										window.getHeight() / getHeight());
 			// @formatter:on
 			i++;
@@ -239,5 +250,9 @@ public class Workspace extends Observable implements Themeable {
 	public Settings getSettings() {
 		return wm.getSettings();
 	}
-	
+
+	public boolean hasWindowsOpen() {
+		return !openWindows.isEmpty();
+	}
+
 }

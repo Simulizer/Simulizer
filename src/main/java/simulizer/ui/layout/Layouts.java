@@ -26,8 +26,12 @@ public class Layouts implements Iterable<Layout> {
 	private Layout layout, defaultLayout;
 	private Workspace workspace;
 
-	public Layouts(Workspace workspace) {
+	public Layouts(Workspace workspace) throws IOException {
 		this.workspace = workspace;
+
+		// Check layouts folder exists
+		if (!Files.exists(folder))
+			throw new IOException("layouts folder is missing");
 
 		reload(true);
 	}
@@ -56,6 +60,12 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		if (defaultLayout == null) 
+			defaultLayout = new Layout("MISSING_LAYOUT", new WindowLocation[0]);
+
+		if (layout == null) 
+			layout = defaultLayout;
 	}
 
 	public void setDefaultLayout() {

@@ -14,6 +14,9 @@
     border-radius: 2px;
     border: 1px solid red;
 }
+.fetch   {background-color: white;}
+.decode  {background-color: orange;}
+.execute {background-color: red;}
 </style>
 </head>
 <body>
@@ -25,37 +28,88 @@ var session;
 var doc;
 var markers = null;
 var Range;
+var Search;
+var pipelineHighlights = [-1, -1, -1]; // line numbers for pipeline highlights
+var userInControl; // whether the user is in control during execution of the program
 
 function init() {
     Range = ace.require("ace/range").Range;
+    Search = ace.require("ace/search").Search;
 
     editor  = ace.edit('editor');
     session = editor.getSession();
     doc     = session.getDocument();
 
     editor.setOptions({
-        useSoftTabs    : true,
-        tabSize        : 4,
-        wrap           : false,
-        scrollSpeed    : 0.1,
-        animatedScroll : false,
-        fontSize       : '12pt',
-        scrollPastEnd  : true,
-        displayIndentGuides: false
+    // configurable
+          useSoftTabs    : true,
+          scrollSpeed    : 0.1,
+
+    // not configurable
+          tabSize        : 4,
+          animatedScroll : false,
+          scrollPastEnd  : true,
+          displayIndentGuides: false
     });
-    editor.setTheme("ace/theme/monokai");
+    session.setUseWrapMode(false);
+
     doc.on('change', function(e) {
         bridge.onChange();// a java method
         if(markers)
             removeMarkers();
     });
+
+
+    // for disabling, then re-enabling selection when switching modes
+    editor._backupPointerEvents = editor.container.style.pointerEvents;
+}
+
+// change by a relative amount (px)
+function changeFontSize(amount) {
+    var current = parseFloat(editor.container.style.fontSize);
+    editor.container.style.fontSize = (current + amount) + "px";
 }
 
 function loadText(text) {
     var cursorPos = -1; // indicates the beginning
     session.setValue(text, cursorPos);
     session.setMode("ace/mode/simp");
-    //editor.getSession().foldAll();
+}
+
+function getLine() {
+	return editor.getSelectionRange().start.row;
+}
+
+function getColumn() {
+	return editor.getSelectionRange().start.column;
+}
+
+// 0-based line index
+function goto(line) {
+    editor.gotoLine(line+1); // expects 1-based index
+    // line, center, animate, callback
+    // centers between two lines so 1/0-based index makes no difference really
+    editor.scrollToLine(line, true, false, function() {});
+}
+
+function find(pattern, backwards) {
+	var s = new Search();
+
+	s.needle = pattern;
+	s.wrap = true;
+	s.caseSensitive = true;
+	s.wholeWord = true;
+
+	if (backwards)
+		editor.findPrevious(s, false);
+	else
+		editor.findNext(s, false);
+}
+function findAll(pattern) {
+	var s = new Search();
+	s.wholeWord = true;
+
+	editor.findAll(pattern, s, false);
 }
 
 function refreshProblems() {
@@ -101,6 +155,56 @@ function removeMarkers() {
             session.removeMarker(markers[i]);
         }
         markers = null;
+    }
+}
+
+function executeMode() {
+    editor.setReadOnly(true);
+    editor.renderer.$cursorLayer.element.style.opacity=0;
+    if(!userInControl) {
+        editor.container.style.pointerEvents = 'none';
+    }
+}
+function editMode() {
+    editor.setReadOnly(false);
+    clearPipelineHighlights();
+    editor.renderer.$cursorLayer.element.style.opacity=1;
+    // whether control was taken or not, reset (what if the setting was changed
+    // during execution)
+    if(editor._backupPointerEvents !== undefined) {
+        editor.container.style.pointerEvents = editor._backupPointerEvents;
+    }
+}
+
+function clearPipelineHighlights() {
+    session.removeGutterDecoration(pipelineHighlights[0], 'fetch');
+    session.removeGutterDecoration(pipelineHighlights[1], 'decode');
+    session.removeGutterDecoration(pipelineHighlights[2], 'execute');
+}
+
+function highlightPipeline(fetchLine, decodeLine, executeLine) {
+    clearPipelineHighlights();
+
+    pipelineHighlights = [fetchLine, decodeLine, executeLine];
+
+    session.addGutterDecoration(fetchLine, 'fetch');
+    session.addGutterDecoration(decodeLine, 'decode');
+    session.addGutterDecoration(executeLine, 'execute');
+    if(!userInControl) {
+        goto(executeLine);
+    }
+}
+
+function setFont(family, size) {
+    if(family !== null) {
+        editor.setOptions({
+            fontFamily: family,
+            fontSize: size
+        });
+    } else {
+        editor.setOptions({
+            fontSize: size
+        });
     }
 }
 

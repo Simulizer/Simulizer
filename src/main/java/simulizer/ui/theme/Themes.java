@@ -24,8 +24,13 @@ public class Themes implements Iterable<Theme> {
 	private Set<Themeable> themeables = new HashSet<Themeable>();
 	private Theme theme = null;
 
-	public Themes(String defaultTheme) {
+	public Themes(String defaultTheme) throws IOException {
 		this.defaultTheme = defaultTheme;
+
+		// Check themes folder exists
+		if (!Files.exists(folder))
+			throw new IOException("themes folder is missing");
+
 		reload();
 	}
 
@@ -61,6 +66,10 @@ public class Themes implements Iterable<Theme> {
 					}
 				}
 			}
+		}
+
+		if (theme == null) {
+			theme = new EmptyTheme();
 		}
 	}
 

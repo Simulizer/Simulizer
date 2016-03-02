@@ -16,13 +16,14 @@ public class Program {
     /**
      * statements of the program
      */
-    public Map<Address, Statement> textSegment;
+    public final Map<Address, Statement> textSegment;
     public Address textSegmentStart;
+    public Address textSegmentLast; // address of the last instruction
 
     /**
      * metadata and type information about areas of the static data segment
      */
-    public Map<Address, Variable> dataSegmentVariables;
+    public final Map<Address, Variable> dataSegmentVariables;
     public Address dataSegmentStart;
 
     /**
@@ -34,9 +35,10 @@ public class Program {
      */
     public Address dynamicSegmentStart;
 
-    public Map<Label, Address> labels;
-    public Map<Address, List<Annotation>> annotations;
-    public Map<Address, Integer> lineNumbers;
+    public final Map<Label, Address> labels;
+    public final Map<Address, Annotation> annotations;
+    public Annotation initAnnotation;
+    public final Map<Address, Integer> lineNumbers;
 
     /**
      * initial value for the global pointer
@@ -62,6 +64,7 @@ public class Program {
         dynamicSegmentStart = Address.NULL;
         labels = new HashMap<>();
         annotations = new HashMap<>();
+        initAnnotation = null;
         lineNumbers = new HashMap<>();
         initialGP = null;
         initialSP = null;
