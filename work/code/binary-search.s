@@ -173,9 +173,7 @@ binary_search:
     li $t0, -1
     beq $a1, $t0 binary_search_NOT_FOUND
 
-nop # @{ l.emphasise(addressToIndex($a1.get())) }@
-    # @{ l.emphasise(addressToIndex($a2.get())) }@
-    # @{ l.commit() }@
+nop # @{ l.setMarkers(addressToIndex($a1.get()), addressToIndex($a2.get())) }@
     
     # no other calls are made so no need to store registers on the stack
 

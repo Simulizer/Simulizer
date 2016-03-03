@@ -141,7 +141,7 @@ MOVE_RETURN:
 # PRINT_MOVE(src, dest)
 PRINT_MOVE:
 
-    # @{ h.move($a0.get()-1, $a1.get()-1); h.commit(); }@
+    # @{ h.move($a0.get()-1, $a1.get()-1) }@
 
     # save/push arguments that may be modified onto the stack (spill)
     addi $sp, $sp, -4       # grow the stack by 4 bytes

@@ -91,6 +91,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 			vis.addAll(rectangles[i], textLabels[i]);
 		}
+
+		for (int i = 0; i < markers.length; ++i) {
+			markers[i] = new Text("");
+			markers[i].setFont(new Font(35));
+			vis.add(markers[i]);
+		}
 	}
 
 	private double getX(int rectIndex) {
@@ -107,7 +113,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private double getMarkerY(int index) {
-		return y0 - markers[index + 1].getBoundsInLocal().getHeight() - 20;
+		return y0 - markers[index + 1].getBoundsInLocal().getHeight() / 3;
 	}
 
 	/**
@@ -154,35 +160,25 @@ public class ListVisualiser extends DataStructureVisualiser {
 		}
 	}
 
-	public void setLeftMarker(int i) {
+	public void setMarkers(int left, int right) {
 		Platform.runLater(() -> {
-			for (int k = 0; k < markers.length; ++k) {
-				if (markers[k] != null && markers[k].getText().equals("R")) vis.remove(markers[k]);
+			for (int i = 0; i < markers.length; ++i)
+				markers[i].setText("");
+
+			if (left == right) setMarker(left, "LR");
+			else {
+				setMarker(left, "L");
+				setMarker(right, "R");
 			}
-
-			setMarker(i, "L");
-		});
-	}
-
-	public void setRightMarker(int i) {
-		Platform.runLater(() -> {
-			for (int k = 0; k < markers.length; ++k) {
-				if (markers[k] != null && markers[k].getText().equals("R")) vis.remove(markers[k]);
-			}
-
-			setMarker(i, "R");
 		});
 	}
 
 	private void setMarker(int i, String label) {
-		System.out.printf("%d, %s%n", i, label);
-		if (markers[i + 1] == null) {
-			markers[i + 1] = new Text(label);
-			vis.add(markers[i + 1]);
-		} else markers[i + 1].setText(label);
-
+		markers[i + 1].setText(label);
 		markers[i + 1].setTranslateX(getTextX(i, markers[i + 1]));
 		markers[i + 1].setTranslateY(getMarkerY(i));
+
+		resize();
 	}
 
 	public void setLabel(int i, String label) {
@@ -289,8 +285,6 @@ public class ListVisualiser extends DataStructureVisualiser {
 		calculateDimensions();
 
 		for (int i = 0; i < rectangles.length; ++i) {
-			System.out.println(getX(i));
-
 			setAttrs(rectangles[i], getX(i), y0, rectLength, rectLength);
 
 			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
