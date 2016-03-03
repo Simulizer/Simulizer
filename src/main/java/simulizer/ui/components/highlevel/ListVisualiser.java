@@ -1,7 +1,6 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javafx.animation.Animation;
@@ -14,11 +13,10 @@ import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.VLineTo;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.data.representation.Word;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
@@ -29,7 +27,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
  * @param <T>
  *            the data type stored in the list
  */
-public class ListVisualiser<T> extends DataStructureVisualiser {
+public class ListVisualiser extends DataStructureVisualiser {
 	private class Pair {
 		public int a;
 		public int b;
@@ -40,17 +38,20 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		}
 	}
 
-	private List<T> list;
+	private List<?> list;
 	private List<Animation> animationBuffer = new ArrayList<>();
 	private List<Pair> swapIndices = new ArrayList<>();
 	private Rectangle[] rectangles;
 	private Text[] textLabels;
+	private Text[] markers;
 
 	private double rectLength;
 	private double y0;
 
 	private final double XPAD = 10;
 	private final double YPAD = 10;
+
+	private boolean queuing;
 
 	/**
 	 * @param width
@@ -60,15 +61,16 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(HighLevelVisualisation vis, double width, double height, List<T> list) {
-		super(vis, width, height);
-		this.setList(list);
+	public ListVisualiser(HighLevelVisualisation vis) {
+		super(vis);
 	}
 
-	public void setList(List<T> list) {
+	public void setList(List<?> list) {
 		this.list = list;
+
 		this.rectangles = new Rectangle[list.size()];
 		this.textLabels = new Text[list.size()];
+		this.markers = new Text[list.size() + 2]; // + 2 so you can put a marker to the left and right
 
 		calculateDimensions();
 
@@ -79,8 +81,6 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private void initRectsAndBoxes() {
-		HighLevelVisualisation vis = getHighLevelVisualisation();
-
 		for (int i = 0; i < rectangles.length; ++i) {
 			rectangles[i] = new Rectangle(getX(i), y0, rectLength, rectLength);
 			rectangles[i].getStyleClass().add("list-item");
@@ -89,12 +89,17 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 			textLabels[i] = new Text("" + list.get(i));
 			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
-			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
 
 			vis.addAll(rectangles[i], textLabels[i]);
 		}
 
+		for (int i = 0; i < markers.length; ++i) {
+			markers[i] = new Text("");
+			markers[i].setFont(new Font(35));
+			vis.add(markers[i]);
+		}
 	}
 
 	private double getX(int rectIndex) {
@@ -102,12 +107,21 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		return getWidth() / 2 - blockWidth / 2 + rectIndex * rectLength;
 	}
 
-	private double getTextX(int rectIndex) {
-		return getX(rectIndex) + rectLength / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2;
+	private double getTextX(int rectIndex, Text label) {
+		return getX(rectIndex) + rectLength / 2 - label.getBoundsInLocal().getWidth() / 2;
 	}
 
 	private double getTextY(int rectIndex) {
 		return y0 + rectLength / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3;
+	}
+
+	private double getMarkerY(int index) {
+		return y0 - markers[index + 1].getBoundsInLocal().getHeight() / 3;
+	}
+
+	public ListVisualiser batch() {
+		this.queuing = true;
+		return this;
 	}
 
 	/**
@@ -118,7 +132,7 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param j
 	 *            the index of the second element
 	 */
-	public void swap(int i, int j) {
+	public ListVisualiser swap(int i, int j) {
 		Rectangle rect1 = rectangles[i];
 		Rectangle rect2 = rectangles[j];
 
@@ -126,8 +140,14 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 		Text text2 = textLabels[j];
 
 		animationBuffer.add(setupSwap(rect1, getX(i), y0, rect2, getX(j), y0));
-		animationBuffer.add(setupTextSwap(text1, getTextX(i), y0, text2, getTextX(j), y0));
+		animationBuffer.add(setupTextSwap(text1, getTextX(i, text1), y0, text2, getTextX(j, text2), y0));
 		swapIndices.add(new Pair(i, j));
+
+		if (queuing) return this;
+		else {
+			commit();
+			return this;
+		}
 	}
 
 	/**
@@ -137,8 +157,8 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * @param i
 	 *            the index of the element to be emphasised (can be outside valid range)
 	 */
-	public void emphasise(int i) {
-		if(i >= 0 && i < rectangles.length) {
+	public ListVisualiser emphasise(int i) {
+		if (i >= 0 && i < rectangles.length) {
 			Rectangle rect = rectangles[i];
 			Text text = textLabels[i];
 
@@ -151,7 +171,36 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 			tt.setAutoReverse(true);
 
 			animationBuffer.add(new ParallelTransition(ft, tt));
+
+			if (queuing) return this;
+			else {
+				commit();
+				return this;
+			}
 		}
+
+		return this;
+	}
+
+	public void setMarkers(int left, int right) {
+		Platform.runLater(() -> {
+			for (int i = 0; i < markers.length; ++i)
+				markers[i].setText("");
+
+			if (left == right) setMarker(left, "LR");
+			else {
+				setMarker(left, "L");
+				setMarker(right, "R");
+			}
+		});
+	}
+
+	private void setMarker(int i, String label) {
+		markers[i + 1].setText(label);
+		markers[i + 1].setTranslateX(getTextX(i, markers[i + 1]));
+		markers[i + 1].setTranslateY(getMarkerY(i));
+
+		resize();
 	}
 
 	public void setLabel(int i, String label) {
@@ -164,6 +213,8 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	 * buffer.
 	 */
 	public void commit() {
+		queuing = false;
+
 		ParallelTransition animation = new ParallelTransition();
 		animation.getChildren().addAll(animationBuffer);
 		animation.play();
@@ -194,19 +245,24 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	private ParallelTransition setupSwap(Rectangle rect1, double x1, double y1, Rectangle rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
-		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2));
-		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1));
+		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2, true));
+		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1, false));
 
 		return svar;
 	}
 
-	private PathTransition getTransition(Rectangle rect, double x1, double y1, double x2, double y2) {
+	private PathTransition getTransition(Rectangle rect, double x1, double y1, double x2, double y2, boolean above) {
 		int width = rect.widthProperty().intValue();
 		int height = rect.heightProperty().intValue();
 
+		double mul = above ? -1 : 2.7;
+		double y = y1 + height / 2;
+
 		Path path = new Path();
-		path.getElements().add(new MoveTo(x1 + width / 2, y1 + height / 2));
+		path.getElements().add(new MoveTo(x1 + width / 2, y));
+		path.getElements().add(new VLineTo(y1 + mul * (height / 2 + 10)));
 		path.getElements().add(new HLineTo(x2 + width / 2));
+		path.getElements().add(new VLineTo(y));
 		PathTransition pathTransition = new PathTransition();
 		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
@@ -218,18 +274,23 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	private ParallelTransition setupTextSwap(Text rect1, double x1, double y1, Text rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
-		svar.getChildren().addAll((Animation) getTextTransition(rect1, x1, y1, x2, y2));
-		svar.getChildren().addAll((Animation) getTextTransition(rect2, x2, y2, x1, y1));
+		svar.getChildren().addAll((Animation) getTextTransition(rect1, x1, y1, x2, y2, true));
+		svar.getChildren().addAll((Animation) getTextTransition(rect2, x2, y2, x1, y1, false));
 
 		return svar;
 	}
 
-	private PathTransition getTextTransition(Text rect, double x1, double y1, double x2, double y2) {
+	private PathTransition getTextTransition(Text rect, double x1, double y1, double x2, double y2, boolean above) {
 		double width = rect.getBoundsInLocal().getWidth();
 
+		double mul = above ? -1 : 2.7;
+		double y = y0 + rectLength / 2;
+
 		Path path = new Path();
-		path.getElements().add(new MoveTo(x1 + width / 2, y0 + rectLength / 2));
+		path.getElements().add(new MoveTo(x1 + width / 2, y));
+		path.getElements().add(new VLineTo(y0 + mul * (rectLength / 2 + 10)));
 		path.getElements().add(new HLineTo(x2 + width / 2));
+		path.getElements().add(new VLineTo(y));
 		PathTransition pathTransition = new PathTransition();
 		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
@@ -240,12 +301,11 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 	}
 
 	private void calculateDimensions() {
-		calculateDimensions(getHighLevelVisualisation().getWindowWidth(), getHighLevelVisualisation().getWindowHeight());
-	}
+		double width = vis.getWindowWidth();
+		double height = vis.getWindowHeight();
 
-	private void calculateDimensions(double width, double height) {
 		double rectCalc;
-		if (height < height) rectCalc = height - 2 * YPAD;
+		if (height < width) rectCalc = height - 2 * YPAD;
 		else rectCalc = width - 2 * XPAD;
 		this.rectLength = rectCalc / rectangles.length;
 
@@ -254,18 +314,31 @@ public class ListVisualiser<T> extends DataStructureVisualiser {
 
 	@Override
 	public void resize() {
+		if (rectangles == null || textLabels == null) return;
+
 		calculateDimensions();
 
-		System.out.println("\nxs");
 		for (int i = 0; i < rectangles.length; ++i) {
 			setAttrs(rectangles[i], getX(i), y0, rectLength, rectLength);
 
-			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
+
+			if (markers[i] != null) {
+				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
+				markers[i].setTranslateY(getMarkerY(i - 1));
+			}
 		}
 
-		setWidth(getHighLevelVisualisation().getWidth());
-		setHeight(getHighLevelVisualisation().getHeight());
+		for (int i = rectangles.length; i < rectangles.length + 2; ++i) {
+			if (markers[i] != null) {
+				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
+				markers[i].setTranslateY(getMarkerY(i - 1));
+			}
+		}
+
+		setWidth(vis.getWidth());
+		setHeight(vis.getHeight());
 	}
 
 }

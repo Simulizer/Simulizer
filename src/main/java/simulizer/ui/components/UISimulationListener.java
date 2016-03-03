@@ -64,7 +64,7 @@ public class UISimulationListener extends SimulationListener {
 	int count = 0;
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
 		count++;
-		wm.getAnnotationManager().processAnnotation(m.annotation);
+		wm.getAnnotationManager().processAnnotationMessage(m);
 	}
 
 	@Override

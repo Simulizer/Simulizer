@@ -118,6 +118,11 @@ public class CPU {
         clock.tickMillis = 3 * tickMillis;
     }
 
+    /**gets the speed in ms of the clock
+     *
+     */
+    public int getClockSpeed(){ return clock.tickMillis; }
+
     /**stop the running of a program
      *
      */
@@ -146,6 +151,14 @@ public class CPU {
      */
     public void registerListener(SimulationListener l) {
         listeners.add(l);
+    }
+
+    /**
+     * Unregisters a listener from the list
+     * @param l the listener to be removed
+     */
+    public void unregisterListener(SimulationListener l){
+        listeners.remove(l);
     }
 
     /**
@@ -655,7 +668,7 @@ public class CPU {
 		
 		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
-			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
@@ -677,7 +690,7 @@ public class CPU {
 
         // used for setting up the annotation environment eg loading visualisations
         if(program.initAnnotation != null) {
-            sendMessage(new AnnotationMessage(program.initAnnotation));
+            sendMessage(new AnnotationMessage(program.initAnnotation, null));
         }
 
         while(isRunning) { //need something to stop this

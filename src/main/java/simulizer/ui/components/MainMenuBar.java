@@ -1,11 +1,16 @@
 package simulizer.ui.components;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import javafx.application.Platform;
-import javafx.scene.control.*;
+import java.net.URI;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -29,7 +34,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
 	private Editor getEditor() {
@@ -147,7 +152,10 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Simulation");
 
 		MenuItem runPause = new MenuItem("Run/Pause");
-		runPause.setOnAction(e -> wm.assembleAndRun());
+		runPause.setOnAction(e -> {
+			new AssemblingDialog(wm.getCPU());
+			wm.assembleAndRun();
+		});
 
 		MenuItem singleStep = new MenuItem("Next Step");
 		singleStep.setDisable(true);
@@ -177,9 +185,11 @@ public class MainMenuBar extends MenuBar {
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
-			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
-			windowsMenu.getItems().add(item);
+			if (wenum.showInWindowsMenu()) {
+				MenuItem item = new MenuItem(wenum.toString());
+				item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
+				windowsMenu.getItems().add(item);
+			}
 		}
 
 		MenuItem delWindows = new MenuItem("Close All");
@@ -187,6 +197,32 @@ public class MainMenuBar extends MenuBar {
 		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
 
 		return windowsMenu;
+	}
+
+	private Menu helpMenu() {
+		Menu helpMenu = new Menu("Help");
+
+		MenuItem guide = new MenuItem("Guide");
+		guide.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.GUIDE));
+
+		MenuItem syscall = new MenuItem("Syscall Reference");
+		syscall.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.SYSCALL_REFERENCE));
+
+		MenuItem instruction = new MenuItem("Instruction Reference");
+		instruction.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.INSTRUCTION_REFERENCE));
+
+		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
+		keyBinds.setOnAction(e -> {
+			try {
+				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		});
+
+		helpMenu.getItems().addAll(guide, syscall, instruction, new SeparatorMenuItem(), keyBinds);
+
+		return helpMenu;
 	}
 
 	private Menu debugMenu() {

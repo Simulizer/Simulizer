@@ -3,6 +3,7 @@ package simulizer.annotations;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.MainMemory;
+import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.HeapException;
@@ -33,22 +34,22 @@ public class SimulationBridge {
 		return cpu.getRegisters();
 	}
 
-	public long getRegister(Register r) {
+	public long getRegisterU(Register r) {
 		Word[] regs = getRegisters();
 		return DataConverter.decodeAsUnsigned(regs[r.getID()].getWord());
 	}
+	public long getRegisterS(Register r) {
+		Word[] regs = getRegisters();
+		return DataConverter.decodeAsSigned(regs[r.getID()].getWord());
+	}
 
-	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) {
+	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) throws MemoryException, HeapException, StackException {
 		MainMemory mem = cpu.getMainMemory();
 		List<Long> words = new ArrayList<>();
 
 		assert (lastAddress > firstAddress) && ((lastAddress - firstAddress) % 4 == 0);
 		for(int i = firstAddress; i <= lastAddress; i+=4) {
-			try {
-				words.add(DataConverter.decodeAsUnsigned(mem.readFromMem(i, 4)));
-			} catch (MemoryException | HeapException | StackException e) {
-				e.printStackTrace();
-			}
+			words.add(DataConverter.decodeAsUnsigned(mem.readFromMem(i, 4)));
 		}
 		return words;
 	}
