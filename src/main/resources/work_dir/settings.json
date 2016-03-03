@@ -5,7 +5,7 @@
   },
   "workspace": {
     "theme": "default",
-    "layout": "cpuvisualisation.json",
+    "layout": "default.json",
     "scale-ui": {
       "enabled": true,
       "delay": 10
@@ -32,11 +32,11 @@
     "soft-tabs": true,
     "theme" : "ace/theme/monokai",
     "user-control-during-execution": false,
-    "vim-mode": true,
+    "vim-mode": false,
     "wrap": false
   },
   "splash-screen": {
-    "enabled": false,
+    "enabled": true,
     "delay": 750,
     "width": 676,
     "height": 235
