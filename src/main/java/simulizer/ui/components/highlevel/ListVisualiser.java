@@ -13,6 +13,7 @@ import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.VLineTo;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -49,6 +50,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private final double XPAD = 10;
 	private final double YPAD = 10;
+
+	private boolean queuing;
 
 	/**
 	 * @param width
@@ -116,6 +119,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 		return y0 - markers[index + 1].getBoundsInLocal().getHeight() / 3;
 	}
 
+	public ListVisualiser batch() {
+		this.queuing = true;
+		return this;
+	}
+
 	/**
 	 * Calculates the animation for swapping the items at the specified indices.
 	 *
@@ -124,7 +132,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * @param j
 	 *            the index of the second element
 	 */
-	public void swap(int i, int j) {
+	public ListVisualiser swap(int i, int j) {
 		Rectangle rect1 = rectangles[i];
 		Rectangle rect2 = rectangles[j];
 
@@ -134,6 +142,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 		animationBuffer.add(setupSwap(rect1, getX(i), y0, rect2, getX(j), y0));
 		animationBuffer.add(setupTextSwap(text1, getTextX(i, text1), y0, text2, getTextX(j, text2), y0));
 		swapIndices.add(new Pair(i, j));
+
+		if (queuing) return this;
+		else {
+			commit();
+			return this;
+		}
 	}
 
 	/**
@@ -143,7 +157,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * @param i
 	 *            the index of the element to be emphasised (can be outside valid range)
 	 */
-	public void emphasise(int i) {
+	public ListVisualiser emphasise(int i) {
 		if (i >= 0 && i < rectangles.length) {
 			Rectangle rect = rectangles[i];
 			Text text = textLabels[i];
@@ -157,7 +171,15 @@ public class ListVisualiser extends DataStructureVisualiser {
 			tt.setAutoReverse(true);
 
 			animationBuffer.add(new ParallelTransition(ft, tt));
+
+			if (queuing) return this;
+			else {
+				commit();
+				return this;
+			}
 		}
+
+		return this;
 	}
 
 	public void setMarkers(int left, int right) {
@@ -191,6 +213,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * buffer.
 	 */
 	public void commit() {
+		queuing = false;
+
 		ParallelTransition animation = new ParallelTransition();
 		animation.getChildren().addAll(animationBuffer);
 		animation.play();
@@ -221,19 +245,24 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private ParallelTransition setupSwap(Rectangle rect1, double x1, double y1, Rectangle rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
-		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2));
-		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1));
+		svar.getChildren().addAll((Animation) getTransition(rect1, x1, y1, x2, y2, true));
+		svar.getChildren().addAll((Animation) getTransition(rect2, x2, y2, x1, y1, false));
 
 		return svar;
 	}
 
-	private PathTransition getTransition(Rectangle rect, double x1, double y1, double x2, double y2) {
+	private PathTransition getTransition(Rectangle rect, double x1, double y1, double x2, double y2, boolean above) {
 		int width = rect.widthProperty().intValue();
 		int height = rect.heightProperty().intValue();
 
+		double mul = above ? -1 : 2.7;
+		double y = y1 + height / 2;
+
 		Path path = new Path();
-		path.getElements().add(new MoveTo(x1 + width / 2, y1 + height / 2));
+		path.getElements().add(new MoveTo(x1 + width / 2, y));
+		path.getElements().add(new VLineTo(y1 + mul * (height / 2 + 10)));
 		path.getElements().add(new HLineTo(x2 + width / 2));
+		path.getElements().add(new VLineTo(y));
 		PathTransition pathTransition = new PathTransition();
 		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
@@ -245,18 +274,23 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private ParallelTransition setupTextSwap(Text rect1, double x1, double y1, Text rect2, double x2, double y2) {
 		ParallelTransition svar = new ParallelTransition();
-		svar.getChildren().addAll((Animation) getTextTransition(rect1, x1, y1, x2, y2));
-		svar.getChildren().addAll((Animation) getTextTransition(rect2, x2, y2, x1, y1));
+		svar.getChildren().addAll((Animation) getTextTransition(rect1, x1, y1, x2, y2, true));
+		svar.getChildren().addAll((Animation) getTextTransition(rect2, x2, y2, x1, y1, false));
 
 		return svar;
 	}
 
-	private PathTransition getTextTransition(Text rect, double x1, double y1, double x2, double y2) {
+	private PathTransition getTextTransition(Text rect, double x1, double y1, double x2, double y2, boolean above) {
 		double width = rect.getBoundsInLocal().getWidth();
 
+		double mul = above ? -1 : 2.7;
+		double y = y0 + rectLength / 2;
+
 		Path path = new Path();
-		path.getElements().add(new MoveTo(x1 + width / 2, y0 + rectLength / 2));
+		path.getElements().add(new MoveTo(x1 + width / 2, y));
+		path.getElements().add(new VLineTo(y0 + mul * (rectLength / 2 + 10)));
 		path.getElements().add(new HLineTo(x2 + width / 2));
+		path.getElements().add(new VLineTo(y));
 		PathTransition pathTransition = new PathTransition();
 		pathTransition.setDuration(Duration.millis(getRate()));
 		pathTransition.setPath(path);
