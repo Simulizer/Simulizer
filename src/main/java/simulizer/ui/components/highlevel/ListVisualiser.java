@@ -42,7 +42,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private List<Pair> swapIndices = new ArrayList<>();
 	private Rectangle[] rectangles;
 	private Text[] textLabels;
-	private List<Text> markers = new ArrayList<>();
+	private Text[] markers;
 
 	private double rectLength;
 	private double y0;
@@ -67,6 +67,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		this.rectangles = new Rectangle[list.size()];
 		this.textLabels = new Text[list.size()];
+		this.markers = new Text[list.size() + 2]; // + 2 so you can put a marker to the left and right
 
 		calculateDimensions();
 
@@ -85,7 +86,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 			textLabels[i] = new Text("" + list.get(i));
 			textLabels[i].setFont(new Font("Arial", 55)); // Need to set this here so that text size calculations work.
-			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
 
 			vis.addAll(rectangles[i], textLabels[i]);
@@ -97,12 +98,16 @@ public class ListVisualiser extends DataStructureVisualiser {
 		return getWidth() / 2 - blockWidth / 2 + rectIndex * rectLength;
 	}
 
-	private double getTextX(int rectIndex) {
-		return getX(rectIndex) + rectLength / 2 - textLabels[rectIndex].getBoundsInLocal().getWidth() / 2;
+	private double getTextX(int rectIndex, Text label) {
+		return getX(rectIndex) + rectLength / 2 - label.getBoundsInLocal().getWidth() / 2;
 	}
 
 	private double getTextY(int rectIndex) {
 		return y0 + rectLength / 2 + textLabels[rectIndex].getBoundsInLocal().getHeight() / 3;
+	}
+
+	private double getMarkerY(int index) {
+		return y0 - markers[index + 1].getBoundsInLocal().getHeight() - 20;
 	}
 
 	/**
@@ -121,7 +126,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 		Text text2 = textLabels[j];
 
 		animationBuffer.add(setupSwap(rect1, getX(i), y0, rect2, getX(j), y0));
-		animationBuffer.add(setupTextSwap(text1, getTextX(i), y0, text2, getTextX(j), y0));
+		animationBuffer.add(setupTextSwap(text1, getTextX(i, text1), y0, text2, getTextX(j, text2), y0));
 		swapIndices.add(new Pair(i, j));
 	}
 
@@ -147,6 +152,37 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 			animationBuffer.add(new ParallelTransition(ft, tt));
 		}
+	}
+
+	public void setLeftMarker(int i) {
+		Platform.runLater(() -> {
+			for (int k = 0; k < markers.length; ++k) {
+				if (markers[k] != null && markers[k].getText().equals("R")) vis.remove(markers[k]);
+			}
+
+			setMarker(i, "L");
+		});
+	}
+
+	public void setRightMarker(int i) {
+		Platform.runLater(() -> {
+			for (int k = 0; k < markers.length; ++k) {
+				if (markers[k] != null && markers[k].getText().equals("R")) vis.remove(markers[k]);
+			}
+
+			setMarker(i, "R");
+		});
+	}
+
+	private void setMarker(int i, String label) {
+		System.out.printf("%d, %s%n", i, label);
+		if (markers[i + 1] == null) {
+			markers[i + 1] = new Text(label);
+			vis.add(markers[i + 1]);
+		} else markers[i + 1].setText(label);
+
+		markers[i + 1].setTranslateX(getTextX(i, markers[i + 1]));
+		markers[i + 1].setTranslateY(getMarkerY(i));
 	}
 
 	public void setLabel(int i, String label) {
@@ -253,10 +289,24 @@ public class ListVisualiser extends DataStructureVisualiser {
 		calculateDimensions();
 
 		for (int i = 0; i < rectangles.length; ++i) {
+			System.out.println(getX(i));
+
 			setAttrs(rectangles[i], getX(i), y0, rectLength, rectLength);
 
-			textLabels[i].setTranslateX(getTextX(i));
+			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
+
+			if (markers[i] != null) {
+				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
+				markers[i].setTranslateY(getMarkerY(i - 1));
+			}
+		}
+
+		for (int i = rectangles.length; i < rectangles.length + 2; ++i) {
+			if (markers[i] != null) {
+				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
+				markers[i].setTranslateY(getMarkerY(i - 1));
+			}
 		}
 
 		setWidth(vis.getWidth());
