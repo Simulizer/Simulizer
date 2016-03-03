@@ -1,12 +1,16 @@
 package simulizer.ui.components.cpu;
 
 import javafx.animation.FillTransition;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import simulizer.ui.windows.CPUVisualisation;
 
 
 public class ComponentStackPane extends StackPane {
@@ -17,12 +21,11 @@ public class ComponentStackPane extends StackPane {
     double y;
     double width;
     double height;
+    CPUVisualisation vis;
+    boolean focused = false;
 
-    public ComponentStackPane(double x, double y, double width, double height, String label){
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public ComponentStackPane(CPUVisualisation vis, String label){
+        this.vis = vis;
         this.text = new Text(label);
     }
 
@@ -52,6 +55,14 @@ public class ComponentStackPane extends StackPane {
         return width;
     }
 
+    public double getX(){ return x; }
+
+    public double getY(){ return y; }
+
+    public void setX(double x){ this.x = x; }
+
+    public void setY(double y){ this.y = y; }
+
     public void setShapeWidth(double width) {
         this.width = width;
     }
@@ -68,11 +79,39 @@ public class ComponentStackPane extends StackPane {
         return new ConnectorWire(this, shape, ConnectorWire.Type.VERTICAL, bottom, arrowStart, offset);
     }
 
-    public void highlight(int n){
-        FillTransition ft = new FillTransition(Duration.millis(300), shape, Color.valueOf("#1e3c72"), Color.RED);
-        ft.setCycleCount(n);
+    public void highlight(){
+        FillTransition ft = new FillTransition(Duration.millis(100), shape, Color.valueOf("#1e3c72"), Color.RED);
+        ft.setCycleCount(2);
         ft.setAutoReverse(true);
         ft.play();
+    }
+
+    public void setTooltip(String text){
+        final ComponentStackPane instance = this;
+        final Tooltip tooltip = new Tooltip(text);
+        Tooltip.install(instance, tooltip);
+        tooltip.setAutoHide(true);
+        tooltip.setWrapText(true);
+
+        vis.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                double eventX = event.getX();
+                double eventY = event.getY();
+                double xMax = getX() + getShapeWidth();
+                double yMax = getY() + getShapeHeight();
+
+                if( eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
+                    tooltip.setMaxWidth(vis.getWidth() - 40);
+                    tooltip.setMaxHeight(vis.getHeight());
+                    tooltip.show(instance, vis.getLayoutX() + eventX, vis.getLayoutY() + eventY);
+                } else {
+                    tooltip.hide();
+                }
+
+            }
+        });
+
     }
 
 }

@@ -4,6 +4,8 @@ import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.internal.runtime.ECMAErrors;
+import jdk.nashorn.internal.runtime.ECMAException;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.user_interaction.IO;
@@ -80,7 +82,10 @@ public class AnnotationExecutor {
 		for(Register r : Register.values()) {
 			String name = r.getName();
 			registerGlobals.append('$').append(name).append("={id:Register.")
-					.append(name).append(",get:function(){return simulation.getRegister(this.id);}};");
+					.append(name)
+					.append(",getS:function(){return simulation.getRegisterS(this.id);}")
+					.append(",getU:function(){return simulation.getRegisterU(this.id);}")
+					.append(",get:function(){return this.getS();}};");
 		}
 		exec(registerGlobals.toString());
 	}
@@ -104,8 +109,24 @@ public class AnnotationExecutor {
 		return tClass.cast(globals.get(name));
 	}
 
-	public Object exec(Annotation annotation) throws ScriptException, SecurityException {
-		Object res = engine.eval(annotation.code);
+	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn {
+		@SuppressWarnings("UnusedAssignment")
+		Object res = null;
+
+		try {
+			res = engine.eval(annotation.code);
+		} catch(ScriptException e) {
+			// exceptions thrown from inside the script are wrapped in a ScriptException
+			if (e.getCause() instanceof ECMAException &&
+					((ECMAException) e.getCause()).thrown instanceof AnnotationEarlyReturn) {
+				promoteToGlobal();
+				return null;
+			} else {
+				throw e;
+			}
+		} catch(Exception e) { // propagate the exception
+			throw new ScriptException(e);
+		}
 		promoteToGlobal();
 		return res;
 	}
@@ -129,6 +150,14 @@ public class AnnotationExecutor {
 	public void debugREPL(IO io) {
 		try {
 			io.printString("REPL start (call exit() to finish)\n");
+
+			SimulationBridge sim = (SimulationBridge) globals.get("simulation");
+			if(sim == null || sim.cpu == null) {
+				io.printString("Simulation not running, REPL running in its own engine\n");
+			} else {
+				io.printString("Simulation running, REPL has access equal to annotations\n");
+			}
+
 			bindGlobal("io", io);
 			exec("print = function(s){io.printString(''+s+'\\n');};");
 			exec("exit = function(){stop = true;}; stop = false;");

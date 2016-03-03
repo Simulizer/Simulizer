@@ -26,21 +26,45 @@ public class UISimulationListener extends SimulationListener {
 	@Override public void processSimulationMessage(SimulationMessage m) {
 		switch(m.detail) {
 			case SIMULATION_STARTED: {
+				Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+
+				if(editor != null) {
+					System.out.println("Simulation Started - running '" +
+							editor.getCurrentFile().getName() + "'" +
+							(editor.hasOutstandingChanges() ? " with outstanding changes" : "")
+					);
+				}
+
 				wm.getAnnotationManager().onStartProgram(wm.getCPU());
-				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-				Platform.runLater(editor::executeMode);
+
+				if(editor != null) {
+					Platform.runLater(editor::executeMode);
+				}
+			} break;
+			case SIMULATION_INTERRUPTED: {
+				System.out.println("Simulation Interrupted");
 			} break;
 			case SIMULATION_STOPPED: {
+				System.out.println("Simulation Stopped");
+
 				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
+				wm.getAnnotationManager().onEndProgram();
+
+				System.out.println("Total annotations fired: " + count);
+
 				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-				Platform.runLater(editor::editMode);
+				if(editor != null) {
+					Platform.runLater(editor::editMode);
+				}
 			} break;
 			default:break;
 		}
 	}
 
+	int count = 0;
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
-		wm.getAnnotationManager().processAnnotation(m.annotation);
+		count++;
+		wm.getAnnotationManager().processAnnotationMessage(m);
 	}
 
 	@Override

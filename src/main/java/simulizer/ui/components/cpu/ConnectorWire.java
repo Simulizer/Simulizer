@@ -8,8 +8,8 @@ public class ConnectorWire extends Wire {
     ComponentStackPane from;
     ComponentStackPane to;
     double offset;
-    boolean rightOrBottom;
     boolean arrowStart;
+    boolean rightOrBottom;
     Type type;
 
     public ConnectorWire(ComponentStackPane from, ComponentStackPane to, Type type, boolean rightOrBottom, boolean arrowStart, double offset){
@@ -18,8 +18,9 @@ public class ConnectorWire extends Wire {
         this.to = to;
         this.arrowStart = arrowStart;
         this.type = type;
-
         this.rightOrBottom = rightOrBottom;
+        this.reverse = (rightOrBottom && arrowStart);
+
         this.offset = offset;
         if(type == Type.HORIZONTAL){
             drawHorizontalWire();
@@ -109,7 +110,7 @@ public class ConnectorWire extends Wire {
 
         if(!rightOrBottom){
             //Bottom to top
-            yStart = from.layoutXProperty().add(0);
+            yStart = from.layoutYProperty().add(0);
             yEnd = to.layoutYProperty().add(to.getShapeHeight());
         }
 

@@ -315,6 +315,12 @@ test {
 
 run {
 	workingDir = file('work')
+	if (!file('work/settings.json').exists())
+    	copy {
+        	from("src/main/resources/work_dir")
+        	into("work")
+        	include("settings.json")
+   		}
 }
 
 

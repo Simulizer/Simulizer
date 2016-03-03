@@ -1,17 +1,9 @@
 package simulizer.ui.components;
 
-import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
-import simulizer.ui.components.cpu.ALU;
-import simulizer.ui.components.cpu.ConnectorWire;
-import simulizer.ui.components.cpu.CustomLine;
-import simulizer.ui.components.cpu.CustomWire;
-import simulizer.ui.components.cpu.GeneralComponent;
-import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.components.cpu.*;
 import simulizer.ui.windows.CPUVisualisation;
 
 public class CPU {
@@ -21,37 +13,56 @@ public class CPU {
     CPUVisualisation vis;
 
     // Items needed to set widths
-    GeneralComponent controlUnit;
-    GeneralComponent programCounter;
-    GeneralComponent instructionMemory;
-    GeneralComponent register;
-    ALU alu;
-    GeneralComponent mainMemory;
-    GeneralComponent ir;
-    GeneralComponent unknown;
-    Group generalWires;
-    CustomWire memToRes;
-    CustomWire IrTOPC;
-    CustomWire PCToPlusFour;
-    CustomWire registerToMemory;
-    CustomWire IMToALU;
-    CustomWire IMToIR;
-    CustomWire IMToRegister1;
-    CustomWire IMToRegister2;
-    CustomWire IMToRegister3;
-    ConnectorWire controlUnitToIr;
-    ConnectorWire controlUnitToPC;
-    ConnectorWire controlUnitToPlusFour;
-    ConnectorWire controlUnitToIM1;
-    ConnectorWire controlUnitToIM2;
-    ConnectorWire controlUnitToRegisters;
-    ConnectorWire controlUnitToALU;
-    ConnectorWire controlUnitToDataMemory;
-    ConnectorWire plusFourToIr;
-    ConnectorWire PCToIM;
-    ConnectorWire aluToMemory;
-    ConnectorWire registerToALU1;
-    ConnectorWire registerToALU2;
+    public GeneralComponent controlUnit;
+    public GeneralComponent programCounter;
+    public GeneralComponent instructionMemory;
+    public GeneralComponent register;
+    public ALU alu;
+    public ALU adder;
+
+    public GeneralComponent mainMemory;
+    public GeneralComponent ir;
+    public GeneralComponent plusFour;
+    public GeneralComponent signExtender;
+
+    public GeneralComponent muxAdder;
+    public GeneralComponent shiftLeft;
+    public GeneralComponent shiftLeftIR;
+
+    public Group generalWires;
+    public CustomWire irToPlusFour;
+    public CustomWire irToRegister1;
+    public CustomWire irToRegister2;
+    public CustomWire irToRegister3;
+    public CustomWire pcToPlusFour;
+    public CustomWire muxToPC;
+    public CustomWire irToSignExtender;
+    public CustomWire signExtenderToALU;
+    public CustomWire dataMemoryToRegisters;
+    public CustomWire aluToRegisters;
+    public CustomWire aluToControlUnit;
+    public CustomWire signExtenderToShift;
+    public CustomWire plusFourToMux;
+    public CustomWire aluToMux;
+    public CustomWire irToShift;
+    public CustomWire shiftToMux;
+    public CustomWire plusFourToMuxWithShift;
+
+    public ConnectorWire adderToMux;
+    public ConnectorWire plusFourToAdder;
+    public ConnectorWire shiftToAdder;
+    public ConnectorWire irToControlUnit;
+    public ConnectorWire controlUnitToIM1;
+    public ConnectorWire controlUnitToRegisters;
+    public ConnectorWire controlUnitToDataMemory;
+    public ConnectorWire PCToIM;
+    public ConnectorWire aluToMemory;
+    public ConnectorWire registerToALU1;
+    public ConnectorWire registerToALU2;
+    public ConnectorWire codeMemoryToIR;
+
+    public Group allItems;
+    public Group components;
 
     public CPU(CPUVisualisation vis, double width, double height){
         this.width = width;
@@ -60,145 +71,129 @@ public class CPU {
     }
 
     public void drawCPU(){
-        Group components = new Group();
-        controlUnit = new GeneralComponent(20, height - 60, width - 40, 30, "Controller");
-        programCounter = new GeneralComponent(20, 60, (width * 0.06), 100, "PC");
-        instructionMemory = new GeneralComponent(90, 60, 100, 100, "Instruction Memory");
-        register = new GeneralComponent(220, 60, 100, 100, "Registers");
-        alu = new ALU(350, 60, 100, 100, "ALU");
-        mainMemory = new GeneralComponent(480, 60, 100, 150, "Data Memory");
-        ir = new GeneralComponent(15, 220, 20, 50, "");
-        unknown = new GeneralComponent(60, 210, 40, 40, "+4");
+        components = new Group();
+        controlUnit = new GeneralComponent(vis, "Controller");
+        programCounter = new GeneralComponent(vis, "PC");
+        instructionMemory = new GeneralComponent(vis, "Code Memory");
+        register = new GeneralComponent(vis, "Registers");
+        alu = new ALU(vis, "ALU");
+        mainMemory = new GeneralComponent(vis, "Data Memory");
+        ir = new GeneralComponent(vis, "IR");
+        plusFour = new GeneralComponent(vis, "+4");
+        signExtender = new GeneralComponent(vis, "+");
+        muxAdder = new GeneralComponent(vis, "mux");
+        shiftLeft = new GeneralComponent(vis, "<");
+        adder = new ALU(vis, "+");
+        shiftLeftIR = new GeneralComponent(vis, "<");
+
+        controlUnit.setTooltip("The control unit (CU) is a component of a computer's central processing unit (CPU) that directs operation of the processor. It tells the computer's memory, arithmetic/logic unit and input and output devices how to respond to a program's instructions.");
+
+        programCounter.setTooltip("A program counter is a register in a computer processor that contains the address (location) of the instruction being executed at the current time. As each instruction gets fetched, the program counter increases its stored value by 1.");
+
+        register.setTooltip("In computer architecture, a processor register is a small amount of storage available as part of a digital processor, such as a central processing unit (CPU). Such registers are typically addressed by mechanisms other than main memory and can be accessed faster.");
+
+        alu.setTooltip("An arithmetic logic unit (ALU) is a digital circuit used to perform arithmetic and logic operations. It represents the fundamental building block of the central processing unit (CPU) of a computer. Modern CPUs contain very powerful and complex ALUs. In addition to ALUs, modern CPUs contain a control unit (CU).");
+
+        mainMemory.setTooltip("PC memory is more easily referred to as RAM (Random Access Memory) and performs very different tasks to storage memory which is found on a hard drive or SSD. RAM, in the form of a memory module, is a component in your computer which enables short-term or temporary data access.");
+
+        ir.setTooltip("In computing, an instruction register (IR) is the part of a CPU's control unit that stores the instruction currently being executed or decoded.");
+
+        instructionMemory.setTooltip("Instruction memory, this is where the instructions of the program are stored.");
+
+        signExtender.setTooltip("Sign extension is the operation, in computer arithmetic, of increasing the number of bits of a binary number while preserving the number's sign (positive/negative) and value.");
+
+        adder.setTooltip("Computes the sum of 2 values together and outputs the result.");
+
+        muxAdder.setTooltip("A multiplexer (or mux) is a device that selects one of several analog or digital input signals and forwards the selected input into a single line.");
+
+        shiftLeftIR.setTooltip("A shift left logical of two positions moves each bit to the left by two.");
+        shiftLeft.setTooltip("A shift left logical of two positions moves each bit to the left by two.");
+
+        plusFour.setTooltip("Changes the value of the program counter by +4.");
 
         generalWires = new Group();
 
-        controlUnitToIr = ir.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToPC = programCounter.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToPlusFour = unknown.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, true, true, -0.1);
-        controlUnitToIM2 = instructionMemory.verticalLineTo(controlUnit, true, false, 0.1);
-        controlUnitToRegisters = register.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToALU = alu.verticalLineTo(controlUnit, true, true, 0);
-        controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, true, true, 0);
-        plusFourToIr = unknown.horizontalLineTo(ir, false, false, 0);
+        //irToControlUnit = ir.verticalLineTo(controlUnit, false, false, 0);
+        //controlUnitToIM1 = instructionMemory.verticalLineTo(controlUnit, false, true, 0);
+        //controlUnitToRegisters = register.verticalLineTo(controlUnit, false, true, 0);
+        //controlUnitToDataMemory = mainMemory.verticalLineTo(controlUnit, false, true, 0);
         PCToIM = programCounter.horizontalLineTo(instructionMemory, true, false, 0);
-        aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0);
+        aluToMemory = alu.horizontalLineTo(mainMemory, true, false, 0.3);
         registerToALU1 = register.horizontalLineTo(alu, true, false, -0.3);
         registerToALU2 = register.horizontalLineTo(alu, true, false, 0.3);
+        codeMemoryToIR = instructionMemory.horizontalLineTo(ir, true, false, 0);
 
-        memToRes = new CustomWire(580, 80);
-        IrTOPC = new CustomWire(15, 230);
-        PCToPlusFour = new CustomWire(60, 110);
-        registerToMemory = new CustomWire(320, 145);
-        IMToALU = new CustomWire(190, 150);
-        IMToIR = new CustomWire(190, 150);
-        IMToRegister1 = new CustomWire(190, 150);
-        IMToRegister2 = new CustomWire(190, 150);
-        IMToRegister3 = new CustomWire(190, 150);
+        plusFourToAdder = plusFour.horizontalLineTo(adder, true, false, 0);
+        shiftToAdder = shiftLeft.horizontalLineTo(adder, true, false, 0);
+        adderToMux = adder.horizontalLineTo(muxAdder, true, false, 0);
+
+        irToPlusFour = new CustomWire(0,0);
+        irToRegister1 = new CustomWire(0,0);
+        irToRegister2 = new CustomWire(0,0);
+        irToRegister3 = new CustomWire(0,0);
+        pcToPlusFour = new CustomWire(0,0);
+        muxToPC = new CustomWire(0,0);
+        irToSignExtender = new CustomWire(0,0);
+        signExtenderToALU = new CustomWire(0,0);
+        dataMemoryToRegisters = new CustomWire(0,0);
+        aluToRegisters = new CustomWire(0,0);
+        aluToControlUnit = new CustomWire(0, 0);
+        aluToMux = new CustomWire(0, 0);
+        shiftToMux = new CustomWire(0, 0);
+        irToShift = new CustomWire(0, 0);
+        signExtenderToShift = new CustomWire(0, 0);
+        muxToPC = new CustomWire(0, 0);
+        plusFourToMux = new CustomWire(0, 0);
+        plusFourToMuxWithShift = new CustomWire(0, 0);
 
         generalWires.getChildren().addAll(
-                controlUnitToIr,
-                controlUnitToPC,
-                controlUnitToPlusFour,
-                controlUnitToIM1,
-                controlUnitToIM2,
-                controlUnitToRegisters,
-                controlUnitToALU,
-                controlUnitToDataMemory,
-                plusFourToIr,
-                PCToIM,
-                aluToMemory,
-                registerToALU1,
-                registerToALU2
+            //irToControlUnit,
+            //controlUnitToIM1,
+            //controlUnitToRegisters,
+            //controlUnitToDataMemory,
+            PCToIM,
+            aluToMemory,
+            registerToALU1,
+            registerToALU2,
+            codeMemoryToIR,
+            plusFourToAdder,
+            shiftToAdder,
+            adderToMux
         );
 
         Group complexWires = new Group();
         complexWires.getChildren().addAll(
-                memToRes,
-                IrTOPC,
-                PCToPlusFour,
-                registerToMemory,
-                IMToALU,
-                IMToIR,
-                IMToRegister1,
-                IMToRegister2,
-                IMToRegister3
+            irToPlusFour,
+            irToRegister1,
+            irToRegister2,
+            irToRegister3,
+            pcToPlusFour,
+            muxToPC,
+            irToSignExtender,
+            signExtenderToALU,
+            dataMemoryToRegisters,
+            aluToRegisters,
+            signExtenderToShift,
+            plusFourToMux,
+            aluToMux,
+            irToShift,
+            shiftToMux,
+            plusFourToMuxWithShift
         );
 
-        vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                double x = event.getX();
-                double y = event.getY();
-                double xMin = register.getLayoutX();
-                double xMax = xMin + register.getShapeWidth();
-                double yMin = register.getLayoutY();
-                double yMax = yMin + register.getShapeHeight();
+        components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, plusFour, signExtender, shiftLeft, adder, muxAdder, shiftLeftIR);
 
-                if( x > xMin && x < xMax && y > yMin && y < yMax){
-                    // In register box, highlight register window somehow?
-                    vis.getMainWindowManager().getWorkspace().openInternalWindow(WindowEnum.REGISTERS).emphasise();
-                } else {
-                	demoVis();
-                }
-            }
-        });
+        double width = vis.getWindowWidth();
+        double height = vis.getWindowHeight();
 
-        components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, unknown);
-        vis.addAll(controlUnit, components, generalWires, complexWires);
+        alu.zoomOnHover();
 
-    }
 
-    public void demoVis(){
-    	
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                	Thread.sleep(500);
+        allItems = new Group();
+        allItems.getChildren().addAll(components, generalWires, complexWires);
+        vis.add(allItems);
 
-                	Platform.runLater(() -> controlUnit.highlight(2));
-                	Platform.runLater(() -> controlUnitToIr.animateData(2, true));
-                	Thread.sleep(3000);
 
-                	Platform.runLater(() -> ir.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> IrTOPC.animateData(4, false));
-                	Thread.sleep(4000);
-
-                	Platform.runLater(() -> programCounter.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> PCToIM.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> instructionMemory.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> IMToRegister1.animateData(3, false));
-                	Thread.sleep(3000);
-
-                	Platform.runLater(() -> register.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> registerToALU1.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> alu.highlight(2));
-                	Thread.sleep(500);
-
-                	Platform.runLater(() -> aluToMemory.animateData(1, false));
-                	Thread.sleep(1000);
-
-                	Platform.runLater(() -> mainMemory.highlight(2));
-
-                } catch(InterruptedException e){
-                    System.out.println(e.getMessage());
-                }
-
-            }
-        }, "Demo-Vis").start();
 
     }
 
@@ -206,100 +201,164 @@ public class CPU {
         double width = vis.getWindowWidth();
         double height = vis.getWindowHeight();
 
-        controlUnit.setAttrs(width * 0.03, height - (height * 0.2), width * 0.94, height * 0.1);
-        programCounter.setAttrs(width * 0.06, height * 0.15, width * 0.06, height * 0.25);
-        instructionMemory.setAttrs(width * 0.15, height * 0.15, width * 0.16, height * 0.25);
-        register.setAttrs(width * 0.367, height * 0.15, width * 0.16, height * 0.25);
-        alu.setAttrs(width * 0.58, height * 0.15, width * 0.11, height * 0.25);
-        mainMemory.setAttrs(width * 0.8, height * 0.15, width * 0.16, height * 0.4);
-        ir.setAttrs(width * 0.025, height * 0.55, width * 0.03, height * 0.125);
-        unknown.setAttrs(width * 0.1, height * 0.525, width * 0.06, height * 0.1);
+//        controlUnit.setAttrs(width * 0.03, height * 0.1, width * 0.94, height * 0.1);
+        programCounter.setAttrs(width * 0.06, height * 0.5, width * 0.05, height * 0.25);
+        instructionMemory.setAttrs(width * 0.15, height * 0.5, width * 0.16, height * 0.25);
+        ir.setAttrs(width * 0.35, height * 0.5, width * 0.05, height * 0.25);
 
+        signExtender.setAttrs(width * 0.5, height * 0.8, width * 0.05, height * 0.05);
+
+        register.setAttrs(width * 0.48, height * 0.5, width * 0.16, height * 0.25);
+        alu.setAttrs(width * 0.68, height * 0.5, width * 0.065, height * 0.25);
+        adder.setAttrs(width * 0.74, height * 0.33, width * 0.03, height * 0.15);
+        shiftLeft.setAttrs(width * 0.645, height * 0.43, width * 0.02, height * 0.07);
+        mainMemory.setAttrs(width * 0.8, height * 0.65, width * 0.16, height * 0.25);
+        muxAdder.setAttrs(width * 0.82, height * 0.28, width * 0.03, height * 0.15);
+
+        plusFour.setAttrs(width * 0.415, height * 0.32, width * 0.04, height * 0.1);
+
+        shiftLeftIR.setAttrs(width * 0.48, height * 0.40, width * 0.02, height * 0.07);
         ObservableList<Node> wires = generalWires.getChildren();
 
         for(Node wire : wires){
             ((ConnectorWire) wire).updateLine();
         }
 
-        memToRes.drawLine(width * 0.96, height * 0.2, new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.125, CustomLine.Direction.UP),
-                new CustomLine(width * 0.583, CustomLine.Direction.LEFT),
-                new CustomLine(height * 0.075, CustomLine.Direction.DOWN)
+//        irToPlusFour.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+//                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+//                new CustomLine(height * 0.17, CustomLine.Direction.UP)
+//        );
+
+        aluToMux.drawLine(alu.getLayoutX() + alu.getShapeWidth(), alu.getLayoutY() + alu.getShapeHeight() * 0.4,
+                new CustomLine(width * 0.09, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.16, CustomLine.Direction.UP)
         );
 
-
-        IrTOPC.drawLine(width * 0.025, height * 0.575,
-                new CustomLine(width * 0.016, CustomLine.Direction.LEFT),
-                new CustomLine(height * 0.25, CustomLine.Direction.UP),
-                new CustomLine(width * 0.05, CustomLine.Direction.RIGHT)
+        plusFourToMuxWithShift.drawLine(plusFour.getLayoutX() + plusFour.getShapeWidth(), plusFour.getLayoutY() + plusFour.getShapeHeight() / 2,
+                new CustomLine(width * 0.2, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.06, CustomLine.Direction.UP),
+                new CustomLine(width * 0.165, CustomLine.Direction.RIGHT)
         );
 
-        PCToPlusFour.drawLine(width * 0.12, height * 0.275,
-                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.25, CustomLine.Direction.DOWN)
+        plusFourToMux.drawLine(plusFour.getLayoutX() + plusFour.getShapeWidth(), plusFour.getLayoutY() + plusFour.getShapeHeight() / 2,
+                new CustomLine(width * 0.2, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.06, CustomLine.Direction.UP),
+                new CustomLine(width * 0.165, CustomLine.Direction.RIGHT)
         );
 
-        registerToMemory.drawLine(width * 0.53, height * 0.3625,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.125, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.25, CustomLine.Direction.RIGHT)
-        );
-
-        IMToALU.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.2333, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.31, CustomLine.Direction.UP)
-        );
-
-        IMToIR.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.2875, CustomLine.Direction.DOWN),
-                new CustomLine(width * 0.272, CustomLine.Direction.LEFT)
-        );
-
-        IMToRegister1.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.175, CustomLine.Direction.UP),
-                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
-        );
-
-        IMToRegister2.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
+        irToRegister1.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
                 new CustomLine(height * 0.1, CustomLine.Direction.UP),
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
+        );
+
+        irToRegister2.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.06, CustomLine.Direction.UP),
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
+        );
+
+        irToRegister3.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() / 2,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.02, CustomLine.Direction.UP),
+                new CustomLine(width * 0.044, CustomLine.Direction.RIGHT)
+        );
+
+        irToSignExtender.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() * 0.5,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.2, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.065, CustomLine.Direction.RIGHT)
+        );
+
+        irToShift.drawLine(ir.getLayoutX() + ir.getShapeWidth(), ir.getLayoutY() + ir.getShapeHeight() * 0.5,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.185, CustomLine.Direction.UP),
+                new CustomLine(width * 0.045, CustomLine.Direction.RIGHT)
+        );
+
+        shiftToMux.drawLine(shiftLeftIR.getLayoutX() + shiftLeftIR.getShapeWidth(), shiftLeftIR.getLayoutY() + shiftLeftIR.getShapeHeight() * 0.5,
+                new CustomLine(width * 0.035, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.125, CustomLine.Direction.UP),
+                new CustomLine(width * 0.3, CustomLine.Direction.RIGHT)
+        );
+
+        signExtenderToALU.drawLine(signExtender.getLayoutX() + signExtender.getShapeWidth(), signExtender.getLayoutY() + signExtender.getShapeHeight() * 0.5,
+                new CustomLine(width * 0.105, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.126, CustomLine.Direction.UP),
                 new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
         );
 
-        IMToRegister3.drawLine(width * 0.310, height * 0.375,
-                new CustomLine(width * 0.016, CustomLine.Direction.RIGHT),
-                new CustomLine(height * 0.025, CustomLine.Direction.UP),
-                new CustomLine(width * 0.04, CustomLine.Direction.RIGHT)
+        signExtenderToShift.drawLine(signExtender.getLayoutX() + signExtender.getShapeWidth(), signExtender.getLayoutY() + signExtender.getShapeHeight() * 0.5,
+                new CustomLine(width * 0.105, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.32, CustomLine.Direction.UP)
         );
+
+        pcToPlusFour.drawLine(programCounter.getLayoutX() + programCounter.getShapeWidth(), programCounter.getLayoutY() + programCounter.getShapeHeight() / 2,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.22, CustomLine.Direction.UP),
+                new CustomLine(width * 0.29, CustomLine.Direction.RIGHT)
+        );
+
+        muxToPC.drawLine(muxAdder.getLayoutX() + muxAdder.getShapeWidth(), muxAdder.getLayoutY() + muxAdder.getShapeHeight() / 2,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.12, CustomLine.Direction.UP),
+                new CustomLine(width * 0.835, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.395, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.03, CustomLine.Direction.RIGHT)
+        );
+
+        aluToControlUnit.drawLine(alu.getLayoutX() + alu.getShapeWidth() / 2, controlUnit.getLayoutY() + controlUnit.getShapeHeight(),
+                new CustomLine(height * 0.325, CustomLine.Direction.DOWN)
+        );
+
+
+
+        dataMemoryToRegisters.drawLine(mainMemory.getLayoutX() + mainMemory.getShapeWidth(), mainMemory.getLayoutY() + mainMemory.getShapeHeight() * 0.8,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.1, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.52, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.23, CustomLine.Direction.UP),
+                new CustomLine(width * 0.025, CustomLine.Direction.RIGHT)
+        );
+
+        aluToRegisters.drawLine(alu.getLayoutX() + alu.getShapeWidth(), alu.getLayoutY() + alu.getShapeHeight() * 0.8,
+                new CustomLine(width * 0.015, CustomLine.Direction.RIGHT),
+                new CustomLine(height * 0.265, CustomLine.Direction.DOWN),
+                new CustomLine(width * 0.305, CustomLine.Direction.LEFT),
+                new CustomLine(height * 0.23, CustomLine.Direction.UP),
+                new CustomLine(width * 0.025, CustomLine.Direction.RIGHT)
+        );
+
 
     }
     
     public void closeAllThreads(){
-    	memToRes.closeThread();
-    	IrTOPC.closeThread();
-    	PCToPlusFour.closeThread();
-    	registerToMemory.closeThread();
-    	IMToALU.closeThread();
-    	IMToIR.closeThread();
-    	IMToRegister1.closeThread();
-    	IMToRegister2.closeThread();
-    	IMToRegister3.closeThread();
-    	controlUnitToIr.closeThread();
-    	controlUnitToPC.closeThread();
-    	controlUnitToPlusFour.closeThread();
-    	controlUnitToIM1.closeThread();
-    	controlUnitToIM2.closeThread();
-    	controlUnitToRegisters.closeThread();
-    	controlUnitToALU.closeThread();
-    	controlUnitToDataMemory.closeThread();
-    	plusFourToIr.closeThread();
-    	PCToIM.closeThread();
-    	aluToMemory.closeThread();
+//        irToControlUnit.closeThread();
+//        controlUnitToIM1.closeThread();
+//        controlUnitToRegisters.closeThread();
+//        controlUnitToDataMemory.closeThread();
+        PCToIM.closeThread();
+        aluToMemory.closeThread();
+        codeMemoryToIR.closeThread();
     	registerToALU1.closeThread();
     	registerToALU2.closeThread();
+
+        irToPlusFour.closeThread();
+        irToRegister1.closeThread();
+        irToRegister2.closeThread();
+        irToRegister3.closeThread();
+        pcToPlusFour.closeThread();
+        muxToPC.closeThread();
+        plusFourToMux.closeThread();
+        signExtenderToShift.closeThread();
+        shiftToAdder.closeThread();
+        plusFourToAdder.closeThread();
+        muxToPC.closeThread();
+        irToSignExtender.closeThread();
+        signExtenderToALU.closeThread();
+        dataMemoryToRegisters.closeThread();
+        aluToRegisters.closeThread();
+        aluToControlUnit.closeThread();
+        aluToMux.closeThread();
     }
 }

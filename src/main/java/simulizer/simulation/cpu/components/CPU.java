@@ -60,7 +60,7 @@ public class CPU {
     protected Statement instructionRegister;
 
     private ALU Alu;
-    private Clock clock;//clock cycle for IE cycle
+    protected Clock clock;//clock cycle for IE cycle
 
     private Word[] registers;
     private MainMemory memory;
@@ -111,17 +111,25 @@ public class CPU {
     }
 
     /**sets the speed in ms of the clock
-     *
+     * will be 3 times what it says to make it representative wrt. the pipeline
      * @param tickMillis the time for one clock cycle
      */
     public void setClockSpeed(int tickMillis) {
-        clock.tickMillis = tickMillis;
+        clock.tickMillis = 3 * tickMillis;
     }
+
+    /**gets the speed in ms of the clock
+     *
+     */
+    public int getClockSpeed(){ return clock.tickMillis; }
 
     /**stop the running of a program
      *
      */
     public void stopRunning() {
+        // harmless to call multiple times, only want to send one message
+        boolean wasRunning = isRunning;
+
         isRunning = false;
         if(clock != null) {
             pauseClock();
@@ -131,7 +139,10 @@ public class CPU {
                 e.printStackTrace();
             }
         }
-        sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+
+        if(wasRunning) {
+            sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+        }
     }
 
     /**
@@ -140,6 +151,14 @@ public class CPU {
      */
     public void registerListener(SimulationListener l) {
         listeners.add(l);
+    }
+
+    /**
+     * Unregisters a listener from the list
+     * @param l the listener to be removed
+     */
+    public void unregisterListener(SimulationListener l){
+        listeners.remove(l);
     }
 
     /**
@@ -567,7 +586,7 @@ public class CPU {
     			String toPrint = "";//initial string
     			byte[] currentByte;
     			int addressPStr = a0;
-    			currentByte = this.memory.readFromMem(a0, 1);//reading in blocks of 4 bytes, i.e 1 character
+    			currentByte = this.memory.readFromMem(a0, 1);//reading in bytes, i.e 1 character
     			while(DataConverter.decodeAsSigned(currentByte) != 0) {//while not at null terminator
     				toPrint += new String(currentByte);//converting to char
     				addressPStr += 1;//incrementing address to next byte
@@ -649,7 +668,7 @@ public class CPU {
 		
 		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
-			sendMessage(new AnnotationMessage(annotations.get(thisInstruction)));
+			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
 
         if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
@@ -666,13 +685,12 @@ public class CPU {
      */
     public void runProgram() {
     	this.startClock();
-        System.out.println("---- Program Execution Started ----");
         this.isRunning = true;
         sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
         // used for setting up the annotation environment eg loading visualisations
         if(program.initAnnotation != null) {
-            sendMessage(new AnnotationMessage(program.initAnnotation));
+            sendMessage(new AnnotationMessage(program.initAnnotation, null));
         }
 
         while(isRunning) { //need something to stop this
@@ -687,10 +705,9 @@ public class CPU {
                     clock.waitForNextTick();
                 }
             } catch(InterruptedException | BrokenBarrierException e) {
-				System.out.println("CPU interrupted");
+                sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
             }
 		}
-        System.out.println("---- Program Execution Ended ----");
         stopRunning();
     }
 

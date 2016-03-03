@@ -4,8 +4,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
+import simulizer.ui.components.cpu.GeneralComponent;
+import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
@@ -15,6 +18,7 @@ public class CPUVisualisation extends InternalWindow {
     double height;
     Pane pane;
 	private CPU cpu;
+	private CPUListener cpuListener;
 
 	public CPUVisualisation() {
         width = 530;
@@ -27,7 +31,7 @@ public class CPUVisualisation extends InternalWindow {
         pane.setMinHeight(height);
         pane.setMaxHeight(height);
         getChildren().add(pane);
-        setMinWidth(530);
+        setMinWidth(width);
         setMinHeight(getMinimalHeight());
 		drawVisualisation();
 	}
@@ -76,6 +80,8 @@ public class CPUVisualisation extends InternalWindow {
 		return height;
 	}
 
+	public CPU getCpu(){ return cpu; }
+
 	private void drawVisualisation() {
 
 		cpu = new CPU(this, width, height);
@@ -87,6 +93,7 @@ public class CPUVisualisation extends InternalWindow {
 				width = newValue.doubleValue();
 				setPaneWidth(width);
 				setPaneHeight(height);
+				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
@@ -97,20 +104,37 @@ public class CPUVisualisation extends InternalWindow {
 				height = newValue.doubleValue();
 				setPaneHeight(height);
 				setPaneWidth(width);
+				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
 
 	}
-	
-	@Override
+
 	protected double getMinimalHeight() {
 		return 415;
+	}
+
+	@Override
+	public void ready(){
+		attachCPU(getWindowManager().getCPU());
+		super.ready();
 	}
 	
 	@Override
 	public void close() {
+		getWindowManager().getCPU().unregisterListener(cpuListener);
 		cpu.closeAllThreads();
 		super.close();
+	}
+
+	/**
+	 * Sets the CPU and adds a listener to the CPU
+	 *
+	 * @param simCpu The simulated cpu
+	 */
+	public void attachCPU(simulizer.simulation.cpu.components.CPU simCpu) {
+		cpuListener = new CPUListener(cpu, simCpu, this);
+		simCpu.registerListener(cpuListener);
 	}
 }

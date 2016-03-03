@@ -42,12 +42,12 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 			if (label != null) {
 				refreshEditor();
 				if (editor != null) {
-					editor.gotoLine(label.getLine());
+					editor.gotoLine(label.getLine() - 1);
 					editor.findNext(label.label); // Now highlight the label
 				}
 			}
 		});
-		
+
 		// Fix table cursor
 		table.setCursor(Cursor.DEFAULT);
 	}
@@ -142,6 +142,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		BorderPane pane = new BorderPane();
 		setContentPane(pane);
 		pane.setCenter(table);
+		pane.setCursor(Cursor.DEFAULT);
 
 		Button btnNext = new ActionButton("Next", Editor::findNext);
 		Button btnPrevious = new ActionButton("Previous", Editor::findPrevious);

@@ -1,6 +1,9 @@
 package simulizer.ui;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -58,16 +61,20 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
-		primaryStage.setOnCloseRequest((e) -> {
-			workspace.closeAll();
-			if (workspace.hasWindowsOpen()) e.consume();
+		primaryStage.setOnCloseRequest(e -> {
+			e.consume();
+			shutdown();
 		});
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
 
-		if ((boolean) settings.get("simulation.pipelined")) cpu = new CPUPipeline(io);
-		else cpu = new CPU(io);
+		if ((boolean) settings.get("simulation.pipelined")) {
+			cpu = new CPUPipeline(io);
+		} else {
+			cpu = new CPU(io);
+		}
+		cpu.registerListener(simListener);
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -93,7 +100,8 @@ public class WindowManager extends GridPane {
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus
 		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
-			if (e.isAltDown()) e.consume();
+			if (e.isAltDown())
+				e.consume();
 		});
 
 		annotationManager = new AnnotationManager(this);
@@ -142,44 +150,61 @@ public class WindowManager extends GridPane {
 		return grid;
 	}
 
-	public void stopCPU() {
+	public void stopSimulation() {
 		if (cpuThread != null) {
-			System.out.println("Terminating running program");
 			cpu.stopRunning();
 			try {
+				System.out.println("Waiting for the simulation thread to close");
 				cpuThread.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			} finally {
+				cpuThread = null;
+				System.out.println("Simulation thread closed");
 			}
-			cpuThread = null;
-			System.out.println("Running program terminated");
 		}
 	}
 
 	public void assembleAndRun() {
-		StoreProblemLogger log = new StoreProblemLogger();
-		Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
+		primaryStage.setTitle("Simulizer - Assembling Program");
+		new Thread(() -> {
+			StoreProblemLogger log = new StoreProblemLogger();
+			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
-		Program p = Assembler.assemble(editor.getText(), log);
+			final FutureTask<String> getProgramText = new FutureTask<>(editor::getText);
 
-		// if no problems, has the effect of clearing
-		editor.setProblems(log.getProblems());
+			Platform.runLater(getProgramText);
 
-		if (p != null) {
-			runProgram(p);
-		} else {
-			int size = log.getProblems().size();
-			UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
-		}
+			try {
+				final Program p = Assembler.assemble(getProgramText.get(), log);
+
+				// doing as little as possible in the FX thread
+				Platform.runLater(() -> {
+					// if no problems, has the effect of clearing
+					editor.setProblems(log.getProblems());
+					if (p == null) {
+						int size = log.getProblems().size();
+						UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+					}
+				});
+
+				if (p != null) {
+					runProgram(p); // spawns another thread
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			} finally {
+				Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
+			}
+
+		} , "Assemble").start();
 	}
 
 	public void runProgram(Program p) {
 		if (p != null) {
-			stopCPU();
+			stopSimulation();
 
 			cpu.loadProgram(p);
-			// TODO: maybe don't re-register the listeners
-			cpu.registerListener(simListener);
 
 			io.clear();
 
@@ -187,7 +212,7 @@ public class WindowManager extends GridPane {
 				@Override
 				protected Object call() throws Exception {
 					try {
-						cpu.setClockSpeed(250);
+						cpu.setClockSpeed((Integer) settings.get("simulation.default-clock-speed"));
 						cpu.runProgram();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -230,8 +255,16 @@ public class WindowManager extends GridPane {
 	public void setPipelined(boolean pipelined) {
 		if (pipelined) {
 			cpu = new CPUPipeline(io);
+			cpu.registerListener(simListener);
 		} else {
 			cpu = new CPU(io);
+			cpu.registerListener(simListener);
 		}
+	}
+
+	public void shutdown() {
+		workspace.closeAll();
+		if (!workspace.hasWindowsOpen())
+			primaryStage.close();
 	}
 }

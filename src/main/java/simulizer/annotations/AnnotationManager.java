@@ -1,12 +1,13 @@
 package simulizer.annotations;
 
+import javax.script.ScriptException;
+
 import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.ui.WindowManager;
-import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.HighLevelVisualisation;
-
-import javax.script.ScriptException;
 
 /**
  * Holds data regarding the processing of annotations and display of visualisations
@@ -40,27 +41,53 @@ public class AnnotationManager {
 		// refresh for each new program
 		newExecutor();
 
+		setupBridges();
+
+		simulationBridge.cpu = cpu;
+
+	}
+
+	private void setupBridges() {
 		// set up access between the bridges and the components they talk to on the Java side
 		debugBridge.wm = wm;
 		debugBridge.io = wm.getIO();
 
-		simulationBridge.cpu = cpu;
+		simulationBridge.cpu = null;
 
 		visualisationBridge.wm = wm;
 	}
+
+	public void onEndProgram() {
+		simulationBridge.cpu = null;
+	}
+
 	public void newExecutor() {
 		ex = new AnnotationExecutor();
 
 		ex.bindGlobal("debug", debugBridge);
+
 		ex.bindGlobal("simulation", simulationBridge);
+		ex.bindGlobal("sim", simulationBridge);
+
 		ex.bindGlobal("visualisation", visualisationBridge);
+		ex.bindGlobal("vis", visualisationBridge);
+
+		setupBridges();
 	}
 
-	public void processAnnotation(Annotation annotation) {
+	public void processAnnotationMessage(AnnotationMessage msg) {
 		try {
-			ex.exec(annotation);
+			ex.exec(msg.annotation);
 		} catch (ScriptException e) {
-			e.printStackTrace();
+			//TODO: send to error stream instead
+			IO io = wm.getIO();
+			io.printString("Annotation error: " + e.getMessage());
+			if(msg.boundAddress != null) {
+				int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
+				io.printString("\nFrom the annotation bound to line: " + lineNum + ".");
+			} else {
+				io.printString("\nFrom the initial annotation.");
+			}
 		}
 	}
 }

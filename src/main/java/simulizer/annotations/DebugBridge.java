@@ -6,7 +6,6 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.WindowManager;
 
-import java.awt.*;
 
 /**
  * A collection of methods for debugging, accessible from annotations

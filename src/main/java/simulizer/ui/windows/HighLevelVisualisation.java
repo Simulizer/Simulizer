@@ -8,9 +8,6 @@ import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public class HighLevelVisualisation extends InternalWindow {
 	private double width = 400;
 	private double height = 300;
@@ -21,13 +18,16 @@ public class HighLevelVisualisation extends InternalWindow {
 	private void init() {
 		this.drawingPane = new Pane();
 
+		// TODO remove this
+		setCache(false);
+
+		// TODO check if all this `setXWidth/Height()` stuff is needed
 		setPaneWidth(width);
 		setPaneHeight(height);
 		getChildren().add(drawingPane);
 
 		setMinWidth(width);
-		setMinHeight(getMinimalHeight());
-
+		setMinHeight(200);
 
 		widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
@@ -46,12 +46,13 @@ public class HighLevelVisualisation extends InternalWindow {
 		});
 	}
 
+
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
-		this.visualiser = new TowerOfHanoiVisualiser(this, (int) width, (int) height, 0, 4);
+		this.visualiser = new TowerOfHanoiVisualiser(this, 0);
 	}
 	public void loadListVisualisation() {
-		visualiser = new ListVisualiser<>(this, getWindowWidth(), getWindowHeight(), new ArrayList<>());
+		visualiser = new ListVisualiser(this);
 	}
 
     public void add(Node e){
@@ -60,6 +61,14 @@ public class HighLevelVisualisation extends InternalWindow {
 
     public void addAll(Node... elements){
         drawingPane.getChildren().addAll(elements);
+    }
+
+    public void remove(Node e){
+        drawingPane.getChildren().remove(e);
+    }
+
+    public void removeAll(Node... elements){
+        drawingPane.getChildren().removeAll(elements);
     }
 
 	public void setPaneWidth(double width) {
@@ -80,11 +89,6 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	public double getWindowHeight() {
 		return height;
-	}
-
-	@Override
-	protected double getMinimalHeight() {
-		return 200;
 	}
 
 	public DataStructureVisualiser getVisualiser() {

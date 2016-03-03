@@ -1,5 +1,6 @@
 package simulizer.utils;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -14,6 +15,15 @@ import java.util.function.Consumer;
  * Utilities for UI related utilities
  */
 public class UIUtils {
+
+	/**
+	 * A form of assertion to make sure that something is called from the javaFX thread
+	 */
+	public static void assertFXThread() {
+		if(!Platform.isFxApplicationThread()) {
+			throw new IllegalStateException("Not on FX application thread; currentThread = " + Thread.currentThread().getName());
+		}
+	}
 
 	public static void showErrorDialog(String title, String message) {
 		showErrorDialog(title, title, message);

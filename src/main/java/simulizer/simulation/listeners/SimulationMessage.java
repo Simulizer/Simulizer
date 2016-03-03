@@ -6,7 +6,8 @@ package simulizer.simulation.listeners;
 public class SimulationMessage extends Message {
 	public enum Detail {
 		SIMULATION_STARTED,
-		SIMULATION_STOPPED
+		SIMULATION_STOPPED, // only sent if stopProgram is called AND the simulation was running
+		SIMULATION_INTERRUPTED
 	}
 
 	public Detail detail;

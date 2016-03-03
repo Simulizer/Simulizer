@@ -45,7 +45,7 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new IntegerSetting("clock-speed", "Clock Speed", "Default speed of the simulation clock", 250, 0, Integer.MAX_VALUE))
+						.add(new IntegerSetting("default-clock-speed", "Default Clock Speed", "Default value of the simulation clock delay (in milliseconds)", 250, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
@@ -66,6 +66,9 @@ public class Settings {
 					.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
 					.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
 					);	
+		settings.add(new ObjectSetting("logger", "Logger")
+				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
+				);	
 		// @formatter:on
 
 		// Loads all the values from jsonObject
@@ -78,38 +81,48 @@ public class Settings {
 		JsonElement element = jsonObject.get(setting.getJsonName());
 
 		// If element doesn't exist in json file, ignore it
-		if (element == null) return;
+		if (element == null)
+			return;
 
-		switch (setting.getSettingType()) {
-			case BOOLEAN:
-				((BooleanSetting) setting).setValue(element.getAsBoolean());
-				break;
+		// Handle null case
+		if (element.isJsonNull()) {
+			setting.setValue(null);
+			return;
+		}
+		try {
+			switch (setting.getSettingType()) {
+				case BOOLEAN:
+					((BooleanSetting) setting).setValue(element.getAsBoolean());
+					break;
 
-			case DOUBLE:
-				((DoubleSetting) setting).setValue(element.getAsDouble());
-				break;
+				case DOUBLE:
+					((DoubleSetting) setting).setValue(element.getAsDouble());
+					break;
 
-			case INTEGER:
-				((IntegerSetting) setting).setValue(element.getAsInt());
-				break;
+				case INTEGER:
+					((IntegerSetting) setting).setValue(element.getAsInt());
+					break;
 
-			case OBJECT:
-				for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
-					loadFromJson(element.getAsJsonObject(), s);
-				break;
+				case OBJECT:
+					for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
+						loadFromJson(element.getAsJsonObject(), s);
+					break;
 
-			case STRING:
-				((StringSetting) setting).setValue(element.getAsString());
-				break;
-
-			default:
-				System.err.println("Unknown: " + setting.getSettingType());
+				case STRING:
+					((StringSetting) setting).setValue(element.getAsString());
+					break;
+			}
+		} catch (Exception e) {
+			// TODO: Find exact exception
+			// Setting was of invalid type, ignoring
 		}
 	}
 
 	/**
-	 * get a loaded value for a setting, specified using a path eg editor.font-size
-	 * @param settingPath the path to the option, separated by a dot
+	 * get a loaded value for a setting, specified using a path eg "editor.font-size"
+	 * 
+	 * @param settingPath
+	 *            the path to the option, separated by a dot
 	 * @return the requested setting
 	 */
 	public Object get(String settingPath) {
@@ -117,7 +130,8 @@ public class Settings {
 		SettingValue<?> setting = settings;
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
-			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting))) return null;
+			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
+				return null;
 		}
 		return setting.getValue();
 	}

@@ -12,11 +12,11 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n−1 discs from pole 2 to pole 3 so they sit on disc n
 #
-# @{ setSpeed(100) }@
-# @{ var h = loadVis('tower-of-hanoi') }@
+# @{ setSpeed(10) }@
+# @{ var h = vis.load('tower-of-hanoi', false) }@
 
 
-    .data    # variables section
+.data    # variables section
     .align 2
 
 # null terminated ASCII strings
@@ -30,7 +30,7 @@ done:          .asciiz "\ndone."
 
 
 
-    .text         # code section
+.text         # code section
     .globl main   # global name (can be referenced in other files)
 
 # must be lower case because the OS of spim looks for this symbol specifically
@@ -46,6 +46,9 @@ main:
     syscall
 
     blez $v0, ERROR_EXIT   # if input <= 0: exit
+
+nop # @{ h.setNumDisks($v0.get()) }@
+    # @{ vis.show()               }@
 
     # call function: MOVE
     li   $a0, 1
@@ -138,7 +141,7 @@ MOVE_RETURN:
 # PRINT_MOVE(src, dest)
 PRINT_MOVE:
 
-    # @{ h.move($a0.get()-1, $a1.get()-1); h.commit(); }@
+    # @{ h.move($a0.get()-1, $a1.get()-1) }@
 
     # save/push arguments that may be modified onto the stack (spill)
     addi $sp, $sp, -4       # grow the stack by 4 bytes
@@ -162,7 +165,7 @@ PRINT_MOVE:
     # print newline
     li $v0, 4               # 4: print string
     la $a0, newline
-    syscall #@
+    syscall
 
     # return
     lw   $a0, 0($sp)        # restore $a0 from the stack

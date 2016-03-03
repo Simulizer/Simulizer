@@ -1,7 +1,7 @@
 # binary search
 # enter numbers in ascending order, using 0 as an end marker
 # @{ setSpeed(100) }@
-# @{ var l = loadVis('list') }@
+# @{ var l = vis.load('list', false) }@
 
 # @{ var startAddress = null }@
 # @{ function addressToIndex(addr) { return (addr - startAddress) / 4; } }@
@@ -37,7 +37,9 @@ main:
     move $a1, $v1
     
  # @{ startAddress = $a0.get() }@
+ # @{ if(startAddress == -1) ret() // no elements }@
  # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get())) }@
+ # @{ vis.show()    }@
  # @{ setSpeed(150) }@
  
     jal read_and_search
@@ -167,9 +169,11 @@ read_and_search_RETURN:
 # binary_search(search_for, first_arr, last_arr)
 # returns whether the item was found (1|0) in $v0
 binary_search:
-    # @{ l.emphasise(addressToIndex($a1.get())) }@
-    # @{ l.emphasise(addressToIndex($a2.get())) }@
-    # @{ l.commit() }@
+    # $a1 (first_addr) == -1  => no elements
+    li $t0, -1
+    beq $a1, $t0 binary_search_NOT_FOUND
+
+nop # @{ l.setMarkers(addressToIndex($a1.get()), addressToIndex($a2.get())) }@
     
     # no other calls are made so no need to store registers on the stack
 

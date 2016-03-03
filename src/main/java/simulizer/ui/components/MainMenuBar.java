@@ -1,9 +1,11 @@
 package simulizer.ui.components;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javafx.scene.control.ButtonType;
+import java.net.URI;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -33,7 +35,7 @@ public class MainMenuBar extends MenuBar {
 
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), debugMenu());
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
 	private Editor getEditor() {
@@ -80,22 +82,8 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
-		exitItem.setOnAction(e -> {
-			Editor editor = getEditor();
-			if (editor.hasOutstandingChanges()) {
-				ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + editor.getCurrentFile().getName() + "\"", "");
-
-				if (save == ButtonType.YES) {
-					editor.saveFile();
-					System.exit(0);
-				} else if (save == ButtonType.NO) {
-					System.exit(0);
-				} else {
-					// do nothing (cancel)
-				}
-			}
-		});
-
+		exitItem.setOnAction(e -> wm.shutdown());
+		
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
@@ -165,13 +153,16 @@ public class MainMenuBar extends MenuBar {
 		Menu runMenu = new Menu("Simulation");
 
 		MenuItem runPause = new MenuItem("Run/Pause");
-		runPause.setOnAction(e -> wm.assembleAndRun());
+		runPause.setOnAction(e -> {
+			new AssemblingDialog(wm.getCPU());
+			wm.assembleAndRun();
+		});
 
 		MenuItem singleStep = new MenuItem("Next Step");
 		singleStep.setDisable(true);
 
 		MenuItem stop = new MenuItem("Stop");
-		stop.setOnAction(e -> wm.stopCPU());
+		stop.setOnAction(e -> wm.stopSimulation());
 
 		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
 		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
@@ -195,9 +186,11 @@ public class MainMenuBar extends MenuBar {
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
-			MenuItem item = new MenuItem(wenum.toString());
-			item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
-			windowsMenu.getItems().add(item);
+			if (wenum.showInWindowsMenu()) {
+				MenuItem item = new MenuItem(wenum.toString());
+				item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
+				windowsMenu.getItems().add(item);
+			}
 		}
 
 		MenuItem delWindows = new MenuItem("Close All");
@@ -205,6 +198,32 @@ public class MainMenuBar extends MenuBar {
 		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
 
 		return windowsMenu;
+	}
+
+	private Menu helpMenu() {
+		Menu helpMenu = new Menu("Help");
+
+		MenuItem guide = new MenuItem("Guide");
+		guide.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.GUIDE));
+
+		MenuItem syscall = new MenuItem("Syscall Reference");
+		syscall.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.SYSCALL_REFERENCE));
+
+		MenuItem instruction = new MenuItem("Instruction Reference");
+		instruction.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.INSTRUCTION_REFERENCE));
+
+		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
+		keyBinds.setOnAction(e -> {
+			try {
+				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		});
+
+		helpMenu.getItems().addAll(guide, syscall, instruction, new SeparatorMenuItem(), keyBinds);
+
+		return helpMenu;
 	}
 
 	private Menu debugMenu() {

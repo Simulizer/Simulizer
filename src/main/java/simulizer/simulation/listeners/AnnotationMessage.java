@@ -1,5 +1,6 @@
 package simulizer.simulation.listeners;
 
+import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;
 
 /**
@@ -7,9 +8,11 @@ import simulizer.assembler.representation.Annotation;
  * @author mbway
  */
 public class AnnotationMessage extends Message {
-	public Annotation annotation; // the annotation that was met
+	public final Annotation annotation; // the annotation that was met
+	public final Address boundAddress; // null if initial annotation
 
-	public AnnotationMessage(Annotation annotation) {
+	public AnnotationMessage(Annotation annotation, Address boundAddress) {
 		this.annotation = annotation;
+		this.boundAddress = boundAddress;
 	}
 }

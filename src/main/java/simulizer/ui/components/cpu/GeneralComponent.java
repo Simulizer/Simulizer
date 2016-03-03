@@ -1,22 +1,23 @@
 package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Rectangle;
+import simulizer.ui.windows.CPUVisualisation;
 
 public class GeneralComponent extends ComponentStackPane {
 
-    public GeneralComponent(double x, double y, double width, double height, String label){
-        super(x, y, width, height, label);
+    public GeneralComponent(CPUVisualisation vis, String label){
+        super(vis, label);
         this.shape = new Rectangle(x, y, width, height);
         setAttributes();
     }
 
-    public void setShapeWidth(double width){
+    public void setShapeWidthAndDraw(double width){
         ((Rectangle) shape).setWidth(width);
         text.setWrappingWidth(width * 0.9);
         super.setShapeWidth(width);
     }
 
-    public void setShapeHeight(double height){
+    public void setShapeHeightAndDraw(double height){
         ((Rectangle) shape).setHeight(height);
         super.setShapeHeight(height);
     }
@@ -24,11 +25,15 @@ public class GeneralComponent extends ComponentStackPane {
     public void setAttrs(double x, double y, double width, double height){
         setLayoutX(x);
         shape.setLayoutX(x);
+        shape.layoutXProperty().set(x);
         setLayoutY(y);
+        setX(x);
+        setY(y);
         shape.setLayoutY(y);
-        setShapeWidth(width);
+        shape.layoutYProperty().set(y);
+        setShapeWidthAndDraw(width);
         setPrefWidth(width);
-        setShapeHeight(height);
+        setShapeHeightAndDraw(height);
         setPrefHeight(height);
     }
 

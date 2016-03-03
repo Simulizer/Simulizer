@@ -1,6 +1,7 @@
 package simulizer.utils;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -111,21 +112,13 @@ public class SpimRunner {
 		}
 
 		assert tmp != null;
-		try {
-			//System.out.println(tmp.getAbsolutePath());
 
-			ProcessBuilder spimBuilder = new ProcessBuilder(
-					"qtspim", "-file", tmp.getAbsolutePath()
-			).redirectErrorStream(true);
+        try {
+            Runtime.getRuntime().exec(new String[] {"qtspim", "-file", tmp.getAbsolutePath()});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-			Process spim = spimBuilder.start();
-
-			spim.waitFor();
-
-		} catch(IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits
+        tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits
 	}
 }

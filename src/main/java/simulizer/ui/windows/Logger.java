@@ -15,11 +15,18 @@ import javafx.scene.layout.Priority;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow implements Observer {
+	private static final long BUFFER_TIME = 20;
 
 	private TextArea output = new TextArea();
 	private TextField input = new TextField();
-	private String lastInput = "";
+	private Button submit;
+
 	private CountDownLatch cdl = new CountDownLatch(1);
+	private String lastInput = "", buffer = "";
+	private long lastUpdate = 0;
+	private volatile boolean callUpdate = true;
+
+	private boolean emphasise = true;
 
 	public Logger() {
 		GridPane pane = new GridPane();
@@ -33,15 +40,14 @@ public class Logger extends InternalWindow implements Observer {
 
 		// Input TextField
 		GridPane.setHgrow(input, Priority.ALWAYS);
-		input.setDisable(true);
 		pane.add(input, 0, 1);
 
-		// Enter Button
-		Button submit = new Button();
+		submit = new Button();
 		submit.setText("Enter");
 		submit.setOnAction((e) -> submitText());
+		submit.setDisable(true);
 		addEventHandler(KeyEvent.ANY, (e) -> {
-			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
+			if (input.isFocused() && e.getCode() == KeyCode.ENTER && !submit.isDisable())
 				submitText();
 		});
 		input.focusedProperty().addListener((e) -> {
@@ -68,6 +74,7 @@ public class Logger extends InternalWindow implements Observer {
 	@Override
 	public void ready() {
 		getWindowManager().getIO().addObserver(this);
+		emphasise = (boolean) getWindowManager().getSettings().get("logger.emphasise");
 		super.ready();
 	}
 
@@ -84,25 +91,39 @@ public class Logger extends InternalWindow implements Observer {
 
 	public String nextMessage() {
 		try {
-			input.setDisable(false);
+			if (emphasise)
+				Platform.runLater(this::emphasise);
+			submit.setDisable(false);
 			cdl = new CountDownLatch(1);
 			cdl.await();
-			input.setDisable(true);
+			submit.setDisable(true);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		return lastInput;
 	}
-	
-	public void cancelNextMessage(){
+
+	public void cancelNextMessage() {
 		cdl.countDown();
 	}
 
 	@Override
 	public void update(Observable o, Object message) {
-		// TODO: this should handle race conditions, perhaps with a buffer or
-		// TODO: don't return to the caller until the write is made
-		Platform.runLater(() -> output.appendText((String) message));
-	}
+		synchronized (buffer) {
+			if (!callUpdate && (buffer == ""))
+				callUpdate = true;
+			buffer += (String) message;
+		}
 
+		if (callUpdate && System.currentTimeMillis() - lastUpdate > BUFFER_TIME) {
+			Platform.runLater(() -> {
+				synchronized (buffer) {
+					callUpdate = false;
+					output.appendText(buffer);
+					buffer = "";
+					lastUpdate = System.currentTimeMillis();
+				}
+			});
+		}
+	}
 }

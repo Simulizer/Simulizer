@@ -7,6 +7,7 @@ import java.util.Stack;
 import javafx.animation.Animation;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
@@ -38,7 +39,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private double platformWidth;
 	private double pegWidth;
 	private double discHeight;
-	private double maxdiscWidth;
+	private double maxDiscWidth;
 	private double discWidthDelta;
 
 	private List<Animation> animationBuffer = new ArrayList<>();
@@ -51,23 +52,45 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private Rectangle[] vPegs = new Rectangle[3];
 	private Rectangle[] discs;
 
-	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, double width, double height, int startingPeg, int numDiscs) {
-		super(vis, width, height);
+	private boolean queuing;
+
+	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, int startingPeg) {
+		super(vis);
 
 		this.startingPeg = startingPeg;
-		this.numDiscs = numDiscs;
-		this.discs = new Rectangle[numDiscs];
+		calculateDimensions();
+	}
 
-		calculateDimensions(width, height);
-		init();
-		resize();
+	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, int startingPeg, int numDiscs) {
+		super(vis);
+
+		this.startingPeg = startingPeg;
+		setNumDisks(numDiscs);
+	}
+
+	public void setNumDisks(int n) {
+		numDiscs = n;
+
+		if(discs != null) {
+			for (Rectangle rect : discs)
+				vis.remove(rect);
+		}
+
+		discs = new Rectangle[numDiscs];
+
+		calculateDimensions();
+
+		Platform.runLater(() -> {
+			init();
+			resize();
+		});
 	}
 
 	/**
 	 * Draws the platform and the initial discs
 	 */
 	private void init() {
-		HighLevelVisualisation vis = getHighLevelVisualisation();
+		vis.getDrawingPane().getChildren().clear();
 
 		this.base = new Rectangle(xOffset, pegY0 + pegHeight, platformWidth, discHeight);
 		vis.add(base);
@@ -82,8 +105,13 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		}
 
 		// Draw discs
+		this.discs = new Rectangle[numDiscs];
+
+		for (Rectangle rect : discs)
+			vis.remove(rect);
+
 		double y = pegY0 + pegHeight - discHeight;
-		double width = maxdiscWidth;
+		double width = maxDiscWidth;
 		double x = xOffset + 5 / 2;
 		for (int i = 0; i < numDiscs; ++i) {
 			discs[i] = new Rectangle(x, y, width, discHeight);
@@ -98,6 +126,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			y -= discHeight;
 		}
 	}
+
 
 	/**
 	 * @param pegIndex
@@ -118,6 +147,11 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		return ((pegY0 + pegHeight) - numdiscsOnPeg * discHeight);
 	}
 
+	public TowerOfHanoiVisualiser batch() {
+		this.queuing = true;
+		return this;
+	}
+
 	/**
 	 * Calculates the animation for moving the disc at peg i to peg j. If there
 	 * is no disc on peg i, then it does nothing
@@ -127,19 +161,29 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 * @param j
 	 *            the index of the peg to move the disc to
 	 */
-	public void move(int i, int j) {
-		if (pegs.get(i).size() == 0 || i == j) return;
+	public TowerOfHanoiVisualiser move(int i, int j) {
+		if (pegs.get(i).size() == 0 || i == j) return this;
 
 		Rectangle disc = pegs.get(i).peek();
 
 		animationBuffer.add(getTransition(disc, getX(i), getY(i), getX(j), getY(j) - discHeight));
 		moveIndices.add(new MoveIndices(i, j));
+
+		if (queuing) return this;
+		else {
+			commit();
+			return this;
+		}
 	}
 
 	/**
 	 * Commits and animates any buffered animations.
 	 */
 	public void commit() {
+		queuing = false;
+
+		if (animationBuffer.isEmpty()) return;
+
 		ParallelTransition animation = new ParallelTransition();
 		animation.getChildren().addAll(animationBuffer);
 		animation.play();
@@ -172,7 +216,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 */
 	private PathTransition getTransition(Rectangle disc, double x1, double y1, double x2, double y2) {
 		int height = disc.heightProperty().intValue();
-		double arcHeight = (getHighLevelVisualisation().getWindowHeight() / 10);
+		double arcHeight = vis.getWindowHeight() / 10;
 
 		Path path = new Path();
 		path.getElements().add(new MoveTo(x1, y1 + height / 2));
@@ -190,10 +234,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	private void calculateDimensions() {
-		calculateDimensions(getHighLevelVisualisation().getWindowWidth(), getHighLevelVisualisation().getWindowHeight());
-	}
+		double width = vis.getWindowWidth();
+		double height = vis.getWindowHeight();
 
-	private void calculateDimensions(double width, double height) {
 		this.platformWidth = (4 * width) / 5;
 		this.xOffset = (width - platformWidth) / 2;
 		this.pegY0 = height / 3;
@@ -201,14 +244,14 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		this.pegWidth = width / 40;
 
 		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
-		this.maxdiscWidth = platformWidth / 3 - width / 120;
-		this.discWidthDelta = Math.min(width / 30, (maxdiscWidth - pegWidth - width / 120) / (numDiscs - 1));
+		this.maxDiscWidth = platformWidth / 3 - width / 120;
+		this.discWidthDelta = Math.min(width / 30, (maxDiscWidth - pegWidth - width / 120) / (numDiscs - 1));
 	}
 
 	@Override
 	public void resize() {
-		double windowWidth = getHighLevelVisualisation().getWindowWidth();
-		double windowHeight = getHighLevelVisualisation().getWindowHeight();
+		double windowWidth = vis.getWindowWidth();
+		double windowHeight = vis.getWindowHeight();
 
 		calculateDimensions();
 

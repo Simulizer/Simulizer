@@ -26,6 +26,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
+import simulizer.utils.ThreadUtils;
 
 public class Simulizer extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
@@ -79,7 +80,7 @@ public class Simulizer extends Application {
 		Task<Boolean> startupTask = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws Exception {
-				launchWindowManager(primaryStage);
+				ThreadUtils.platformRunAndWait(() -> launchWindowManager(primaryStage));
 				updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 				long offset = (int) settings.get("splash-screen.delay") - (System.currentTimeMillis() - splashStartTime);
 				if (offset > 0)
@@ -140,8 +141,9 @@ public class Simulizer extends Application {
 		stage.setWidth(SPLASH_WIDTH);
 		stage.setHeight(SPLASH_HEIGHT);
 		stage.setAlwaysOnTop(true);
-		stage.show();
 		splashStartTime = System.currentTimeMillis();
+		stage.show();
+
 	}
 
 	private URI getResource(String filepath) throws URISyntaxException {

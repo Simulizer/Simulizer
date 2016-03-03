@@ -32,6 +32,7 @@ import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.FileUtils;
+import simulizer.utils.SafeJSObject;
 import simulizer.utils.UIUtils;
 
 /**
@@ -46,7 +47,6 @@ public class Editor extends InternalWindow {
 	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
 
 	WindowManager wm;
-	private WebView view;
 	private WebEngine engine;
 	private File currentFile;
 
@@ -60,11 +60,9 @@ public class Editor extends InternalWindow {
 	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
 	// references to javascript objects
-	private JSObject jsWindow;
-	private JSObject jsEditor;
-	private JSObject jsSession;
-	// passed to js functions which take no arguments to keep the engine happy
-	private static final Integer dummyArgument = 0;
+	private SafeJSObject jsWindow;
+	private SafeJSObject jsEditor;
+	private SafeJSObject jsSession;
 
 	// execute mode = simulation running
 	private enum Mode { EDIT_MODE, EXECUTE_MODE }
@@ -94,7 +92,7 @@ public class Editor extends InternalWindow {
 	private Bridge bridge;
 
 	public Editor() {
-		view = new WebView();
+		WebView view = new WebView();
 		currentFile = null;
 		bridge = new Bridge(this);
 
@@ -158,7 +156,7 @@ public class Editor extends InternalWindow {
 					// loaded, run this once then remove as a listener
 
 					// setup the javascript --> java bridge
-					jsWindow = (JSObject) engine.executeScript("window");
+					jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
 					jsWindow.setMember("bridge", bridge);
 
 					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
@@ -167,8 +165,8 @@ public class Editor extends InternalWindow {
 					initSyntaxHighlighter();
 
 					jsWindow.call("init");
-					jsEditor = (JSObject) engine.executeScript("editor"); // created by init() so must be set after
-					jsSession = (JSObject) engine.executeScript("session");
+					jsEditor = new SafeJSObject((JSObject) engine.executeScript("editor")); // created by init() so must be set after
+					jsSession = new SafeJSObject((JSObject) engine.executeScript("session"));
 
 					//enableFirebug();
 
@@ -457,7 +455,7 @@ public class Editor extends InternalWindow {
 	 * @warning must be called from a JavaFX thread
 	 */
 	public boolean getWrap() {
-		return (boolean) jsSession.call("getUseWrapMode", dummyArgument);
+		return (boolean) jsSession.call("getUseWrapMode");
 	}
 
 	/**
