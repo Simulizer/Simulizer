@@ -12,7 +12,6 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.CloseIcon;
-import jfxtras.scene.control.window.MinimizeIcon;
 import jfxtras.scene.control.window.Window;
 import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
