@@ -182,28 +182,32 @@ public class ListVisualiser extends DataStructureVisualiser {
 		return this;
 	}
 
-	public void setMarkers(int left, int right) {
-		Platform.runLater(() -> {
-			for (int i = 0; i < markers.length; ++i)
-				markers[i].setText("");
-
-			if (left == right) setMarker(left, "LR");
-			else {
-				setMarker(left, "L");
-				setMarker(right, "R");
-			}
-		});
-	}
-
-	private void setMarker(int i, String label) {
-		markers[i + 1].setText(label);
-		markers[i + 1].setTranslateX(getTextX(i, markers[i + 1]));
-		markers[i + 1].setTranslateY(getMarkerY(i));
+	/**
+	 * Adds a marker at the specified index. If the index is -1,
+	 * then the marker will be added to the left of the list. If the marker
+	 * is equal to the length of the list, then the marker will be placed to
+	 * the right of the list
+	 *
+	 * @param index
+	 *            the index of where to place the label
+	 * @param label
+	 *            the label to place
+	 */
+	public void addMarker(int index, String label) {
+		String existingText = markers[index + 1].getText();
+		markers[index + 1].setText(existingText + " " + label);
+		markers[index + 1].setTranslateX(getTextX(index, markers[index + 1]));
+		markers[index + 1].setTranslateY(getMarkerY(index));
 
 		resize();
 	}
 
-	public void setLabel(int i, String label) {
+	public void clearMarkers() {
+		for (Text marker : markers)
+			marker.setText("");
+	}
+
+	public void setTextLabel(int i, String label) {
 		textLabels[i].setText(label);
 		resize();
 	}
