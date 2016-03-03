@@ -71,8 +71,10 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	public void setNumDisks(int n) {
 		numDiscs = n;
 
-		 for (Rectangle rect : discs)
-			 vis.remove(rect);
+		if(discs != null) {
+			for (Rectangle rect : discs)
+				vis.remove(rect);
+		}
 
 		discs = new Rectangle[numDiscs];
 

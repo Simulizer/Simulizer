@@ -47,7 +47,7 @@ main:
 
     blez $v0, ERROR_EXIT   # if input <= 0: exit
 
-    # @{ h.setNumDisks($v0.get()) }@
+nop # @{ h.setNumDisks($v0.get()) }@
     # @{ vis.show()               }@
 
     # call function: MOVE
