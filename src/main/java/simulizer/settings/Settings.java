@@ -68,6 +68,9 @@ public class Settings {
 					.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
 					.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
 					);	
+		settings.add(new ObjectSetting("logger", "Logger")
+				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
+				);	
 		// @formatter:on
 
 		// Loads all the values from jsonObject

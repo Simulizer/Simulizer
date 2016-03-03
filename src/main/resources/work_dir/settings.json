@@ -40,5 +40,8 @@
     "delay": 750,
     "width": 676,
     "height": 235
+  },
+  "logger": {
+  	"emphasise": true
   }
 }
