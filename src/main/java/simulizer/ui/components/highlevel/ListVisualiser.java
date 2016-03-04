@@ -120,7 +120,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private double getTextX(int rectIndex, Text label, int pos) {
 		switch (pos) {
 			case CENTER:
-				return getX(rectIndex) + rectLength / 2 - 5 * label.getBoundsInLocal().getWidth() / 8;
+				return getX(rectIndex) + rectLength / 2 - label.getBoundsInLocal().getWidth() / 2;
 			case LEFT:
 				return getX(rectIndex) - label.getBoundsInLocal().getWidth() / 2;
 			case RIGHT:
@@ -221,13 +221,23 @@ public class ListVisualiser extends DataStructureVisualiser {
 			index == -1 ? 0 : index == list.size() ? 3 * list.size() + 1 : 3 * index + (pos == LEFT ? 1 : pos == CENTER ? 2 : 3);
 
 		String existingText = markers[markerIndex].getText();
-		markers[markerIndex].setText(existingText + " " + label);
+		markers[markerIndex].setText(existingText + label);
 		markers[markerIndex].setTranslateX(getTextX(index, markers[markerIndex], pos));
 		markers[markerIndex].setTranslateY(getMarkerY(index));
 
 		resize();
 
 		return markerIndex++;
+	}
+
+	public int left() {
+		return LEFT;
+	}
+	public int centre() {
+		return CENTER;
+	}
+	public int right() {
+		return RIGHT;
 	}
 
 	public void clearMarkers() {
