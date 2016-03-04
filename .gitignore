@@ -53,7 +53,8 @@ gradle.properties
 */gradle.properties
 
 # Ignore application working directory
-/work/settings.json # Temporarily allowing work dir until I can copy out of a jar file
+# Temporarily allowing work dir until I can copy out of a jar file
+/work/settings.json 
 
 # Ignore logs
 *.log
