@@ -28,6 +28,10 @@ import simulizer.ui.windows.HighLevelVisualisation;
  *            the data type stored in the list
  */
 public class ListVisualiser extends DataStructureVisualiser {
+	public static final int LEFT = 0;
+	public static final int CENTER = 1;
+	public static final int RIGHT = 2;
+
 	private class Pair {
 		public int a;
 		public int b;
@@ -53,6 +57,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private boolean queuing;
 
+	private int markerIndex = 0;
+
 	/**
 	 * @param width
 	 *            the width of the area to draw on
@@ -70,7 +76,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		this.rectangles = new Rectangle[list.size()];
 		this.textLabels = new Text[list.size()];
-		this.markers = new Text[list.size() + 2]; // + 2 so you can put a marker to the left and right
+		this.markers = new Text[3 * list.size() + 2]; // + 2 so you can put a marker to the left and right
 
 		calculateDimensions();
 
@@ -109,6 +115,19 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private double getTextX(int rectIndex, Text label) {
 		return getX(rectIndex) + rectLength / 2 - label.getBoundsInLocal().getWidth() / 2;
+	}
+
+	private double getTextX(int rectIndex, Text label, int pos) {
+		switch (pos) {
+			case CENTER:
+				return getX(rectIndex) + rectLength / 2 - 5 * label.getBoundsInLocal().getWidth() / 8;
+			case LEFT:
+				return getX(rectIndex) - label.getBoundsInLocal().getWidth() / 2;
+			case RIGHT:
+				return getX(rectIndex) + rectLength - label.getBoundsInLocal().getWidth();
+			default:
+				return -1;
+		}
 	}
 
 	private double getTextY(int rectIndex) {
@@ -182,6 +201,10 @@ public class ListVisualiser extends DataStructureVisualiser {
 		return this;
 	}
 
+	public void addMarker(int index, String label) {
+		addMarker(index, label, CENTER);
+	}
+
 	/**
 	 * Adds a marker at the specified index. If the index is -1,
 	 * then the marker will be added to the left of the list. If the marker
@@ -193,13 +216,18 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * @param label
 	 *            the label to place
 	 */
-	public void addMarker(int index, String label) {
-		String existingText = markers[index + 1].getText();
-		markers[index + 1].setText(existingText + " " + label);
-		markers[index + 1].setTranslateX(getTextX(index, markers[index + 1]));
-		markers[index + 1].setTranslateY(getMarkerY(index));
+	public int addMarker(int index, String label, int pos) {
+		int markerIndex =
+			index == -1 ? 0 : index == list.size() ? 3 * list.size() + 1 : 3 * index + (pos == LEFT ? 1 : pos == CENTER ? 2 : 3);
+
+		String existingText = markers[markerIndex].getText();
+		markers[markerIndex].setText(existingText + " " + label);
+		markers[markerIndex].setTranslateX(getTextX(index, markers[markerIndex], pos));
+		markers[markerIndex].setTranslateY(getMarkerY(index));
 
 		resize();
+
+		return markerIndex++;
 	}
 
 	public void clearMarkers() {
@@ -327,18 +355,14 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
-
-			if (markers[i] != null) {
-				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
-				markers[i].setTranslateY(getMarkerY(i - 1));
-			}
 		}
 
-		for (int i = rectangles.length; i < rectangles.length + 2; ++i) {
-			if (markers[i] != null) {
-				markers[i].setTranslateX(getTextX(i - 1, markers[i]));
-				markers[i].setTranslateY(getMarkerY(i - 1));
-			}
+		markers[0].setTranslateX(getTextX(-1, markers[0]));
+
+		int[] posArray = { LEFT, CENTER, RIGHT };
+		for (int i = 1, j = 0; i < markers.length - 1; ++i, j = (j + 1) % 3) {
+			markers[i].setTranslateX(getTextX((i - 1) / 3, markers[i], posArray[j]));
+			markers[i].setTranslateY(getMarkerY(i - 1));
 		}
 
 		setWidth(vis.getWidth());
