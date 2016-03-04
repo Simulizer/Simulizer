@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./convert-markdown 
+./generate-pdf
+./clean

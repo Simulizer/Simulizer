@@ -61,6 +61,7 @@ gradle.properties
 
 # Ignore generated tex files
 docs/final-report/tables/*.tex
+docs/final-report/*.pdf
 
 # Ignore personal helper scripts
 copy-settings.sh

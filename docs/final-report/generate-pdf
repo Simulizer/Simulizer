@@ -1,0 +1,19 @@
+#!/bin/bash
+
+REPORT_HOME=./
+TARGET="main.tex"
+DEST="Final-Report"
+
+cd ${REPORT_HOME}
+
+if [ $# -gt 1 ]
+then
+  echo "Usage: ./generate-pdf.sh [output-format]"
+elif [ $# -eq 0 ] || [ $1 == 'pdf' ]
+then
+  pdflatex ${TARGET} -o ${DEST}.pdf
+else
+  latex ${TARGET} -o ${DEST}.tex
+fi
+
+cd -
