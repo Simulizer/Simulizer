@@ -2,6 +2,7 @@ package simulizer.settings.types;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 

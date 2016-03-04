@@ -3,6 +3,7 @@ package simulizer.ui.components.settings;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import simulizer.settings.types.StringSetting;
@@ -16,12 +17,6 @@ public class StringControl extends GridPane {
 		title.getStyleClass().add("title");
 		add(title, 0, 0);
 
-		// Option Name
-		Label desc = new Label(setting.getDescription());
-		GridPane.setHgrow(desc, Priority.SOMETIMES);
-		desc.getStyleClass().add("description");
-		add(desc, 0, 1);
-
 		// Option Value
 		TextField value = new TextField();
 		value.setText(setting.getValue());
@@ -31,5 +26,10 @@ public class StringControl extends GridPane {
 		value.getStyleClass().add("value");
 		value.textProperty().addListener((e) -> setting.setValue(value.getText()));
 		add(value, 1, 0);
+
+		// Tooltip
+		Tooltip tooltip = new Tooltip(setting.getDescription());
+		Tooltip.install(title, tooltip);
+		Tooltip.install(value, tooltip);
 	}
 }
