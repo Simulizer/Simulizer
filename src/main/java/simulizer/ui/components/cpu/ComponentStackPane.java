@@ -102,7 +102,7 @@ public class ComponentStackPane extends StackPane {
                 double xMax = getX() + getShapeWidth();
                 double yMax = getY() + getShapeHeight();
 
-                if( eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
+                if(!vis.getMainWindowManager().getCPU().isRunning() && eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
                     tooltip.setMaxWidth(vis.getWidth() - 40);
                     tooltip.setMaxHeight(vis.getHeight());
                     double x = vis.getScene().getWindow().getX() + vis.getLayoutX() + eventX - getShapeWidth() / 2;

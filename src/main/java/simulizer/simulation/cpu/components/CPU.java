@@ -26,7 +26,16 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.listeners.*;
+import simulizer.simulation.listeners.AnnotationMessage;
+import simulizer.simulation.listeners.DataMovementMessage;
+import simulizer.simulation.listeners.ExecuteStatementMessage;
+import simulizer.simulation.listeners.ListenerController;
+import simulizer.simulation.listeners.Message;
+import simulizer.simulation.listeners.ProblemMessage;
+import simulizer.simulation.listeners.RegisterChangedMessage;
+import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.listeners.SimulationMessage;
+import simulizer.simulation.listeners.StageEnterMessage;
 import simulizer.simulation.listeners.StageEnterMessage.Stage;
 
 /**this is the central CPU class
@@ -54,7 +63,7 @@ public class CPU {
 
     private Word[] registers;
     private MainMemory memory;
-    
+
     private Decoder decoder;
     private Executor executor;
 
@@ -66,7 +75,7 @@ public class CPU {
 
     protected boolean isRunning;//for program status
     protected Address lastAddress;//used to determine end of program
-    
+
     private IO io;
 
 
@@ -118,6 +127,8 @@ public class CPU {
      *
      */
     public int getClockSpeed(){ return clock.tickMillis; }
+
+    public boolean isRunning() { return isRunning; }
 
     /**stop the running of a program
      *
@@ -271,14 +282,14 @@ public class CPU {
         this.programCounter = this.executor.execute(instruction,this.getProgramCounter());//will set the program counter if changed
     }
 
-    
+
     /**this method will run a single cycle of the FDE cycle
      * @throws MemoryException if problem accessing memory
      * @throws DecodeException if error during decode
      * @throws InstructionException if error with instruction
      * @throws ExecuteException if problem during execution
      * @throws HeapException if the heap goes wrong at some point
-     * @throws StackException 
+     * @throws StackException
      *
      */
     public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
@@ -290,7 +301,7 @@ public class CPU {
         fetch();
         sendMessage(new ExecuteStatementMessage(thisInstruction));
 		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
-		
+
 		execute(instruction);
 		if(annotations.containsKey(thisInstruction)) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
@@ -345,19 +356,19 @@ public class CPU {
     public MainMemory getMainMemory() {
         return memory;
     }
- 
+
     public Address getProgramCounter() {
     	return programCounter;
     }
-    
+
     public ALU getALU() {
     	return Alu;
     }
-    
+
     public IO getIO() {
     	return io;
     }
-    
+
     public Program getProgram() {
         return program;
     }
