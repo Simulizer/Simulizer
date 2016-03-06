@@ -32,7 +32,7 @@
     "soft-tabs": true,
     "theme" : "ace/theme/monokai",
     "user-control-during-execution": false,
-    "vim-mode": true,
+    "vim-mode": false,
     "wrap": false
   },
   "splash-screen": {
