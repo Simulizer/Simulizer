@@ -132,9 +132,9 @@ public class Executor {
 	                    }
 	                    
 	                    cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = new Word(read);
-	                    cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
-	                	cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                 	}
+                    cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
+                	cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
                 }
                 else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.srcAddr)) {//store
                 	byte[] toStore;//where to store the data to be put in memory

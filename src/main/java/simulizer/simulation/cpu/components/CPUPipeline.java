@@ -24,6 +24,7 @@ import simulizer.simulation.listeners.AnnotationMessage;
 import simulizer.simulation.listeners.ExecuteStatementMessage;
 import simulizer.simulation.listeners.PipelineHazardMessage;
 import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
+import simulizer.simulation.listeners.PipelineStateMessage;
 import simulizer.simulation.listeners.ProblemMessage;
 
 /**this class is an extension of the original CPU class
@@ -40,6 +41,7 @@ public class CPUPipeline extends CPU {
 	private InstructionFormat ID;//user for storing between decode and execute
 	private boolean canFetch;//useful for pipeline stalling
 	private int isFinished;//used for testing end of program
+	private int nopCount;//used to check for pipeline hazards when sending messages
 	
 	/**constructor calls the super constructor
 	 * as well as initialising the new pipeline related fields
@@ -51,6 +53,7 @@ public class CPUPipeline extends CPU {
 		this.ID = createNopInstruction();
 		this.canFetch = true;
 		this.isFinished = 0;
+		this.nopCount = 0;
 		
 	}
 	
@@ -184,7 +187,6 @@ public class CPUPipeline extends CPU {
 	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
 
 		Address thisInstruction = programCounter;
-
 		if(this.canFetch&&this.isFinished==0){
 			fetch();
 			sendMessage(new ExecuteStatementMessage(thisInstruction));
@@ -212,7 +214,6 @@ public class CPUPipeline extends CPU {
 			sendMessage(new PipelineHazardMessage(Hazard.RAW));
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
-			
 			this.canFetch = false;
 		} else {
 			ID = decode(IF.getInstruction(), IF.getOperandList());
@@ -234,10 +235,28 @@ public class CPUPipeline extends CPU {
 		}
 
 		Address executingAddress = new Address(thisInstruction.getValue()-8);//has to be -8 to counter pipeline (i.e back two steps of 4 bytes each)
-		if(annotations.containsKey(executingAddress)) {//checking for annotations
+		if(annotations.containsKey(executingAddress)&&this.nopCount==0) {//checking for annotations (not when a fake nop is executed)
 			sendMessage(new AnnotationMessage(annotations.get(executingAddress), executingAddress));
 		}
 		
+		//Dealing with pipeline state messages
+		Address decodeAddress = new Address(thisInstruction.getValue()-4);
+		Address executeAddress = executingAddress;
+		if(this.nopCount == 2) {
+			decodeAddress = null;
+		} 
+		if(this.nopCount >= 1) {
+			executeAddress = null;
+		}
+		sendMessage(new PipelineStateMessage(thisInstruction,decodeAddress,executeAddress));
+		
+		this.nopCount = (this.nopCount==0) ? 0 : this.nopCount-1;//only decrementing if not 0
+		
+		if(needToBubbleRAWReg) {//if raw hazard has happened in this cycle
+			this.nopCount = 1;
+		} else if(jumped) {//if jump occurred in this cycle
+			this.nopCount = 2;
+		}
 	}
 	
 	/**overwriting the run program method of CPU but adding some field changes before execution
@@ -248,6 +267,7 @@ public class CPUPipeline extends CPU {
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
+		this.nopCount = 0;
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program
