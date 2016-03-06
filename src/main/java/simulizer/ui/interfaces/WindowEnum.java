@@ -2,12 +2,13 @@ package simulizer.ui.interfaces;
 
 public enum WindowEnum {
 	// @formatter:off
-	EDITOR("Editor", "Editor"), 
-	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"), 
-	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"), 
-	LABELS("Labels"), 
-	LOGGER("Logger"), 
-	REGISTERS("Registers"), 
+	EDITOR("Editor", "Editor"),
+	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
+	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
+	LABELS("Labels"),
+	LOGGER("Logger"),
+	MEMORY_VIEW("MemoryView", "Memory View"),
+	REGISTERS("Registers"),
 	GUIDE("help.GuideWindow", "Guide", false),
 	SYSCALL_REFERENCE("help.SyscallReference", "Syscall Reference", false),
 	INSTRUCTION_REFERENCE("help.InstructionReference", "Instruction Reference", false);
