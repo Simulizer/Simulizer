@@ -92,6 +92,7 @@ public class ComponentStackPane extends StackPane {
         Tooltip.install(instance, tooltip);
         tooltip.setAutoHide(true);
         tooltip.setWrapText(true);
+        tooltip.setPrefWidth(350);
 
         vis.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
             @Override
@@ -104,7 +105,9 @@ public class ComponentStackPane extends StackPane {
                 if( eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
                     tooltip.setMaxWidth(vis.getWidth() - 40);
                     tooltip.setMaxHeight(vis.getHeight());
-                    tooltip.show(instance, vis.getLayoutX() + eventX, vis.getLayoutY() + eventY);
+                    double x = vis.getScene().getWindow().getX() + vis.getLayoutX() + eventX - getShapeWidth() / 2;
+                    double y = vis.getScene().getWindow().getY() + vis.getLayoutY() + eventY - getShapeHeight()/2 - 20;
+                    tooltip.show(instance, x, y);
                 } else {
                     tooltip.hide();
                 }
