@@ -39,7 +39,7 @@ public class CPUPipeline extends CPU {
 	private Statement IF;//used for storing between fetch and decode
 	private InstructionFormat ID;//user for storing between decode and execute
 	private boolean canFetch;//useful for pipeline stalling
-	private boolean isFinished;//used for testing end of program
+	private int isFinished;//used for testing end of program
 	
 	/**constructor calls the super constructor
 	 * as well as initialising the new pipeline related fields
@@ -50,7 +50,7 @@ public class CPUPipeline extends CPU {
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		this.canFetch = true;
-		this.isFinished = false;
+		this.isFinished = 0;
 		
 	}
 	
@@ -128,6 +128,14 @@ public class CPUPipeline extends CPU {
 					registers.add(dest.get());
 				}
 				break;
+			case SPECIAL:
+				if(instruction.getInstruction().equals(Instruction.syscall)) {
+					long syscallCode = DataConverter.decodeAsSigned(getRegisters()[Register.v0.getID()].getWord());
+					if(syscallCode == 5||syscallCode==8||syscallCode==9||syscallCode==12) {//these syscall codes write to v0
+						registers.add(Register.v0);
+					}
+				}
+				break;
 			default:
 				break;
 		}
@@ -177,56 +185,59 @@ public class CPUPipeline extends CPU {
 
 		Address thisInstruction = programCounter;
 
-		if(this.canFetch&&!this.isFinished){
+		if(this.canFetch&&this.isFinished==0){
 			fetch();
 			sendMessage(new ExecuteStatementMessage(thisInstruction));
 		} else if (!this.canFetch) {
 			this.canFetch = true;
-		} else if(this.isFinished) {//ending termination
+		} else if(this.isFinished==1) {//getting closer to termination
+			this.isFinished++;
+		} else if(this.isFinished==2) { //ending termination
 			//exiting cleanly but representing that in reality an error would be thrown
 			this.isRunning = false;
 			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. "
 					+ "This could be because you forgot to exit cleanly."
 					+ " To exit cleanly please call syscall with code 10."));
-			
 		}
 		
-		if(this.programCounter.getValue() == this.lastAddress.getValue()+4) {//if end of program reached
-			this.isFinished = true;//stop fetching essentially and begin to terminate program
+		if(this.programCounter.getValue() == this.lastAddress.getValue()+4 && this.isFinished == 0) {//if end of program reached
+			this.isFinished = 1;//stop fetching essentially and begin to terminate program
         }
 		
 		boolean needToBubbleRAWReg = needToBubble(registersRead(IF),registersBeingWritten(ID));//detecting pipeline hazards
 		
+		InstructionFormat oldIDToExecute = ID;//storing old value of ID before overwritten, this is what I should be executing
 		if (needToBubbleRAWReg) { //if we need to stall to prevent incorrect reads
 			
 			sendMessage(new PipelineHazardMessage(Hazard.RAW));
-		
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
+			
 			this.canFetch = false;
 		} else {
 			ID = decode(IF.getInstruction(), IF.getOperandList());
 			IF = instructionRegister;//updating IF
 		}
 		
-		execute(ID);
-		
+		execute(oldIDToExecute);
+	    
 		//jumped checks if either an unconditional jump is made or, a branch returning true
-		boolean jumped = ID.mode.equals(AddressMode.JTYPE) || (ID.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
+		boolean jumped = oldIDToExecute.mode.equals(AddressMode.JTYPE) || (oldIDToExecute.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		
 		if(jumped)//flush pipeline and allow continuation of running
 		{
 			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
-			this.isFinished = false;//considering edge case where jump on last instruction
+			this.isFinished = 0;//considering edge case where jump on last instruction
 			this.isRunning = true;//keep the program running
 			IF = createNopStatement();
 			ID = createNopInstruction();
 		}
 
-		Address executingAddress = new Address(thisInstruction.getValue()-8);//has to be -8 to counter pipeline
+		Address executingAddress = new Address(thisInstruction.getValue()-8);//has to be -8 to counter pipeline (i.e back two steps of 4 bytes each)
 		if(annotations.containsKey(executingAddress)) {//checking for annotations
 			sendMessage(new AnnotationMessage(annotations.get(executingAddress), executingAddress));
 		}
+		
 	}
 	
 	/**overwriting the run program method of CPU but adding some field changes before execution
@@ -235,7 +246,7 @@ public class CPUPipeline extends CPU {
 	public void runProgram()
 	{
 		this.canFetch = true;//resetting fields for new program
-		this.isFinished = false;
+		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();

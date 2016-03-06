@@ -179,6 +179,8 @@ public class CPU {
                 l.processInstructionTypeMessage((InstructionTypeMessage) m);
             } else if(m instanceof PipelineHazardMessage) {
                 l.processPipelineHazardMessage((PipelineHazardMessage) m);
+            } else if(m instanceof PipelineStateMessage) {
+            	l.processPipelineStateMessage((PipelineStateMessage) m);
             } else if(m instanceof ProblemMessage) {
                 l.processProblemMessage((ProblemMessage) m);
             } else if(m instanceof RegisterChangedMessage) {
@@ -187,7 +189,7 @@ public class CPU {
                 l.processSimulationMessage((SimulationMessage) m);
             } else if(m instanceof StageEnterMessage) {
                 l.processStageEnterMessage((StageEnterMessage) m);
-            }
+            } 
         }
     }
 
