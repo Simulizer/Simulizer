@@ -16,7 +16,7 @@ import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow implements Observer {
 	private static final long BUFFER_TIME = 20;
-	
+
 	private TextArea output = new TextArea();
 	private TextField input = new TextField();
 	private Button submit;
@@ -25,6 +25,8 @@ public class Logger extends InternalWindow implements Observer {
 	private String lastInput = "", buffer = "";
 	private long lastUpdate = 0;
 	private volatile boolean callUpdate = true;
+
+	private boolean emphasise = true;
 
 	public Logger() {
 		setTitle("Program I/O");
@@ -74,6 +76,7 @@ public class Logger extends InternalWindow implements Observer {
 	@Override
 	public void ready() {
 		getWindowManager().getIO().addObserver(this);
+		emphasise = (boolean) getWindowManager().getSettings().get("logger.emphasise");
 		super.ready();
 	}
 
@@ -90,6 +93,8 @@ public class Logger extends InternalWindow implements Observer {
 
 	public String nextMessage() {
 		try {
+			if (emphasise)
+				Platform.runLater(this::emphasise);
 			submit.setDisable(false);
 			cdl = new CountDownLatch(1);
 			cdl.await();

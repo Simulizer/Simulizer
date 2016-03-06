@@ -5,7 +5,7 @@
   },
   "workspace": {
     "theme": "default",
-    "layout": "cpuvisualisation.json",
+    "layout": "default.json",
     "scale-ui": {
       "enabled": true,
       "delay": 10
@@ -27,7 +27,7 @@
   "editor": {
     "font-family": "Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace",
     "font-size": 20,
-    "initial-file" : "code/binary-search.s",
+    "initial-file" : "code/tower-of-hanoi.s",
     "scroll-speed": 0.1,
     "soft-tabs": true,
     "theme" : "ace/theme/monokai",
@@ -36,9 +36,12 @@
     "wrap": false
   },
   "splash-screen": {
-    "enabled": false,
+    "enabled": true,
     "delay": 750,
     "width": 676,
     "height": 235
+  },
+  "logger": {
+  	"emphasise": true
   }
 }

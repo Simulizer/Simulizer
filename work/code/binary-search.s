@@ -1,6 +1,6 @@
 # binary search
 # enter numbers in ascending order, using 0 as an end marker
-# @{ setSpeed(100) }@
+# @{ setSpeed(30) }@
 # @{ var l = vis.load('list', false) }@
 
 # @{ var startAddress = null }@
@@ -35,13 +35,13 @@ main:
     # read_and_search(first_elem, last_elem)
     move $a0, $v0
     move $a1, $v1
-    
+
  # @{ startAddress = $a0.get() }@
  # @{ if(startAddress == -1) ret() // no elements }@
  # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get())) }@
  # @{ vis.show()    }@
- # @{ setSpeed(150) }@
- 
+ # @{ setSpeed(75) }@
+
     jal read_and_search
 
     li $v0, 10      # 10: exit
@@ -174,7 +174,7 @@ binary_search:
     beq $a1, $t0 binary_search_NOT_FOUND
 
 nop # @{ l.setMarkers(addressToIndex($a1.get()), addressToIndex($a2.get())) }@
-    
+
     # no other calls are made so no need to store registers on the stack
 
     # if equal then there is still one element to be checked.
@@ -191,6 +191,8 @@ nop # @{ l.setMarkers(addressToIndex($a1.get()), addressToIndex($a2.get())) }@
 
     li  $t1, 2
     div $t0, $t0, $t1  # half way distance in words (floored)
+
+    # @{ l.emphasise($t0.get()) }@
 
     li  $t1, 4
     mul $t0, $t0, $t1  # half way distance in bytes

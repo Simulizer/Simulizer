@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Deletes .aux and .log files, and then deletes .tex files from the source folders (but not the main.tex file).
+
+REPORT_HOME=./
+DIRS=( "segments" "chapters" )
+DEL=( "aux" "log" )
+
+cd ${REPORT_HOME}
+for t in "${DEL[@]}"
+do
+  rm -rf *."${t}"
+done
+
+for d in "${DIRS[@]}"; do
+  cd "${REPORT_HOME}/${d}"
+  rm -rf *.tex
+  cd -
+done
+
