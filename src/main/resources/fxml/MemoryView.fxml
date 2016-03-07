@@ -19,10 +19,10 @@
 					</font>
 				</Label>
 				<Label fx:id="lbl1Byte" text="1 byte =" />
-				<HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" VBox.vgrow="ALWAYS">
+				<HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" VBox.vgrow="ALWAYS">
 					<children>
-						<Slider fx:id="sldrByteSize" orientation="VERTICAL" value="50.0" />
-						<Rectangle fx:id="byteRectangle" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="24.0" stroke="BLACK" strokeType="INSIDE" width="22.0" />
+						<Slider fx:id="sldrByteSize" orientation="VERTICAL" value="90.0" />
+						<Rectangle fx:id="byteRectangle" fill="#bdbebf" height="24.0" stroke="BLACK" strokeType="INSIDE" width="22.0" />
 					</children>
 				</HBox>
 				<CheckBox mnemonicParsing="false" text="Flipped" />

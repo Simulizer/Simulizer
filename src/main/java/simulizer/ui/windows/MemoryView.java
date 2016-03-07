@@ -62,16 +62,30 @@ public class MemoryView extends InternalWindow {
 
 	@FXML
 	public void initialize() {
-		double v = 10;
-		sldrByteSize.setValue(v);
-		byteRectangle.setHeight(Math.max(v / 100. * sldrByteSize.getHeight(), 50));
+		initSlider();
+		initStackPane();
+	}
+
+	private void initSlider() {
+		byteRectangle.setHeight(Math.max((100-sldrByteSize.getValue()) / 100. * sldrByteSize.getHeight(), 50));
+
+//		sldrByteSize.heightProperty().addListener((o, old, n) -> {
+//			recalculateByteHeight(n.doubleValue());
+//			Platform.runLater(() -> drawTest());
+//		});
 
 		sldrByteSize.valueProperty().addListener((o, old, n) -> {
-			double h = n.doubleValue() / 100. * sldrByteSize.getHeight();
-			byteRectangle.setHeight(h);
-			drawTest();
+			recalculateByteHeight(n.doubleValue());
+			Platform.runLater(() -> drawTest());
 		});
+	}
 
+	private void recalculateByteHeight(double v) {
+		double h = (100-v) / 100. * sldrByteSize.getHeight();
+		byteRectangle.setHeight(h);
+	}
+
+	private void initStackPane() {
 		// TODO replace 40 with the width of the scroll bar (which should be set in CSS)
 		// TODO make scroll bar always ON in scroll panes (to make calculations easier)
 		canvasStack.widthProperty().bind(paneStack.widthProperty().subtract(20));
