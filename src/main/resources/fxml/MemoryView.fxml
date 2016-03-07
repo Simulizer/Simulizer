@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.canvas.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
@@ -31,7 +32,7 @@
 	<bottom>
 		<HBox alignment="CENTER" fillHeight="false" prefHeight="100.0" prefWidth="200.0" spacing="30.0" BorderPane.alignment="CENTER">
 			<children>
-				<VBox alignment="CENTER" minWidth="-Infinity" HBox.hgrow="ALWAYS">
+				<VBox alignment="CENTER" minWidth="-Infinity">
 					<children>
 						<Label text="Current Value:" VBox.vgrow="ALWAYS">
 							<font>
@@ -95,7 +96,58 @@
 			</BorderPane.margin>
 		</HBox>
 	</bottom>
+   <padding>
+      <Insets bottom="10.0" top="20.0" />
+   </padding>
    <center>
-      <MeshView BorderPane.alignment="CENTER" />
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Stack">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane fx:id="paneStack" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasStack" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Heap">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasHeap" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Static">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasStatic" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+         <BorderPane.margin>
+            <Insets left="30.0" right="30.0" />
+         </BorderPane.margin>
+      </HBox>
    </center>
 </BorderPane>
