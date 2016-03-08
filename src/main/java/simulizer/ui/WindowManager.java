@@ -172,12 +172,11 @@ public class WindowManager extends GridPane {
 			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
 			final FutureTask<String> getProgramText = new FutureTask<>(editor::getText);
-
+			
 			Platform.runLater(getProgramText);
 
 			try {
 				final Program p = Assembler.assemble(getProgramText.get(), log);
-
 				// doing as little as possible in the FX thread
 				Platform.runLater(() -> {
 					// if no problems, has the effect of clearing

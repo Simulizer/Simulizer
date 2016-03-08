@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="722.0" prefWidth="917.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="simulizer.ui.windows.MemoryView">
+	<left>
+		<VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0" BorderPane.alignment="CENTER">
+			<children>
+				<Label fx:id="lblScale" text="Scale">
+					<font>
+						<Font size="28.0" />
+					</font>
+				</Label>
+				<Label fx:id="lbl1Byte" text="1 byte =" />
+				<HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" VBox.vgrow="ALWAYS">
+					<children>
+						<Slider fx:id="sldrByteSize" orientation="VERTICAL" value="90.0" />
+						<Rectangle fx:id="byteRectangle" fill="#bdbebf" height="24.0" stroke="BLACK" strokeType="INSIDE" width="22.0" />
+					</children>
+				</HBox>
+				<CheckBox mnemonicParsing="false" text="Flipped" />
+			</children>
+		</VBox>
+	</left>
+	<bottom>
+		<HBox alignment="CENTER" fillHeight="false" prefHeight="100.0" prefWidth="200.0" spacing="30.0" BorderPane.alignment="CENTER">
+			<children>
+				<VBox alignment="CENTER" minWidth="-Infinity">
+					<children>
+						<Label text="Current Value:" VBox.vgrow="ALWAYS">
+							<font>
+								<Font size="26.0" />
+							</font>
+						</Label>
+						<Button fx:id="btnLoadRange" minWidth="-Infinity" mnemonicParsing="false" onAction="#loadRange" prefHeight="25.0" prefWidth="212.0" text="Load Arbitrary Range" VBox.vgrow="ALWAYS" />
+					</children>
+				</VBox>
+				<GridPane>
+					<columnConstraints>
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+					</rowConstraints>
+					<children>
+						<Label text="Address" textAlignment="CENTER">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Label text="Size" GridPane.columnIndex="1">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Label text="As Unsigned" GridPane.columnIndex="2">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Label text="As Signed" GridPane.columnIndex="3">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Label text="As Pointer" GridPane.columnIndex="4">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Label text="As String" GridPane.columnIndex="5">
+							<font>
+								<Font name="System Bold" size="13.0" />
+							</font>
+						</Label>
+						<Button mnemonicParsing="false" text="Follow" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+						<Button mnemonicParsing="false" text="Read" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+					</children>
+				</GridPane>
+			</children>
+			<BorderPane.margin>
+				<Insets top="30.0" />
+			</BorderPane.margin>
+		</HBox>
+	</bottom>
+   <padding>
+      <Insets bottom="10.0" top="20.0" />
+   </padding>
+   <center>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Stack">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane fx:id="paneStack" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasStack" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Heap">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasHeap" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Static">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Label>
+                  <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+                     <content>
+                        <Canvas fx:id="canvasStatic" height="200.0" width="200.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+         <BorderPane.margin>
+            <Insets left="30.0" right="30.0" />
+         </BorderPane.margin>
+      </HBox>
+   </center>
+</BorderPane>

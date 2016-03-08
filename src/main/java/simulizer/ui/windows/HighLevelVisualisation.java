@@ -3,6 +3,7 @@ package simulizer.ui.windows;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
+import simulizer.ui.components.highlevel.FrameVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
 import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
@@ -22,24 +23,20 @@ public class HighLevelVisualisation extends InternalWindow {
 		setCache(false);
 
 		// TODO check if all this `setXWidth/Height()` stuff is needed
-		setPaneWidth(width);
-		setPaneHeight(height);
-		getChildren().add(drawingPane);
+		getContentPane().getChildren().add(drawingPane);
 
 		setMinWidth(width);
 		setMinHeight(200);
 
-		widthProperty().addListener((o, old, newValue) -> {
+		getContentPane().widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
-			setPaneWidth(width);
 			if(visualiser != null) {
 				visualiser.resize();
 			}
 		});
 
-		heightProperty().addListener((o, old, newValue) -> {
+		getContentPane().heightProperty().addListener((o, old, newValue) -> {
 			height = newValue.doubleValue();
-			setPaneHeight(height);
 			if(visualiser != null) {
 				visualiser.resize();
 			}
@@ -53,6 +50,9 @@ public class HighLevelVisualisation extends InternalWindow {
 	}
 	public void loadListVisualisation() {
 		visualiser = new ListVisualiser(this);
+	}
+	public void loadFrameVisualisation() {
+		visualiser = new FrameVisualiser(this);
 	}
 
     public void add(Node e){
@@ -73,14 +73,10 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	public void setPaneWidth(double width) {
 		drawingPane.setPrefWidth(width);
-		drawingPane.setMinWidth(width);
-		drawingPane.setMaxWidth(width);
 	}
 
 	public void setPaneHeight(double height) {
 		drawingPane.setPrefHeight(height);
-		drawingPane.setMinHeight(height);
-		drawingPane.setMaxHeight(height);
 	}
 
 	public double getWindowWidth() {
