@@ -33,6 +33,10 @@ public class VisualisationBridge {
 					ThreadUtils.platformRunAndWait(vis::loadListVisualisation);
 					vis.setVisible(showNow);
 					return vis.getVisualiser();
+				case "frame":
+					ThreadUtils.platformRunAndWait(vis::loadFrameVisualisation);
+					vis.setVisible(showNow);
+					return vis.getVisualiser();
 				default:
 					throw new IllegalArgumentException();
 			}
