@@ -8,15 +8,17 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
+import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
-public class Registers extends InternalWindow {
+public class Registers extends InternalWindow implements CPUChangedListener {
 	private TableView<Data> table = new TableView<Data>();
 	private CPU cpu;
+	private RegisterListener listener = new RegisterListener();
 
 	public Registers() {
 		widthProperty().addListener((o, old, newValue) -> {
@@ -29,19 +31,12 @@ public class Registers extends InternalWindow {
 	}
 
 	public void refreshData() {
-		// Create Listener for Register Changes
-		CPU cpu = getWindowManager().getCPU();
-		if (cpu != null && this.cpu != cpu) {
-			this.cpu = cpu;
-			cpu.registerListener(new RegisterListener());
-		}
-
 		ObservableList<Data> data = FXCollections.observableArrayList();
 		int i = 0;
 		for (Register r : Register.values()) {
 			String hex = "", unsigned = "", signed = "";
 			try {
-				byte[] contents = getWindowManager().getRegisters()[i].getWord();
+				byte[] contents = getWindowManager().getCPU().getRegisters()[i].getWord();
 				unsigned = "" + DataConverter.decodeAsUnsigned(contents);
 				signed = "" + DataConverter.decodeAsSigned(contents);
 				hex = Long.toHexString(DataConverter.decodeAsUnsigned(contents));
@@ -62,6 +57,8 @@ public class Registers extends InternalWindow {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void ready() {
+		getWindowManager().addCPUChangedListener(this);
+		
 		TableColumn<Data, String> register = new TableColumn<Data, String>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<Data, String>("name"));
 
@@ -80,6 +77,12 @@ public class Registers extends InternalWindow {
 
 		getContentPane().getChildren().add(table);
 		super.ready();
+	}
+	
+	@Override
+	public void close() {
+		getWindowManager().removeCPUChangedListener(this);
+		super.close();
 	}
 
 	public static class Data {
@@ -117,6 +120,15 @@ public class Registers extends InternalWindow {
 			// TODO: Be less wasteful, only update changed register
 			refreshData();
 		}
+	}
+
+	@Override
+	public void cpuChanged(CPU cpu) {
+		if (this.cpu != null)
+			cpu.unregisterListener(listener);
+		this.cpu = cpu;
+		if (cpu != null)
+			cpu.registerListener(listener);
 	}
 
 }

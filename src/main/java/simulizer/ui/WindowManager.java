@@ -1,6 +1,8 @@
 package simulizer.ui;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -16,10 +18,10 @@ import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.settings.Settings;
+import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
-import simulizer.simulation.data.representation.Word;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
@@ -27,7 +29,6 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.CPUVisualisation;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
@@ -40,6 +41,7 @@ public class WindowManager extends GridPane {
 	private Layouts layouts;
 	private Settings settings;
 
+	private Set<CPUChangedListener> cpuChangedListeners = new HashSet<CPUChangedListener>();
 	private CPU cpu = null;
 	private LoggerIO io;
 	private Thread cpuThread = null;
@@ -174,7 +176,7 @@ public class WindowManager extends GridPane {
 			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
 			final FutureTask<String> getProgramText = new FutureTask<>(editor::getText);
-			
+
 			Platform.runLater(getProgramText);
 
 			try {
@@ -189,7 +191,7 @@ public class WindowManager extends GridPane {
 					}
 				});
 
-				if(p != null) {
+				if (p != null) {
 					runProgram(p); // spawns another thread
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -228,10 +230,6 @@ public class WindowManager extends GridPane {
 		}
 	}
 
-	public Word[] getRegisters() {
-		return cpu.getRegisters();
-	}
-
 	public CPU getCPU() {
 		return cpu;
 	}
@@ -242,7 +240,6 @@ public class WindowManager extends GridPane {
 
 	public Settings getSettings() {
 		return settings;
-
 	}
 
 	public LoggerIO getIO() {
@@ -261,6 +258,18 @@ public class WindowManager extends GridPane {
 			cpu = new CPU(io);
 			cpu.registerListener(simListener);
 		}
+
+		for (CPUChangedListener listener : cpuChangedListeners) {
+			listener.cpuChanged(cpu);
+		}
+	}
+
+	public void addCPUChangedListener(CPUChangedListener listener) {
+		cpuChangedListeners.add(listener);
+	}
+
+	public void removeCPUChangedListener(CPUChangedListener listener) {
+		cpuChangedListeners.remove(listener);
 	}
 
 	public void shutdown() {
