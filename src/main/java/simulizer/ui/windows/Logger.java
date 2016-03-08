@@ -8,45 +8,70 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.util.Pair;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
 
 public class Logger extends InternalWindow implements Observer {
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
 	private static final long BUFFER_TIME = 20;
+	private volatile boolean callUpdate = true;
 
-	private TextArea output = new TextArea();
 	private TextField input = new TextField();
 	private Button submit;
 
 	private CountDownLatch cdl = new CountDownLatch(1);
-	private String lastInput = "", buffer = "";
-	private volatile boolean callUpdate = true;
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
+	private String lastInput = "";
+
+	private TabPane tabPane;
+	private StringBuilder[] logs;
+	private TextArea[] outputs;
 
 	private boolean emphasise = true;
 
 	public Logger() {
 		setTitle("Program I/O");
 
+		logs = new StringBuilder[IOStream.values().length];
+		outputs = new TextArea[IOStream.values().length];
 		GridPane pane = new GridPane();
 
-		// Output Console
-		output.setEditable(false);
-		output.textProperty().addListener((e) -> output.setScrollTop(Double.MAX_VALUE));
-		GridPane.setHgrow(output, Priority.ALWAYS);
-		GridPane.setVgrow(output, Priority.ALWAYS);
-		pane.add(output, 0, 0, 2, 1);
+		tabPane = new TabPane();
+		tabPane.setCursor(Cursor.DEFAULT);
+		for (int i = 0; i < IOStream.values().length; i++) {
+			Tab tab = new Tab();
+			tab.setText(IOStream.values()[i].toString());
+			tab.setClosable(false);
+
+			TextArea output = new TextArea();
+			output.setEditable(false);
+			output.textProperty().addListener((e) -> output.setScrollTop(Double.MAX_VALUE));
+			tab.setContent(output);
+
+			outputs[i] = output;
+			logs[i] = new StringBuilder();
+
+			tabPane.getTabs().add(tab);
+		}
+		GridPane.setHgrow(tabPane, Priority.ALWAYS);
+		GridPane.setVgrow(tabPane, Priority.ALWAYS);
+		pane.add(tabPane, 0, 0, 2, 1);
 
 		// Input TextField
 		GridPane.setHgrow(input, Priority.ALWAYS);
 		pane.add(input, 0, 1);
 
+		// Submit button
 		submit = new Button();
 		submit.setText("Enter");
 		submit.setOnAction((e) -> submitText());
@@ -71,7 +96,8 @@ public class Logger extends InternalWindow implements Observer {
 		lastInput = input.getText();
 		if (!lastInput.equals("")) {
 			input.setText("");
-			output.appendText(lastInput + "\n");
+			logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput + "\n");
+			callUpdate = true;
 			cdl.countDown();
 		}
 	}
@@ -84,10 +110,10 @@ public class Logger extends InternalWindow implements Observer {
 		flush.scheduleAtFixedRate(() -> {
 			if (callUpdate) {
 				Platform.runLater(() -> {
-					synchronized (buffer) {
+					synchronized (logs) {
 						callUpdate = false;
-						output.appendText(buffer);
-						buffer = "";
+						for (int i = 0; i < outputs.length; i++)
+							outputs[i].setText(logs[i].toString());
 					}
 				});
 			}
@@ -105,7 +131,8 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
-		output.setText("");
+		for (int i = 0; i < outputs.length; i++)
+			outputs[i].setText("");
 	}
 
 	public String nextMessage() {
@@ -127,11 +154,13 @@ public class Logger extends InternalWindow implements Observer {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void update(Observable o, Object message) {
-		synchronized (buffer) {
-			if (!callUpdate && (buffer == ""))
+		synchronized (logs) {
+			if (!callUpdate)
 				callUpdate = true;
-			buffer += (String) message;
+			Pair<IOStream, String> pair = (Pair<IOStream, String>) message;
+			logs[pair.getKey().getID()].append(pair.getValue());
 		}
 
 	}

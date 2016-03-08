@@ -1,6 +1,7 @@
 package simulizer.simulation.components;
 
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 
 /**this class is used as a really naive way of taking I/O to and from the simulation
  * it is used only for testing purposes and will not be used in the final system at all
@@ -33,19 +34,19 @@ public class IOTest implements IO {
 	}
 
 	@Override
-	public void printString(String str) {
+	public void printString(IOStream stream, String str) {
 		scanner = str;
 		
 	}
 
 	@Override
-	public void printInt(int num) {
+	public void printInt(IOStream stream, int num) {
 		scanner = num+"";
 		
 	}
 
 	@Override
-	public void printChar(char letter) {
+	public void printChar(IOStream stream, char letter) {
 		scanner = letter+"";
 		
 	}

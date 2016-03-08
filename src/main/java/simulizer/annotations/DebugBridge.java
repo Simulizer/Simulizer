@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.WindowManager;
 
 
@@ -19,7 +20,7 @@ public class DebugBridge {
 
 	public void log(String string) {
 		if(io != null) {
-			io.printString("js: " + string + "\n");
+			io.printString(IOStream.DEBUG, "js: " + string + "\n");
 		} else {
 			System.out.println("js: " + string);
 		}

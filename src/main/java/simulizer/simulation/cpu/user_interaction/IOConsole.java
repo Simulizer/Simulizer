@@ -23,7 +23,7 @@ public class IOConsole implements IO
 	 * 
 	 * @param str the string to be printed
 	 */
-	public void printString(String str)
+	public void printString(IOStream stream, String str)
 	{
 		System.out.println(str);
 	}
@@ -32,7 +32,7 @@ public class IOConsole implements IO
 	 * 
 	 * @param num the number to be printed
 	 */
-	public void printInt(int num)
+	public void printInt(IOStream stream, int num)
 	{
 		System.out.println(num);
 	}
@@ -41,7 +41,7 @@ public class IOConsole implements IO
 	 * 
 	 * @param letter the character to be printed
 	 */
-	public void printChar(char letter)
+	public void printChar(IOStream stream, char letter)
 	{
 		System.out.println(letter);
 	}

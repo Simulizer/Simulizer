@@ -6,6 +6,7 @@ import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.assembler.representation.operand.OperandFormat;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.ExecuteException;
@@ -174,7 +175,7 @@ public class Executor {
     	int a0 = (int)DataConverter.decodeAsSigned(cpu.getRegisters()[Register.a0.getID()].getWord());//getting main argument register
     	switch(v0) {
     		case 1://print int
-    			cpu.getIO().printInt(a0);//printing to console
+    			cpu.getIO().printInt(IOStream.STANDARD, a0);//printing to console
     			break;
     		case 4://print string
     			String toPrint = "";//initial string
@@ -187,7 +188,7 @@ public class Executor {
     				currentByte = cpu.getMainMemory().readFromMem(addressPStr, 1);//next word to read
     			}
     			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(currentByte)),Optional.empty()));
-    			cpu.getIO().printString(toPrint);
+    			cpu.getIO().printString(IOStream.STANDARD, toPrint);
     			break;
     		case 5://read int
     			int read = cpu.getIO().readInt();//reading in from console
@@ -225,7 +226,7 @@ public class Executor {
     			break;
     		case 11://print char
     			char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
-    			cpu.getIO().printChar(toPrintChar);
+    			cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
     			break;
     		case 12://read char
     			String readChar = cpu.getIO().readChar() + "";//from console
