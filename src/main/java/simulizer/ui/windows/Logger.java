@@ -3,6 +3,9 @@ package simulizer.ui.windows;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
@@ -23,8 +26,8 @@ public class Logger extends InternalWindow implements Observer {
 
 	private CountDownLatch cdl = new CountDownLatch(1);
 	private String lastInput = "", buffer = "";
-	private long lastUpdate = 0;
 	private volatile boolean callUpdate = true;
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
 
 	private boolean emphasise = true;
 
@@ -77,6 +80,19 @@ public class Logger extends InternalWindow implements Observer {
 	public void ready() {
 		getWindowManager().getIO().addObserver(this);
 		emphasise = (boolean) getWindowManager().getSettings().get("logger.emphasise");
+
+		flush.scheduleAtFixedRate(() -> {
+			if (callUpdate) {
+				Platform.runLater(() -> {
+					synchronized (buffer) {
+						callUpdate = false;
+						output.appendText(buffer);
+						buffer = "";
+					}
+				});
+			}
+		} , 0, BUFFER_TIME, TimeUnit.MILLISECONDS);
+
 		super.ready();
 	}
 
@@ -84,6 +100,7 @@ public class Logger extends InternalWindow implements Observer {
 	public void close() {
 		super.close();
 		getWindowManager().getIO().deleteObserver(this);
+		flush.shutdown();
 	}
 
 	public void clear() {
@@ -117,15 +134,5 @@ public class Logger extends InternalWindow implements Observer {
 			buffer += (String) message;
 		}
 
-		if (callUpdate && System.currentTimeMillis() - lastUpdate > BUFFER_TIME) {
-			Platform.runLater(() -> {
-				synchronized (buffer) {
-					callUpdate = false;
-					output.appendText(buffer);
-					buffer = "";
-					lastUpdate = System.currentTimeMillis();
-				}
-			});
-		}
 	}
 }
