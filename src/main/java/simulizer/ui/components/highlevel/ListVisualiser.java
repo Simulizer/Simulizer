@@ -18,7 +18,7 @@ import javafx.scene.shape.VLineTo;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import simulizer.highlevel.models.DataStructureModel;
+import simulizer.highlevel.models.ListModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
@@ -80,7 +80,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
+	public ListVisualiser(ListModel model, HighLevelVisualisation vis) {
 		super(model, vis);
 	}
 
@@ -95,7 +95,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		Platform.runLater(() -> {
 			initRectsAndBoxes();
-			resize();
+			repaint();
 		});
 	}
 
@@ -273,7 +273,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 		markers[markerIndex].setTranslateX(getTextX(index, markers[markerIndex], pos));
 		markers[markerIndex].setTranslateY(getMarkerY(index));
 
-		resize();
+		repaint();
 
 		return markerIndex++;
 	}
@@ -297,7 +297,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	public void setTextLabel(int i, String label) {
 		textLabels[i].setText(label);
-		resize();
+		repaint();
 	}
 
 	/**
@@ -407,7 +407,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void resize() {
+	public void repaint() {
 		if (rectangles == null || textLabels == null)
 			return;
 
@@ -441,7 +441,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	public void update(Observable o, Object arg) {
 		super.update(o, arg);
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
