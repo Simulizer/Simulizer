@@ -1,7 +1,6 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Random;
 
 import javafx.scene.image.ImageView;
@@ -26,7 +25,7 @@ public class FrameVisualiser extends DataStructureVisualiser {
 		getChildren().add(image);
 	}
 
-	private void drawFrame() {
+	private void drawFrame(double[][] img) {
 		WritableImage frame = new WritableImage(width, height);
 		PixelWriter pw = frame.getPixelWriter();
 		Random rand = new Random();
@@ -63,7 +62,7 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	public void update(Observable o, Object arg) {
 		if (!rendering) {
 			rendering = true;
-			Thread t = new Thread(this::drawFrame, "Render");
+			Thread t = new Thread(() -> drawFrame((double[][]) arg), "Render");
 			t.setDaemon(true);
 			t.start();
 		} else {

@@ -30,7 +30,9 @@ public class HanoiModel extends DataStructureModel {
 		Stack<Integer> firstPeg = getPegs().get(0);
 		for (int disc = n - 1; disc >= 0; disc--)
 			firstPeg.push(disc);
-
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	public void batch() {

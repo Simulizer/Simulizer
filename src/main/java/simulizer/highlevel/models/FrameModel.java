@@ -2,10 +2,12 @@ package simulizer.highlevel.models;
 
 public class FrameModel extends DataStructureModel {
 
-	private double[][] image = new double[640][480];
+	private double[][] image = new double[240][160];
 
 	public void commit() {
 		// TODO: Write FrameModel
+		setChanged();
+		notifyObservers(image);
 	}
 
 	@Override

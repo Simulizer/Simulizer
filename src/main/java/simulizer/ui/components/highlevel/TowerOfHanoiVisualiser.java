@@ -3,6 +3,7 @@ package simulizer.ui.components.highlevel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Queue;
 import java.util.Stack;
 
 import javafx.animation.Animation;
@@ -16,6 +17,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.VLineTo;
 import javafx.util.Duration;
+import javafx.util.Pair;
 import simulizer.highlevel.models.HanoiModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -60,6 +62,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		super(model, vis);
 		this.model = model;
 		calculateDimensions();
+		setNumDisks();
 	}
 
 	public void setNumDisks() {
@@ -280,9 +283,20 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
-
+	@SuppressWarnings("unchecked")
+	public void update(Observable model, Object obj) {
+		if (obj == null) {
+			// Set Num Discs
+			setNumDisks();
+		} else {
+			// Move Queue
+			Queue<Pair<Integer, Integer>> updateQueue = (Queue<Pair<Integer, Integer>>) obj;
+			batch();
+			for (Pair<Integer, Integer> pair : updateQueue) {
+				move(pair.getKey(), pair.getValue());
+			}
+			commit();
+		}
 	}
 
 }
