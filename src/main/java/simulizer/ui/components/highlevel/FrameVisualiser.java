@@ -40,7 +40,7 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void resize() {
+	public void repaint() {
 		double windowWidth = vis.getWindowWidth(), windowHeight = vis.getWindowHeight();
 
 		image.setLayoutX(0);

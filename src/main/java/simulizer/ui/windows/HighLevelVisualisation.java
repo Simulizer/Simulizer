@@ -46,14 +46,14 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 			width = newValue.doubleValue();
 			Iterator<Tab> i = tabs.getTabs().iterator();
 			while (i.hasNext())
-				((DataStructureVisualiser) i.next().getContent()).resize();
+				((DataStructureVisualiser) i.next().getContent()).repaint();
 		});
 
 		getContentPane().heightProperty().addListener((o, old, newValue) -> {
 			height = newValue.doubleValue();
 			Iterator<Tab> i = tabs.getTabs().iterator();
 			while (i.hasNext())
-				((DataStructureVisualiser) i.next().getContent()).resize();
+				((DataStructureVisualiser) i.next().getContent()).repaint();
 		});
 	}
 

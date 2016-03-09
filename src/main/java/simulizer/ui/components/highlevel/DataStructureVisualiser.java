@@ -58,7 +58,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		showing = false;
 	}
 
-	public abstract void resize();
+	public abstract void repaint();
 
 	public abstract String getName();
 
