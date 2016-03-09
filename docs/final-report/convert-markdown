@@ -9,7 +9,7 @@ DIRS=( "segments" "chapters")
 for d in ${DIRS[@]}
 do
   cd "${REPORT_HOME}/${d}"
-  for f in $( find . -name *.md ) 
+  for f in $( find . -name "*.md" ) 
   do
     pandoc -f markdown -t latex ${f} > "$(basename ${f} .md).tex"
   done

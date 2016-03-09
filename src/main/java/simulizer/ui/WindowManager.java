@@ -217,7 +217,6 @@ public class WindowManager extends GridPane {
 				@Override
 				protected Object call() throws Exception {
 					try {
-						cpu.setClockSpeed((Integer) settings.get("simulation.default-clock-speed"));
 						cpu.runProgram();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -255,11 +254,11 @@ public class WindowManager extends GridPane {
 	public void setPipelined(boolean pipelined) {
 		if (pipelined) {
 			cpu = new CPUPipeline(io);
-			cpu.registerListener(simListener);
 		} else {
 			cpu = new CPU(io);
-			cpu.registerListener(simListener);
 		}
+		cpu.registerListener(simListener);
+		cpu.setClockSpeed((Integer) settings.get("simulation.default-clock-speed"));
 
 		for (CPUChangedListener listener : cpuChangedListeners) {
 			listener.cpuChanged(cpu);
