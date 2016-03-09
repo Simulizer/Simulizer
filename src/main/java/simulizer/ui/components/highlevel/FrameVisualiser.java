@@ -20,7 +20,7 @@ public class FrameVisualiser extends DataStructureVisualiser {
 		image = new ImageView();
 		image.setSmooth(false);
 		image.setCache(false);
-		vis.add(image);
+		getChildren().add(image);
 		commit();
 	}
 
@@ -57,6 +57,11 @@ public class FrameVisualiser extends DataStructureVisualiser {
 		image.setLayoutY(0);
 		image.setFitWidth(windowWidth);
 		image.setFitHeight(windowHeight);
+	}
+
+	@Override
+	public String getName() {
+		return "Frame";
 	}
 
 }

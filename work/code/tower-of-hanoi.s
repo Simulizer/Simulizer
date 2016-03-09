@@ -8,9 +8,9 @@
 # where the value of the integer repre sents the size of the disk.
 #
 # the steps of MOVE are:
-# 1. move n−1 discs from pole 1 to pole 2. This leaves disc n alone on pole 1
+# 1. move n?1 discs from pole 1 to pole 2. This leaves disc n alone on pole 1
 # 2. move disc n from pole 1 to pole 3
-# 3. move n−1 discs from pole 2 to pole 3 so they sit on disc n
+# 3. move n?1 discs from pole 2 to pole 3 so they sit on disc n
 #
 # @{ setSpeed(10) }@
 # @{ var h = vis.load('tower-of-hanoi', false) }@
@@ -48,7 +48,7 @@ main:
     blez $v0, ERROR_EXIT   # if input <= 0: exit
 
 nop # @{ h.setNumDisks($v0.get()) }@
-    # @{ vis.show()               }@
+    # @{ h.show()                 }@
 
     # call function: MOVE
     li   $a0, 1

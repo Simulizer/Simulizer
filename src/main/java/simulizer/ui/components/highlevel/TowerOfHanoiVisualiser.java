@@ -73,7 +73,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 		if(discs != null) {
 			for (Rectangle rect : discs)
-				vis.remove(rect);
+				getChildren().remove(rect);
 		}
 
 		discs = new Rectangle[numDiscs];
@@ -90,14 +90,14 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 * Draws the platform and the initial discs
 	 */
 	private void init() {
-		vis.getDrawingPane().getChildren().clear();
+		getChildren().clear();
 
 		this.base = new Rectangle(xOffset, pegY0 + pegHeight, platformWidth, discHeight);
-		vis.add(base);
+		getChildren().add(base);
 
 		for (int i = 0; i < 3; ++i) {
 			vPegs[i] = new Rectangle(getX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight);
-			vis.add(vPegs[i]);
+			getChildren().add(vPegs[i]);
 		}
 
 		for (int i = 0; i < 3; ++i) {
@@ -108,7 +108,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		this.discs = new Rectangle[numDiscs];
 
 		for (Rectangle rect : discs)
-			vis.remove(rect);
+			getChildren().remove(rect);
 
 		double y = pegY0 + pegHeight - discHeight;
 		double width = maxDiscWidth;
@@ -120,7 +120,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 			pegs.get(startingPeg).push(discs[i]);
 
-			vis.add(discs[i]);
+			getChildren().add(discs[i]);
 			x += (discWidthDelta / 2);
 			width -= discWidthDelta;
 			y -= discHeight;
@@ -278,6 +278,11 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 		setWidth(windowWidth);
 		setHeight(windowHeight);
+	}
+
+	@Override
+	public String getName() {
+		return "Towers Of Hanoi";
 	}
 
 }

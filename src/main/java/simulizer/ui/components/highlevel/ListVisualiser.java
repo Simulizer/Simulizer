@@ -109,13 +109,13 @@ public class ListVisualiser extends DataStructureVisualiser {
 			textLabels[i].setTranslateX(getTextX(i, textLabels[i]));
 			textLabels[i].setTranslateY(getTextY(i));
 
-			vis.addAll(rectangles[i], textLabels[i]);
+			getChildren().addAll(rectangles[i], textLabels[i]);
 		}
 
 		for (int i = 0; i < markers.length; ++i) {
 			markers[i] = new Text("");
 			markers[i].setFont(new Font(35));
-			vis.add(markers[i]);
+			getChildren().add(markers[i]);
 		}
 	}
 
@@ -420,6 +420,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		setWidth(vis.getWidth());
 		setHeight(vis.getHeight());
+	}
+
+	@Override
+	public String getName() {
+		return "List";
 	}
 
 }
