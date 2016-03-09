@@ -14,6 +14,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -34,6 +36,7 @@ public class Logger extends InternalWindow implements Observer {
 	private String lastInput = "";
 
 	private TabPane tabPane;
+	private boolean[] ioChanged;
 	private StringBuilder[] logs;
 	private TextArea[] outputs;
 
@@ -42,6 +45,7 @@ public class Logger extends InternalWindow implements Observer {
 	public Logger() {
 		setTitle("Program I/O");
 
+		ioChanged = new boolean[IOStream.values().length];
 		logs = new StringBuilder[IOStream.values().length];
 		outputs = new TextArea[IOStream.values().length];
 		GridPane pane = new GridPane();
@@ -58,11 +62,16 @@ public class Logger extends InternalWindow implements Observer {
 			output.textProperty().addListener((e) -> output.setScrollTop(Double.MAX_VALUE));
 			tab.setContent(output);
 
+			ioChanged[i] = false;
 			outputs[i] = output;
 			logs[i] = new StringBuilder();
 
 			tabPane.getTabs().add(tab);
 		}
+		tabPane.getSelectionModel().selectedItemProperty().addListener(e -> {
+			System.out.println("SelectionChanged");
+			tabPane.getSelectionModel().getSelectedItem().setGraphic(null);
+		});
 		GridPane.setHgrow(tabPane, Priority.ALWAYS);
 		GridPane.setVgrow(tabPane, Priority.ALWAYS);
 		pane.add(tabPane, 0, 0, 2, 1);
@@ -112,8 +121,17 @@ public class Logger extends InternalWindow implements Observer {
 				Platform.runLater(() -> {
 					synchronized (logs) {
 						callUpdate = false;
-						for (int i = 0; i < outputs.length; i++)
+						for (int i = 0; i < outputs.length; i++) {
+							Tab t = tabPane.getTabs().get(i);
+							if (!t.isSelected() && ioChanged[i]) {
+								try {
+									t.setGraphic(new ImageView("file:notify.png"));
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
 							outputs[i].setText(logs[i].toString());
+						}
 					}
 				});
 			}
@@ -160,6 +178,7 @@ public class Logger extends InternalWindow implements Observer {
 			if (!callUpdate)
 				callUpdate = true;
 			Pair<IOStream, String> pair = (Pair<IOStream, String>) message;
+			ioChanged[pair.getKey().getID()] = true;
 			logs[pair.getKey().getID()].append(pair.getValue());
 		}
 
