@@ -439,6 +439,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void update(Observable o, Object arg) {
+		super.update(o, arg);
 		// TODO Auto-generated method stub
 		
 	}

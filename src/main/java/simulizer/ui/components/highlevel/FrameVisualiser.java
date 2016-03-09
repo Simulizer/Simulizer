@@ -60,6 +60,7 @@ public class FrameVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void update(Observable o, Object arg) {
+		super.update(o, arg);
 		if (!rendering) {
 			rendering = true;
 			Thread t = new Thread(() -> drawFrame((double[][]) arg), "Render");

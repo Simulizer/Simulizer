@@ -1,5 +1,6 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.Observable;
 import java.util.Observer;
 
 import javafx.scene.layout.Pane;
@@ -69,4 +70,13 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		return model;
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
+		if (model.isVisible() != showing) {
+			if (model.isVisible())
+				show();
+			else
+				hide();
+		}
+	}
 }

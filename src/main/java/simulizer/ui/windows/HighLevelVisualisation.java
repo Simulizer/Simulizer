@@ -128,13 +128,13 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private void addNewVisualisation(DataStructureModel model) {
 		switch (model.modelType()) {
 			case FRAME:
-				addTab(new FrameVisualiser((FrameModel) model, this));
+				new FrameVisualiser((FrameModel) model, this);
 				break;
 			case HANOI:
-				addTab(new TowerOfHanoiVisualiser((HanoiModel) model, this));
+				new TowerOfHanoiVisualiser((HanoiModel) model, this);
 				break;
 			case LIST:
-				addTab(new ListVisualiser((ListModel) model, this));
+				new ListVisualiser((ListModel) model, this);
 				break;
 		}
 	}

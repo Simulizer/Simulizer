@@ -285,6 +285,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void update(Observable model, Object obj) {
+		super.update(model, obj);
 		if (obj == null) {
 			// Set Num Discs
 			setNumDisks();
