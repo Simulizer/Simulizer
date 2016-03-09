@@ -2,7 +2,6 @@ package simulizer.annotations;
 
 import javax.script.ScriptException;
 
-import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
@@ -55,7 +54,7 @@ public class AnnotationManager {
 
 		simulationBridge.cpu = null;
 
-		visualisationBridge.wm = wm;
+		visualisationBridge.visMan = wm.getHLVisualManager();
 	}
 
 	public void onEndProgram() {
@@ -80,10 +79,10 @@ public class AnnotationManager {
 		try {
 			ex.exec(msg.annotation);
 		} catch (ScriptException e) {
-			//TODO: send to error stream instead
+			// TODO: send to error stream instead
 			IO io = wm.getIO();
 			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage());
-			if(msg.boundAddress != null) {
+			if (msg.boundAddress != null) {
 				int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
 				io.printString(IOStream.ERROR, "\nFrom the annotation bound to line: " + lineNum + ".");
 			} else {

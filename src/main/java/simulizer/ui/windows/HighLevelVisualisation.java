@@ -1,12 +1,21 @@
 package simulizer.ui.windows;
 
 import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
 
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.util.Pair;
+import simulizer.highlevel.models.Action;
+import simulizer.highlevel.models.DataStructureModel;
+import simulizer.highlevel.models.FrameModel;
+import simulizer.highlevel.models.HLVisualManager;
+import simulizer.highlevel.models.HanoiModel;
+import simulizer.highlevel.models.ListModel;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.FrameVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
@@ -14,7 +23,7 @@ import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
-public class HighLevelVisualisation extends InternalWindow {
+public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private double width = 400;
 	private double height = 300;
 
@@ -48,24 +57,27 @@ public class HighLevelVisualisation extends InternalWindow {
 		});
 	}
 
-	public DataStructureVisualiser openVisualisation(String visualiser, boolean show) {
-		DataStructureVisualiser vis = null;
-		switch (visualiser) {
-			case "tower-of-hanoi":
-				vis = new TowerOfHanoiVisualiser(this, 0);
-				break;
-			case "list":
-				vis = new ListVisualiser(this);
-				break;
-			case "frame":
-				vis = new FrameVisualiser(this);
-				break;
-			default:
-				throw new IllegalArgumentException();
+	@Override
+	public void ready() {
+		// Listened for visualisation changes
+		HLVisualManager hlvisual = getWindowManager().getHLVisualManager();
+		hlvisual.addObserver(this);
+
+		// Add already opened visualisations
+		Iterator<DataStructureModel> models = hlvisual.getModels().iterator();
+		while (models.hasNext()) {
+			addNewVisualisation(models.next());
 		}
-		if (show)
-			vis.show();
-		return vis;
+
+		super.ready();
+	}
+
+	@Override
+	public void close() {
+		super.close();
+
+		// Stop listening to visualisation changes
+		getWindowManager().getHLVisualManager().deleteObserver(this);
 	}
 
 	public void addTab(DataStructureVisualiser vis) {
@@ -83,10 +95,6 @@ public class HighLevelVisualisation extends InternalWindow {
 		}
 	}
 
-	public void closeVisualisation(DataStructureVisualiser visualiser) {
-		removeTab(visualiser);
-	}
-
 	public double getWindowWidth() {
 		return width;
 	}
@@ -99,6 +107,31 @@ public class HighLevelVisualisation extends InternalWindow {
 	public void setTheme(Theme theme) {
 		super.setTheme(theme);
 		getStylesheets().add(theme.getStyleSheet("highlevel.css"));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void update(Observable arg0, Object obj) {
+		Pair<Action, DataStructureModel> change = (Pair<Action, DataStructureModel>) obj;
+		if (change.getKey() == Action.CREATED) {
+			addNewVisualisation(change.getValue());
+		} else if (change.getKey() == Action.DELETED) {
+			
+		}
+	}
+
+	private void addNewVisualisation(DataStructureModel model) {
+		switch (model.modelType()) {
+			case FRAME:
+				addTab(new FrameVisualiser((FrameModel) model, this));
+				break;
+			case HANOI:
+				addTab(new TowerOfHanoiVisualiser((HanoiModel) model, this));
+				break;
+			case LIST:
+				addTab(new ListVisualiser((ListModel) model, this));
+				break;
+		}
 	}
 
 }

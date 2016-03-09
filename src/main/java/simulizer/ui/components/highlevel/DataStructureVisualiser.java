@@ -1,16 +1,22 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.Observer;
+
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import simulizer.highlevel.models.DataStructureModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
-public abstract class DataStructureVisualiser extends Pane {
+public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int rate = 1000;
 	protected HighLevelVisualisation vis;
 	private boolean showing = false;
+	private DataStructureModel model;
 
-	public DataStructureVisualiser(HighLevelVisualisation vis) {
+	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
+		this.model = model;
 		this.vis = vis;
+		model.addObserver(this);
 	}
 
 	/**
@@ -54,5 +60,9 @@ public abstract class DataStructureVisualiser extends Pane {
 	public abstract void resize();
 
 	public abstract String getName();
+
+	public void close() {
+		model.deleteObserver(this);
+	}
 
 }

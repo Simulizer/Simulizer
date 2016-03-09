@@ -1,11 +1,14 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import simulizer.highlevel.models.FrameModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class FrameVisualiser extends DataStructureVisualiser {
@@ -14,25 +17,13 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	private int width = 240, height = 160;
 	private volatile boolean rendering = false;
 
-	public FrameVisualiser(HighLevelVisualisation vis) {
-		super(vis);
+	public FrameVisualiser(FrameModel model, HighLevelVisualisation vis) {
+		super(model, vis);
 
 		image = new ImageView();
 		image.setSmooth(false);
 		image.setCache(false);
 		getChildren().add(image);
-		commit();
-	}
-
-	public void commit() {
-		if (!rendering) {
-			rendering = true;
-			Thread t = new Thread(this::drawFrame, "Render");;
-			t.setDaemon(true);
-			t.start();
-		} else {
-			System.out.println("Missed frame");
-		}
 	}
 
 	private void drawFrame() {
@@ -62,6 +53,22 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	@Override
 	public String getName() {
 		return "Frame";
+	}
+
+	@Override
+	public void close() {
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (!rendering) {
+			rendering = true;
+			Thread t = new Thread(this::drawFrame, "Render");
+			t.setDaemon(true);
+			t.start();
+		} else {
+			System.out.println("Missed frame");
+		}
 	}
 
 }

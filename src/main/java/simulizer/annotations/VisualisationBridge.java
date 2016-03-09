@@ -1,9 +1,7 @@
 package simulizer.annotations;
 
-import simulizer.ui.WindowManager;
-import simulizer.ui.components.highlevel.DataStructureVisualiser;
-import simulizer.ui.interfaces.WindowEnum;
-import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.highlevel.models.DataStructureModel;
+import simulizer.highlevel.models.HLVisualManager;
 
 /**
  * A collection of methods for controlling high level visualisations from annotations
@@ -11,16 +9,15 @@ import simulizer.ui.windows.HighLevelVisualisation;
 public class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
-	WindowManager wm;
+	HLVisualManager visMan;
 
-	public DataStructureVisualiser load(String visualisationName) {
+	public DataStructureModel load(String visualisationName) {
 		return load(visualisationName, true);
 	}
 
-	public DataStructureVisualiser load(String visualisationName, boolean showNow) {
+	public DataStructureModel load(String visualisationName, boolean showNow) {
 		// TODO: ThreadUtil.runAndWait()
-		HighLevelVisualisation vis = (HighLevelVisualisation) wm.getWorkspace().openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
-		DataStructureVisualiser output = vis.openVisualisation(visualisationName, showNow);
+		DataStructureModel output = visMan.create(visualisationName, showNow);
 		return output;
 
 	}

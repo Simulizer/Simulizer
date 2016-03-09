@@ -17,6 +17,7 @@ import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
+import simulizer.highlevel.models.HLVisualManager;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
@@ -47,6 +48,7 @@ public class WindowManager extends GridPane {
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private AnnotationManager annotationManager;
+	private HLVisualManager hlvisual = new HLVisualManager();
 
 	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
@@ -276,5 +278,9 @@ public class WindowManager extends GridPane {
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen())
 			primaryStage.close();
+	}
+
+	public HLVisualManager getHLVisualManager() {
+		return hlvisual;
 	}
 }

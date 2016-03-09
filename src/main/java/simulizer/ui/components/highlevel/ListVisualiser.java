@@ -2,6 +2,7 @@ package simulizer.ui.components.highlevel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
 import javafx.animation.Animation;
 import javafx.animation.FillTransition;
@@ -17,6 +18,7 @@ import javafx.scene.shape.VLineTo;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import simulizer.highlevel.models.DataStructureModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 /**
@@ -78,8 +80,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 * @param list
 	 *            the list to be visualised
 	 */
-	public ListVisualiser(HighLevelVisualisation vis) {
-		super(vis);
+	public ListVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
+		super(model, vis);
 	}
 
 	public void setList(List<?> list) {
@@ -173,7 +175,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 		animationBuffer.add(setupTextSwap(text1, getTextX(i, text1), y0, text2, getTextX(j, text2), y0));
 		swapIndices.add(new Pair(i, j));
 
-		if (queuing) return this;
+		if (queuing)
+			return this;
 		else {
 			commit();
 			return this;
@@ -202,7 +205,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 			animationBuffer.add(new ParallelTransition(ft, tt));
 
-			if (queuing) return this;
+			if (queuing)
+				return this;
 			else {
 				commit();
 				return this;
@@ -216,9 +220,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 		if (i >= 0 && i < markers.length) {
 			int markerIndex;
 
-			if (i == -1) markerIndex = -1;
-			else if (i == markers.length) markerIndex = markers.length - 1;
-			else markerIndex = 1 + 3 * i + pos;
+			if (i == -1)
+				markerIndex = -1;
+			else if (i == markers.length)
+				markerIndex = markers.length - 1;
+			else
+				markerIndex = 1 + 3 * i + pos;
 
 			Text marker = markers[markerIndex];
 			System.out.println("Marker text: " + marker.getText());
@@ -228,7 +235,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 			tt.setAutoReverse(true);
 			animationBuffer.add(tt);
 
-			if (queuing) return this;
+			if (queuing)
+				return this;
 			else {
 				commit();
 				return this;
@@ -258,8 +266,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	 *            the label to place
 	 */
 	public int addMarker(int index, String label, int pos) {
-		int markerIndex =
-			index == -1 ? 0 : index == list.size() ? 3 * list.size() + 1 : 3 * index + (pos == LEFT ? 1 : pos == CENTRE ? 2 : 3);
+		int markerIndex = index == -1 ? 0 : index == list.size() ? 3 * list.size() + 1 : 3 * index + (pos == LEFT ? 1 : pos == CENTRE ? 2 : 3);
 
 		String existingText = markers[markerIndex].getText();
 		markers[markerIndex].setText(existingText + label);
@@ -390,8 +397,10 @@ public class ListVisualiser extends DataStructureVisualiser {
 		double height = vis.getWindowHeight();
 
 		double rectCalc;
-		if (height < width) rectCalc = height - 2 * YPAD;
-		else rectCalc = width - 2 * XPAD;
+		if (height < width)
+			rectCalc = height - 2 * YPAD;
+		else
+			rectCalc = width - 2 * XPAD;
 		this.rectLength = rectCalc / rectangles.length;
 
 		this.y0 = height / 2 - rectLength / 2;
@@ -399,7 +408,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void resize() {
-		if (rectangles == null || textLabels == null) return;
+		if (rectangles == null || textLabels == null)
+			return;
 
 		calculateDimensions();
 
@@ -425,6 +435,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 	@Override
 	public String getName() {
 		return "List";
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
