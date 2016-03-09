@@ -18,7 +18,6 @@ public class HighLevelVisualisation extends InternalWindow {
 	private double width = 400;
 	private double height = 300;
 
-	private DataStructureVisualiser visualiser;
 	private TabPane tabs;
 
 	public HighLevelVisualisation() {
@@ -36,16 +35,16 @@ public class HighLevelVisualisation extends InternalWindow {
 
 		getContentPane().widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
-			if (visualiser != null) {
-				visualiser.resize();
-			}
+			Iterator<Tab> i = tabs.getTabs().iterator();
+			while (i.hasNext())
+				((DataStructureVisualiser) i.next().getContent()).resize();
 		});
 
 		getContentPane().heightProperty().addListener((o, old, newValue) -> {
 			height = newValue.doubleValue();
-			if (visualiser != null) {
-				visualiser.resize();
-			}
+			Iterator<Tab> i = tabs.getTabs().iterator();
+			while (i.hasNext())
+				((DataStructureVisualiser) i.next().getContent()).resize();
 		});
 	}
 
@@ -64,7 +63,7 @@ public class HighLevelVisualisation extends InternalWindow {
 			default:
 				throw new IllegalArgumentException();
 		}
-		if (show) 
+		if (show)
 			vis.show();
 		return vis;
 	}
@@ -79,7 +78,7 @@ public class HighLevelVisualisation extends InternalWindow {
 		Iterator<Tab> iterator = tabs.getTabs().iterator();
 		while (iterator.hasNext()) {
 			Tab t = iterator.next();
-			if (t.getContent() == visualiser)
+			if (t.getContent() == vis)
 				Platform.runLater(() -> tabs.getTabs().remove(t));
 		}
 	}
@@ -94,10 +93,6 @@ public class HighLevelVisualisation extends InternalWindow {
 
 	public double getWindowHeight() {
 		return height;
-	}
-
-	public DataStructureVisualiser getVisualiser() {
-		return this.visualiser;
 	}
 
 	@Override
