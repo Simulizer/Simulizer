@@ -1,3 +1,4 @@
+# @{ vis.show() }@
 # @{ var f = vis.load('frame', true) }@
 # @{ setSpeed(10); }@
 .text
