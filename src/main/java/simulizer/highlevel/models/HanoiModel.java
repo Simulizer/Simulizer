@@ -1,13 +1,16 @@
 package simulizer.highlevel.models;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
 
 import javafx.util.Pair;
 
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>();
+	private final Queue<Pair<Integer, Integer>> moves = new LinkedList<>();
 	private int numDiscs = 0;
 
 	public HanoiModel() {
@@ -32,13 +35,21 @@ public class HanoiModel extends DataStructureModel {
 	}
 
 	public void move(int startPeg, int endPeg) {
-		// Apply Update
-		int item = getPegs().get(startPeg).pop();
-		getPegs().get(endPeg).push(item);
+		Pair<Integer, Integer> move = new Pair<>(startPeg, endPeg);
+		moves.add(move);
 
 		// Notify Observers
 		setChanged();
-		notifyObservers(new Pair<Integer, Integer>(startPeg, endPeg));
+		notifyObservers(move);
+	}
+
+	public void step() {
+		Pair<Integer, Integer> move = moves.poll();
+		int startPeg = move.getKey(), endPeg = move.getValue();
+
+		// Apply Update
+		int item = getPegs().get(startPeg).pop();
+		getPegs().get(endPeg).push(item);
 	}
 
 	public List<Stack<Integer>> getPegs() {
