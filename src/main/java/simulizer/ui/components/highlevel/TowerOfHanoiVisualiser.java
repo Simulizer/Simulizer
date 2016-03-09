@@ -183,7 +183,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 		// Draw the pegs
 		for (int i = 0; i < 3; ++i)
-			gc.fillRect(getPegX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight);
+			gc.fillRect(getPegX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight + 2); // + 2 to avoid gap between peg and platform
 	}
 
 	private void drawStaticDiscs(GraphicsContext gc) {
