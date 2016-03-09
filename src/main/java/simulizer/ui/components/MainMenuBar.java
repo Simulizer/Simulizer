@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -148,22 +149,43 @@ public class MainMenuBar extends MenuBar {
 	}
 
 	private Menu simulationMenu() {
-		// To be moved to separate buttons later
 		Menu runMenu = new Menu("Simulation");
+		runMenu.setOnShowing(e -> simControlsMenu(runMenu));
+		simControlsMenu(runMenu);
+		return runMenu;
+	}
 
-		MenuItem runPause = new MenuItem("Run/Pause");
-		runPause.setOnAction(e -> {
+	private void simControlsMenu(Menu runMenu) {
+		runMenu.getItems().clear();
+
+		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
+		assembleAndRun.setDisable(wm.getCPU().isRunning());
+		assembleAndRun.setOnAction(e -> {
 			new AssemblingDialog(wm.getCPU());
 			wm.assembleAndRun();
 		});
 
-		MenuItem singleStep = new MenuItem("Next Step");
-		singleStep.setDisable(true);
+		MenuItem resume = new MenuItem("Resume Simulation");
+		resume.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		resume.setOnAction(e -> wm.getCPU().startClock());
 
-		MenuItem stop = new MenuItem("Stop");
+		MenuItem singleStep = new MenuItem("Single Step");
+		singleStep.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		singleStep.setOnAction(e -> {
+			try {
+				wm.getCPU().runSingleCycle();
+			} catch (Exception ex) {
+				// TODO: Handle Exception properly
+				ex.printStackTrace();
+			}
+		});
+
+		MenuItem stop = new MenuItem("Stop Simulation");
+		stop.setDisable(!wm.getCPU().isRunning());
 		stop.setOnAction(e -> wm.stopSimulation());
 
-		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
+		CheckMenuItem simplePipeline = new CheckMenuItem("Use Pipelined CPU");
+		simplePipeline.setDisable(wm.getCPU().isRunning());
 		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
 		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
 
@@ -173,13 +195,12 @@ public class MainMenuBar extends MenuBar {
 			if (cpu != null) {
 				TextInputDialog clockSpeed = new TextInputDialog();
 				clockSpeed.setTitle("Clock Speed");
-				clockSpeed.setContentText("Enter Clock Speed: ");
-				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockSpeed(Integer.parseInt(speed)));
+				clockSpeed.setContentText("Enter Clock Speed (in Hz): ");
+				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockHertz(Double.parseDouble(speed)));
 			}
 		});
 
-		runMenu.getItems().addAll(runPause, singleStep, stop, simplePipeline, setClockSpeed);
-		return runMenu;
+		runMenu.getItems().addAll(assembleAndRun, resume, singleStep, stop, simplePipeline, setClockSpeed);
 	}
 
 	private Menu windowsMenu() {
