@@ -68,10 +68,7 @@ public class Logger extends InternalWindow implements Observer {
 
 			tabPane.getTabs().add(tab);
 		}
-		tabPane.getSelectionModel().selectedItemProperty().addListener(e -> {
-			System.out.println("SelectionChanged");
-			tabPane.getSelectionModel().getSelectedItem().setGraphic(null);
-		});
+		tabPane.getSelectionModel().selectedItemProperty().addListener(e -> tabPane.getSelectionModel().getSelectedItem().setGraphic(null));
 		GridPane.setHgrow(tabPane, Priority.ALWAYS);
 		GridPane.setVgrow(tabPane, Priority.ALWAYS);
 		pane.add(tabPane, 0, 0, 2, 1);
@@ -123,13 +120,8 @@ public class Logger extends InternalWindow implements Observer {
 						callUpdate = false;
 						for (int i = 0; i < outputs.length; i++) {
 							Tab t = tabPane.getTabs().get(i);
-							if (!t.isSelected() && ioChanged[i]) {
-								try {
-									t.setGraphic(new ImageView("file:notify.png"));
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
+							if (!t.isSelected() && ioChanged[i])
+								t.setGraphic(new ImageView("file:notify.png"));
 							outputs[i].setText(logs[i].toString());
 						}
 					}
