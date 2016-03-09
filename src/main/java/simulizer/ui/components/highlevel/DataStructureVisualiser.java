@@ -65,4 +65,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		model.deleteObserver(this);
 	}
 
+	public DataStructureModel getModel() {
+		return model;
+	}
+
 }

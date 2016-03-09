@@ -53,8 +53,9 @@ public class AnnotationManager {
 		debugBridge.io = wm.getIO();
 
 		simulationBridge.cpu = null;
-
+		
 		visualisationBridge.visMan = wm.getHLVisualManager();
+		wm.getHLVisualManager().removeAll();
 	}
 
 	public void onEndProgram() {

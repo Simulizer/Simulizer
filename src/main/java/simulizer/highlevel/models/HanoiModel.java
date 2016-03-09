@@ -1,17 +1,13 @@
 package simulizer.highlevel.models;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Stack;
 
 import javafx.util.Pair;
 
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>();
-	private final Queue<Pair<Integer, Integer>> updateQueue = new LinkedList<>();
-	private boolean queuing = false;
 	private int numDiscs = 0;
 
 	public HanoiModel() {
@@ -30,35 +26,19 @@ public class HanoiModel extends DataStructureModel {
 		Stack<Integer> firstPeg = getPegs().get(0);
 		for (int disc = n - 1; disc >= 0; disc--)
 			firstPeg.push(disc);
-		
+
 		setChanged();
 		notifyObservers();
 	}
 
-	public void batch() {
-		queuing = true;
-	}
-
 	public void move(int startPeg, int endPeg) {
-		updateQueue.add(new Pair<Integer, Integer>(startPeg, endPeg));
-		if (!queuing)
-			commit();
-	}
-
-	public void commit() {
-		Queue<Pair<Integer, Integer>> copyQueue = new LinkedList<>();
-
 		// Apply Update
-		for (Pair<Integer, Integer> update : updateQueue) {
-			copyQueue.add(update);
-			int item = getPegs().get(update.getKey()).pop();
-			getPegs().get(update.getValue()).push(item);
-		}
-		queuing = false;
+		int item = getPegs().get(startPeg).pop();
+		getPegs().get(endPeg).push(item);
 
 		// Notify Observers
 		setChanged();
-		notifyObservers(copyQueue);
+		notifyObservers(new Pair<Integer, Integer>(startPeg, endPeg));
 	}
 
 	public List<Stack<Integer>> getPegs() {

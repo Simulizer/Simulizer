@@ -116,7 +116,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		if (change.getKey() == Action.CREATED) {
 			addNewVisualisation(change.getValue());
 		} else if (change.getKey() == Action.DELETED) {
-			
+			Iterator<Tab> iterator = tabs.getTabs().iterator();
+			while (iterator.hasNext()) {
+				Tab t = iterator.next();
+				if (((DataStructureVisualiser) t.getContent()).getModel() == change.getValue())
+					Platform.runLater(() -> tabs.getTabs().remove(t));
+			}
 		}
 	}
 

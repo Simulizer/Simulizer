@@ -1,6 +1,7 @@
 package simulizer.highlevel.models;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Observable;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class HLVisualManager extends Observable {
 			default:
 				throw new IllegalArgumentException();
 		}
-		getModels().add(model);
+		models.add(model);
 		if (showNow)
 			model.show();
 		else
@@ -36,9 +37,19 @@ public class HLVisualManager extends Observable {
 	}
 
 	public void remove(DataStructureModel model) {
-		getModels().remove(model);
+		models.remove(model);
 		setChanged();
 		notifyObservers(new Pair<Action, DataStructureModel>(Action.DELETED, model));
+	}
+
+	public void removeAll() {
+		Iterator<DataStructureModel> iterator = models.iterator();
+		while (iterator.hasNext()) {
+			DataStructureModel model = iterator.next();
+			iterator.remove();
+			setChanged();
+			notifyObservers(new Pair<Action, DataStructureModel>(Action.DELETED, model));
+		}
 	}
 
 	public Set<DataStructureModel> getModels() {
