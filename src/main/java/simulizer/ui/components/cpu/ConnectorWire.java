@@ -3,6 +3,9 @@ package simulizer.ui.components.cpu;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.shape.Polyline;
 
+/**
+ * Represents a horizontal or vertical wire
+ */
 public class ConnectorWire extends Wire {
 
     ComponentStackPane from;
@@ -12,6 +15,15 @@ public class ConnectorWire extends Wire {
     boolean rightOrBottom;
     Type type;
 
+    /**
+     * Sets up the connector wire
+     * @param from The shape going from
+     * @param to The shape going to
+     * @param type The type of wire
+     * @param rightOrBottom If starting from the right or bottom
+     * @param arrowStart If the arrow should be on from or to
+     * @param offset The offset of the wire to multiply (0-1)
+     */
     public ConnectorWire(ComponentStackPane from, ComponentStackPane to, Type type, boolean rightOrBottom, boolean arrowStart, double offset){
         super(new Polyline(), new Polyline(), type);
         this.from = from;
@@ -35,6 +47,9 @@ public class ConnectorWire extends Wire {
 
     }
 
+    /**
+     * Redraws the wire and reanimates the data if required
+     */
     public void updateLine(){
         if(this.type == Type.HORIZONTAL){
             drawHorizontalWire();
@@ -44,6 +59,9 @@ public class ConnectorWire extends Wire {
         reanimateData();
     }
 
+    /**
+     * Draws a horizontal wire connecting the two shapes
+     */
     public void drawHorizontalWire(){
         line.getPoints().clear();
         arrowHead.getPoints().clear();
@@ -54,7 +72,6 @@ public class ConnectorWire extends Wire {
         DoubleBinding yEnd = from.layoutYProperty().add(from.getShapeHeight() / 2).add(from.getShapeHeight() * offset);
 
         if(!rightOrBottom){
-            // Goes from right to left
             xStart = from.layoutXProperty().add(0);
             xEnd = to.layoutXProperty().add(to.getShapeWidth());
 
@@ -99,6 +116,9 @@ public class ConnectorWire extends Wire {
         });
     }
 
+    /**
+     * Draws a vertical wire connecting the two shapes
+     */
     public void drawVerticalLine(){
         line.getPoints().clear();
         arrowHead.getPoints().clear();
@@ -156,7 +176,5 @@ public class ConnectorWire extends Wire {
 
         }
     }
-
-
 
 }

@@ -2,16 +2,18 @@ package simulizer.ui.windows;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
-import simulizer.ui.components.cpu.GeneralComponent;
 import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
+/**
+ * The cpu visualisation window
+ */
 public class CPUVisualisation extends InternalWindow {
 
     double width;
@@ -20,6 +22,9 @@ public class CPUVisualisation extends InternalWindow {
 	private CPU cpu;
 	private CPUListener cpuListener;
 
+	/**
+	 * Sets up the cpu visualisation along with the containing pane
+	 */
 	public CPUVisualisation() {
         width = 530;
         height = 415;
@@ -30,12 +35,20 @@ public class CPUVisualisation extends InternalWindow {
         pane.setPrefHeight(height);
         pane.setMinHeight(height);
         pane.setMaxHeight(height);
-        getChildren().add(pane);
         setMinWidth(width);
         setMinHeight(getMinimalHeight());
+		getChildren().add(pane);
 		drawVisualisation();
+		pane.setCache(true);
+		pane.setCacheHint(CacheHint.SPEED);
+		setCache(true);
+		setCacheHint(CacheHint.SPEED);
 	}
 
+	/**
+	 * Sets the theme for the window
+	 * @param theme The theme to use
+     */
     @Override
     public void setTheme(Theme theme) {
         super.setTheme(theme);
@@ -44,44 +57,83 @@ public class CPUVisualisation extends InternalWindow {
         getStylesheets().add(theme.getStyleSheet("cpu.css"));
     }
 
-    public void add(Node e){
-        pane.getChildren().add(e);
+	/**
+	 * Adds a node to the pane
+	 * @param node The node to add
+     */
+    public void add(Node node){
+        pane.getChildren().add(node);
     }
 
-    public void addAll(Node... elements){
-        pane.getChildren().addAll(elements);
+	/**
+	 * Adds a group of nodes to the pane
+	 * @param nodes The group of nodes to add
+     */
+    public void addAll(Node... nodes){
+        pane.getChildren().addAll(nodes);
     }
 
+	/**
+	 * Gets the current pane
+	 * @return The current pane
+     */
 	public Pane getPane() {
 		return pane;
 	}
 
+	/**
+	 * Gets the window manager
+	 * @return The window manager
+     */
 	public WindowManager getMainWindowManager(){
 		return super.getWindowManager();
 	}
 
+	/**
+	 * Sets min, max, and preferred widths for the pane
+	 * @param width The width to set
+     */
 	public void setPaneWidth(double width) {
 		pane.setPrefWidth(width);
 		pane.setMinWidth(width);
 		pane.setMaxWidth(width);
 	}
 
+	/**
+	 * Sets min, max and preferred heights for the pane
+	 * @param height The height to set
+     */
 	public void setPaneHeight(double height) {
 		pane.setPrefHeight(height);
 		pane.setMinHeight(height);
 		pane.setMaxHeight(height);
 	}
 
+	/**
+	 * Gets the window width
+	 * @return The window width
+     */
 	public double getWindowWidth() {
 		return width;
 	}
 
+	/**
+	 * Gets the window height
+	 * @return The window height
+     */
 	public double getWindowHeight() {
 		return height;
 	}
 
+	/**
+	 * Gets the cpu handling the visualisation
+	 * @return The cpu
+     */
 	public CPU getCpu(){ return cpu; }
 
+	/**
+	 * Draws the visualisation and handles resizing of the window
+	 */
 	private void drawVisualisation() {
 
 		cpu = new CPU(this, width, height);
@@ -93,7 +145,6 @@ public class CPUVisualisation extends InternalWindow {
 				width = newValue.doubleValue();
 				setPaneWidth(width);
 				setPaneHeight(height);
-				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
@@ -104,23 +155,32 @@ public class CPUVisualisation extends InternalWindow {
 				height = newValue.doubleValue();
 				setPaneHeight(height);
 				setPaneWidth(width);
-				setClip(new Rectangle(width, height));
 				cpu.resizeShapes();
 			}
 		});
 
 	}
 
+	/**
+	 * Gets the minimal height of the window
+	 * @return The minimal height
+     */
 	protected double getMinimalHeight() {
 		return 415;
 	}
 
+	/**
+	 * Called when the window is ready
+	 */
 	@Override
 	public void ready(){
 		attachCPU(getWindowManager().getCPU());
 		super.ready();
 	}
-	
+
+	/**
+	 * Called when the window is closed
+	 */
 	@Override
 	public void close() {
 		getWindowManager().getCPU().unregisterListener(cpuListener);
