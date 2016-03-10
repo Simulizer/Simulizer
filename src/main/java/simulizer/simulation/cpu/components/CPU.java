@@ -55,7 +55,6 @@ import simulizer.utils.UIUtils;
  */
 public class CPU {
 
-	private List<SimulationListener> listeners;
 	private ListenerController listenControl;
 
 	protected Address programCounter;
@@ -88,8 +87,7 @@ public class CPU {
 	 *            the io type being used
 	 */
 	public CPU(IO io) {
-		listeners = new ArrayList<>();
-		this.listenControl = new ListenerController(listeners);
+		this.listenControl = new ListenerController();
 		this.clearRegisters();
 		this.clock = new Clock(100);
 		this.isRunning = false;

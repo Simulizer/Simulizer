@@ -1,5 +1,6 @@
 package simulizer.simulation.listeners;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** this class deals with registering of listeners 
@@ -9,21 +10,17 @@ import java.util.List;
  */
 public class ListenerController {
 	
-	private List<SimulationListener> listeners;
+	private final List<SimulationListener> listeners;
 	
-	/**constructor initialises fields
-	 * 
-	 * @param listeners the listeners recognised by the cpu
-	 */
-	public ListenerController(List<SimulationListener> listeners) {
-		this.listeners = listeners;
+	public ListenerController() {
+		listeners = new ArrayList<>();
 	}
 	
 	/**
      * Register a listener to receive messages
      * @param l the listener to send messages to
      */
-    public void registerListener(SimulationListener l) {
+    public synchronized void registerListener(SimulationListener l) {
         this.listeners.add(l);
     }
 
@@ -31,7 +28,7 @@ public class ListenerController {
      * Unregisters a listener from the list
      * @param l the listener to be removed
      */
-    public void unregisterListener(SimulationListener l){
+    public synchronized void unregisterListener(SimulationListener l){
         this.listeners.remove(l);
     }
 
@@ -39,7 +36,7 @@ public class ListenerController {
      * send a message to all of the registered listeners
      * @param m the message to send
      */
-    public void sendMessage(Message m) {
+    public synchronized void sendMessage(Message m) {
         for(SimulationListener l : this.listeners) {
             l.processMessage(m);
 
