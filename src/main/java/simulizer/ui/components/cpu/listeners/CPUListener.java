@@ -92,7 +92,7 @@ public class CPUListener extends SimulationListener {
                     processIType();
                     break;
                 case sw:
-                    speed = simCpu.getClockSpeed() / 6;
+                    speed = simCpu.getClockSpeed() / 3;
 
                     cpu.showText("SW INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
 
@@ -115,8 +115,6 @@ public class CPUListener extends SimulationListener {
                     cpu.alu.highlight();
                     cpu.aluToMemory.animateData(speed);
                     sleepFor(speed);
-
-                    incrementPC(speed);
 
                     break;
                 case j:
@@ -205,15 +203,12 @@ public class CPUListener extends SimulationListener {
                     break;
                 case li:
                 case la:
-
-                    speed = simCpu.getClockSpeed() / 4;
+                    speed = simCpu.getClockSpeed();
 
                     cpu.showText("LI/LA INSTRUCTION - Step 1 - Register is written to with the new value", speed);
                     cpu.ir.highlight();
                     cpu.irToRegister3.animateData(speed);
                     sleepFor(speed);
-
-                    incrementPC(speed);
                     break;
             }
         }
@@ -238,7 +233,7 @@ public class CPUListener extends SimulationListener {
      * Processes an I-TYPE instruction
      */
     public void processIType(){
-        int speed = simCpu.getClockSpeed() / 7;
+        int speed = simCpu.getClockSpeed() / 4;
 
         cpu.showText("I-TYPE INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
 
@@ -268,14 +263,13 @@ public class CPUListener extends SimulationListener {
         cpu.dataMemoryToRegisters.animateData(speed);
         sleepFor(speed);
 
-        incrementPC(speed);
     }
 
     /**
      * Processess an R-TYPE instruction
      */
     public void processRType(){
-        int speed = simCpu.getClockSpeed() / 6;
+        int speed = simCpu.getClockSpeed() / 3;
 
         cpu.showText("R-TYPE INSTRUCTION - Step 1 - Both read registers and one write register are selected", speed);
 
@@ -298,7 +292,6 @@ public class CPUListener extends SimulationListener {
         cpu.aluToRegisters.animateData(speed);
         sleepFor(speed);
 
-        incrementPC(speed);
     }
 
     /**
@@ -310,7 +303,7 @@ public class CPUListener extends SimulationListener {
             case Fetch:
                 int speed = simCpu.getClockSpeed() / 2;
 
-                cpu.showText("INSTRUCTION FETCH - Step 1 - The next instruction address is sent to memory", speed);
+                cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
                 cpu.programCounter.highlight();
                 cpu.PCToIM.animateData(speed);
                 sleepFor(speed);
@@ -321,28 +314,22 @@ public class CPUListener extends SimulationListener {
                 cpu.codeMemoryToIR.animateData(speed);
                 sleepFor(speed);
 
+                cpu.showText("INSTRUCTION FETCH - Step 3 - PC is updated to the next instruction address", speed * 3);
+
+                cpu.programCounter.highlight();
+                cpu.pcToPlusFour.animateData(speed);
+                sleepFor(speed);
+
+                cpu.plusFour.highlight();
+                cpu.plusFourToMux.animateData(speed);
+                sleepFor(speed);
+
+                cpu.muxAdder.highlight();
+                cpu.muxToPC.animateData(speed);
+                sleepFor(speed);
+
                 break;
         }
-    }
-
-    /**
-     * Increments the program counter, used on most instructions at the end
-     * @param speed The speed of the entire animation
-     */
-    private void incrementPC(int speed){
-        cpu.showText("END OF EXECUTION - PC is updated to the next instruction address", speed * 3);
-
-        cpu.programCounter.highlight();
-        cpu.pcToPlusFour.animateData(speed);
-        sleepFor(speed);
-
-        cpu.plusFour.highlight();
-        cpu.plusFourToMux.animateData(speed);
-        sleepFor(speed);
-
-        cpu.muxAdder.highlight();
-        cpu.muxToPC.animateData(speed);
-        sleepFor(speed);
     }
 
     /**
