@@ -11,6 +11,7 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 import javax.script.*;
 
@@ -71,7 +72,7 @@ public class AnnotationExecutor {
 			filter.apiLoaded = true; // from now on restrict access to Java classes
 
 		} catch (ScriptException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 
@@ -174,7 +175,7 @@ public class AnnotationExecutor {
 			}
 			io.printString(IOStream.DEBUG, "REPL stopped\n");
 		} catch (RuntimeException | ScriptException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 			io.printString(IOStream.DEBUG, "REPL stopped due to exception\n");
 		}
 	}

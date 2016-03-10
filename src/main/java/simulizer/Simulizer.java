@@ -53,7 +53,7 @@ public class Simulizer extends Application {
 		try {
 			settings = Settings.loadSettings(new File("settings.json"));
 		} catch (IOException ex) {
-			System.err.println("Failed to launch: settings.json was missing");
+			UIUtils.showErrorDialog("Failed To Launch", "Failed to launch: settings.json was missing");
 			System.exit(1);
 		}
 
@@ -108,7 +108,7 @@ public class Simulizer extends Application {
 		try {
 			wm = new WindowManager(primaryStage, settings);
 		} catch (IOException ex) {
-			System.err.println("Failed to launch: " + ex.getMessage());
+			UIUtils.showErrorDialog("Failed To Launch", ex.getMessage());
 			System.exit(1);
 		}
 	}

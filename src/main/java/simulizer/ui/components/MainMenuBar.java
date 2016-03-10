@@ -170,7 +170,7 @@ public class MainMenuBar extends MenuBar {
 				wm.getCPU().runSingleCycle();
 			} catch (Exception ex) {
 				// TODO: Handle Exception properly
-				ex.printStackTrace();
+				UIUtils.showExceptionDialog(ex);
 			}
 		});
 
@@ -231,7 +231,7 @@ public class MainMenuBar extends MenuBar {
 			try {
 				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				UIUtils.showExceptionDialog(ex);
 			}
 		});
 
@@ -251,7 +251,7 @@ public class MainMenuBar extends MenuBar {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
 					out.println("null");
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					UIUtils.showExceptionDialog(e1);
 				}
 			} else {
 				ProgramStringBuilder.dumpToFile(p, outputFilename);

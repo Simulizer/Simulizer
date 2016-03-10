@@ -1,5 +1,7 @@
 package simulizer.ui.interfaces;
 
+import simulizer.utils.UIUtils;
+
 public enum WindowEnum {
 	// @formatter:off
 	EDITOR("Editor", "Editor"),
@@ -35,7 +37,7 @@ public enum WindowEnum {
 		try {
 			return (InternalWindow) Class.forName(pkg + className).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 		return null;
 	}

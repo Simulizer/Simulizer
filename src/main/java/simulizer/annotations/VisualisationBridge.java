@@ -7,6 +7,7 @@ import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.ThreadUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * A collection of methods for controlling high level visualisations from annotations
@@ -41,7 +42,7 @@ public class VisualisationBridge {
 					throw new IllegalArgumentException();
 			}
 		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 			return null;
 		}
 	}

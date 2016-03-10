@@ -124,7 +124,7 @@ public class WindowManager extends GridPane {
 						Platform.runLater(workspace::resizeInternalWindows);
 					}
 				} catch (InterruptedException e1) {
-					e1.printStackTrace();
+					UIUtils.showExceptionDialog(e1);
 				}
 			}).start();
 		});
@@ -161,7 +161,7 @@ public class WindowManager extends GridPane {
 				System.out.println("Waiting for the simulation thread to close");
 				cpuThread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				UIUtils.showExceptionDialog(e);
 			} finally {
 				cpuThread = null;
 				System.out.println("Simulation thread closed");
@@ -218,7 +218,7 @@ public class WindowManager extends GridPane {
 					try {
 						cpu.runProgram();
 					} catch (Exception e) {
-						e.printStackTrace();
+						UIUtils.showExceptionDialog(e);
 					}
 					return null;
 				}

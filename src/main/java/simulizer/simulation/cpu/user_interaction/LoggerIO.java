@@ -24,7 +24,7 @@ public class LoggerIO extends Observable implements IO {
 		try {
 			return Integer.parseInt(requestInput());
 		} catch (NumberFormatException e) {
-			System.err.println(e.getMessage());
+			printString(IOStream.ERROR, e.getClass().getName() + ":\n\t" + e.getMessage());
 		}
 		return 0;
 	}

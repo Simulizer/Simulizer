@@ -13,6 +13,7 @@ import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
+import simulizer.utils.UIUtils;
 
 public class Settings {
 	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
@@ -116,7 +117,7 @@ public class Settings {
 					break;
 
 				default:
-					System.err.println("Unknown: " + setting.getSettingType());
+					UIUtils.showErrorDialog("Unknown Setting Type", setting.getSettingType());
 			}
 		} catch (Exception e) {
 			// TODO: Find exact exception

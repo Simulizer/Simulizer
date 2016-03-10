@@ -8,6 +8,7 @@ import simulizer.simulation.listeners.InstructionTypeMessage;
 import simulizer.simulation.listeners.SimulationListener;
 import simulizer.simulation.listeners.StageEnterMessage;
 import simulizer.ui.windows.CPUVisualisation;
+import simulizer.utils.UIUtils;
 
 public class CPUListener extends SimulationListener {
 
@@ -201,7 +202,7 @@ public class CPUListener extends SimulationListener {
         try{
             Thread.sleep(millis);
         } catch (InterruptedException e){
-            System.out.println(e.getMessage());
+            UIUtils.showExceptionDialog(e);
         }
     }
 

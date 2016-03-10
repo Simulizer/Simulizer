@@ -37,6 +37,7 @@ import simulizer.simulation.listeners.SimulationListener;
 import simulizer.simulation.listeners.SimulationMessage;
 import simulizer.simulation.listeners.StageEnterMessage;
 import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.utils.UIUtils;
 
 /**
  * this is the central CPU class
@@ -162,7 +163,7 @@ public class CPU {
 			try {
 				clock.join(); // stop the clock thread
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				UIUtils.showExceptionDialog(e);
 			}
 		}
 

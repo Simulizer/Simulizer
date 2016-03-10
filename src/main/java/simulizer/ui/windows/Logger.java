@@ -23,6 +23,7 @@ import javafx.scene.layout.Priority;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.UIUtils;
 
 public class Logger extends InternalWindow implements Observer {
 	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
@@ -154,7 +155,7 @@ public class Logger extends InternalWindow implements Observer {
 			cdl.await();
 			submit.setDisable(true);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 		return lastInput;
 	}

@@ -17,6 +17,7 @@ import javafx.scene.layout.Priority;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.utils.UIUtils;
 
 /**
  * Shows the current labels in the code editor.
@@ -92,7 +93,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 				labelGetting.join();
 				Platform.runLater(() -> table.setItems(labels));
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				UIUtils.showExceptionDialog(e);
 			}
 		}
 	}

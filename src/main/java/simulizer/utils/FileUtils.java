@@ -21,7 +21,7 @@ public class FileUtils {
 			return new String(data, "UTF-8");
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 
 		return null;
@@ -36,7 +36,7 @@ public class FileUtils {
 			fw.write(content);
 			fw.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 
@@ -60,7 +60,7 @@ public class FileUtils {
 				throw new FileNotFoundException(path);
 			}
 		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 
 		try {
@@ -68,7 +68,7 @@ public class FileUtils {
 			for (int c = br.read(); c != -1; c = br.read())
 				sb.append((char) c);
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 
 		return sb.toString();

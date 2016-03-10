@@ -2,11 +2,14 @@ package simulizer.utils;
 
 import javafx.application.Platform;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,11 +38,17 @@ public class UIUtils {
 	}
 
 	public static void showErrorDialog(String title, String header, String message) {
+		System.err.println(title + "\n\t" + header + "\n\t" + message);
+
 		Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setTitle(title);
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 		alert.show();
+	}
+
+	public static void showExceptionDialog(Throwable e) {
+		showExceptionDialog(Thread.currentThread(), e);
 	}
 
 	/**
@@ -51,8 +60,11 @@ public class UIUtils {
 		try {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			pw.write("On Thread: " + where.getName() + "\n");
-			pw.write("At: " + LocalDateTime.now().toString().replace("T", " ") + "\n");
+			pw.write("Thread:  " + where.getName() + "\n");
+			pw.write("At:      " + LocalDateTime.now().toString().replace("T", " ") + "\n");
+			pw.write("Cause:   " + e.getCause() + "\n");
+			pw.write("Message: " + e.getMessage() + "\n");
+			pw.write("\n");
 			e.printStackTrace(pw);
 			final String exceptionText = sw.toString();
 
@@ -86,20 +98,21 @@ public class UIUtils {
 
 				Label label = new Label("Stacktrace:");
 
-				TextArea textArea = new TextArea(exceptionText);
-				textArea.setEditable(false);
-				textArea.setWrapText(true);
+				TextArea stacktrace = new TextArea(exceptionText);
+				stacktrace.setEditable(false);
+				stacktrace.setWrapText(true);
+				stacktrace.setFont(javafx.scene.text.Font.font(Font.MONOSPACED));
 
-				textArea.setMaxWidth(Double.MAX_VALUE);
-				textArea.setMaxHeight(Double.MAX_VALUE);
-				GridPane.setVgrow(textArea, Priority.ALWAYS);
-				GridPane.setHgrow(textArea, Priority.ALWAYS);
+				stacktrace.setMaxWidth(Double.MAX_VALUE);
+				stacktrace.setMaxHeight(Double.MAX_VALUE);
+				GridPane.setVgrow(stacktrace, Priority.ALWAYS);
+				GridPane.setHgrow(stacktrace, Priority.ALWAYS);
 
 				GridPane expContent = new GridPane();
 				expContent.setMaxWidth(Double.MAX_VALUE);
 				expContent.setHgap(4);
 				expContent.add(label, 0, 0);
-				expContent.add(textArea, 0, 1);
+				expContent.add(stacktrace, 0, 1);
 
 				alert.getDialogPane().setExpandableContent(expContent);
 				alert.getDialogPane().expandedProperty().set(true); // set expanded by default

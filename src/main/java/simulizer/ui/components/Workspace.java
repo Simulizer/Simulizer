@@ -24,6 +24,7 @@ import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themeable;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.UIUtils;
 
 public class Workspace extends Observable implements Themeable {
 	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
@@ -192,8 +193,8 @@ public class Workspace extends Observable implements Themeable {
 					}
 
 					Platform.runLater(() -> callback.accept(finalE));
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
+				} catch (InterruptedException ex) {
+					UIUtils.showExceptionDialog(ex);
 				}
 			}, "Editor-Waiting-For-Load");
 			waiting.setDaemon(true);
@@ -217,7 +218,8 @@ public class Workspace extends Observable implements Themeable {
 				window.setGridBounds(wm.getGridBounds());
 				window.ready();
 			} else {
-				System.err.println("Tried to add a window which already exists: " + window.getTitle());
+				UIUtils.showErrorDialog("Problem Opening Window",
+						"Tried to add a window which already exists: " + window.getTitle());
 			}
 		}
 	}

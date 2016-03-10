@@ -80,7 +80,6 @@ public class AnnotationManager {
 		try {
 			ex.exec(msg.annotation);
 		} catch (ScriptException e) {
-			//TODO: send to error stream instead
 			IO io = wm.getIO();
 			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage());
 			if(msg.boundAddress != null) {
