@@ -1,11 +1,11 @@
 package simulizer.simulation.cpu.components;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Optional;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
@@ -243,12 +243,9 @@ public class Executor {
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		case 82736775://RICK ASCII :)
-    			try {
-    		        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("../misc/rick.wav").getAbsoluteFile());
-    		        Clip clip = AudioSystem.getClip();
-    		        clip.open(audioInputStream);
-    		        clip.start();
-    		    } catch(Exception e) {}
+			try {
+				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
+			} catch (IOException | URISyntaxException e) {System.out.println("CANT OPEN");} 
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}
