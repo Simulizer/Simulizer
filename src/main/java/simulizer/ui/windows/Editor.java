@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javafx.scene.control.ButtonType;
 import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -366,6 +366,10 @@ public class Editor extends InternalWindow {
 		if(file == null) return;
 
 		FileUtils.writeToFile(file, getText());
+
+		currentFile = file;
+		setEdited(false);
+		refreshTitle();
 	}
 
 	public void loadFile(File file) {
