@@ -35,4 +35,4 @@ Meet the Team
 
 Licence
 -------
-**Simulizer** is released under the [GNU General Public License v3.0](Licence.md)
+**Simulizer** is released under the [GNU General Public License v3.0](Licence)
