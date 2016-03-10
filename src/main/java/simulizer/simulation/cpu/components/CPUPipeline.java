@@ -53,7 +53,7 @@ public class CPUPipeline extends CPU {
 		this.ID = createNopInstruction();
 		this.canFetch = true;
 		this.isFinished = 0;
-		this.nopCount = 0;
+		this.nopCount = 2;//initially 2
 		
 	}
 	
@@ -267,7 +267,7 @@ public class CPUPipeline extends CPU {
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
-		this.nopCount = 0;
+		this.nopCount = 2;//decode and execute bubbled initially
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program

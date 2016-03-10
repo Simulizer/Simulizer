@@ -1,6 +1,11 @@
 package simulizer.simulation.cpu.components;
 
+import java.io.File;
 import java.util.Optional;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
@@ -237,6 +242,13 @@ public class Executor {
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
+    		case 82736775://RICK ASCII :)
+    			try {
+    		        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("../misc/rick.wav").getAbsoluteFile());
+    		        Clip clip = AudioSystem.getClip();
+    		        clip.open(audioInputStream);
+    		        clip.start();
+    		    } catch(Exception e) {}
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}
