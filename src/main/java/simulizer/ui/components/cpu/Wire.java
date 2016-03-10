@@ -117,7 +117,6 @@ public class Wire extends Group {
 	 * @param animTime The time for the animation to complete in
      */
 	public void animateData(int animTime) {
-
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
