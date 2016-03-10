@@ -176,6 +176,9 @@ public class UIUtils {
 	public static void promptSaveAs(Stage parent, Consumer<File> callback) {
 		File file = saveFileSelector("Save an assembly file", parent, new File("code"), new FileChooser.ExtensionFilter("Assembly files *.s", "*.s"));
 		if(file != null) {
+			if (!file.getName().endsWith(".s"))
+				file = new File(file.getAbsolutePath() + ".s");
+			
 			callback.accept(file);
 		}
 	}
