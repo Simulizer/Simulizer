@@ -27,6 +27,7 @@ import javafx.util.Duration;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
 import simulizer.utils.ThreadUtils;
+import simulizer.utils.UIUtils;
 
 public class Simulizer extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
@@ -41,12 +42,13 @@ public class Simulizer extends Application {
 	private Settings settings;
 
 	public static void main(String[] args) {
+		Thread.setDefaultUncaughtExceptionHandler(UIUtils::showExceptionDialog);
 		launch(args);
 	}
 
 	@Override
 	public void init() throws Exception {
-		ImageView splash = null;
+		ImageView splash;
 
 		try {
 			settings = Settings.loadSettings(new File("settings.json"));

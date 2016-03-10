@@ -1,13 +1,18 @@
 package simulizer.utils;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -35,6 +40,76 @@ public class UIUtils {
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 		alert.show();
+	}
+
+	/**
+	 * Display the stack trace of an exception.
+	 * Inspired by: http://code.makery.ch/blog/javafx-dialogs-official/
+	 * @param e the exception to display
+	 */
+	public static void showExceptionDialog(Thread where, Throwable e) {
+		try {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			pw.write("On Thread: " + where.getName() + "\n");
+			pw.write("At: " + LocalDateTime.now().toString().replace("T", " ") + "\n");
+			e.printStackTrace(pw);
+			final String exceptionText = sw.toString();
+
+			// in case JavaFX is very broken
+			System.err.print(exceptionText);
+
+			// write to a file log
+			BufferedWriter log = null;
+			try {
+				log = new BufferedWriter(new FileWriter("./exceptions.log", true));
+				log.write(exceptionText + "\n\n\n");
+				log.flush();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} finally {
+				if(log != null) {
+					try {
+						log.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+
+			Platform.runLater(() -> {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Exception");
+				alert.setHeaderText("Something went wrong with Simlulizer.");
+				alert.setContentText("The details of the problem are below.\nPlease contact the developers with this information:");
+				alert.getDialogPane().setPrefSize(720, 480);
+
+				Label label = new Label("Stacktrace:");
+
+				TextArea textArea = new TextArea(exceptionText);
+				textArea.setEditable(false);
+				textArea.setWrapText(true);
+
+				textArea.setMaxWidth(Double.MAX_VALUE);
+				textArea.setMaxHeight(Double.MAX_VALUE);
+				GridPane.setVgrow(textArea, Priority.ALWAYS);
+				GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+				GridPane expContent = new GridPane();
+				expContent.setMaxWidth(Double.MAX_VALUE);
+				expContent.setHgap(4);
+				expContent.add(label, 0, 0);
+				expContent.add(textArea, 0, 1);
+
+				alert.getDialogPane().setExpandableContent(expContent);
+				alert.getDialogPane().expandedProperty().set(true); // set expanded by default
+
+				alert.showAndWait();
+			});
+		} catch(Throwable t) {
+			System.err.println("Failed to handle exception with another exception:");
+			t.printStackTrace(System.err);
+		}
 	}
 
 	/**
