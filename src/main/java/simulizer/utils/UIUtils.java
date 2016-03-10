@@ -1,23 +1,25 @@
 package simulizer.utils;
 
+import java.awt.Font;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import javafx.application.Platform;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import java.awt.*;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Utilities for UI related utilities
@@ -92,7 +94,7 @@ public class UIUtils {
 			Platform.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.ERROR);
 				alert.setTitle("Exception");
-				alert.setHeaderText("Something went wrong with Simlulizer.");
+				alert.setHeaderText("Something went wrong with Simulizer.");
 				alert.setContentText("The details of the problem are below.\nPlease contact the developers with this information:");
 				alert.getDialogPane().setPrefSize(720, 480);
 
