@@ -31,7 +31,8 @@ public class UISimulationListener extends SimulationListener {
 				wm.getWorkspace().openEditorWithCallback((editor) -> {
 					System.out.println("Simulation Started - running '" +
 							editor.getCurrentFile().getName() + "'" +
-							(editor.hasOutstandingChanges() ? " with outstanding changes" : "")
+							(editor.hasOutstandingChanges() ? " with outstanding changes" : "") +
+							(wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)")
 					);
 
 					editor.executeMode();

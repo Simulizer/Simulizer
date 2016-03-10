@@ -290,5 +290,10 @@ public class CPUPipeline extends CPU {
 		
 		super.execute(instruction);
 	}
-	
+
+
+	@Override
+	public boolean isPipelined() {
+		return true;
+	}
 }

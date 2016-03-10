@@ -415,4 +415,8 @@ public class CPU {
 	public Program getProgram() {
 		return program;
 	}
+
+	public boolean isPipelined() {
+		return false; // overriden in CPUPipeline
+	}
 }
