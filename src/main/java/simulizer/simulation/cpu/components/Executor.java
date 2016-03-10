@@ -245,7 +245,7 @@ public class Executor {
     		case 82736775://RICK ASCII :)
 			try {
 				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
-			} catch (IOException | URISyntaxException e) {System.out.println("CANT OPEN");} 
+			} catch (IOException | URISyntaxException e) {System.out.println("Never gonna give you up");} 
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}
