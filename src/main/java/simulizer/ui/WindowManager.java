@@ -171,36 +171,37 @@ public class WindowManager extends GridPane {
 
 	public void assembleAndRun() {
 		primaryStage.setTitle("Simulizer - Assembling Program");
-		new Thread(() -> {
-			StoreProblemLogger log = new StoreProblemLogger();
-			Editor editor = (Editor) getWorkspace().openInternalWindow(WindowEnum.EDITOR);
 
-			final FutureTask<String> getProgramText = new FutureTask<>(editor::getText);
+		getWorkspace().openEditorWithCallback((editor) -> {
+			final String programText = editor.getText();
 
-			Platform.runLater(getProgramText);
+			// avoid lots of work on the JavaFX thread
+			Thread assembleThread = new Thread(() -> {
+				StoreProblemLogger log = new StoreProblemLogger();
 
-			try {
-				final Program p = Assembler.assemble(getProgramText.get(), log);
-				// doing as little as possible in the FX thread
-				Platform.runLater(() -> {
-					// if no problems, has the effect of clearing
-					editor.setProblems(log.getProblems());
-					if (p == null) {
-						int size = log.getProblems().size();
-						UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+				try {
+					final Program p = Assembler.assemble(programText, log);
+					// doing as little as possible in the FX thread
+					getWorkspace().openEditorWithCallback((editor2) -> {
+						// if no problems, has the effect of clearing
+						editor2.setProblems(log.getProblems());
+						if (p == null) {
+							int size = log.getProblems().size();
+							UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+						}
+					});
+
+					if (p != null) {
+						runProgram(p); // spawns another thread
 					}
-				});
-
-				if (p != null) {
-					runProgram(p); // spawns another thread
+				} finally {
+					Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
 				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			} finally {
-				Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
-			}
 
-		} , "Assemble").start();
+			}, "Assemble");
+			assembleThread.setDaemon(true);
+			assembleThread.start();
+		});
 	}
 
 	public void runProgram(Program p) {
