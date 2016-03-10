@@ -46,7 +46,7 @@ public class Editor extends InternalWindow {
 	// TODO: update problems as the user types. maybe do this using ace's worker
 	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
 
-	WindowManager wm;
+	private boolean pageLoaded;
 	private WebEngine engine;
 	private File currentFile;
 
@@ -63,6 +63,10 @@ public class Editor extends InternalWindow {
 	private SafeJSObject jsWindow;
 	private SafeJSObject jsEditor;
 	private SafeJSObject jsSession;
+
+	public boolean hasLoaded() {
+		return pageLoaded;
+	}
 
 	// execute mode = simulation running
 	private enum Mode { EDIT_MODE, EXECUTE_MODE }
@@ -93,6 +97,7 @@ public class Editor extends InternalWindow {
 
 	public Editor() {
 		WebView view = new WebView();
+		pageLoaded = false;
 		currentFile = null;
 		bridge = new Bridge(this);
 
@@ -145,7 +150,64 @@ public class Editor extends InternalWindow {
 		getContentPane().getChildren().add(view);
 	}
 
+	/**
+	 * called by loadPage once the document has loaded
+	 */
+	private void afterDocumentLoaded(Settings settings) {
+		// setup the javascript --> java bridge
+		jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
+		jsWindow.setMember("bridge", bridge);
+
+		engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
+		initSyntaxHighlighter();
+
+		jsWindow.call("init");
+		jsEditor = new SafeJSObject((JSObject) engine.executeScript("editor")); // created by init() so must be set after
+		jsSession = new SafeJSObject((JSObject) engine.executeScript("session"));
+
+		//enableFirebug();
+
+		// load settings
+		setWrap((boolean) settings.get("editor.wrap"));
+		String fontFamily = (String) settings.get("editor.font-family");
+		int fontSize = (int) settings.get("editor.font-size");
+		jsWindow.call("setFont", fontFamily, fontSize);
+
+		jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+		engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
+		jsEditor.call("setTheme", (String) settings.get("editor.theme"));
+
+		boolean vim = (boolean) settings.get("editor.vim-mode");
+		if(vim) {
+			engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
+			jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
+		}
+
+		boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
+		jsWindow.setMember("userInControl", userInControl);
+
+		String initialFile = (String) settings.get("editor.initial-file");
+		if(initialFile != null) {
+			File f = new File(initialFile);
+			if(f.exists()) {
+				loadFile(f);
+			} else {
+				//TODO: log failure properly
+				throw new IllegalArgumentException("file not found");
+			}
+		} else {
+			newFile();
+		}
+
+		// signals that all the editor methods are now safe to call
+		pageLoaded = true;
+	}
+
 	private void loadPage(Settings settings) {
+		UIUtils.assertFXThread();
+
 		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
 
 		// can only execute scripts once the page has loaded
@@ -154,53 +216,7 @@ public class Editor extends InternalWindow {
 			public void changed(ObservableValue<? extends Document> observableValue, Document oldDoc, Document newDoc) {
 				if (newDoc != null) {
 					// loaded, run this once then remove as a listener
-
-					// setup the javascript --> java bridge
-					jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
-					jsWindow.setMember("bridge", bridge);
-
-					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
-					initSyntaxHighlighter();
-
-					jsWindow.call("init");
-					jsEditor = new SafeJSObject((JSObject) engine.executeScript("editor")); // created by init() so must be set after
-					jsSession = new SafeJSObject((JSObject) engine.executeScript("session"));
-
-					//enableFirebug();
-
-					// load settings
-					setWrap((boolean) settings.get("editor.wrap"));
-					String fontFamily = (String) settings.get("editor.font-family");
-					int fontSize = (int) settings.get("editor.font-size");
-					jsWindow.call("setFont", fontFamily, fontSize);
-
-					jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
-					engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
-					jsEditor.call("setTheme", (String) settings.get("editor.theme"));
-
-					boolean vim = (boolean) settings.get("editor.vim-mode");
-					if(vim) {
-						engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
-						jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
-					}
-
-					boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
-					jsWindow.setMember("userInControl", userInControl);
-
-					String initialFile = (String) settings.get("editor.initial-file");
-					if(initialFile != null) {
-						File f = new File(initialFile);
-						if(f.exists()) {
-							loadFile(f);
-						} else {
-							//TODO: log failure properly
-							throw new IllegalArgumentException("file not found");
-						}
-					} else {
-						newFile();
-					}
+					afterDocumentLoaded(settings);
 
 					engine.documentProperty().removeListener(this);
 				}
@@ -210,7 +226,7 @@ public class Editor extends InternalWindow {
 
 	@Override
 	public void ready() {
-		wm = getWindowManager();
+		WindowManager wm = getWindowManager();
 
 		loadPage(wm.getSettings());
 
@@ -218,14 +234,15 @@ public class Editor extends InternalWindow {
 
 		for (String className : observersToAdd) {
 			TemporaryObserver obs =
-				(TemporaryObserver) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ofString(className));
+				(TemporaryObserver) wm.getWorkspace().findInternalWindow(WindowEnum.ofString(className));
 			if (obs != null) addObserver(obs);
 		}
 
 		super.ready();
 	}
 
-	@Override public void close() {
+	@Override
+	public void close() {
 		if(hasOutstandingChanges()) {
 			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + currentFile.getName() + "\"", "");
 

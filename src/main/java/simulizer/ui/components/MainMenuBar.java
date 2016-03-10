@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.function.Consumer;
 
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -38,17 +39,13 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
-	private Editor getEditor() {
-		return (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-	}
-
 	private Menu fileMenu() {
 		// | File
 		Menu fileMenu = new Menu("File");
 
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
-		newItem.setOnAction(e -> getEditor().newFile());
+		newItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback(Editor::newFile));
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Open
@@ -56,29 +53,26 @@ public class MainMenuBar extends MenuBar {
 		loadItem.setOnAction(e -> {
 			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
-				getEditor().loadFile(f);
+				wm.getWorkspace().openEditorWithCallback((ed) -> ed.loadFile(f));
 			}
 		});
 		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
-		saveItem.setOnAction(e -> {
-			if (getEditor().getCurrentFile() == null) {
-				Editor editor = getEditor();
-				UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
+		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			if (ed.getCurrentFile() == null) {
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
 			} else {
-				getEditor().saveFile();
+				ed.saveFile();
 			}
-		});
+		}));
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
-		saveAsItem.setOnAction(e -> {
-			Editor editor = getEditor();
-			UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
-		});
+		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) ->
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
@@ -250,8 +244,8 @@ public class MainMenuBar extends MenuBar {
 		Menu debugMenu = new Menu("Debug");
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
-		dumpProgram.setOnAction(e -> {
-			Program p = Assembler.assemble(getEditor().getText(), null);
+		dumpProgram.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			Program p = Assembler.assemble(ed.getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
@@ -263,24 +257,26 @@ public class MainMenuBar extends MenuBar {
 				ProgramStringBuilder.dumpToFile(p, outputFilename);
 			}
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
-		});
+		}));
 
 		MenuItem runSpim = new MenuItem("Run in SPIM");
-		runSpim.setOnAction(e -> {
-			String program = getEditor().getText();
+		runSpim.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			String program = ed.getText();
 			SpimRunner.runQtSpim(program);
-		});
+		}));
 
 		MenuItem jsREPL = new MenuItem("Start javascript REPL");
 		jsREPL.setOnAction(e -> {
-			new Thread(() -> {
+			Thread replThread = new Thread(() -> {
 				// if there is an executor (eg simulation running) then use that
 				if (wm.getAnnotationManager().getExecutor() == null) {
 					// this does not bridge with the visualisations or simulation
 					wm.getAnnotationManager().newExecutor();
 				}
 				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			}).start();
+			}, "JS-REPL-Thread");
+			replThread.setDaemon(true);
+			replThread.start();
 		});
 
 		Menu themes = new Menu("Themes");

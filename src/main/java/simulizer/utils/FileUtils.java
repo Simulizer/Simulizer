@@ -9,7 +9,7 @@ import java.io.*;
 public class FileUtils {
 
 	public static String getFileContent(String path) {
-		FileInputStream fis = null;
+		FileInputStream fis;
 		try {
 			File file = new File(path);
 			fis = new FileInputStream(file);
