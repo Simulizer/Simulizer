@@ -26,8 +26,8 @@ public class SimulationBridge {
 		cpu.stopRunning();
 	}
 
-	public void setClockSpeed(int tickMillis) {
-		cpu.setClockSpeed(tickMillis);
+	public void setClockSpeed(double hertz) {
+		cpu.setClockHertz(hertz);
 	}
 
 	public Word[] getRegisters() {

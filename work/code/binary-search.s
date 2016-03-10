@@ -1,6 +1,6 @@
 # binary search
 # enter numbers in ascending order, using 0 as an end marker
-# @{ setSpeed(30) }@
+# @{ setSpeed(35) }@
 # @{ var l = vis.load('list', false) }@
 
 # @{ var startAddress = null }@
@@ -39,8 +39,8 @@ main:
  # @{ startAddress = $a0.get() }@
  # @{ if(startAddress == -1) ret() // no elements }@
  # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get())) }@
- # @{ vis.show()    }@
- # @{ setSpeed(75) }@
+ # @{ vis.show()   }@
+ # @{ setSpeed(15) }@
 
     jal read_and_search
 

@@ -70,7 +70,7 @@ public class Clock extends Thread {
 				// 1 for cpu, 1 for the clock.
 				// all must be waiting before the clock advances
 				lastTickStart = System.currentTimeMillis();
-				Thread.sleep(Math.max(tickMillis - overshoot, 0));
+				Thread.sleep(Math.max(tickMillis - overshoot, 0)); // TODO: Use nanoseconds for greater accuracy
 
 				if (!isRunning) {
 					break;

@@ -12,7 +12,7 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n?1 discs from pole 2 to pole 3 so they sit on disc n
 #
-# @{ setSpeed(10) }@
+# @{ setSpeed(100) }@
 # @{ var h = vis.load('tower-of-hanoi', false) }@
 
 

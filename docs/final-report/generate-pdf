@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPORT_HOME=./
-TARGET="main.tex"
+TARGET="main"
 DEST="Final-Report"
 
 cd ${REPORT_HOME}
@@ -11,9 +11,11 @@ then
   echo "Usage: ./generate-pdf.sh [output-format]"
 elif [ $# -eq 0 ] || [ $1 == 'pdf' ]
 then
-  pdflatex ${TARGET} -o ${DEST}.pdf
+  pdflatex ${TARGET}.tex -o ${DEST}.pdf
+  mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
 else
-  latex ${TARGET} -o ${DEST}.tex
+  latex ${TARGET}.tex -o ${DEST}.pdf
+  mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
 fi
 
 cd -
