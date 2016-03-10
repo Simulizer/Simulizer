@@ -20,5 +20,15 @@ Where it is used: JavaFX is the main source of all of the UI code built for Simu
 - License: JavaFX is released under the GPL v2 license
 - Link: [http://docs.oracle.com/javase/8/javase-clienttechnologies.htm](http://docs.oracle.com/javase/8/javase-clienttechnologies.htm)
 
+**JFxtras** – a set of high quality controls and add-ons for JavaFX:
+Where it is used: In addition to JavaFX, these libraries act as extensions to our JavaFX usage, in some cases throughout the system.
+- License: JFXtras is released under the New BSD License
+- Link: [http://jfxtras.org/](http://jfxtras.org/)
+
+**GSon** – a Java serialization library that can convert Java Objects into JSON and back.
+Where it is used: I honestly din't know, SOMEONE CHANGE
+- License: GSon is released under the Apache 2.0 License
+- Link: [https://github.com/google/gson](https://github.com/google/gson)
+
 In addition to these two pieces of external software, for a small part of the project a different programming language has been used. The language used is JavaScript. JavaScript is being used to provide ‘annotations’ in the text editor. These are written into the comments of the MIPS program, and then are parsed as well. Once parsed, this JavaScript code allows the user to debug their programs by logging register values for example. It additionally allows easy control over the running of the high-level visualisations. Given that it is expected that a large number of second year Computer Science students will have at least basic experience with JavaScript, and the fact that a scripting language is a suitable language for this task, JavaScript seemed to be an appropriate choice. As a rough approximate, JavaScript contributes about 1.5% to the entire code base of Simulizer.
 

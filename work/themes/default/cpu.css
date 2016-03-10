@@ -23,3 +23,12 @@
     -fx-text-alignment: center;
     -fx-font: 16px "Arial, sans-serif";
 }
+
+.cpu-info-label-outer{
+    -fx-stroke: #1e3c72;
+    -fx-fill: #fff;
+}
+
+.cpu-info-label-text{
+    -fx-fill: "#000";
+}

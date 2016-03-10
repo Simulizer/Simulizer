@@ -1,7 +1,6 @@
 package simulizer.simulation.cpu.components;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -242,10 +241,16 @@ public class Executor {
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
+    		case 67697865://AND HIS NAME IS...
+    			try {
+    				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=5LitDGyxFh4").toURI());
+    			} catch (IOException | URISyntaxException e) {System.out.println("JOHN CENA!!!");} 
+    			break;
     		case 82736775://RICK ASCII :)
-			try {
-				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
-			} catch (IOException | URISyntaxException e) {System.out.println("Never gonna give you up");} 
+				try {
+					Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
+				} catch (IOException | URISyntaxException e) {System.out.println("Never gonna give you up");} 
+				break;
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}
