@@ -190,7 +190,7 @@ public class CPUPipeline extends CPU {
 	/**method will overwrite the method in the CPU class for running a cycle
 	 * this method will mimic a primitive pipeline instead of a sequential execution
 	 */
-	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
 
 		Address thisInstruction = programCounter;
 		if(this.canFetch&&this.isFinished==0){

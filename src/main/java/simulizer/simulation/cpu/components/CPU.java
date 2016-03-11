@@ -62,6 +62,11 @@ public class CPU {
 
 	private ALU Alu;
 	protected final Clock clock;
+	private long cycles;
+	/**
+	 * used for resume for single cycle
+	 */
+	private boolean breakAfterCycle;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -90,6 +95,8 @@ public class CPU {
 		this.listenControl = new ListenerController();
 		this.clearRegisters();
 		this.clock = new Clock();
+		this.cycles = 0;
+		this.breakAfterCycle = false;
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
@@ -145,11 +152,22 @@ public class CPU {
 		// isRunning remains true
 		clock.stop();
 	}
+
 	public void resume() {
 		if(isRunning) {
+			breakAfterCycle = false;
 			clock.start();
 		} else {
 			runProgram();
+		}
+	}
+
+	public void resumeForOneCycle() {
+		if(!clock.isRunning()) {
+			breakAfterCycle = true;
+			clock.start();
+		} else {
+			UIUtils.showErrorDialog("Could not resume", "Could not resume the simulation\nfor a single cycle because it was not paused");
 		}
 	}
 
@@ -303,6 +321,7 @@ public class CPU {
 		this.programCounter = this.executor.execute(instruction, this.getProgramCounter());// will set the program counter if changed
 	}
 
+
 	/**
 	 * this method will run a single cycle of the FDE cycle
 	 * 
@@ -319,7 +338,7 @@ public class CPU {
 	 * @throws StackException
 	 *
 	 */
-	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
 
 		// PC holds next instruction and is advanced by fetch,
 		// messages should be sent about this instruction instead
@@ -347,7 +366,9 @@ public class CPU {
 	 */
 	public void runProgram() {
 		isRunning = true;
+		breakAfterCycle = false;
 		clock.resetTicks();
+		cycles = 0;
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
@@ -380,6 +401,11 @@ public class CPU {
 
 			//TODO: aggregate stats like this into a window
 			long cycleDuration = System.currentTimeMillis() - cycleStart;
+
+			cycles++;
+			if(breakAfterCycle) {
+				pause();
+			}
 		}
 		stopRunning();
 	}

@@ -193,7 +193,7 @@ public class MainMenuBar extends MenuBar {
 		singleStep.setOnAction(e -> {
 			if (!clock.isRunning() && cpu.isRunning()) {
 				try {
-					cpu.runSingleCycle();
+					cpu.resumeForOneCycle();
 				} catch (Exception ex) {
 					// TODO: Handle Exception properly
 					UIUtils.showExceptionDialog(ex);
