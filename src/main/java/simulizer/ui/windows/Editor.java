@@ -124,6 +124,8 @@ public class Editor extends InternalWindow {
 				content.putString(clip);
 				clipboard.setContent(content);
 
+				event.consume();
+
 			} else if (C_v.match(event)) {
 				if(mode == Mode.EXECUTE_MODE)
 					return;
@@ -135,10 +137,14 @@ public class Editor extends InternalWindow {
 				}
 
 				editedSinceLabelUpdate = true;
+				event.consume();
+
 			} else if(C_plus.match(event)) {
 				jsWindow.call("changeFontSize", 1);
+				event.consume();
 			} else if(C_minus.match(event)) {
 				jsWindow.call("changeFontSize", -1);
+				event.consume();
 			} else {
 				if(mode == Mode.EXECUTE_MODE)
 					return;
