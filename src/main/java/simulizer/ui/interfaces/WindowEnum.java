@@ -6,6 +6,7 @@ public enum WindowEnum {
 	// @formatter:off
 	EDITOR("Editor", "Editor"),
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
+	OPTIONS("Options"),
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
 	LABELS("Labels"),
 	LOGGER("Logger"),

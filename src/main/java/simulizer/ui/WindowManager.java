@@ -67,7 +67,6 @@ public class WindowManager extends GridPane {
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
-
 		newCPU((boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
@@ -189,7 +188,7 @@ public class WindowManager extends GridPane {
 					Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
 				}
 
-			}, "Assemble");
+			} , "Assemble");
 			assembleThread.setDaemon(true);
 			assembleThread.start();
 		});
@@ -242,7 +241,7 @@ public class WindowManager extends GridPane {
 	}
 
 	public void newCPU(boolean pipelined) {
-		if(cpu != null) {
+		if (cpu != null) {
 			cpu.shutdown();
 		}
 
