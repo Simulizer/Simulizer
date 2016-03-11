@@ -4,7 +4,6 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javafx.scene.control.ButtonType;
 import java.net.URI;
 
 import javafx.scene.control.CheckMenuItem;
@@ -72,13 +71,12 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
-		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) ->
-				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
+		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
-		
+
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
@@ -105,7 +103,8 @@ public class MainMenuBar extends MenuBar {
 		saveLayoutItem.setOnAction(e -> {
 			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
-				if (!saveFile.getName().endsWith(".json")) saveFile = new File(saveFile.getAbsolutePath() + ".json");
+				if (!saveFile.getName().endsWith(".json"))
+					saveFile = new File(saveFile.getAbsolutePath() + ".json");
 
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);
@@ -144,50 +143,70 @@ public class MainMenuBar extends MenuBar {
 
 	private Menu simulationMenu() {
 		Menu runMenu = new Menu("Simulation");
-		runMenu.setOnShowing(e -> simControlsMenu(runMenu));
-		simControlsMenu(runMenu);
+		runMenu.setOnShowing(e -> simControlsMenu(runMenu, true));
+		runMenu.setOnHidden(e -> simControlsMenu(runMenu, false));
+		simControlsMenu(runMenu, false);
 		return runMenu;
 	}
 
-	private void simControlsMenu(Menu runMenu) {
+	private void simControlsMenu(Menu runMenu, boolean allowDisabling) {
 		runMenu.getItems().clear();
 
 		final CPU cpu = wm.getCPU();
 		final Clock clock = cpu.getClock();
 
 		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
-		assembleAndRun.setDisable(cpu.isRunning());
+		assembleAndRun.setAccelerator(new KeyCodeCombination(KeyCode.F5));
+		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
-			UIUtils.showAssemblingDialog(cpu);
-			wm.assembleAndRun();
+			if (!cpu.isRunning()) {
+				UIUtils.showAssemblingDialog(cpu);
+				wm.assembleAndRun();
+			}
 		});
 
-		MenuItem pause = new MenuItem("Pause Simulation");
-		pause.setDisable(!clock.isRunning() || !cpu.isRunning());
-		pause.setOnAction(e -> cpu.pause());
-
-		MenuItem resume = new MenuItem("Resume Simulation");
-		resume.setDisable(clock.isRunning() || !cpu.isRunning());
-		resume.setOnAction(e -> wm.getCPU().resume());
+		MenuItem pauseResume = null;
+		if (!clock.isRunning()) {
+			pauseResume = new MenuItem("Resume Simulation");
+			pauseResume.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
+		} else {
+			pauseResume = new MenuItem("Pause Simulation");
+			pauseResume.setDisable(allowDisabling && (!clock.isRunning() || !cpu.isRunning()));
+		}
+		pauseResume.setAccelerator(new KeyCodeCombination(KeyCode.F6));
+		pauseResume.setOnAction(e -> {
+			if (!clock.isRunning() && cpu.isRunning())
+				wm.getCPU().resume();
+			else if (clock.isRunning() && cpu.isRunning()) {
+				cpu.pause();
+			}
+		});
 
 		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setDisable(clock.isRunning() || !cpu.isRunning());
+		singleStep.setAccelerator(new KeyCodeCombination(KeyCode.F7));
+		singleStep.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
 		singleStep.setOnAction(e -> {
-			try {
-				cpu.runSingleCycle();
-			} catch (Exception ex) {
-				// TODO: Handle Exception properly
-				UIUtils.showExceptionDialog(ex);
+			if (!clock.isRunning() && cpu.isRunning()) {
+				try {
+					cpu.runSingleCycle();
+				} catch (Exception ex) {
+					// TODO: Handle Exception properly
+					UIUtils.showExceptionDialog(ex);
+				}
 			}
 		});
 
 		MenuItem stop = new MenuItem("End Simulation");
-		stop.setDisable(!cpu.isRunning());
-		stop.setOnAction(e -> wm.stopSimulation());
+		stop.setAccelerator(new KeyCodeCombination(KeyCode.F8));
+		stop.setDisable(allowDisabling && !cpu.isRunning());
+		stop.setOnAction(e -> {
+			if (cpu.isRunning())
+				wm.stopSimulation();
+		});
 
 		CheckMenuItem togglePipeline = new CheckMenuItem("Toggle CPU Pipelining");
 		togglePipeline.setDisable(cpu.isRunning());
-		togglePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
+		togglePipeline.setSelected(cpu.isPipelined());
 		togglePipeline.setOnAction(e -> wm.newCPU(togglePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
@@ -199,9 +218,10 @@ public class MainMenuBar extends MenuBar {
 				double speed = -1;
 				try {
 					speed = Double.parseDouble(input);
-				} catch(NumberFormatException ignored) { /* speed == -1 */ }
+				} catch (NumberFormatException ignored) {
+					/* speed == -1 */ }
 
-				if(speed >= 0) {
+				if (speed >= 0) {
 					cpu.setCycleFreq(speed);
 				} else {
 					UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
@@ -209,7 +229,7 @@ public class MainMenuBar extends MenuBar {
 			});
 		});
 
-		runMenu.getItems().addAll(assembleAndRun, pause, resume, singleStep, stop, togglePipeline, setClockSpeed);
+		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, setClockSpeed);
 	}
 
 	private Menu windowsMenu() {
@@ -289,7 +309,7 @@ public class MainMenuBar extends MenuBar {
 					wm.getAnnotationManager().newExecutor();
 				}
 				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			}, "JS-REPL-Thread");
+			} , "JS-REPL-Thread");
 			replThread.setDaemon(true);
 			replThread.start();
 		});
