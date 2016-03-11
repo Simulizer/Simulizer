@@ -2,6 +2,8 @@ Unit testing
 ============
 All separate components of our software (bar maybe our main UI) will be tested through the use of JUnit tests. All of these tests will be visible in the src/test directory in svn, but the following will lay out our tests on the separate components of the software along with their expected and recorded results:
 
+**Name of Component/Class**: `ALU`
+
 | Test ID | Method  | Instruction | Word 1     | Word 2     | Expected    | Actual      | Pass (y/n) | Date tested |
 |:--------|:--------|:------------|:-----------|:-----------|:------------|:------------|:-----------|:------------|
 | ALU1    | execute | abs         | -10        | empty      | 10          | 10          | y          | 16/2/16     |
@@ -80,3 +82,46 @@ All separate components of our software (bar maybe our main UI) will be tested t
 | ALU74   | execute | bne         | 0          | 0          | branchFalse | branchFalse | y          | 16/2/16     |
 | ALU75   | execute | bne         | 0          | -1         | branchTrue  | branchTrue  | y          | 16/2/16     |
 | ALU76   | execute | bgez        | 0          | 1          | branchTrue  | branchTrue  | y          | 16/2/16     |
+
+**Name of Component/Class**: `DynamicDataSegment`
+
+| Test ID | Method name                                                        | Input 1         | Input 2 | Expected                        | Actual                          | Pass (y/n) | Date Tested |
+|:--------|:-------------------------------------------------------------------|:----------------|:--------|:--------------------------------|:--------------------------------|:-----------|:------------|
+| DDS1    | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
+| DDS2    | sbrk                                                               | 8               | n/a     | 10                              | 10                              | y          | 17/12/16    |
+| DDS3    | sbrk                                                               | 4               | n/a     | 18                              | 18                              | y          | 17/12/16    |
+| DDS4    | size                                                               | n/a             | n/a     | 12                              | 12                              | y          | 17/12/16    |
+| DDS5    | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
+| DDS6    | sbrk                                                               | 1048576         | n/a     | 10                              | 10                              | y          | 17/12/16    |
+| DDS7    | size                                                               | n/a             | n/a     | 1048576                         | 1048576                         | y          | 17/12/16    |
+| DDS8    | sbrk                                                               | 4               | n/a     | Exception                       | Exception                       | y          | 17/12/16    |
+| DDS9    | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
+| DDS10   | sbrk                                                               | 3               | n/a     | Exception                       | Exception                       | y          | 17/12/16    |
+| DDS11   | sbrk                                                               | 4               | n/a     | 10                              | 10                              | y          | 17/12/16    |
+| DDS12   | size                                                               | n/a             | n/a     | 4                               | 4                               | y          | 17/12/16    |
+| DDS13   | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
+| DDS14   | sbrk                                                               | 8 then - 4      | n/a     | 14                              | 14                              | y          | 17/12/16    |
+| DDS15   | size                                                               | n/a             | n/a     | 8                               | 8                               | y          | 17/12/16    |
+| DDS16   | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
+| DDS17   | sbrk                                                               | -4              | n/a     | Exception                       | Exception                       | y          | 17/12/16    |
+| DDS18   | getBytes (after `sbrk(8)`) <br/><br/> and set 0x11 at 5)           | 5               | 1       | 0x11                            | 0x11                            | y          | 17/12/16    |
+| DDS19   | getBytes (after `sbrk(8)`) <br/> and setting 5 bytes starting at 2 | 2               | 4       | 0x11                            | 0x11                            | y          | 17/12/16    |
+| DDS20   | getBytes                                                           | 2               | 4       | 0x10                            | 0x10                            | y          | 17/12/16    |
+| DDS21   | getBytes                                                           | 2               | 4       | 0x78                            | 0x78                            | y          | 17/12/16    |
+| DDS22   | getBytes                                                           | 2               | 4       | 0x65                            | 0x65                            | y          | 17/12/16    |
+| DDS23   | getBytes                                                           | 0               | 5       | Exception                       | Exception                       | y          | 17/12/16    |
+| DDS24   | setBytes (test by retrieval at position)                           | 4 element array | 2       | result[0] = 0x11                | result[0] = 0x11                | y          | 17/12/16    |
+| DDS25   | setBytes                                                           | 4 element array | 2       | result[1] = 0x10                | result[1] = 0x10                | y          | 17/12/16    |
+| DDS26   | setBytes                                                           | 4 element array | 2       | result[2] = 0x78                | result[2] = 0x78                | y          | 17/12/16    |
+| DDS27   | setBytes                                                           | 4 element array | 2       | result[3] = 0x65                | result[3] = 0x65                | y          | 17/12/16    |
+| DDS28   | setBytes                                                           | empty array     | 2       | result[0] = 0x11                | result[0] = 0x11                | y          | 17/12/16    |
+| DDS29   | setBytes                                                           | 5 element array | 4       | Exception <br/> (out of bounds) | Exception <br/> (out of bounds) | y          | 17/12/16    |
+
+
+
+
+
+
+
+
+#
