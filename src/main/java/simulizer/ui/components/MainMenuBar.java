@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import javafx.scene.control.ButtonType;
 import java.net.URI;
 
 import javafx.scene.control.CheckMenuItem;
@@ -76,7 +77,7 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
-
+		
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
 		return fileMenu;
 	}
@@ -103,8 +104,7 @@ public class MainMenuBar extends MenuBar {
 		saveLayoutItem.setOnAction(e -> {
 			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
-				if (!saveFile.getName().endsWith(".json"))
-					saveFile = new File(saveFile.getAbsolutePath() + ".json");
+				if (!saveFile.getName().endsWith(".json")) saveFile = new File(saveFile.getAbsolutePath() + ".json");
 
 				wm.getLayouts().saveLayout(saveFile);
 				wm.getLayouts().reload(false);

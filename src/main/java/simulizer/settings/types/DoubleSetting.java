@@ -1,5 +1,6 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class DoubleSetting extends SettingValue<Double> {
@@ -28,8 +29,16 @@ public class DoubleSetting extends SettingValue<Double> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Double";
+	public SettingType getSettingType() {
+		return SettingType.DOUBLE;
+	}
+
+	public double getLowBound() {
+		return lowBound;
+	}
+
+	public double getHighBound() {
+		return highBound;
 	}
 
 }

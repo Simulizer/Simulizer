@@ -1,5 +1,6 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class IntegerSetting extends SettingValue<Integer> {
@@ -26,12 +27,20 @@ public class IntegerSetting extends SettingValue<Integer> {
 		if (!boundsSet)
 			return true;
 		else
-			return lowBound <= value && value <= highBound;
+			return getLowBound() <= value && value <= getHighBound();
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Integer";
+	public SettingType getSettingType() {
+		return SettingType.INTEGER;
+	}
+
+	public int getLowBound() {
+		return lowBound;
+	}
+
+	public int getHighBound() {
+		return highBound;
 	}
 
 }

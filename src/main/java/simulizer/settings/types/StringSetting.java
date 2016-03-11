@@ -1,5 +1,6 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
 public class StringSetting extends SettingValue<String> {
@@ -18,8 +19,8 @@ public class StringSetting extends SettingValue<String> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "String";
+	public SettingType getSettingType() {
+		return SettingType.STRING;
 	}
 
 }
