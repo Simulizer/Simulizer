@@ -35,7 +35,7 @@ public class UISimulationListener extends SimulationListener {
 
 				wm.getWorkspace().openEditorWithCallback((editor) -> {
 					System.out.println("Simulation Started - running '" +
-							editor.getCurrentFile().getName() + "'" +
+							editor.getBackingFilename() + "'" +
 							(editor.hasOutstandingChanges() ? " with outstanding changes" : "") +
 							(wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)")
 					);
@@ -58,7 +58,9 @@ public class UISimulationListener extends SimulationListener {
 				long ticks = wm.getCPU().getClock().getTicks();
 				System.out.println("Total time: " + (duration / 1000.0) + " seconds");
 				System.out.println("Total ticks: " + ticks);
-				System.out.println("Average time per tick: " + (duration / ticks) + " ms");
+				if(ticks != 0) { // this is actually possible (.text;main:nop)
+					System.out.println("Average time per tick: " + (duration / ticks) + " ms");
+				}
 
 				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
 			} break;

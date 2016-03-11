@@ -253,7 +253,7 @@ public class Editor extends InternalWindow {
 	@Override
 	public void close() {
 		if(hasOutstandingChanges()) {
-			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + currentFile.getName() + "\"", "");
+			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
 
 			if(save == ButtonType.YES) {
 				saveFile();
@@ -354,8 +354,11 @@ public class Editor extends InternalWindow {
 		return (int) jsWindow.call("getLine");
 	}
 
-	public File getCurrentFile() {
-		return currentFile;
+	public boolean hasBackingFile() {
+		return currentFile != null;
+	}
+	public String getBackingFilename() {
+		return currentFile == null ? "Untitled" : currentFile.getName();
 	}
 
 	/**
@@ -364,7 +367,7 @@ public class Editor extends InternalWindow {
 	public void saveFile() {
 		String currentText = getText();
 
-		if(currentFile != null && changedSinceLastSave) {
+		if(hasBackingFile() && changedSinceLastSave) {
 			FileUtils.writeToFile(currentFile, currentText);
 			setEdited(false);
 			refreshTitle();
@@ -412,10 +415,9 @@ public class Editor extends InternalWindow {
 	}
 
 	private void refreshTitle() {
-		String filename = currentFile != null ? currentFile.getName() : "New File";
 		String editedSymbol = changedSinceLastSave ? " *" : "";
 		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
-		setTitle(WindowEnum.getName(this) + modeString + " - " + filename + editedSymbol);
+		setTitle(WindowEnum.getName(this) + modeString + " - " + getBackingFilename() + editedSymbol);
 	}
 
 	/**

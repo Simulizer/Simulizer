@@ -106,7 +106,7 @@ public class WindowManager extends GridPane {
 
 		// a hack to make the layout load properly
 		primaryStage.setOnShown((e) -> {
-			new Thread(() -> {
+			Thread layoutFixThread = new Thread(() -> {
 				try {
 					for (int i = 0; i < 100; i++) {
 						Thread.sleep(50);
@@ -115,7 +115,9 @@ public class WindowManager extends GridPane {
 				} catch (InterruptedException e1) {
 					UIUtils.showExceptionDialog(e1);
 				}
-			}).start();
+			}, "Layout-Fix-Thread");
+			layoutFixThread.setDaemon(true);
+			layoutFixThread.start();
 		});
 		primaryStage.show();
 
