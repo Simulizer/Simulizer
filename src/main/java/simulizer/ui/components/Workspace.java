@@ -26,6 +26,12 @@ import simulizer.ui.theme.Themeable;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
+/**
+ * The workspace is the container where all InternalWindows are stored and handles opening/closing InternalWindows.
+ * 
+ * @author Michael
+ *
+ */
 public class Workspace extends Observable implements Themeable {
 	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
 	private final Pane pane = new Pane();
@@ -164,12 +170,13 @@ public class Workspace extends Observable implements Themeable {
 	 * callback mechanism is the only guaranteed correct solution as far as I
 	 * know.
 	 *
-	 * @param callback the operation to perform with the editor (will be executed on the JavaFX thread)
+	 * @param callback
+	 *            the operation to perform with the editor (will be executed on the JavaFX thread)
 	 */
 	public void openEditorWithCallback(Consumer<Editor> callback) {
-		Editor e = (Editor)findInternalWindow(WindowEnum.EDITOR);
-		if(e != null && e.hasLoaded()) {
-			if(Platform.isFxApplicationThread()) {
+		Editor e = (Editor) findInternalWindow(WindowEnum.EDITOR);
+		if (e != null && e.hasLoaded()) {
+			if (Platform.isFxApplicationThread()) {
 				callback.accept(e);
 			} else {
 				final Editor finalE = e;
@@ -177,7 +184,7 @@ public class Workspace extends Observable implements Themeable {
 			}
 		} else {
 			// perform the job of openInternalWindow
-			e = (Editor)WindowEnum.EDITOR.createNewWindow();
+			e = (Editor) WindowEnum.EDITOR.createNewWindow();
 			final Editor finalE = e;
 			assert e != null;
 			e.setWindowManager(wm);
@@ -188,7 +195,7 @@ public class Workspace extends Observable implements Themeable {
 			// wait for the page to load (crucially: on a non JavaFX thread)
 			Thread waiting = new Thread(() -> {
 				try {
-					while(!finalE.hasLoaded()) {
+					while (!finalE.hasLoaded()) {
 						Thread.sleep(20);
 					}
 
@@ -196,7 +203,7 @@ public class Workspace extends Observable implements Themeable {
 				} catch (InterruptedException ex) {
 					UIUtils.showExceptionDialog(ex);
 				}
-			}, "Editor-Waiting-For-Load");
+			} , "Editor-Waiting-For-Load");
 			waiting.setDaemon(true);
 			waiting.start();
 		}
@@ -218,8 +225,7 @@ public class Workspace extends Observable implements Themeable {
 				window.setGridBounds(wm.getGridBounds());
 				window.ready();
 			} else {
-				UIUtils.showErrorDialog("Problem Opening Window",
-						"Tried to add a window which already exists: " + window.getTitle());
+				UIUtils.showErrorDialog("Problem Opening Window", "Tried to add a window which already exists: " + window.getTitle());
 			}
 		}
 	}
@@ -290,10 +296,16 @@ public class Workspace extends Observable implements Themeable {
 		return new Layout(name, wls);
 	}
 
+	/**
+	 * @return the pane's width property
+	 */
 	public ReadOnlyDoubleProperty widthProperty() {
 		return pane.widthProperty();
 	}
 
+	/**
+	 * @return the pane's height property
+	 */
 	public ReadOnlyDoubleProperty heightProperty() {
 		return pane.widthProperty();
 	}
@@ -305,6 +317,9 @@ public class Workspace extends Observable implements Themeable {
 		return wm.getSettings();
 	}
 
+	/**
+	 * @return true if any InternalWindow is open
+	 */
 	public boolean hasWindowsOpen() {
 		return !openWindows.isEmpty();
 	}

@@ -8,6 +8,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import simulizer.settings.types.StringSetting;
 
+/**
+ * Component to edit a StringSetting
+ * 
+ * @author Michael
+ *
+ */
 public class StringControl extends GridPane {
 
 	public StringControl(StringSetting setting) {

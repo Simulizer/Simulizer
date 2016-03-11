@@ -20,6 +20,12 @@ import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.utils.UIUtils;
 
+/**
+ * Represents all the Layouts stored in the layouts folder. Handles converting them between json files and Layout objects
+ * 
+ * @author Michael
+ *
+ */
 public class Layouts implements Iterable<Layout> {
 
 	private final Path folder = Paths.get("layouts");
@@ -27,6 +33,11 @@ public class Layouts implements Iterable<Layout> {
 	private Layout layout, defaultLayout;
 	private Workspace workspace;
 
+	/**
+	 * @param workspace
+	 *            the workspace to apply the layouts to
+	 * @throws IOException
+	 */
 	public Layouts(Workspace workspace) throws IOException {
 		this.workspace = workspace;
 
@@ -37,6 +48,12 @@ public class Layouts implements Iterable<Layout> {
 		reload(true);
 	}
 
+	/**
+	 * Refreshes the list of layouts
+	 * 
+	 * @param findDefault
+	 *            whether to automatically load the default layout
+	 */
 	public void reload(boolean findDefault) {
 		layouts.clear();
 		Gson g = new Gson();
@@ -62,17 +79,26 @@ public class Layouts implements Iterable<Layout> {
 			UIUtils.showExceptionDialog(e);
 		}
 
-		if (defaultLayout == null) 
+		if (defaultLayout == null)
 			defaultLayout = new Layout("MISSING_LAYOUT", new WindowLocation[0]);
 
-		if (layout == null) 
+		if (layout == null)
 			layout = defaultLayout;
 	}
 
+	/**
+	 * Sets the current layout to the default
+	 */
 	public void setDefaultLayout() {
 		setLayout(defaultLayout);
 	}
 
+	/**
+	 * Saves the current state of the workspace as a layout
+	 * 
+	 * @param saveFile
+	 *            the file to save to
+	 */
 	public void saveLayout(File saveFile) {
 		Layout l = workspace.generateLayout(saveFile.getName());
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
@@ -84,6 +110,12 @@ public class Layouts implements Iterable<Layout> {
 		}
 	}
 
+	/**
+	 * Restores the state of the workspace to the passed layout
+	 * 
+	 * @param layout
+	 *            the layout to set the workspace as
+	 */
 	public void setLayout(Layout layout) {
 		this.layout = layout;
 
@@ -99,6 +131,11 @@ public class Layouts implements Iterable<Layout> {
 
 	}
 
+	/**
+	 * Sets the passed InternalWindow to the dimensions defined in the selected layout
+	 * 
+	 * @param w the InternalWindow to set the dimensions for
+	 */
 	public void setWindowDimentions(InternalWindow w) {
 		double width = workspace.getWidth(), height = workspace.getHeight();
 

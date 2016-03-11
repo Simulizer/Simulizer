@@ -8,6 +8,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import simulizer.settings.types.DoubleSetting;
 
+/**
+ * Component to edit a DoubleSetting
+ * 
+ * @author Michael
+ *
+ */
 public class DoubleControl extends GridPane {
 
 	public DoubleControl(DoubleSetting setting) {
@@ -26,7 +32,7 @@ public class DoubleControl extends GridPane {
 		value.getStyleClass().add("value");
 		value.valueProperty().addListener((e) -> setting.setValue(value.getValue()));
 		add(value, 1, 0);
-		
+
 		// Tooltip
 		Tooltip tooltip = new Tooltip(setting.getDescription());
 		Tooltip.install(title, tooltip);

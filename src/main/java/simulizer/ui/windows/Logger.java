@@ -25,6 +25,12 @@ import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.utils.UIUtils;
 
+/**
+ * Provides Input/Output for SIMP programs and output for javascript debug/error messages
+ * 
+ * @author Michael
+ *
+ */
 public class Logger extends InternalWindow implements Observer {
 	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
 	private static final long BUFFER_TIME = 20;
@@ -143,7 +149,7 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
-		for(TextArea output : outputs)
+		for (TextArea output : outputs)
 			output.setText("");
 	}
 
@@ -165,7 +171,7 @@ public class Logger extends InternalWindow implements Observer {
 			UIUtils.showExceptionDialog(e);
 		}
 
-		if(lastInputCancelled) {
+		if (lastInputCancelled) {
 			return null;
 		} else {
 			return lastInput;

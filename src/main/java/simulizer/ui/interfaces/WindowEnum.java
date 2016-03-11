@@ -2,6 +2,12 @@ package simulizer.ui.interfaces;
 
 import simulizer.utils.UIUtils;
 
+/**
+ * Contains all possible InternalWindows
+ * 
+ * @author Michael
+ *
+ */
 public enum WindowEnum {
 	// @formatter:off
 	EDITOR("Editor", "Editor"),
@@ -34,6 +40,9 @@ public enum WindowEnum {
 		this.showInWindowsMenu = showInWindowsMenu;
 	}
 
+	/**
+	 * @return A new instance of the InternalWindow
+	 */
 	public InternalWindow createNewWindow() {
 		try {
 			return (InternalWindow) Class.forName(pkg + className).newInstance();
@@ -43,12 +52,26 @@ public enum WindowEnum {
 		return null;
 	}
 
+	/**
+	 * Returns true if the current enum represents the passed InternalWindow
+	 * 
+	 * @param w
+	 *            the InternalWindow to compare to
+	 * @return whether the enum represents the InternalWindow
+	 */
 	public boolean equals(InternalWindow w) {
 		// Fully Qualified Name
 		String fQN = w.getClass().toString().split(" ")[1];
 		return (pkg + className).equals(fQN);
 	}
 
+	/**
+	 * Converts the InternalWindow to an enum
+	 * 
+	 * @param w
+	 *            The InternalWindow to convert
+	 * @return the enum
+	 */
 	public static WindowEnum toEnum(InternalWindow w) {
 		for (WindowEnum we : WindowEnum.values())
 			if (we.equals(w))
@@ -72,6 +95,9 @@ public enum WindowEnum {
 		}
 	}
 
+	/**
+	 * @return whether the current enum should be part of the Windows MainMenuBar
+	 */
 	public boolean showInWindowsMenu() {
 		return showInWindowsMenu;
 	}

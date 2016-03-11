@@ -28,6 +28,12 @@ import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
 import simulizer.utils.UIUtils;
 
+/**
+ * The main window of the application. It is very much the middle man, storing the simulation and the workspace
+ * 
+ * @author Michael
+ *
+ */
 public class WindowManager extends GridPane {
 	private Stage primaryStage;
 
@@ -100,6 +106,9 @@ public class WindowManager extends GridPane {
 		annotationManager = new AnnotationManager(this);
 	}
 
+	/**
+	 * Shows the window
+	 */
 	public void show() {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
@@ -129,22 +138,37 @@ public class WindowManager extends GridPane {
 		}
 	}
 
+	/**
+	 * @return the primary stage
+	 */
 	public Stage getPrimaryStage() {
 		return primaryStage;
 	}
 
+	/**
+	 * @return the themes
+	 */
 	public Themes getThemes() {
 		return themes;
 	}
 
+	/**
+	 * @return the layouts
+	 */
 	public Layouts getLayouts() {
 		return layouts;
 	}
 
+	/**
+	 * @return the grid bounds
+	 */
 	public GridBounds getGridBounds() {
 		return grid;
 	}
 
+	/**
+	 * Stops the simulation
+	 */
 	public void stopSimulation() {
 		if (cpuThread != null) {
 			cpu.stopRunning();
@@ -160,6 +184,9 @@ public class WindowManager extends GridPane {
 		}
 	}
 
+	/**
+	 * Assembles the SIMP program and executes it
+	 */
 	public void assembleAndRun() {
 		primaryStage.setTitle("Simulizer - Assembling Program");
 
@@ -196,6 +223,12 @@ public class WindowManager extends GridPane {
 		});
 	}
 
+	/**
+	 * Runs a SIMP program
+	 * 
+	 * @param p
+	 *            the program to run
+	 */
 	public void runProgram(Program p) {
 		if (p != null) {
 			stopSimulation();
@@ -222,26 +255,47 @@ public class WindowManager extends GridPane {
 		}
 	}
 
+	/**
+	 * @return the CPU
+	 */
 	public CPU getCPU() {
 		return cpu;
 	}
 
+	/**
+	 * @return the workspace
+	 */
 	public Workspace getWorkspace() {
 		return workspace;
 	}
 
+	/**
+	 * @return the settings
+	 */
 	public Settings getSettings() {
 		return settings;
 	}
 
+	/**
+	 * @return the IO
+	 */
 	public LoggerIO getIO() {
 		return io;
 	}
 
+	/**
+	 * @return the annotation manager
+	 */
 	public AnnotationManager getAnnotationManager() {
 		return annotationManager;
 	}
 
+	/**
+	 * Creates a new CPU. Used to switch between pipelined and non pipelined CPU
+	 * 
+	 * @param pipelined
+	 *            whether the new cpu should be pipelined
+	 */
 	public void newCPU(boolean pipelined) {
 		if (cpu != null) {
 			cpu.shutdown();
@@ -260,14 +314,29 @@ public class WindowManager extends GridPane {
 		}
 	}
 
+	/**
+	 * Adds a CPU changed listener
+	 * 
+	 * @param listener
+	 *            the listener to add
+	 */
 	public void addCPUChangedListener(CPUChangedListener listener) {
 		cpuChangedListeners.add(listener);
 	}
 
+	/**
+	 * Removes a CPU changed listener
+	 * 
+	 * @param listener
+	 *            the listener to remove
+	 */
 	public void removeCPUChangedListener(CPUChangedListener listener) {
 		cpuChangedListeners.remove(listener);
 	}
 
+	/**
+	 * Shutdown the application
+	 */
 	public void shutdown() {
 		cpu.shutdown();
 		workspace.closeAll();
