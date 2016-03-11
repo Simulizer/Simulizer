@@ -18,6 +18,7 @@ import simulizer.ui.windows.Editor;
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;
+	long startTime;
 
 	public UISimulationListener(WindowManager wm) {
 		this.wm = wm;
@@ -26,6 +27,8 @@ public class UISimulationListener extends SimulationListener {
 	@Override public void processSimulationMessage(SimulationMessage m) {
 		switch(m.detail) {
 			case SIMULATION_STARTED: {
+				startTime = System.currentTimeMillis();
+
 				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer - Simulation Running"));
@@ -51,6 +54,11 @@ public class UISimulationListener extends SimulationListener {
 				wm.getAnnotationManager().onEndProgram();
 
 				System.out.println("Total annotations fired: " + count);
+				long duration = System.currentTimeMillis() - startTime;
+				long ticks = wm.getCPU().getClock().getTicks();
+				System.out.println("Total time: " + (duration / 1000.0) + " seconds");
+				System.out.println("Total ticks: " + ticks);
+				System.out.println("Average time per tick: " + (duration / ticks) + " ms");
 
 				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
 			} break;

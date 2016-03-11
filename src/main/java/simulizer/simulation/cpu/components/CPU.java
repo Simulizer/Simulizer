@@ -359,7 +359,7 @@ public class CPU {
 		clock.start();
 
 		while (isRunning) {
-			long tickStart = System.currentTimeMillis();
+			long cycleStart = System.currentTimeMillis();
 
 			try {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
@@ -375,8 +375,8 @@ public class CPU {
 				sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
 			}
 
-			long tickDuration = System.currentTimeMillis() - tickStart;
-			System.out.println("tick duration: " + tickDuration);
+			//TODO: aggregate stats like this into a window
+			long cycleDuration = System.currentTimeMillis() - cycleStart;
 		}
 		stopRunning();
 	}
