@@ -183,9 +183,10 @@ public class Settings {
 
 	public void save() {
 		try (Writer writer = new FileWriter(json)) {
-			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().create();
+			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().disableHtmlEscaping().create();
 			JsonObject element = new JsonObject();
-			saveSetting(element, settings);
+			for (SettingValue<?> s : settings.getValue())
+				saveSetting(element, s);
 			gson.toJson(element, writer);
 		} catch (IOException e) {
 			e.printStackTrace();
