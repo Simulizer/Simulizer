@@ -2,7 +2,7 @@
 
 REPORT_HOME=./
 TARGET="main"
-DEST="A4Report"
+DEST="A4TestReport"
 
 cd ${REPORT_HOME}
 

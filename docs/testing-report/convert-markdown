@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Generates a tex source in the source files from the markdown files
+
+REPORT_HOME=./
+
+DIRS=( "segments" "chapters")
+
+for d in ${DIRS[@]}
+do
+  cd "${REPORT_HOME}/${d}"
+  for f in $( find . -name "*.md" ) 
+  do
+    pandoc -f markdown -t latex ${f} > "$(basename ${f} .md).tex"
+  done
+  cd -
+done
+
