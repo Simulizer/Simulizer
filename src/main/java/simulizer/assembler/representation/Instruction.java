@@ -50,6 +50,15 @@ public enum Instruction {
     xor    (OperandFormat.destSrcSrc,  "XOR"),
     xori   (OperandFormat.destSrcImm,  "XOR immediate"),
 
+// Instructions using lo and hi
+    //mult   (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo"),
+    //multu  (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo (unsigned)"),
+    //mfhi   (OperandFormat.destSrc,     "Move contents of hi to a register"),
+    //mflo   (OperandFormat.destSrc,     "Move contents of lo to a register"),
+    //mthi   (OperandFormat.destSrc,     "Move contents of register into hi"),
+    //mtlo   (OperandFormat.destSrc,     "Move contents of register into lo"),
+    
+    
 // Shift and Rotations
     rol    (OperandFormat.destSrcSrc,  "rotate left"),
     ror    (OperandFormat.destSrcSrc,  "rotate right"),
@@ -76,7 +85,7 @@ public enum Instruction {
     
 // Constant-Manipulating Instructions
     li     (OperandFormat.destImm,     "load immediate"),
-
+    lui    (OperandFormat.destImm,     "load upper immediate"),
 
 // Comparison Instructions: ignored
 
