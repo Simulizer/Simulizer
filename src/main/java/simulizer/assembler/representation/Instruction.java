@@ -18,7 +18,7 @@ public enum Instruction {
     abs    (OperandFormat.destSrc,     "dest <- abs(src)"),
 
     and    (OperandFormat.destSrcSrc,  "logical AND"),
-    //andi   (OperandFormat.destSrcImm,  "logical and immediate (zero extended)"),
+    andi   (OperandFormat.destSrcImm,  "logical and immediate (zero extended)"),
 
     add    (OperandFormat.destSrcSrc,  "addition (with overflow)"),
     addu   (OperandFormat.destSrcSrc,  "addition (without overflow)"),
@@ -37,6 +37,9 @@ public enum Instruction {
     div    (OperandFormat.destSrcSrc,  "division (with overflow)"),
     divu   (OperandFormat.destSrcSrc,  "division (without overflow)"),
 
+    rem    (OperandFormat.destSrcSrc,  "remainder of division"),
+    remu   (OperandFormat.destSrcSrc,  "remainder of division (unsigned)"),
+    
     neg    (OperandFormat.destSrc,     "dest <- -(src) (with overflow)"),
     negu   (OperandFormat.destSrc,     "dest <- -(src) (without overflow)"),
 
@@ -46,6 +49,16 @@ public enum Instruction {
     ori    (OperandFormat.destSrcImm,  "logical OR immediate"),
     xor    (OperandFormat.destSrcSrc,  "XOR"),
     xori   (OperandFormat.destSrcImm,  "XOR immediate"),
+
+// Shift and Rotations
+    rol    (OperandFormat.destSrcSrc,  "rotate left"),
+    ror    (OperandFormat.destSrcSrc,  "rotate right"),
+    sll    (OperandFormat.destSrcImm,  "shift left logical"),
+    sllv   (OperandFormat.destSrcSrc,  "shift left logical variable"),
+    sra    (OperandFormat.destSrcImm,  "shift right arithmetic"),
+    srav   (OperandFormat.destSrcSrc,  "shift right arithmetic variable"),
+    srl    (OperandFormat.destSrcImm,  "shift right logical"),
+    srlv   (OperandFormat.destSrcSrc,  "shift right logical variable"),
 
 // Set Instructions    
     seq    (OperandFormat.destSrcSrc, "set to 1 if equal"),

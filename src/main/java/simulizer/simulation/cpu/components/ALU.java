@@ -62,7 +62,7 @@ public class ALU {
         switch(instruction) {//checking each possible instruction
             case abs:
                 return encodeS(Math.abs(decodeS(firstValue)));
-            case and:
+            case and: case andi:
                 byte[] resultAnd = new byte[4];
                 for(int i = 0; i < resultAnd.length; i++) {
                     resultAnd[i] = (byte) (firstValue[i] & secondValue[i]);
@@ -94,10 +94,37 @@ public class ALU {
                 return encodeS(decodeS(firstValue) / decodeS(secondValue));
             case divu:
                 return encodeU(decodeU(firstValue) / decodeU(secondValue));
+            case rem:
+            	return encodeS(decodeS(firstValue) % decodeS(secondValue));
+            case remu:
+            	return encodeU(decodeU(firstValue) % decodeU(secondValue));
             case neg:
                 return encodeS(decodeS(firstValue)*-1);
             case negu:
-                return encodeU(decodeS(firstValue)*-1);//is this correct?
+                return encodeU(decodeS(firstValue)*-1);
+            case rol:
+            	long shiftNoRol = decodeU(secondValue) % 32;
+            	long toShiftRol = decodeU(firstValue);
+            	return encodeU((toShiftRol << shiftNoRol) | (toShiftRol >> (32-shiftNoRol)));
+            case ror:
+            	long shiftNoRor = decodeU(secondValue) % 32;
+            	long toShiftRor = decodeU(firstValue);
+            	return encodeU((toShiftRor << shiftNoRor) | (toShiftRor >> (32-shiftNoRor)));
+            case sll:
+            	return encodeU(decodeU(firstValue) << decodeU(secondValue));
+            case sllv:
+            	long shiftNoL = decodeU(secondValue) % 32;
+            	return encodeU(decodeU(firstValue) << shiftNoL);
+            case sra:
+            	return encodeS(decodeS(firstValue) >> decodeU(secondValue));//shift bits should always be positive really, otherwise use other instruction
+            case srav:
+            	long shiftNoRa = decodeU(secondValue) % 32;
+            	return encodeS(decodeS(firstValue) >> shiftNoRa);
+            case srl:
+            	return encodeU(decodeU(firstValue) >> decodeU(secondValue));
+            case srlv:
+            	long shiftNoR = decodeU(secondValue) % 32;
+            	return encodeU(decodeU(firstValue) >> shiftNoR);
             case nor:
                 byte[] resultNor = new byte[4];
                 for(int i = 0; i < resultNor.length; i++) {
@@ -110,30 +137,18 @@ public class ALU {
                     resultNot[i] = (byte) ~(firstValue[i]);
                 }
                 return new Word(resultNot);
-            case or:
+            case or: case ori:
                 byte[] resultOr = new byte[4];
                 for(int i = 0; i < resultOr.length; i++) {
                     resultOr[i] = (byte) (firstValue[i] | secondValue[i]);
                 }
                 return new Word(resultOr);
-            case ori:
-                byte[] resultOri = new byte[4];
-                for(int i = 0; i < resultOri.length; i++) {
-                    resultOri[i] = (byte) (firstValue[i] | secondValue[i]);
-                }
-                return new Word(resultOri);
-            case xor:
+            case xor: case xori:
                 byte[] resultXor = new byte[4];
                 for(int i = 0; i < resultXor.length; i++) {
                     resultXor[i] = (byte) (firstValue[i] ^ secondValue[i]);
                 }
                 return new Word(resultXor);
-            case xori:
-                byte[] resultXori = new byte[4];
-                for(int i = 0; i < resultXori.length; i++) {
-                    resultXori[i] = (byte) (firstValue[i] ^ secondValue[i]);
-                }
-                return new Word(resultXori);
             case b:
             	branchFlag = true;
                 return new Word(branchTrue);
