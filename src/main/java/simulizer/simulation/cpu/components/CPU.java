@@ -135,6 +135,7 @@ public class CPU {
 		// harmless to call multiple times, only want to send one message
 		if (isRunning) {
 			isRunning = false;
+			io.cancelRead();
 			clock.stop();
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
 		}

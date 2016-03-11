@@ -35,10 +35,11 @@ public class Logger extends InternalWindow implements Observer {
 
 	private CountDownLatch cdl = new CountDownLatch(1);
 	private String lastInput = "";
+	private boolean lastInputCancelled = false;
 
 	private TabPane tabPane;
 	private boolean[] ioChanged;
-	private StringBuilder[] logs;
+	private final StringBuilder[] logs;
 	private TextArea[] outputs;
 
 	private boolean emphasise = true;
@@ -103,7 +104,7 @@ public class Logger extends InternalWindow implements Observer {
 		lastInput = input.getText();
 		if (!lastInput.equals("")) {
 			input.setText("");
-			logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput + "\n");
+			logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput).append("\n");
 			callUpdate = true;
 			cdl.countDown();
 		}
@@ -142,26 +143,38 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
-		for (int i = 0; i < outputs.length; i++)
-			outputs[i].setText("");
+		for(TextArea output : outputs)
+			output.setText("");
 	}
 
+	/**
+	 * @return the user entered string (or null if cancelled)
+	 */
 	public String nextMessage() {
 		try {
 			if (emphasise)
 				Platform.runLater(this::emphasise);
 			submit.setDisable(false);
-			cdl = new CountDownLatch(1);
+			synchronized (this) { // cannot create new latch and count down at the same time
+				cdl = new CountDownLatch(1);
+				lastInputCancelled = false;
+			}
 			cdl.await();
 			submit.setDisable(true);
 		} catch (InterruptedException e) {
 			UIUtils.showExceptionDialog(e);
 		}
-		return lastInput;
+
+		if(lastInputCancelled) {
+			return null;
+		} else {
+			return lastInput;
+		}
 	}
 
-	public void cancelNextMessage() {
+	public synchronized void cancelNextMessage() {
 		cdl.countDown();
+		lastInputCancelled = true;
 	}
 
 	@Override
