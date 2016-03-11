@@ -45,8 +45,8 @@ public class Clock {
 			setTickPeriod((long) (1000000 / freq));
 		}
 	}
-	public long getTickFrequency() {
-		return 1000000 / tickPeriod;
+	public double getTickFrequency() {
+		return 1000000.0 / tickPeriod;
 	}
 
 	private synchronized void setTickPeriod(long tickPeriod) {

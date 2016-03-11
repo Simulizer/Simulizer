@@ -35,7 +35,12 @@ public class CPUListener extends SimulationListener {
      * @return the duration in ms
      */
     private int getCycleFraction(int oneOverFraction) {
-        return (int) (1000 / (simCpu.getCycleFreq()*oneOverFraction));
+		double denominator = simCpu.getCycleFreq() * oneOverFraction;
+		if(denominator < 0.00001) {
+			return 0; // TODO: put a better value here
+		} else {
+			return (int) (1000 / denominator);
+		}
     }
 
     /**

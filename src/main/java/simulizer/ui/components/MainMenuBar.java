@@ -190,11 +190,15 @@ public class MainMenuBar extends MenuBar {
 				clockSpeed.setTitle("Clock Speed");
 				clockSpeed.setContentText("Enter Clock Speed (cycles per second (Hz)): ");
 				clockSpeed.showAndWait().ifPresent(input -> {
-					double speed = Double.parseDouble(input);
+					double speed = -1;
+					try {
+						speed = Double.parseDouble(input);
+					} catch(NumberFormatException ignored) { /* speed == -1 */ }
+
 					if(speed >= 0) {
 						cpu.setCycleFreq(speed);
 					} else {
-						UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value");
+						UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
 					}
 				});
 			}

@@ -63,8 +63,9 @@ public class CPUPipeline extends CPU {
 		// therefore the frequency of ticks is 3 times that of non-pipelined
 		clock.setTickFrequency(freq * 3);
 	}
+
 	@Override
-	public long getCycleFreq() {
+	public double getCycleFreq() {
 		// one cycle every 3 ticks
 		return clock.getTickFrequency() / 3;
 	}

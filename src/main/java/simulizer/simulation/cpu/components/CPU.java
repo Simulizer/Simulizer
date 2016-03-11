@@ -117,7 +117,8 @@ public class CPU {
 		// therefore the tick frequency == cycle frequency
 		clock.setTickFrequency(freq);
 	}
-	public long getCycleFreq() {
+
+	public double getCycleFreq() {
 		return clock.getTickFrequency();
 	}
 
