@@ -2,8 +2,12 @@ package simulizer.settings;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,15 +21,17 @@ import simulizer.utils.UIUtils;
 
 public class Settings {
 	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
+	private File json;
 
 	public static Settings loadSettings(File json) throws IOException {
 		JsonParser parser = new JsonParser();
 		JsonElement jsonElement = parser.parse(new FileReader(json));
 		JsonObject jsonObject = jsonElement.getAsJsonObject();
-		return new Settings(jsonObject);
+		return new Settings(json, jsonObject);
 	}
 
-	private Settings(JsonObject jsonObject) {
+	private Settings(File json, JsonObject jsonObject) {
+		this.json = json;
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new ObjectSetting("window", "Window")
@@ -145,8 +151,45 @@ public class Settings {
 		return settings;
 	}
 
+	private void saveSetting(JsonObject parent, SettingValue<?> setting) {
+		try {
+			switch (setting.getSettingType()) {
+				case BOOLEAN:
+					parent.addProperty(setting.getJsonName(), (Boolean) setting.getValue());
+					break;
+				case DOUBLE:
+					parent.addProperty(setting.getJsonName(), (Double) setting.getValue());
+					break;
+				case INTEGER:
+					parent.addProperty(setting.getJsonName(), (Integer) setting.getValue());
+					break;
+				case OBJECT:
+					JsonObject element = new JsonObject();
+					parent.add(setting.getJsonName(), element);
+					for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
+						saveSetting(element, s);
+					break;
+				case STRING:
+					parent.addProperty(setting.getJsonName(), (String) setting.getValue());
+					break;
+				default:
+					UIUtils.showErrorDialog("Unknown Setting Type", "" + setting.getSettingType());
+			}
+		} catch (Exception e) {
+			// TODO: Find exact exception
+			// Setting was of invalid type, ignoring
+		}
+	}
+
 	public void save() {
-		// TODO: Save settings to json file
+		try (Writer writer = new FileWriter(json)) {
+			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().create();
+			JsonObject element = new JsonObject();
+			saveSetting(element, settings);
+			gson.toJson(element, writer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
