@@ -103,7 +103,14 @@ public class Executor {
             case LSTYPE:
             	cpu.sendMessage(new InstructionTypeMessage(AddressMode.LSTYPE));
                 if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destImm)) {//li
-                    cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+                	if(instruction.getInstruction().equals(Instruction.li)) {
+                		  cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+                	} else if(instruction.getInstruction().equals(Instruction.lui)) {
+                		byte[] immediate = instruction.asLSType().getImmediate().get().getWord();
+                		immediate = new byte[]{immediate[2],immediate[3],0x00,0x00};//lower half of immediate as upper half
+                		cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = new Word(immediate);
+                	}
+                  
                     cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
 
