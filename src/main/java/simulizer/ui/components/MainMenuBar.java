@@ -30,44 +30,71 @@ import simulizer.utils.SpimRunner;
 import simulizer.utils.UIUtils;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
+/**
+ * This class holds all the Menu Items that are stored in the Bar at the top of the window.
+ * 
+ * @author Michael
+ */
 public class MainMenuBar extends MenuBar {
 
 	private WindowManager wm;
 
+	/**
+	 * Creates a new MainMenuBar
+	 * 
+	 * @param wm
+	 *            The WindowManager instance to attach to
+	 */
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
 		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
+	/**
+	 * @return the file menu
+	 */
 	private Menu fileMenu() {
-		// | File
 		Menu fileMenu = new Menu("File");
+		fileMenu.setOnShowing(e -> fileMenuHelper(fileMenu, true));
+		fileMenu.setOnHidden(e -> fileMenuHelper(fileMenu, false));
+		fileMenuHelper(fileMenu, false);
+		return fileMenu;
+	}
+
+	private void fileMenuHelper(Menu fileMenu, boolean allowDisabling) {
+		// | File
+		fileMenu.getItems().clear();
 
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
-		newItem.setDisable(wm.getCPU().isRunning());
-		newItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback(Editor::newFile));
+		newItem.setDisable(allowDisabling && wm.getCPU().isRunning());
+		newItem.setOnAction(e -> {
+			if (!wm.getCPU().isRunning())
+				wm.getWorkspace().openEditorWithCallback(Editor::newFile);
+		});
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
-		loadItem.setDisable(wm.getCPU().isRunning());
+		loadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		loadItem.setOnAction(e -> {
-			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
-			if (f != null) {
-				wm.getWorkspace().openEditorWithCallback((ed) -> ed.loadFile(f));
+			if (!wm.getCPU().isRunning()) {
+				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+				if (f != null)
+					wm.getWorkspace().openEditorWithCallback((ed) -> ed.loadFile(f));
 			}
 		});
 		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
-		saveItem.setDisable(wm.getCPU().isRunning());
+		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
-			if (ed.getCurrentFile() == null) {
-				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
-			} else {
-				ed.saveFile();
+			if (!wm.getCPU().isRunning()) {
+				if (ed.getCurrentFile() == null)
+					UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
+				else
+					ed.saveFile();
 			}
 		}));
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
@@ -75,17 +102,20 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setDisable(wm.getCPU().isRunning());
-		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) ->
-				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
+		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
 
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
-		return fileMenu;
 	}
 
+	/**
+	 * Generates the layouts menu
+	 * 
+	 * @return the layouts menu
+	 */
 	private Menu layoutsMenu() {
 		// | |-- Layouts
 		Menu layoutMenu = new Menu("Layouts");
@@ -93,6 +123,12 @@ public class MainMenuBar extends MenuBar {
 		return layoutMenu;
 	}
 
+	/**
+	 * A separate helper function to generate the layouts menu. Used to dynamically refresh the loaded layouts
+	 * 
+	 * @param menu
+	 *            The layout menu
+	 */
 	private void layoutMenu(Menu menu) {
 		menu.getItems().clear();
 
@@ -126,6 +162,13 @@ public class MainMenuBar extends MenuBar {
 		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
 	}
 
+	/**
+	 * Dynamically generates the Theme menu.
+	 * 
+	 * @param menu
+	 *            The menu item to attach to
+	 * @return The completed menu
+	 */
 	private Menu themeMenu(Menu menu) {
 		menu.getItems().clear();
 
@@ -146,6 +189,11 @@ public class MainMenuBar extends MenuBar {
 		return menu;
 	}
 
+	/**
+	 * The simulation menu
+	 * 
+	 * @return the simulation menu
+	 */
 	private Menu simulationMenu() {
 		Menu runMenu = new Menu("Simulation");
 		runMenu.setOnShowing(e -> simControlsMenu(runMenu, true));
@@ -154,6 +202,14 @@ public class MainMenuBar extends MenuBar {
 		return runMenu;
 	}
 
+	/**
+	 * Dynamically generates the simulation menu items
+	 * 
+	 * @param runMenu
+	 *            The simulation menu to add the items to
+	 * @param allowDisabling
+	 *            Force all the options to be enabled
+	 */
 	private void simControlsMenu(Menu runMenu, boolean allowDisabling) {
 		runMenu.getItems().clear();
 
@@ -223,7 +279,8 @@ public class MainMenuBar extends MenuBar {
 				double speed = -1;
 				try {
 					speed = Double.parseDouble(input);
-				} catch(NumberFormatException ignored) { /* speed == -1 */ }
+				} catch (NumberFormatException ignored) {
+					/* speed == -1 */ }
 
 				if (speed >= 0) {
 					cpu.setCycleFreq(speed);
@@ -236,6 +293,11 @@ public class MainMenuBar extends MenuBar {
 		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, setClockSpeed);
 	}
 
+	/**
+	 * The window menu
+	 * 
+	 * @return the window menu
+	 */
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Windows");
 		for (WindowEnum wenum : WindowEnum.values()) {
@@ -253,6 +315,11 @@ public class MainMenuBar extends MenuBar {
 		return windowsMenu;
 	}
 
+	/**
+	 * The help menu
+	 * 
+	 * @return the help menu
+	 */
 	private Menu helpMenu() {
 		Menu helpMenu = new Menu("Help");
 
@@ -279,6 +346,11 @@ public class MainMenuBar extends MenuBar {
 		return helpMenu;
 	}
 
+	/**
+	 * The debug menu
+	 * 
+	 * @return the debug menu
+	 */
 	private Menu debugMenu() {
 		Menu debugMenu = new Menu("Debug");
 
@@ -313,7 +385,7 @@ public class MainMenuBar extends MenuBar {
 					wm.getAnnotationManager().newExecutor();
 				}
 				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			}, "JS-REPL-Thread");
+			} , "JS-REPL-Thread");
 			replThread.setDaemon(true);
 			replThread.start();
 		});
