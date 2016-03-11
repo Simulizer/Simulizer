@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mystyle}
+%\usepackage[backend=biber, 
+%  style=authoryear, 
+%  sorting=nyt, 
+%  urldate=long,
+%  maxcitenames=2]{biblatex}
+%\addbibresource{main.bib}
+
+\title{\huge\textbf{Simulizer Test Report}}
+\author{
+  Charlie Street
+  \and
+  Kelsey McKenna
+  \and
+  Matthew Broadway
+  \and
+  Michael Oultram
+  \and
+  Theo Styles
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% Section files
+\input{chapters/1-introduction.tex}
+\begin{landscape}
+\input{chapters/2-unit-testing.tex}
+\end{landscape}
+
+% These don't work on my machine at the moment,
+% but they should work fine on a properly configured
+% system (and through sharelatex etc.)
+% \nocite{*} % To include uncited references
+% \printbibliography
+
+\end{document}

@@ -154,7 +154,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
 		assembleAndRun.setDisable(wm.getCPU().isRunning());
 		assembleAndRun.setOnAction(e -> {
-			new AssemblingDialog(wm.getCPU());
+			UIUtils.showAssemblingDialog(wm.getCPU());
 			wm.assembleAndRun();
 		});
 

@@ -3,8 +3,6 @@ package simulizer.ui;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -25,11 +23,9 @@ import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
-import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
 public class WindowManager extends GridPane {
@@ -81,9 +77,9 @@ public class WindowManager extends GridPane {
 
 		// @formatter:off Sets the grid
 		if((boolean) settings.get("workspace.grid.enabled"))
-			grid = new GridBounds((int) settings.get("workspace.grid.horizontal"), 
-								  (int) settings.get("workspace.grid.vertical"), 
-								  (double) settings.get("workspace.grid.sensitivity"), 
+			grid = new GridBounds((int) settings.get("workspace.grid.horizontal"),
+								  (int) settings.get("workspace.grid.vertical"),
+								  (double) settings.get("workspace.grid.sensitivity"),
 								  (int) settings.get("workspace.grid.delay"));
 
 		// @formatter:on Set the layout
@@ -182,6 +178,7 @@ public class WindowManager extends GridPane {
 						if (p == null) {
 							int size = log.getProblems().size();
 							UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+							UIUtils.closeAssemblingDialog();
 						}
 					});
 
