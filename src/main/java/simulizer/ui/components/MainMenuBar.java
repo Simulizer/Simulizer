@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.function.Consumer;
 
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -161,7 +160,7 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem resume = new MenuItem("Resume Simulation");
 		resume.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
-		resume.setOnAction(e -> wm.getCPU().startClock());
+		resume.setOnAction(e -> wm.getCPU().resume());
 
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
@@ -181,7 +180,7 @@ public class MainMenuBar extends MenuBar {
 		CheckMenuItem simplePipeline = new CheckMenuItem("Use Pipelined CPU");
 		simplePipeline.setDisable(wm.getCPU().isRunning());
 		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
-		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
+		simplePipeline.setOnAction(e -> wm.newCPU(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -189,8 +188,15 @@ public class MainMenuBar extends MenuBar {
 			if (cpu != null) {
 				TextInputDialog clockSpeed = new TextInputDialog();
 				clockSpeed.setTitle("Clock Speed");
-				clockSpeed.setContentText("Enter Clock Speed (in Hz): ");
-				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockHertz(Double.parseDouble(speed)));
+				clockSpeed.setContentText("Enter Clock Speed (cycles per second (Hz)): ");
+				clockSpeed.showAndWait().ifPresent(input -> {
+					double speed = Double.parseDouble(input);
+					if(speed >= 0) {
+						cpu.setCycleFreq(speed);
+					} else {
+						UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value");
+					}
+				});
 			}
 		});
 

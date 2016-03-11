@@ -61,7 +61,7 @@ public class CPU {
 	protected Statement instructionRegister;
 
 	private ALU Alu;
-	protected Clock clock;// clock cycle for IE cycle
+	protected final Clock clock;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -89,59 +89,38 @@ public class CPU {
 	public CPU(IO io) {
 		this.listenControl = new ListenerController();
 		this.clearRegisters();
-		this.clock = new Clock(100);
+		this.clock = new Clock();
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
 		this.executor = new Executor(this);
 	}
 
-	/**
-	 * this method will set the clock controlling
-	 * the execution cycle to run
-	 */
-	public void startClock() {
-		clock.reset();
-		clock.startRunning();
-		if (!clock.isAlive()) {
-			clock.start();// start the clock thread
-		}
+	public void shutdown() {
+		stopRunning();
+		clock.shutdown();
+	}
+
+	public Clock getClock() {
+		return clock;
 	}
 
 	/**
-	 * this method will set the clock controlling
-	 * the execution cycle to run
-	 */
-	public void pauseClock() {
-		if (clock != null) {
-			clock.stopRunning();
-			io.cancelRead();
-		}
-	}
-
-	public void setClockHertz(double hertz) {
-		clock.tickMillis = 3 * (int) (1000 / hertz);
-		System.out.println(clock.tickMillis);
-	}
-
-	/**
-	 * sets the speed in ms of the clock
-	 * will be 3 times what it says to make it representative wrt. the pipeline
-	 * 
-	 * @param tickMillis
-	 *            the time for one clock cycle
-	 */
-	public void setClockSpeed(int tickMillis) {
-		clock.tickMillis = 3 * tickMillis;
-	}
-
-	/**
-	 * gets the speed in ms of the clock
+	 * set the number of cycles (fetch+decode+execute) to be run per second.
+     * This method provides the same observable results regardless of whether
+     * the CPU is pipelined or not
 	 *
+	 * @param freq the number of cycles per second
 	 */
-	public int getClockSpeed() {
-		return clock.tickMillis;
+	public void setCycleFreq(double freq) {
+		// 1 cycle = 1 wait on the clock for non-pipelined
+		// therefore the tick frequency == cycle frequency
+		clock.setTickFrequency(freq);
 	}
+	public long getCycleFreq() {
+		return clock.getTickFrequency();
+	}
+
 
 	public boolean isRunning() {
 		return isRunning;
@@ -153,20 +132,22 @@ public class CPU {
 	 */
 	public void stopRunning() {
 		// harmless to call multiple times, only want to send one message
-		boolean wasRunning = isRunning;
-
-		isRunning = false;
-		if (clock != null) {
-			pauseClock();
-			try {
-				clock.join(); // stop the clock thread
-			} catch (InterruptedException e) {
-				UIUtils.showExceptionDialog(e);
-			}
-		}
-
-		if (wasRunning) {
+		if (isRunning) {
+			isRunning = false;
+			clock.stop();
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+		}
+	}
+
+	public void pause() {
+		// isRunning remains true
+		clock.stop();
+	}
+	public void resume() {
+		if(isRunning) {
+			clock.start();
+		} else {
+			runProgram();
 		}
 	}
 
@@ -211,7 +192,6 @@ public class CPU {
 	 */
 	public void loadProgram(Program program) {
 		this.program = program;
-		this.clock = new Clock(100);// re-initialise clock
 		this.instructionRegister = null;// nothing to put in yet so null
 
 		this.clearRegisters();// reset the registers
@@ -364,29 +344,39 @@ public class CPU {
 	 *
 	 */
 	public void runProgram() {
-		this.startClock();
-		this.isRunning = true;
+		isRunning = true;
+		clock.resetTicks();
+
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
 		// used for setting up the annotation environment eg loading visualisations
+		// if clock speed set, then this applies on the first tick since the clock is
+		// started below
 		if (program.initAnnotation != null) {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
-		while (isRunning) { // need something to stop this
+		clock.start();
+
+		while (isRunning) {
+			long tickStart = System.currentTimeMillis();
+
 			try {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
 			} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
 				sendMessage(new ProblemMessage(e.getMessage()));
-				this.isRunning = false;
+				isRunning = false;
 			}
 			try {
-				if (isRunning) {
+				if (isRunning && clock.isRunning()) {
 					clock.waitForNextTick();
 				}
-			} catch (InterruptedException | BrokenBarrierException e) {
+			} catch (InterruptedException e) {
 				sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
 			}
+
+			long tickDuration = System.currentTimeMillis() - tickStart;
+			System.out.println("tick duration: " + tickDuration);
 		}
 		stopRunning();
 	}

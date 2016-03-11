@@ -1,7 +1,7 @@
 {
   "window": {
-  	"width": 1366,
-  	"height": 768
+    "width": 1366,
+    "height": 768
   },
   "workspace": {
     "theme": "default",
@@ -20,7 +20,7 @@
     "lock-to-window": false
   },
   "simulation": {
-    "default-clock-speed": 250,
+    "default-CPU-frequency": 4,
     "zero-memory": true,
     "pipelined": false
   },
@@ -42,6 +42,6 @@
     "height": 235
   },
   "logger": {
-  	"emphasise": true
+    "emphasise": true
   }
 }

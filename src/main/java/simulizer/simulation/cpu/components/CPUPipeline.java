@@ -56,12 +56,17 @@ public class CPUPipeline extends CPU {
 		this.nopCount = 2;//initially 2
 		
 	}
-	
-	/**overwrites the normal cpu clock speed to make it representative of pipeline speed
-	 *
-	 */
-	public void setClockSpeed(int millis) {
-		clock.tickMillis = millis;
+
+	@Override
+	public void setCycleFreq(double freq) {
+		// for pipelined 1 cycle = 3 waits on the clock
+		// therefore the frequency of ticks is 3 times that of non-pipelined
+		clock.setTickFrequency(freq * 3);
+	}
+	@Override
+	public long getCycleFreq() {
+		// one cycle every 3 ticks
+		return clock.getTickFrequency() / 3;
 	}
 
 	/**method will go through a statement and extract the registers

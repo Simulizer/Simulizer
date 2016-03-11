@@ -1,7 +1,7 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * thread for the clock keeping time of the IE cycle
@@ -9,83 +9,104 @@ import java.util.concurrent.CyclicBarrier;
  * @author Charlie Street
  *
  */
-public class Clock extends Thread {
-
-	public int tickMillis;// time for a single clock tick
-
-	private boolean isRunning;// determine if still running
-	private long ticks;
-	CyclicBarrier barrier;
-	int waitForCount; // the number of threads waiting on the barrier
+public class Clock {
 
 	/**
-	 * constructor sets up field
+	 * the duration of a single clock tick in microseconds (10^-6 seconds)
 	 */
-	public Clock(int tickMillis) {
-		super("CPU-Clock");
-		setDaemon(true);
-		this.tickMillis = tickMillis;
-		this.isRunning = false;// not running on initial creation
-		ticks = 0;
-		waitForCount = 2;
-		barrier = new CyclicBarrier(waitForCount);
-	}
+	private long tickPeriod;
 
-	public void reset() {
-		isRunning = false;
-		ticks = 0;
-		barrier.reset();
-	}
-
-	private synchronized void incrementTicks() {
-		ticks++;
-	}
-
-	public synchronized long getTicks() {
-		return ticks;
-	}
-
-	public void waitForNextTick() throws BrokenBarrierException, InterruptedException {
-		barrier.await();
-	}
-
-	public void startRunning() {
-		isRunning = true;
-	}
-
-	public void stopRunning() {
-		isRunning = false;
-		barrier.reset();
-	}
+	private final LongAdder ticks;
+	private ScheduledExecutorService executor;
+	private ScheduledFuture<?> ticker;
 
 	/**
-	 * run method will run the loop of the clock
-	 * 
+     * Untested, but below a certain threshold the time taken to handle the
+     * clock may become significant and decrease performance (setting to 1ns
+     * would definitely be sub-optimal for example)
 	 */
-	public void run() {
-		long lastTickStart;
-		long overshoot = 0;
-		try {
-			while (isRunning) {
-				// 1 for cpu, 1 for the clock.
-				// all must be waiting before the clock advances
-				lastTickStart = System.currentTimeMillis();
-				Thread.sleep(Math.max(tickMillis - overshoot, 0)); // TODO: Use nanoseconds for greater accuracy
+	private static final long MIN_PERIOD = 50;
 
-				if (!isRunning) {
-					break;
-				}
 
-				// wait for all others to finish
-				waitForNextTick();
 
-				overshoot = System.currentTimeMillis() - lastTickStart - tickMillis;
+	public Clock() {
+		this.tickPeriod = MIN_PERIOD;
+		ticks = new LongAdder();
+		executor = Executors.newSingleThreadScheduledExecutor();
+		ticker = null;
+	}
 
-				incrementTicks();
-			}
-		} catch (InterruptedException | BrokenBarrierException ignored) {
 
+	public void setTickFrequency(double freq) {
+		if(freq < 0.00001) {
+			// practically zero => max speed
+			setTickPeriod(0);
+		} else {
+			setTickPeriod((long) (1000000 / freq));
+		}
+	}
+	public long getTickFrequency() {
+		return 1000000 / tickPeriod;
+	}
+
+	private synchronized void setTickPeriod(long tickPeriod) {
+		this.tickPeriod = Math.max(tickPeriod, MIN_PERIOD);
+
+		if(isRunning()) {
+			start(); // stops current ticker and makes a new one
 		}
 	}
 
+
+	public long getTicks() {
+		return ticks.longValue();
+	}
+
+	public void resetTicks() {
+		ticks.reset();
+	}
+
+	public void waitForNextTick() throws InterruptedException {
+		synchronized (ticks) {
+			ticks.wait();
+		}
+	}
+
+	private void incrementTicks() {
+		synchronized (ticks) {
+			ticks.increment();
+			ticks.notifyAll();
+		}
+	}
+
+	public synchronized void start() {
+		if (executor.isShutdown()) {
+			throw new IllegalStateException();
+		}
+		stop();
+
+		ticker = executor.scheduleAtFixedRate(this::incrementTicks, 0, tickPeriod, TimeUnit.MICROSECONDS);
+	}
+
+	public synchronized void stop() {
+		if (isRunning()) {
+			ticker.cancel(true); // may interrupt if running
+			ticker = null;
+			incrementTicks(); // let any threads waiting on the clock fall through
+		}
+	}
+
+	public synchronized void shutdown() {
+		stop();
+		executor.shutdown();
+		try {
+			executor.awaitTermination(3, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			executor.shutdownNow();
+		}
+	}
+
+	public synchronized boolean isRunning() {
+		return !executor.isShutdown() && ticker != null && !ticker.isCancelled();
+	}
 }

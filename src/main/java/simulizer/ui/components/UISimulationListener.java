@@ -28,6 +28,8 @@ public class UISimulationListener extends SimulationListener {
 			case SIMULATION_STARTED: {
 				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer - Simulation Running"));
+
 				wm.getWorkspace().openEditorWithCallback((editor) -> {
 					System.out.println("Simulation Started - running '" +
 							editor.getCurrentFile().getName() + "'" +
@@ -43,6 +45,7 @@ public class UISimulationListener extends SimulationListener {
 			} break;
 			case SIMULATION_STOPPED: {
 				System.out.println("Simulation Stopped");
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer"));
 
 				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
 				wm.getAnnotationManager().onEndProgram();

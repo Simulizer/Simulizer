@@ -41,7 +41,7 @@ public class WindowManager extends GridPane {
 	private Layouts layouts;
 	private Settings settings;
 
-	private Set<CPUChangedListener> cpuChangedListeners = new HashSet<CPUChangedListener>();
+	private Set<CPUChangedListener> cpuChangedListeners = new HashSet<>();
 	private CPU cpu = null;
 	private LoggerIO io;
 	private Thread cpuThread = null;
@@ -72,13 +72,7 @@ public class WindowManager extends GridPane {
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
 
-		if ((boolean) settings.get("simulation.pipelined")) {
-			cpu = new CPUPipeline(io);
-			cpu.registerListener(simListener);
-		} else {
-			cpu = new CPU(io);
-			cpu.registerListener(simListener);
-		}
+		newCPU((boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));
@@ -250,14 +244,18 @@ public class WindowManager extends GridPane {
 		return annotationManager;
 	}
 
-	public void setPipelined(boolean pipelined) {
+	public void newCPU(boolean pipelined) {
+		if(cpu != null) {
+			cpu.shutdown();
+		}
+
 		if (pipelined) {
 			cpu = new CPUPipeline(io);
 		} else {
 			cpu = new CPU(io);
 		}
 		cpu.registerListener(simListener);
-		cpu.setClockSpeed((Integer) settings.get("simulation.default-clock-speed"));
+		cpu.setCycleFreq((Integer) settings.get("simulation.default-CPU-frequency"));
 
 		for (CPUChangedListener listener : cpuChangedListeners) {
 			listener.cpuChanged(cpu);
@@ -273,6 +271,7 @@ public class WindowManager extends GridPane {
 	}
 
 	public void shutdown() {
+		cpu.shutdown();
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen())
 			primaryStage.close();

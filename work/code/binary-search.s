@@ -1,6 +1,5 @@
 # binary search
 # enter numbers in ascending order, using 0 as an end marker
-# @{ setSpeed(35) }@
 # @{ var l = vis.load('list', false) }@
 
 # @{ var startAddress = null }@

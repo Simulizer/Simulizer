@@ -30,6 +30,15 @@ public class CPUListener extends SimulationListener {
     }
 
     /**
+     * get the duration of 1/n th of a single CPU cycle (fetch+decode+execute)
+     * @param oneOverFraction eg 3 => 1/3 of a cycle
+     * @return the duration in ms
+     */
+    private int getCycleFraction(int oneOverFraction) {
+        return (int) (1000 / (simCpu.getCycleFreq()*oneOverFraction));
+    }
+
+    /**
      * Processes the message when a certain instruction is being executed
      * @param m The data movement message
      */
@@ -43,7 +52,7 @@ public class CPUListener extends SimulationListener {
                 case bne:
                 case blez:
                 case bltz:
-                    int speed = simCpu.getClockSpeed() / 6;
+                    int speed = getCycleFraction(6);
 
                     cpu.showText("BRANCH INSTRUCTION - Step 1 - Register operands are read and 16-bit immediate is sign extended", speed);
 
@@ -92,7 +101,7 @@ public class CPUListener extends SimulationListener {
                     processIType();
                     break;
                 case sw:
-                    speed = simCpu.getClockSpeed() / 3;
+                    speed = getCycleFraction(3);
 
                     cpu.showText("SW INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
 
@@ -118,7 +127,7 @@ public class CPUListener extends SimulationListener {
 
                     break;
                 case j:
-                    speed = simCpu.getClockSpeed() / 4;
+                    speed = getCycleFraction(4);
 
                     cpu.showText("JUMP INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
 
@@ -147,7 +156,7 @@ public class CPUListener extends SimulationListener {
                     sleepFor(speed);
                     break;
                 case jal:
-                    speed = simCpu.getClockSpeed() / 5;
+                    speed = getCycleFraction(5);
 
                     cpu.showText("JAL INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
 
@@ -181,7 +190,7 @@ public class CPUListener extends SimulationListener {
                     sleepFor(speed);
                     break;
                 case jr:
-                    speed = simCpu.getClockSpeed() / 3;
+                    speed = getCycleFraction(3);
 
                     cpu.showText("JR INSTRUCTION - Step 1 - Register value is read", speed);
 
@@ -203,7 +212,7 @@ public class CPUListener extends SimulationListener {
                     break;
                 case li:
                 case la:
-                    speed = simCpu.getClockSpeed();
+                    speed = getCycleFraction(1);
 
                     cpu.showText("LI/LA INSTRUCTION - Step 1 - Register is written to with the new value", speed);
                     cpu.ir.highlight();
@@ -233,7 +242,7 @@ public class CPUListener extends SimulationListener {
      * Processes an I-TYPE instruction
      */
     public void processIType(){
-        int speed = simCpu.getClockSpeed() / 4;
+        int speed = getCycleFraction(4);
 
         cpu.showText("I-TYPE INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
 
@@ -269,7 +278,7 @@ public class CPUListener extends SimulationListener {
      * Processess an R-TYPE instruction
      */
     public void processRType(){
-        int speed = simCpu.getClockSpeed() / 3;
+        int speed = getCycleFraction(4);
 
         cpu.showText("R-TYPE INSTRUCTION - Step 1 - Both read registers and one write register are selected", speed);
 
@@ -301,7 +310,7 @@ public class CPUListener extends SimulationListener {
     public void processStageEnterMessage(StageEnterMessage m) {
         switch (m.getStage()){
             case Fetch:
-                int speed = simCpu.getClockSpeed() / 2;
+                int speed = getCycleFraction(2);
 
                 cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
                 cpu.programCounter.highlight();

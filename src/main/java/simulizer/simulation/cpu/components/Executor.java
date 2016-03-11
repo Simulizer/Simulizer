@@ -83,7 +83,7 @@ public class Executor {
                     syscall(v0);//carry out specified syscall op
                 }
                 else if(instruction.getInstruction().equals(Instruction.BREAK)) {
-                	cpu.pauseClock();//stop clock for now
+					cpu.pause();
                 }
                 else if(!instruction.getInstruction().equals(Instruction.nop)) {
                     throw new ExecuteException("Error with zero argument instruction", instruction);

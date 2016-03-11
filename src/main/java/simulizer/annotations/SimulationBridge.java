@@ -26,8 +26,11 @@ public class SimulationBridge {
 		cpu.stopRunning();
 	}
 
-	public void setClockSpeed(double hertz) {
-		cpu.setClockHertz(hertz);
+	/**
+	 * Technically setting the frequency rather than 'speed'
+	 */
+	public void setSpeed(double freq) {
+		cpu.setCycleFreq(freq);
 	}
 
 	public Word[] getRegisters() {
