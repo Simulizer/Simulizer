@@ -47,6 +47,20 @@ public enum Instruction {
     xor    (OperandFormat.destSrcSrc,  "XOR"),
     xori   (OperandFormat.destSrcImm,  "XOR immediate"),
 
+// Set Instructions    
+    seq    (OperandFormat.destSrcSrc, "set to 1 if equal"),
+    sge    (OperandFormat.destSrcSrc, "set to 1 if greater than or equal"),
+    sgeu   (OperandFormat.destSrcSrc, "set to 1 if greater than or equal (unsigned)"),
+    sgt    (OperandFormat.destSrcSrc, "set to 1 if greater than"),
+    sgtu   (OperandFormat.destSrcSrc, "set to 1 if greater than unsigned"),
+    sle    (OperandFormat.destSrcSrc, "set to 1 if less than or equal"),
+    sleu   (OperandFormat.destSrcSrc, "set to 1 if less than or equal (unsigned)"),
+    slt    (OperandFormat.destSrcSrc, "set to 1 if less than"),
+    slti   (OperandFormat.destSrcImm, "set to 1 if less than with immediate"),
+    sltu   (OperandFormat.destSrcSrc, "set to 1 if less than (unsigned)"),
+    sltiu  (OperandFormat.destSrcImm, "set to 1 if less than with immediate (unsigned)"),
+    sne    (OperandFormat.destSrcSrc, "set to 1 if not equal"),
+    
 // Constant-Manipulating Instructions
     li     (OperandFormat.destImm,     "load immediate"),
 

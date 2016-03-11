@@ -156,62 +156,96 @@ public class ALU {
                 branchFlag = false;
                 return new Word(branchFalse);//if all bytes equal then false
             case bgez:
-                if(decodeS(firstValue) >= 0)
-                {
+                if(decodeS(firstValue) >= 0) {
                 	branchFlag = true;
                     return new Word(branchTrue);
                 }
-                else
-                {
+                else {
                 	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case bgtz:
-                if(decodeS(firstValue) > 0)
-                {
+                if(decodeS(firstValue) > 0) {
                 	branchFlag = true;
                     return new Word(branchTrue);
                 }
-                else
-                {
+                else {
                 	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case blez:
-                if(decodeS(firstValue) <= 0)
-                {
+                if(decodeS(firstValue) <= 0) {
                 	branchFlag = true;
                     return new Word(branchTrue);
                 }
-                else
-                {
+                else {
                 	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case bltz:
-                if(decodeS(firstValue) < 0)
-                {
+                if(decodeS(firstValue) < 0) {
                 	branchFlag = true;
                     return new Word(branchTrue);
                 }
-                else
-                {
+                else {
                 	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case beqz:
-                if(decodeS(firstValue) == 0)
-                {
+                if(decodeS(firstValue) == 0) {
                 	branchFlag = true;
                     return new Word(branchTrue);
                 }
-                else
-                {
+                else {
                 	branchFlag = false;
                     return new Word(branchFalse);
                 }
             case move:
                 return new Word(firstValue);
+            case seq:
+            	for(int i = 0; i < firstValue.length; i++) {
+                    if(firstValue[i] != secondValue[i]) {
+                        return encodeS(0);
+                    }
+                }
+            	return encodeS(1);
+            case sge:
+            	if(decodeS(firstValue) >= decodeS(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sgeu:
+            	if(decodeU(firstValue) >= decodeU(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sgt:
+            	if(decodeS(firstValue) > decodeS(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sgtu:
+            	if(decodeU(firstValue) > decodeU(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sle:
+            	if(decodeS(firstValue) <= decodeS(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sleu:
+            	if(decodeU(firstValue) >= decodeU(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case slt:
+            	if(decodeS(firstValue) < decodeS(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case slti:
+            	if(decodeS(firstValue) < decodeS(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sltu:
+            	if(decodeU(firstValue) < decodeU(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sltiu:
+            	if(decodeU(firstValue) < decodeU(secondValue)) {return encodeS(1);}
+            	return encodeS(0);
+            case sne:
+            	for(int i = 0; i < firstValue.length; i++) {
+                    if(firstValue[i] != secondValue[i]) {
+                        return encodeS(1);
+                    }
+                }
+            	return encodeS(0);
             default:
                 throw new InstructionException("Invalid/Unsupported Instruction.",instruction);
         }
