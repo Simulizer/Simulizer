@@ -20,6 +20,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import simulizer.simulation.cpu.components.CPU;
+import simulizer.ui.components.AssemblingDialog;
 
 /**
  * Utilities for UI related utilities
@@ -33,6 +35,15 @@ public class UIUtils {
 		if(!Platform.isFxApplicationThread()) {
 			throw new IllegalStateException("Not on FX application thread; currentThread = " + Thread.currentThread().getName());
 		}
+	}
+
+	private static AssemblingDialog assemblingDialog;
+	public static void showAssemblingDialog(CPU cpu) {
+		assemblingDialog = new AssemblingDialog(cpu);
+	}
+	public static void closeAssemblingDialog() {
+		assemblingDialog.closeDown();
+		assemblingDialog = null;
 	}
 
 	public static void showErrorDialog(String title, String message) {
@@ -178,7 +189,7 @@ public class UIUtils {
 		if(file != null) {
 			if (!file.getName().endsWith(".s"))
 				file = new File(file.getAbsolutePath() + ".s");
-			
+
 			callback.accept(file);
 		}
 	}

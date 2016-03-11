@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.util.function.Consumer;
 
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -155,7 +154,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
 		assembleAndRun.setDisable(wm.getCPU().isRunning());
 		assembleAndRun.setOnAction(e -> {
-			new AssemblingDialog(wm.getCPU());
+			UIUtils.showAssemblingDialog(wm.getCPU());
 			wm.assembleAndRun();
 		});
 
