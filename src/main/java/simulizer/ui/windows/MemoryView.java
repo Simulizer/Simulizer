@@ -25,6 +25,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.UIUtils;
 
 public class MemoryView extends InternalWindow {
 	@FXML
@@ -53,10 +54,10 @@ public class MemoryView extends InternalWindow {
 
 		try {
 			// This cannot be in the constructor, otherwise a stackoverflow error
-			BorderPane pane = (BorderPane) FXMLLoader.load(getClass().getResource("/fxml/MemoryView.fxml"));
+			BorderPane pane = FXMLLoader.load(getClass().getResource("/fxml/MemoryView.fxml"));
 			getContentPane().getChildren().add(pane);
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 

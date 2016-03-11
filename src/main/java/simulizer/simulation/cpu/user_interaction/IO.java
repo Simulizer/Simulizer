@@ -8,8 +8,8 @@ public interface IO {
 	String readString();
 	int readInt();
 	char readChar();
-	void printString(String str);
-	void printInt(int num);
-	void printChar(char letter);
+	void printString(IOStream stream, String str);
+	void printInt(IOStream stream, int num);
+	void printChar(IOStream stream, char letter);
 	void cancelRead();
 }

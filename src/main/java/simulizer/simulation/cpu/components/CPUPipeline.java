@@ -53,15 +53,21 @@ public class CPUPipeline extends CPU {
 		this.ID = createNopInstruction();
 		this.canFetch = true;
 		this.isFinished = 0;
-		this.nopCount = 0;
+		this.nopCount = 2;//initially 2
 		
 	}
-	
-	/**overwrites the normal cpu clock speed to make it representative of pipeline speed
-	 *
-	 */
-	public void setClockSpeed(int millis) {
-		clock.tickMillis = millis;
+
+	@Override
+	public void setCycleFreq(double freq) {
+		// for pipelined 1 cycle = 3 waits on the clock
+		// therefore the frequency of ticks is 3 times that of non-pipelined
+		clock.setTickFrequency(freq * 3);
+	}
+
+	@Override
+	public double getCycleFreq() {
+		// one cycle every 3 ticks
+		return clock.getTickFrequency() / 3;
 	}
 
 	/**method will go through a statement and extract the registers
@@ -267,7 +273,7 @@ public class CPUPipeline extends CPU {
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
-		this.nopCount = 0;
+		this.nopCount = 2;//decode and execute bubbled initially
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program
@@ -290,5 +296,10 @@ public class CPUPipeline extends CPU {
 		
 		super.execute(instruction);
 	}
-	
+
+
+	@Override
+	public boolean isPipelined() {
+		return true;
+	}
 }

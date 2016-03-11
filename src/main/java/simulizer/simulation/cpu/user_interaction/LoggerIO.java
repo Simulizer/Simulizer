@@ -1,8 +1,8 @@
 package simulizer.simulation.cpu.user_interaction;
 
 import java.util.Observable;
-import java.util.concurrent.CountDownLatch;
 
+import javafx.util.Pair;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Logger;
@@ -24,7 +24,7 @@ public class LoggerIO extends Observable implements IO {
 		try {
 			return Integer.parseInt(requestInput());
 		} catch (NumberFormatException e) {
-			System.err.println(e.getMessage());
+			printString(IOStream.ERROR, e.getClass().getName() + ":\n\t" + e.getMessage() + "\n");
 		}
 		return 0;
 	}
@@ -42,21 +42,21 @@ public class LoggerIO extends Observable implements IO {
 	}
 
 	@Override
-	public void printString(String str) {
+	public void printString(IOStream stream, String str) {
 		setChanged();
-		notifyObservers(str);
+		notifyObservers(new Pair<IOStream, String>(stream, str));
 	}
 
 	@Override
-	public void printInt(int num) {
+	public void printInt(IOStream stream, int num) {
 		setChanged();
-		notifyObservers("" + num);
+		notifyObservers(new Pair<IOStream, String>(stream, "" + num));
 	}
 
 	@Override
-	public void printChar(char letter) {
+	public void printChar(IOStream stream, char letter) {
 		setChanged();
-		notifyObservers("" + letter);
+		notifyObservers(new Pair<IOStream, String>(stream, "" + letter));
 	}
 
 	private String requestInput() {

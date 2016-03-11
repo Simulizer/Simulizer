@@ -14,7 +14,7 @@ public class DebugOutput {
 			out.print(str);
 			out.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 

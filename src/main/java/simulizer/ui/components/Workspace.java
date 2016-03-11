@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -22,6 +23,8 @@ import simulizer.ui.layout.Layout;
 import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themeable;
+import simulizer.ui.windows.Editor;
+import simulizer.utils.UIUtils;
 
 public class Workspace extends Observable implements Themeable {
 	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
@@ -150,6 +153,56 @@ public class Workspace extends Observable implements Themeable {
 	}
 
 	/**
+	 * Do something with the editor, opening a new window if one isn't already open
+	 *
+	 * Explanation:
+	 * The editor must load a HTML page and setup its members after the page has
+	 * loaded. JavaFX requires that the loading be done asynchronously, which
+	 * makes it impossible to cleanly wait for the initialisation to finish
+	 * while on the JavaFX thread (because the act of waiting while on the
+	 * JavaFX thread will block the loading its-self from starting). Using a
+	 * callback mechanism is the only guaranteed correct solution as far as I
+	 * know.
+	 *
+	 * @param callback the operation to perform with the editor (will be executed on the JavaFX thread)
+	 */
+	public void openEditorWithCallback(Consumer<Editor> callback) {
+		Editor e = (Editor)findInternalWindow(WindowEnum.EDITOR);
+		if(e != null && e.hasLoaded()) {
+			if(Platform.isFxApplicationThread()) {
+				callback.accept(e);
+			} else {
+				final Editor finalE = e;
+				Platform.runLater(() -> callback.accept(finalE));
+			}
+		} else {
+			// perform the job of openInternalWindow
+			e = (Editor)WindowEnum.EDITOR.createNewWindow();
+			final Editor finalE = e;
+			assert e != null;
+			e.setWindowManager(wm);
+			wm.getLayouts().setWindowDimentions(e);
+			// starts the page loading
+			Platform.runLater(() -> addWindows(finalE));
+
+			// wait for the page to load (crucially: on a non JavaFX thread)
+			Thread waiting = new Thread(() -> {
+				try {
+					while(!finalE.hasLoaded()) {
+						Thread.sleep(20);
+					}
+
+					Platform.runLater(() -> callback.accept(finalE));
+				} catch (InterruptedException ex) {
+					UIUtils.showExceptionDialog(ex);
+				}
+			}, "Editor-Waiting-For-Load");
+			waiting.setDaemon(true);
+			waiting.start();
+		}
+	}
+
+	/**
 	 * Adds Internal Windows to the workspace (use openInternalWindow instead)
 	 *
 	 * @param windows
@@ -165,7 +218,8 @@ public class Workspace extends Observable implements Themeable {
 				window.setGridBounds(wm.getGridBounds());
 				window.ready();
 			} else {
-				System.err.println("Tried to add a window which already exists: " + window.getTitle());
+				UIUtils.showErrorDialog("Problem Opening Window",
+						"Tried to add a window which already exists: " + window.getTitle());
 			}
 		}
 	}

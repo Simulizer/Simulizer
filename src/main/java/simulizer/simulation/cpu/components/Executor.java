@@ -1,11 +1,16 @@
 package simulizer.simulation.cpu.components;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Optional;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.assembler.representation.operand.OperandFormat;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.ExecuteException;
@@ -78,7 +83,7 @@ public class Executor {
                     syscall(v0);//carry out specified syscall op
                 }
                 else if(instruction.getInstruction().equals(Instruction.BREAK)) {
-                	cpu.pauseClock();//stop clock for now
+					cpu.pause();
                 }
                 else if(!instruction.getInstruction().equals(Instruction.nop)) {
                     throw new ExecuteException("Error with zero argument instruction", instruction);
@@ -174,7 +179,7 @@ public class Executor {
     	int a0 = (int)DataConverter.decodeAsSigned(cpu.getRegisters()[Register.a0.getID()].getWord());//getting main argument register
     	switch(v0) {
     		case 1://print int
-    			cpu.getIO().printInt(a0);//printing to console
+    			cpu.getIO().printInt(IOStream.STANDARD, a0);//printing to console
     			break;
     		case 4://print string
     			String toPrint = "";//initial string
@@ -187,7 +192,7 @@ public class Executor {
     				currentByte = cpu.getMainMemory().readFromMem(addressPStr, 1);//next word to read
     			}
     			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(currentByte)),Optional.empty()));
-    			cpu.getIO().printString(toPrint);
+    			cpu.getIO().printString(IOStream.STANDARD, toPrint);
     			break;
     		case 5://read int
     			int read = cpu.getIO().readInt();//reading in from console
@@ -225,7 +230,7 @@ public class Executor {
     			break;
     		case 11://print char
     			char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
-    			cpu.getIO().printChar(toPrintChar);
+    			cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
     			break;
     		case 12://read char
     			String readChar = cpu.getIO().readChar() + "";//from console
@@ -236,6 +241,16 @@ public class Executor {
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
+    		case 67697865://AND HIS NAME IS...
+    			try {
+    				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=5LitDGyxFh4").toURI());
+    			} catch (IOException | URISyntaxException e) {System.out.println("JOHN CENA!!!");} 
+    			break;
+    		case 82736775://RICK ASCII :)
+				try {
+					Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
+				} catch (IOException | URISyntaxException e) {System.out.println("Never gonna give you up");} 
+				break;
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}

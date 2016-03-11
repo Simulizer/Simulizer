@@ -18,6 +18,7 @@ import simulizer.ui.windows.Editor;
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;
+	long startTime;
 
 	public UISimulationListener(WindowManager wm) {
 		this.wm = wm;
@@ -26,36 +27,40 @@ public class UISimulationListener extends SimulationListener {
 	@Override public void processSimulationMessage(SimulationMessage m) {
 		switch(m.detail) {
 			case SIMULATION_STARTED: {
-				Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-
-				if(editor != null) {
-					System.out.println("Simulation Started - running '" +
-							editor.getCurrentFile().getName() + "'" +
-							(editor.hasOutstandingChanges() ? " with outstanding changes" : "")
-					);
-				}
+				startTime = System.currentTimeMillis();
 
 				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 
-				if(editor != null) {
-					Platform.runLater(editor::executeMode);
-				}
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer - Simulation Running"));
+
+				wm.getWorkspace().openEditorWithCallback((editor) -> {
+					System.out.println("Simulation Started - running '" +
+							editor.getCurrentFile().getName() + "'" +
+							(editor.hasOutstandingChanges() ? " with outstanding changes" : "") +
+							(wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)")
+					);
+
+					editor.executeMode();
+				});
 			} break;
 			case SIMULATION_INTERRUPTED: {
 				System.out.println("Simulation Interrupted");
 			} break;
 			case SIMULATION_STOPPED: {
 				System.out.println("Simulation Stopped");
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer"));
 
 				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
 				wm.getAnnotationManager().onEndProgram();
 
 				System.out.println("Total annotations fired: " + count);
+				long duration = System.currentTimeMillis() - startTime;
+				long ticks = wm.getCPU().getClock().getTicks();
+				System.out.println("Total time: " + (duration / 1000.0) + " seconds");
+				System.out.println("Total ticks: " + ticks);
+				System.out.println("Average time per tick: " + (duration / ticks) + " ms");
 
-				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-				if(editor != null) {
-					Platform.runLater(editor::editMode);
-				}
+				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
 			} break;
 			default:break;
 		}
@@ -76,14 +81,9 @@ public class UISimulationListener extends SimulationListener {
 				Map<Address, Integer> lineNums = cpu.getProgram().lineNumbers;
 				if (lineNums.containsKey(m.statementAddress)) {
 					int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
-					// editor.setReadOnly(true);
-					Platform.runLater(() -> {
-						Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-						if (editor != null) {
-							// these lines
-							editor.highlightPipeline(-1, -1, lineNum);
-						}
-					});
+
+					wm.getWorkspace().openEditorWithCallback((editor) ->
+							editor.highlightPipeline(-1, -1, lineNum));
 				}
 			}
 		}

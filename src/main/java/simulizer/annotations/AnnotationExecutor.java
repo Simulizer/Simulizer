@@ -9,7 +9,9 @@ import jdk.nashorn.internal.runtime.ECMAException;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 import javax.script.*;
 
@@ -70,7 +72,7 @@ public class AnnotationExecutor {
 			filter.apiLoaded = true; // from now on restrict access to Java classes
 
 		} catch (ScriptException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 
@@ -149,13 +151,13 @@ public class AnnotationExecutor {
 	 */
 	public void debugREPL(IO io) {
 		try {
-			io.printString("REPL start (call exit() to finish)\n");
+			io.printString(IOStream.DEBUG, "REPL start (call exit() to finish)\n");
 
 			SimulationBridge sim = (SimulationBridge) globals.get("simulation");
 			if(sim == null || sim.cpu == null) {
-				io.printString("Simulation not running, REPL running in its own engine\n");
+				io.printString(IOStream.DEBUG, "Simulation not running, REPL running in its own engine\n");
 			} else {
-				io.printString("Simulation running, REPL has access equal to annotations\n");
+				io.printString(IOStream.DEBUG, "Simulation running, REPL has access equal to annotations\n");
 			}
 
 			bindGlobal("io", io);
@@ -164,17 +166,17 @@ public class AnnotationExecutor {
 
 			String line;
 			while(!getGlobal("stop", Boolean.class)) {
-				io.printString("js> ");
+				io.printString(IOStream.DEBUG, "js> ");
 				line = io.readString();
 				Object res = exec(new Annotation(line));
 				if(res != null) {
-					io.printString(res.toString() + "\n");
+					io.printString(IOStream.DEBUG, res.toString() + "\n");
 				}
 			}
-			io.printString("REPL stopped\n");
+			io.printString(IOStream.DEBUG, "REPL stopped\n");
 		} catch (RuntimeException | ScriptException e) {
-			e.printStackTrace();
-			io.printString("REPL stopped due to exception\n");
+			UIUtils.showExceptionDialog(e);
+			io.printString(IOStream.DEBUG, "REPL stopped due to exception\n");
 		}
 	}
 }

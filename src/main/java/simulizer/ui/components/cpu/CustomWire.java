@@ -2,8 +2,17 @@ package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
 
+/**
+ * Represents a custom wire which travels in multiple directions
+ */
 public class CustomWire extends Wire {
 
+    /**
+     * Sets up a new custom wire
+     * @param xStart The starting x position
+     * @param yStart The starting y position
+     * @param customLines The custom lines for the wire
+     */
     public CustomWire(double xStart, double yStart, CustomLine... customLines){
         super(new Polyline(), new Polyline(), Type.CUSTOM);
 
@@ -15,6 +24,12 @@ public class CustomWire extends Wire {
         getChildren().addAll(line, arrowHead);
     }
 
+    /**
+     * Draws a line according to the custom lines
+     * @param xStart The starting x position
+     * @param yStart The starting y position
+     * @param customLines The custom lines to draw
+     */
     public void drawLine(double xStart, double yStart, CustomLine... customLines){
         line.getPoints().clear();
         arrowHead.getPoints().clear();

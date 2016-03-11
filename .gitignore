@@ -10,8 +10,9 @@ misc/svn-gatekeeper/experiment
 /settings.json
 /themes/
 
-# ignore program dumps
+# ignore debugging files
 program-dump.txt
+exceptions.log
 
 # ignore IntelliJ project files
 .idea/
@@ -60,8 +61,16 @@ gradle.properties
 *.log
 
 # Ignore generated tex files
-docs/final-report/tables/*.tex
+docs/final-report/segments/*.tex
+docs/final-report/chapters/*.tex
 docs/final-report/*.pdf
+docs/final-report/*.out
+
+docs/testing-report/segments/*.tex
+docs/testing-report/chapters/*.tex
+docs/testing-report/*.pdf
+docs/testing-report/*.out
 
 # Ignore personal helper scripts
 copy-settings.sh
+

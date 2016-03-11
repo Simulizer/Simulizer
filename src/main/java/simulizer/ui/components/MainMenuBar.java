@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import javafx.scene.control.ButtonType;
 import java.net.URI;
+
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -38,17 +39,13 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
 	}
 
-	private Editor getEditor() {
-		return (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-	}
-
 	private Menu fileMenu() {
 		// | File
 		Menu fileMenu = new Menu("File");
 
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
-		newItem.setOnAction(e -> getEditor().newFile());
+		newItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback(Editor::newFile));
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Open
@@ -56,29 +53,26 @@ public class MainMenuBar extends MenuBar {
 		loadItem.setOnAction(e -> {
 			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
-				getEditor().loadFile(f);
+				wm.getWorkspace().openEditorWithCallback((ed) -> ed.loadFile(f));
 			}
 		});
 		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
-		saveItem.setOnAction(e -> {
-			if (getEditor().getCurrentFile() == null) {
-				Editor editor = getEditor();
-				UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
+		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			if (ed.getCurrentFile() == null) {
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
 			} else {
-				getEditor().saveFile();
+				ed.saveFile();
 			}
-		});
+		}));
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
-		saveAsItem.setOnAction(e -> {
-			Editor editor = getEditor();
-			UIUtils.promptSaveAs(wm.getPrimaryStage(), editor::saveAs);
-		});
+		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) ->
+				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
@@ -148,25 +142,45 @@ public class MainMenuBar extends MenuBar {
 	}
 
 	private Menu simulationMenu() {
-		// To be moved to separate buttons later
-
 		Menu runMenu = new Menu("Simulation");
+		runMenu.setOnShowing(e -> simControlsMenu(runMenu));
+		simControlsMenu(runMenu);
+		return runMenu;
+	}
 
-		MenuItem runPause = new MenuItem("Run/Pause");
-		runPause.setOnAction(e -> {
-			new AssemblingDialog(wm.getCPU());
+	private void simControlsMenu(Menu runMenu) {
+		runMenu.getItems().clear();
+
+		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
+		assembleAndRun.setDisable(wm.getCPU().isRunning());
+		assembleAndRun.setOnAction(e -> {
+			UIUtils.showAssemblingDialog(wm.getCPU());
 			wm.assembleAndRun();
 		});
 
-		MenuItem singleStep = new MenuItem("Next Step");
-		singleStep.setDisable(true);
+		MenuItem resume = new MenuItem("Resume Simulation");
+		resume.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		resume.setOnAction(e -> wm.getCPU().resume());
 
-		MenuItem stop = new MenuItem("Stop");
+		MenuItem singleStep = new MenuItem("Single Step");
+		singleStep.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		singleStep.setOnAction(e -> {
+			try {
+				wm.getCPU().runSingleCycle();
+			} catch (Exception ex) {
+				// TODO: Handle Exception properly
+				UIUtils.showExceptionDialog(ex);
+			}
+		});
+
+		MenuItem stop = new MenuItem("Stop Simulation");
+		stop.setDisable(!wm.getCPU().isRunning());
 		stop.setOnAction(e -> wm.stopSimulation());
 
-		CheckMenuItem simplePipeline = new CheckMenuItem("Pipelined CPU");
+		CheckMenuItem simplePipeline = new CheckMenuItem("Use Pipelined CPU");
+		simplePipeline.setDisable(wm.getCPU().isRunning());
 		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
-		simplePipeline.setOnAction(e -> wm.setPipelined(simplePipeline.isSelected()));
+		simplePipeline.setOnAction(e -> wm.newCPU(simplePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -174,13 +188,23 @@ public class MainMenuBar extends MenuBar {
 			if (cpu != null) {
 				TextInputDialog clockSpeed = new TextInputDialog();
 				clockSpeed.setTitle("Clock Speed");
-				clockSpeed.setContentText("Enter Clock Speed: ");
-				clockSpeed.showAndWait().ifPresent(speed -> cpu.setClockSpeed(Integer.parseInt(speed)));
+				clockSpeed.setContentText("Enter Clock Speed (cycles per second (Hz)): ");
+				clockSpeed.showAndWait().ifPresent(input -> {
+					double speed = -1;
+					try {
+						speed = Double.parseDouble(input);
+					} catch(NumberFormatException ignored) { /* speed == -1 */ }
+
+					if(speed >= 0) {
+						cpu.setCycleFreq(speed);
+					} else {
+						UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
+					}
+				});
 			}
 		});
 
-		runMenu.getItems().addAll(runPause, singleStep, stop, simplePipeline, setClockSpeed);
-		return runMenu;
+		runMenu.getItems().addAll(assembleAndRun, resume, singleStep, stop, simplePipeline, setClockSpeed);
 	}
 
 	private Menu windowsMenu() {
@@ -217,7 +241,7 @@ public class MainMenuBar extends MenuBar {
 			try {
 				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				UIUtils.showExceptionDialog(ex);
 			}
 		});
 
@@ -230,37 +254,39 @@ public class MainMenuBar extends MenuBar {
 		Menu debugMenu = new Menu("Debug");
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
-		dumpProgram.setOnAction(e -> {
-			Program p = Assembler.assemble(getEditor().getText(), null);
+		dumpProgram.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			Program p = Assembler.assemble(ed.getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
 					out.println("null");
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					UIUtils.showExceptionDialog(e1);
 				}
 			} else {
 				ProgramStringBuilder.dumpToFile(p, outputFilename);
 			}
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
-		});
+		}));
 
 		MenuItem runSpim = new MenuItem("Run in SPIM");
-		runSpim.setOnAction(e -> {
-			String program = getEditor().getText();
+		runSpim.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+			String program = ed.getText();
 			SpimRunner.runQtSpim(program);
-		});
+		}));
 
 		MenuItem jsREPL = new MenuItem("Start javascript REPL");
 		jsREPL.setOnAction(e -> {
-			new Thread(() -> {
+			Thread replThread = new Thread(() -> {
 				// if there is an executor (eg simulation running) then use that
 				if (wm.getAnnotationManager().getExecutor() == null) {
 					// this does not bridge with the visualisations or simulation
 					wm.getAnnotationManager().newExecutor();
 				}
 				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			}).start();
+			}, "JS-REPL-Thread");
+			replThread.setDaemon(true);
+			replThread.start();
 		});
 
 		Menu themes = new Menu("Themes");

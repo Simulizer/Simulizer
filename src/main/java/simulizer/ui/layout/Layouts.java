@@ -18,6 +18,7 @@ import com.google.gson.stream.JsonReader;
 
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.UIUtils;
 
 public class Layouts implements Iterable<Layout> {
 
@@ -53,12 +54,12 @@ public class Layouts implements Iterable<Layout> {
 							defaultLayout = l;
 						layouts.add(l);
 					} catch (JsonIOException | JsonSyntaxException | IOException e) {
-						System.out.println("Invalid File: " + layout.toUri().toString());
+						UIUtils.showErrorDialog("Invalid File", "Invalid File: " + layout.toUri().toString());
 					}
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 
 		if (defaultLayout == null) 
@@ -79,7 +80,7 @@ public class Layouts implements Iterable<Layout> {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
 			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
-			System.err.println("Unable to save file");
+			UIUtils.showErrorDialog("Error Saving Layout", "Unable to save the file");
 		}
 	}
 

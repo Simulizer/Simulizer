@@ -117,8 +117,8 @@ public class ExecuteTest {
 	{
 		CPU cpu = new CPU(io);
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
-		cpu.setClockSpeed(50);//speed it up a bit
 		cpu.runProgram();//execute the program
+		cpu.shutdown();
 		return cpu;
 	}
 	
@@ -1595,7 +1595,7 @@ public class ExecuteTest {
 								"li $a0, 99;\n" +//99 in ascii is 'c'
 								"syscall;\n";
 		
-		createCPU(myInstructions);	
+		createCPU(myInstructions);
 		assertEquals("c",this.io.scanner);
 		this.io.scanner = "";
 	}

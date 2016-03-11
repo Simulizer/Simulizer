@@ -18,7 +18,7 @@ alert = function(msg){debug.alert(''+msg);};
 
 // simulation bridge
 stop     = function(){simulation.stop();};
-setSpeed = function(s){simulation.setClockSpeed(s);};
+setSpeed = function(s){simulation.setSpeed(s);};
 
 // global bindings for each register are added later
 // eg $s0 = {id:Register.s0, get: function to get the current s0 value}

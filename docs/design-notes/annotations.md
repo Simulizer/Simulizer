@@ -60,7 +60,7 @@ The simulation bridge (named `simulation` and `sim` in JS) gives limited access 
 
 Methods:
 - `stop()` stop the simulation (not able to resume)
-- `setClockSpeed(tickMillis)` set the simulation speed
+- `setSpeed(frequency)` set the simulation speed (cycle frequency)
 - `Word[] getRegisters()`
 - `long getRegisterS(Register)` get the current signed value of a register (identified using its enum)
 - `long getRegisterU(Register)` get the current unsigned value of a register (identified using its enum)

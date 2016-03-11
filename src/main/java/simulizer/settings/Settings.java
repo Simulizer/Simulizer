@@ -3,14 +3,17 @@ package simulizer.settings;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import simulizer.settings.types.BooleanSetting;
 import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
+import simulizer.utils.UIUtils;
 
 public class Settings {
 	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
@@ -45,7 +48,7 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new IntegerSetting("default-clock-speed", "Default Clock Speed", "Default value of the simulation clock delay (in milliseconds)", 250, 0, Integer.MAX_VALUE))
+						.add(new IntegerSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
@@ -111,6 +114,8 @@ public class Settings {
 				case STRING:
 					((StringSetting) setting).setValue(element.getAsString());
 					break;
+				default:
+					UIUtils.showErrorDialog("Unknown Setting Type", "" + setting.getSettingType());
 			}
 		} catch (Exception e) {
 			// TODO: Find exact exception
@@ -131,7 +136,7 @@ public class Settings {
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
-				return null;
+				return null; // TODO: handle failure more gracefully
 		}
 		return setting.getValue();
 	}

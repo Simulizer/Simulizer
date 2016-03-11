@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import simulizer.utils.UIUtils;
 
 public class Themes implements Iterable<Theme> {
 	private final String defaultTheme;
@@ -45,7 +46,8 @@ public class Themes implements Iterable<Theme> {
 				File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
 				if (themeJSONs.length == 1) {
 					File themeJSON = themeJSONs[0];
-					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+					try (InputStream in = Files.newInputStream(themeJSON.toPath());
+							BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
 						t.location = themeFolder.toURI().toString();
 						t.themes = this;
@@ -58,11 +60,11 @@ public class Themes implements Iterable<Theme> {
 						// @formatter:on
 							themes.add(t);
 						} catch (NullPointerException e) {
-							e.printStackTrace();
+							UIUtils.showExceptionDialog(e);
 						}
 
 					} catch (IOException e1) {
-						e1.printStackTrace();
+						UIUtils.showExceptionDialog(e1);
 					}
 				}
 			}
