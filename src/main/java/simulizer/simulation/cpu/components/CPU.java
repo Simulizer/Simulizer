@@ -163,11 +163,9 @@ public class CPU {
 	}
 
 	public void resumeForOneCycle() {
+		breakAfterCycle = true;
 		if(!clock.isRunning()) {
-			breakAfterCycle = true;
 			clock.start();
-		} else {
-			UIUtils.showErrorDialog("Could not resume", "Could not resume the simulation\nfor a single cycle because it was not paused");
 		}
 	}
 
