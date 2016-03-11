@@ -108,7 +108,7 @@ public class WindowManager extends GridPane {
 		primaryStage.setOnShown((e) -> {
 			new Thread(() -> {
 				try {
-					for (int i = 0; i < 3; i++) {
+					for (int i = 0; i < 100; i++) {
 						Thread.sleep(50);
 						Platform.runLater(workspace::resizeInternalWindows);
 					}
