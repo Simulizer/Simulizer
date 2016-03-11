@@ -112,7 +112,10 @@ public class Editor extends InternalWindow {
 
 		// handle copy and paste manually
 		addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+
 			if (C_c.match(event)) {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
 				String clip = (String) jsEditor.call("getCopyText");
 
 				Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -122,19 +125,25 @@ public class Editor extends InternalWindow {
 				clipboard.setContent(content);
 
 			} else if (C_v.match(event)) {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
 				Clipboard clipboard = Clipboard.getSystemClipboard();
 				String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
 
 				if (clip != null) {
 					jsEditor.call("insert", clip);
 				}
+
+				editedSinceLabelUpdate = true;
 			} else if(C_plus.match(event)) {
 				jsWindow.call("changeFontSize", 1);
 			} else if(C_minus.match(event)) {
 				jsWindow.call("changeFontSize", -1);
+			} else {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
+				editedSinceLabelUpdate = true;
 			}
-
-			editedSinceLabelUpdate = true;
 		});
 
 		editedSinceLabelUpdate = false;

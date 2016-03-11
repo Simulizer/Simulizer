@@ -46,11 +46,13 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- New
 		MenuItem newItem = new MenuItem("New");
+		newItem.setDisable(wm.getCPU().isRunning());
 		newItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback(Editor::newFile));
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
+		loadItem.setDisable(wm.getCPU().isRunning());
 		loadItem.setOnAction(e -> {
 			File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 			if (f != null) {
@@ -61,6 +63,7 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
+		saveItem.setDisable(wm.getCPU().isRunning());
 		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
 			if (ed.getCurrentFile() == null) {
 				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
@@ -72,6 +75,7 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
+		saveAsItem.setDisable(wm.getCPU().isRunning());
 		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) ->
 				UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 

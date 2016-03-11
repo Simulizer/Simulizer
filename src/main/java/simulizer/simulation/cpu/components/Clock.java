@@ -92,7 +92,10 @@ public class Clock {
 		if (isRunning()) {
 			ticker.cancel(true); // may interrupt if running
 			ticker = null;
-			incrementTicks(); // let any threads waiting on the clock fall through
+		}
+		// let any threads waiting on the clock fall through
+		synchronized (ticks) {
+			ticks.notifyAll();
 		}
 	}
 
