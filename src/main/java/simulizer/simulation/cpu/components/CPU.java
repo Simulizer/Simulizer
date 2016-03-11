@@ -370,7 +370,8 @@ public class CPU {
 				isRunning = false;
 			}
 			try {
-				if (isRunning && clock.isRunning()) {
+				if (isRunning) {
+					// if the clock is stopped then it advances by 1 tick to unlock this thread
 					clock.waitForNextTick();
 				}
 			} catch (InterruptedException e) {

@@ -20,6 +20,7 @@ import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.cpu.components.Clock;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
@@ -151,60 +152,64 @@ public class MainMenuBar extends MenuBar {
 	private void simControlsMenu(Menu runMenu) {
 		runMenu.getItems().clear();
 
+		final CPU cpu = wm.getCPU();
+		final Clock clock = cpu.getClock();
+
 		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
-		assembleAndRun.setDisable(wm.getCPU().isRunning());
+		assembleAndRun.setDisable(cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
-			UIUtils.showAssemblingDialog(wm.getCPU());
+			UIUtils.showAssemblingDialog(cpu);
 			wm.assembleAndRun();
 		});
 
+		MenuItem pause = new MenuItem("Pause Simulation");
+		pause.setDisable(!clock.isRunning() || !cpu.isRunning());
+		pause.setOnAction(e -> cpu.pause());
+
 		MenuItem resume = new MenuItem("Resume Simulation");
-		resume.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		resume.setDisable(clock.isRunning() || !cpu.isRunning());
 		resume.setOnAction(e -> wm.getCPU().resume());
 
 		MenuItem singleStep = new MenuItem("Single Step");
-		singleStep.setDisable(wm.getCPU().isRunning() || wm.getCPU().getProgram() == null);
+		singleStep.setDisable(clock.isRunning() || !cpu.isRunning());
 		singleStep.setOnAction(e -> {
 			try {
-				wm.getCPU().runSingleCycle();
+				cpu.runSingleCycle();
 			} catch (Exception ex) {
 				// TODO: Handle Exception properly
 				UIUtils.showExceptionDialog(ex);
 			}
 		});
 
-		MenuItem stop = new MenuItem("Stop Simulation");
-		stop.setDisable(!wm.getCPU().isRunning());
+		MenuItem stop = new MenuItem("End Simulation");
+		stop.setDisable(!cpu.isRunning());
 		stop.setOnAction(e -> wm.stopSimulation());
 
-		CheckMenuItem simplePipeline = new CheckMenuItem("Use Pipelined CPU");
-		simplePipeline.setDisable(wm.getCPU().isRunning());
-		simplePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
-		simplePipeline.setOnAction(e -> wm.newCPU(simplePipeline.isSelected()));
+		CheckMenuItem togglePipeline = new CheckMenuItem("Toggle CPU Pipelining");
+		togglePipeline.setDisable(cpu.isRunning());
+		togglePipeline.setSelected((boolean) wm.getSettings().get("simulation.pipelined"));
+		togglePipeline.setOnAction(e -> wm.newCPU(togglePipeline.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
-			CPU cpu = wm.getCPU();
-			if (cpu != null) {
-				TextInputDialog clockSpeed = new TextInputDialog();
-				clockSpeed.setTitle("Clock Speed");
-				clockSpeed.setContentText("Enter Clock Speed (cycles per second (Hz)): ");
-				clockSpeed.showAndWait().ifPresent(input -> {
-					double speed = -1;
-					try {
-						speed = Double.parseDouble(input);
-					} catch(NumberFormatException ignored) { /* speed == -1 */ }
+			TextInputDialog clockSpeed = new TextInputDialog();
+			clockSpeed.setTitle("Clock Speed");
+			clockSpeed.setContentText("Enter Clock Speed:\n(cycles per second (Hz))");
+			clockSpeed.showAndWait().ifPresent(input -> {
+				double speed = -1;
+				try {
+					speed = Double.parseDouble(input);
+				} catch(NumberFormatException ignored) { /* speed == -1 */ }
 
-					if(speed >= 0) {
-						cpu.setCycleFreq(speed);
-					} else {
-						UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
-					}
-				});
-			}
+				if(speed >= 0) {
+					cpu.setCycleFreq(speed);
+				} else {
+					UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
+				}
+			});
 		});
 
-		runMenu.getItems().addAll(assembleAndRun, resume, singleStep, stop, simplePipeline, setClockSpeed);
+		runMenu.getItems().addAll(assembleAndRun, pause, resume, singleStep, stop, togglePipeline, setClockSpeed);
 	}
 
 	private Menu windowsMenu() {
