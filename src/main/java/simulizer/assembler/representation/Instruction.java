@@ -68,8 +68,7 @@ public enum Instruction {
 // Comparison Instructions: ignored
 
 // Branch Instructions (limited range jump)
-    // ignoring many "and link" instructions
-    // ignoring many 2 register comparisons in favour of the compare to zero variety
+    // ignoring some "and link" instructions
     b      (OperandFormat.label,       "unconditional branch to label"),
     beq    (OperandFormat.cmpCmpLabel, "branch on equal"),
     bne    (OperandFormat.cmpCmpLabel, "branch on not equal"),
@@ -78,6 +77,15 @@ public enum Instruction {
     blez   (OperandFormat.cmpLabel,    "branch on <= zero"),
     bltz   (OperandFormat.cmpLabel,    "branch on < zero"),
     beqz   (OperandFormat.cmpLabel,    "branch on = zero"),
+    bge    (OperandFormat.cmpCmpLabel, "branch on cmp1 >= cmp2"),
+    bgeu   (OperandFormat.cmpCmpLabel, "branch on cmp1 >= cmp2 (unsigned)"),
+    bgt    (OperandFormat.cmpCmpLabel, "branch on cmp1 > cmp2"),
+    bgtu   (OperandFormat.cmpCmpLabel, "branch on cmp1 > cmp2 (unsigned)"),
+    ble    (OperandFormat.cmpCmpLabel, "branch on cmp1 <= cmp2"),
+    bleu   (OperandFormat.cmpCmpLabel, "branch on cmp1 <= cmp2 (unsigned)"),
+    blt    (OperandFormat.cmpCmpLabel, "branch on cmp1 < cmp2"),
+    bltu   (OperandFormat.cmpCmpLabel, "branch on cmp1 < cmp2 (unsigned)"),
+    
 
 // Jump Instructions
     j      (OperandFormat.label,       "unconditional jump to label"),

@@ -156,50 +156,44 @@ public class ALU {
                 branchFlag = false;
                 return new Word(branchFalse);//if all bytes equal then false
             case bgez:
-                if(decodeS(firstValue) >= 0) {
-                	branchFlag = true;
-                    return new Word(branchTrue);
-                }
-                else {
-                	branchFlag = false;
-                    return new Word(branchFalse);
-                }
+                if(decodeS(firstValue) >= 0) {branchFlag = true; return new Word(branchTrue);}
+                else {branchFlag = false; return new Word(branchFalse);}
             case bgtz:
-                if(decodeS(firstValue) > 0) {
-                	branchFlag = true;
-                    return new Word(branchTrue);
-                }
-                else {
-                	branchFlag = false;
-                    return new Word(branchFalse);
-                }
+                if(decodeS(firstValue) > 0) {branchFlag = true; return new Word(branchTrue);}
+                else {branchFlag = false; return new Word(branchFalse);}
             case blez:
-                if(decodeS(firstValue) <= 0) {
-                	branchFlag = true;
-                    return new Word(branchTrue);
-                }
-                else {
-                	branchFlag = false;
-                    return new Word(branchFalse);
-                }
+                if(decodeS(firstValue) <= 0) {branchFlag = true; return new Word(branchTrue);}
+                else {branchFlag = false; return new Word(branchFalse);}
             case bltz:
-                if(decodeS(firstValue) < 0) {
-                	branchFlag = true;
-                    return new Word(branchTrue);
-                }
-                else {
-                	branchFlag = false;
-                    return new Word(branchFalse);
-                }
+                if(decodeS(firstValue) < 0) {branchFlag = true; return new Word(branchTrue);}
+                else {branchFlag = false; return new Word(branchFalse);}
             case beqz:
-                if(decodeS(firstValue) == 0) {
-                	branchFlag = true;
-                    return new Word(branchTrue);
-                }
-                else {
-                	branchFlag = false;
-                    return new Word(branchFalse);
-                }
+                if(decodeS(firstValue) == 0) {branchFlag = true; return new Word(branchTrue);}
+                else {branchFlag = false; return new Word(branchFalse);}
+            case bge:
+            	if(decodeS(firstValue) >= decodeS(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case bgeu:
+            	if(decodeU(firstValue) >= decodeU(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case bgt:
+            	if(decodeS(firstValue) > decodeS(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case bgtu:
+            	if(decodeU(firstValue) > decodeU(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case ble:
+            	if(decodeS(firstValue) <= decodeS(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case bleu:
+            	if(decodeU(firstValue) <= decodeU(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case blt:
+            	if(decodeS(firstValue) < decodeS(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
+            case bltu:
+            	if(decodeU(firstValue) < decodeU(secondValue)) {branchFlag = true; return new Word(branchTrue);}
+            	else {branchFlag = false; return new Word(branchFalse);}
             case move:
                 return new Word(firstValue);
             case seq:
