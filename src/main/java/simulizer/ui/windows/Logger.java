@@ -32,8 +32,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Logger extends InternalWindow implements Observer {
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(
-			new ThreadUtils.NamedThreadFactory("Logger"));
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Logger"));
 	private static final long BUFFER_TIME = 20;
 	private volatile boolean callUpdate = true;
 
@@ -155,6 +154,8 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
+		for (StringBuilder log : logs)
+			log.setLength(0);
 		for (TextArea output : outputs)
 			output.setText("");
 	}
