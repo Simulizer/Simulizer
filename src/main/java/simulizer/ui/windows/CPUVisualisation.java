@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
+import simulizer.ui.components.cpu.listeners.CPUChangedListener;
 import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
@@ -175,6 +176,8 @@ public class CPUVisualisation extends InternalWindow {
 	@Override
 	public void ready(){
 		attachCPU(getWindowManager().getCPU());
+		CPUChangedListener cpuChangedListener = new CPUChangedListener(this);
+		getWindowManager().addCPUChangedListener(cpuChangedListener);
 		super.ready();
 	}
 
