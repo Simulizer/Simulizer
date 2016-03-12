@@ -101,6 +101,10 @@ public class ProgramExtractor extends SimpBaseListener {
     }
 
 
+	private int startLine(ParserRuleContext ctx) {
+		return ctx.getStart().getLine() - 1; // Antlr uses 1-based, simulizer uses 0-based
+	}
+
 
     /**
      * when accessing a sub-rule from a grammar rule, the result may be null
@@ -286,7 +290,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     } else {
                         Operand op = operands.get(0); // only one argument permitted
                         pushVariable(new Variable(
-                            Variable.Type.ASCII, op.asStringOp().value.length(), Optional.of(op), ctx.getStart().getLine()));
+                            Variable.Type.ASCII, op.asStringOp().value.length(), Optional.of(op), startLine(ctx)));
                     }
                     break;
                 case ".asciiz":
@@ -297,7 +301,7 @@ public class ProgramExtractor extends SimpBaseListener {
                         op = new StringOperand(op.asStringOp().value + '\0'); // add the null terminator
 
                         pushVariable(new Variable(
-                            Variable.Type.ASCIIZ, op.asStringOp().value.length(), Optional.of(op), ctx.getStart().getLine()));
+                            Variable.Type.ASCIIZ, op.asStringOp().value.length(), Optional.of(op), startLine(ctx)));
                     }
                     break;
                 case ".byte":
@@ -306,7 +310,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
-                                Variable.Type.Byte, 1, Optional.of(op), ctx.getStart().getLine()));
+                                Variable.Type.Byte, 1, Optional.of(op), startLine(ctx)));
                         }
                     }
                     break;
@@ -316,7 +320,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
-                                Variable.Type.Half, 2, Optional.of(op), ctx.getStart().getLine()));
+                                Variable.Type.Half, 2, Optional.of(op), startLine(ctx)));
                         }
                     }
                     break;
@@ -326,7 +330,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
-                                Variable.Type.Word, 4, Optional.of(op), ctx.getStart().getLine()));
+                                Variable.Type.Word, 4, Optional.of(op), startLine(ctx)));
                         }
                     }
                     break;
@@ -337,7 +341,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     } else {
                         Operand op = operands.get(0);
                         pushVariable(new Variable(
-                            Variable.Type.Space, op.asIntegerOp().value, Optional.empty(), ctx.getStart().getLine()));
+                            Variable.Type.Space, op.asIntegerOp().value, Optional.empty(), startLine(ctx)));
                     }
                     break;
                 default:
@@ -402,7 +406,7 @@ public class ProgramExtractor extends SimpBaseListener {
                 }
             }
 
-            pushStatement(new Statement(instruction, operands, ctx.getStart().getLine()));
+            pushStatement(new Statement(instruction, operands, startLine(ctx)));
 
         } else {
             log.logProblem("Statements should only be placed inside the .text segment", ctx);

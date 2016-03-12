@@ -191,7 +191,13 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
     session.addGutterDecoration(decodeLine, 'decode');
     session.addGutterDecoration(executeLine, 'execute');
     if(!userInControl) {
-        goto(executeLine);
+        if(executeLine != -1) {
+            goto(executeLine);
+        } else if(decodeLine != -1) {
+            goto(decodeLine);
+        } else {
+            goto(fetchLine);
+        }
     }
 }
 

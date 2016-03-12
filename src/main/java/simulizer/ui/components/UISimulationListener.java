@@ -4,11 +4,9 @@ import java.util.Map;
 
 import javafx.application.Platform;
 import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.listeners.AnnotationMessage;
-import simulizer.simulation.listeners.ExecuteStatementMessage;
-import simulizer.simulation.listeners.SimulationListener;
-import simulizer.simulation.listeners.SimulationMessage;
+import simulizer.simulation.listeners.*;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
@@ -78,22 +76,35 @@ public class UISimulationListener extends SimulationListener {
 		wm.getAnnotationManager().processAnnotationMessage(m);
 	}
 
-	@Override
-	public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		// TODO clean up the simulation so less things become null
-		if (wm.getCPU() != null) {
-			CPU cpu = wm.getCPU();
-			if (cpu.getProgram() != null) {
-				Map<Address, Integer> lineNums = cpu.getProgram().lineNumbers;
-				if (lineNums.containsKey(m.statementAddress)) {
-					int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
+	private void highlightAddresses(Address fetch, Address decode, Address execute) {
+		final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
 
-					final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-					if(e != null) {
-						Platform.runLater(() -> e.highlightPipeline(-1, -1, lineNum));
-					}
+		if(e != null) {
+			CPU cpu = wm.getCPU();
+
+			if (cpu != null) {
+				Program p = cpu.getProgram();
+
+				if (p != null) {
+					Map<Address, Integer> lineNums = p.lineNumbers;
+
+					int fetchL = lineNums.getOrDefault(fetch, -1);
+					int decodeL = lineNums.getOrDefault(decode, -1);
+					int executeL = lineNums.getOrDefault(execute, -1);
+
+					Platform.runLater(() -> e.highlightPipeline(fetchL, decodeL, executeL));
 				}
 			}
 		}
+	}
+
+	@Override
+	public void processExecuteStatementMessage(ExecuteStatementMessage m) {
+		highlightAddresses(null, null, m.statementAddress);
+	}
+
+	@Override
+	public void processPipelineStateMessage(PipelineStateMessage m) {
+		highlightAddresses(m.getFetched(), m.getDecoded(), m.getExecuted());
 	}
 }

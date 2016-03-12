@@ -298,8 +298,10 @@ public class WindowManager extends GridPane {
 	 *            whether the new cpu should be pipelined
 	 */
 	public void newCPU(boolean pipelined) {
+		double oldCycleFreq = -1;
 		if (cpu != null) {
 			cpu.shutdown();
+			oldCycleFreq = cpu.getCycleFreq();
 		}
 
 		if (pipelined) {
@@ -308,7 +310,11 @@ public class WindowManager extends GridPane {
 			cpu = new CPU(io);
 		}
 		cpu.registerListener(simListener);
-		cpu.setCycleFreq((Integer) settings.get("simulation.default-CPU-frequency"));
+		if(oldCycleFreq < 0) {
+			cpu.setCycleFreq((Integer) settings.get("simulation.default-CPU-frequency"));
+		} else {
+			cpu.setCycleFreq(oldCycleFreq);
+		}
 
 		for (CPUChangedListener listener : cpuChangedListeners) {
 			listener.cpuChanged(cpu);
