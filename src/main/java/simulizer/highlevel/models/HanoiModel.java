@@ -1,32 +1,29 @@
 package simulizer.highlevel.models;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Stack;
 
 import javafx.util.Pair;
 
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>();
-	private final Queue<Pair<Integer, Integer>> moves = new LinkedList<>();
 	private int numDiscs = 0;
 
 	public HanoiModel() {
 		for (int pegCount = 0; pegCount < 3; pegCount++)
-			getPegs().add(new Stack<Integer>());
+			pegs.add(new Stack<Integer>());
 	}
 
 	public void setNumDisks(int n) {
 		numDiscs = n;
 		// Clear all pegs
-		getPegs().clear();
+		pegs.clear();
 		for (int pegCount = 0; pegCount < 3; pegCount++)
-			getPegs().add(new Stack<Integer>());
+			pegs.add(new Stack<Integer>());
 
 		// Get the first peg and add all the discs
-		Stack<Integer> firstPeg = getPegs().get(0);
+		Stack<Integer> firstPeg = pegs.get(0);
 		for (int disc = n - 1; disc >= 0; disc--)
 			firstPeg.push(disc);
 
@@ -35,25 +32,38 @@ public class HanoiModel extends DataStructureModel {
 	}
 
 	public void move(int startPeg, int endPeg) {
-		Pair<Integer, Integer> move = new Pair<>(startPeg, endPeg);
-		moves.add(move);
+		synchronized (pegs) {
+			Pair<Integer, Integer> move = new Pair<>(startPeg, endPeg);
 
-		// Notify Observers
-		setChanged();
-		notifyObservers(move);
-	}
+			// Apply Update
+			int item = pegs.get(startPeg).pop();
+			pegs.get(endPeg).push(item);
 
-	public void step() {
-		Pair<Integer, Integer> move = moves.poll();
-		int startPeg = move.getKey(), endPeg = move.getValue();
-
-		// Apply Update
-		int item = getPegs().get(startPeg).pop();
-		getPegs().get(endPeg).push(item);
+			// Notify Observers
+			setChanged();
+			notifyObservers(move);
+		}
 	}
 
 	public List<Stack<Integer>> getPegs() {
-		return pegs;
+		synchronized (pegs) {
+			// Copies all the pegs to a new object
+			List<Stack<Integer>> pegsCopy = new ArrayList<>();
+			for (Stack<Integer> pegOrig : pegs) {
+				// Copy peg into revPeg
+				Stack<Integer> pegRev = new Stack<>();
+				pegRev.addAll(pegOrig);
+
+				// Copy revPeg into a new peg
+				Stack<Integer> pegCopy = new Stack<>();
+				for (Integer item : pegRev) 
+					pegCopy.add(new Integer(item));
+				
+				// Add new peg to pegsCopy
+				pegsCopy.add(pegCopy);
+			}
+			return pegsCopy;
+		}
 	}
 
 	public int getNumDiscs() {

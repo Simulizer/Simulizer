@@ -21,6 +21,7 @@ import simulizer.highlevel.models.HanoiModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
+	private List<Stack<Integer>> pegs;
 	private Canvas canvas = new Canvas();
 	private HanoiModel model;
 	private Color[] colorGradient = { Color.RED, Color.ORANGE, Color.BLUE, Color.GREEN, Color.YELLOW };
@@ -58,6 +59,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	public TowerOfHanoiVisualiser(HanoiModel model, HighLevelVisualisation vis) {
 		super(model, vis);
 		this.model = model;
+		pegs = model.getPegs();
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
@@ -80,6 +82,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		if (obj != null) {
 			moves.add((Pair<Integer, Integer>) obj);
 			runAnimations();
+		} else {
+			pegs = model.getPegs();
 		}
 
 		repaint();
@@ -95,7 +99,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			int numDiscs = model.getNumDiscs();
 			int endPeg = move.getValue();
 
-			List<Stack<Integer>> pegs = model.getPegs();
 			int numDiscsOnStart = pegs.get(startPeg).size();
 			int numDiscsOnEnd = pegs.get(endPeg).size();
 
@@ -133,7 +136,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 				),
 				new KeyFrame(Duration.seconds(1.3),
 					e -> {
-						model.step(); // tell the model to move forward one move
+						// Apply Update
+						pegs.get(endPeg).push(pegs.get(startPeg).pop());
+						
 						animating = false;
 						repaint();
 
@@ -187,7 +192,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawStaticDiscs(GraphicsContext gc) {
-		List<Stack<Integer>> pegs = model.getPegs();
 		int numDiscs = model.getNumDiscs();
 
 		for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
