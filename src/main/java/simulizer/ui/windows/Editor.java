@@ -183,12 +183,38 @@ public class Editor extends InternalWindow {
 		getContentPane().getChildren().add(view);
 	}
 
-	private void startContinuousAssembly() {
+	/**
+	 * set continuous assembly 'on' for future file loads
+	 * also start continuous assembly now
+	 */
+	public void enableContinuousAssembly() {
+		continuousAssemblyEnabled = true;
+		startContinuousAssembly();
+	}
+
+	/**
+	 * set continuous assembly 'off' for future file loads
+	 * also stop continuous assembly now if it is running
+	 */
+	public void disableContinuousAssembly() {
+		continuousAssemblyEnabled = false;
+		stopContinuousAssembly();
+	}
+
+	public boolean isContinuousAssemblyEnabled() {
+		return continuousAssemblyEnabled;
+	}
+
+
+	public void startContinuousAssembly() {
 		if(assembleTask != null) {
 			assembleTask.cancel(false); // wait to finish
 		}
 		if(!continuousAssembly.isShutdown()) {
 			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
+				if(!continuousAssemblyEnabled || mode == Mode.EXECUTE_MODE)
+					return;
+
 				try {
 					FutureTask<String> text = new FutureTask<>(() -> {
 						try {
@@ -210,18 +236,23 @@ public class Editor extends InternalWindow {
 						final List<Problem> problems = Assembler.checkForProblems(program);
 						Platform.runLater(() -> setProblems(problems));
 						lastProgramHash = thisProgramHash;
-
-						continuousAssemblyInProgress = false;
-						Platform.runLater(this::refreshTitle);
 					}
 				} catch(TimeoutException | InterruptedException ignored) {
 					// its fine, just don't compile
 				} catch (Exception e) {
 					UIUtils.showExceptionDialog(e);
-					assembleTask.cancel(false);
-					assembleTask = null;
+				} finally {
+					continuousAssemblyInProgress = false;
+					Platform.runLater(this::refreshTitle);
 				}
 			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.MILLISECONDS);
+		}
+	}
+
+	public void stopContinuousAssembly() {
+		if(assembleTask != null) {
+			assembleTask.cancel(true);
+			assembleTask = null;
 		}
 	}
 
@@ -351,8 +382,8 @@ public class Editor extends InternalWindow {
 			}
 		}
 
+		stopContinuousAssembly();
 		// shutdown the continuous assembly thread
-		if(assembleTask != null) assembleTask.cancel(true);
 		continuousAssembly.shutdownNow();
 
 		super.close();

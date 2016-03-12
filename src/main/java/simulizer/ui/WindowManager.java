@@ -194,6 +194,13 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION + " - Assembling Program");
 
 		getWorkspace().openEditorWithCallback((editor) -> {
+			final boolean CAWasEnabled = editor.isContinuousAssemblyEnabled();
+
+			if(CAWasEnabled)
+				editor.disableContinuousAssembly();
+			editor.stopContinuousAssembly();
+
+
 			final String programText = editor.getText();
 
 			// avoid lots of work on the JavaFX thread
@@ -218,6 +225,8 @@ public class WindowManager extends GridPane {
 					}
 				} finally {
 					Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
+					if(CAWasEnabled)
+						editor.enableContinuousAssembly();
 				}
 
 			} , "Assemble");
