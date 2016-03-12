@@ -203,9 +203,8 @@ public class Editor extends InternalWindow {
 						continuousAssemblyInProgress = true;
 						Platform.runLater(this::refreshTitle);
 
-						StoreProblemLogger problems = new StoreProblemLogger();
-						Assembler.assemble(program, problems);
-						Platform.runLater(() -> setProblems(problems.getProblems()));
+						final List<Problem> problems = Assembler.checkForProblems(program);
+						Platform.runLater(() -> setProblems(problems));
 						lastProgramHash = thisProgramHash;
 
 						continuousAssemblyInProgress = false;

@@ -115,21 +115,32 @@ public class AnnotationExecutor {
 		return tClass.cast(globals.get(name));
 	}
 
-	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn {
-		@SuppressWarnings("UnusedAssignment")
+	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn, AssertionError {
+		@SuppressWarnings("UnusedAssignment") // this is actually necessary
 		Object res = null;
+
+		// exceptions thrown from inside the script are wrapped in a ScriptException
+		// exceptions thrown from java executed from a script are not wrapped
 
 		try {
 			res = engine.eval(annotation.code);
 		} catch(ScriptException e) {
 			// exceptions thrown from inside the script are wrapped in a ScriptException
-			if (e.getCause() instanceof ECMAException &&
-					((ECMAException) e.getCause()).thrown instanceof AnnotationEarlyReturn) {
-				promoteToGlobal();
-				return null;
+			if (e.getCause() instanceof ECMAException) {
+				Object cause = ((ECMAException) e.getCause()).thrown;
+
+				if (cause instanceof AnnotationEarlyReturn) {
+					promoteToGlobal();
+					throw (AnnotationEarlyReturn) cause;
+				} else {
+					throw e;
+				}
 			} else {
 				throw e;
 			}
+		} catch(AssertionError e) {
+			promoteToGlobal();
+			throw new AssertionError(annotation.code); // exception message = code that caused it
 		} catch(Exception e) { // propagate the exception
 			throw new ScriptException(e);
 		}
@@ -172,7 +183,12 @@ public class AnnotationExecutor {
 			while(!getGlobal("stop", Boolean.class)) {
 				io.printString(IOStream.DEBUG, "js> ");
 				line = io.readString();
-				Object res = exec(new Annotation(line));
+				Object res = null;
+				try {
+					res = exec(new Annotation(line));
+				} catch(AssertionError | AnnotationEarlyReturn e) {
+					io.printString(IOStream.DEBUG, e.getClass().getName());
+				}
 				if(res != null) {
 					io.printString(IOStream.DEBUG, res.toString() + "\n");
 				}

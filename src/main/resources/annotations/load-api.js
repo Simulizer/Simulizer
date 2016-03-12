@@ -15,6 +15,7 @@ AnnotationEarlyReturn = Java.type('simulizer.annotations.AnnotationEarlyReturn')
 // debug bridge
 log   = function(msg){debug.log(''+msg);};
 alert = function(msg){debug.alert(''+msg);};
+assert = function(cond){debug.assertTrue(cond);};
 
 // simulation bridge
 stop     = function(){simulation.stop();};
@@ -30,7 +31,7 @@ setSpeed = function(s){simulation.setSpeed(s);};
 ret = function(){throw new AnnotationEarlyReturn();};
 
 // override globals (from debugger watch private attribute: engine.global for a full list)
-_internal.disabled = function(){print("disabled");};
+_internal.disabled = function(){print('disabled');};
 
 print = log;
 exit  = stop;

@@ -52,6 +52,7 @@ The debug bridge (named `debug` in JS) gives the annotations access to component
 
 Methods:
 - `log(msg)` write a message (implicitly converted to string) to the program I/O
+- `assertTrue(cond)` check that a condition holds. If it does not then a helpful message is displayed in the program I/O
 - `alert(msg)` show a popup message (implicitly converted to string)
 - `getCPU()` get the Java `CPU` object
 
@@ -104,9 +105,10 @@ To increase brevity, certain commonly used methods from the bridges are assigned
 
 ```javascript
 // Debug Bridge
-log   = debug.log
-print = debug.log
-alert = debug.alert
+log    = debug.log
+print  = debug.log
+alert  = debug.alert
+assert = debug.assertTrue
 
 // Simulation Bridge
 stop     = simulation.stop

@@ -11,10 +11,11 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import simulizer.annotations.AnnotationExecutor;
 import simulizer.assembler.extractor.ProgramExtractor;
+import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemCountLogger;
 import simulizer.assembler.extractor.problem.ProblemLogger;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.*;
 import simulizer.parser.SimpLexer;
 import simulizer.parser.SimpParser;
@@ -23,6 +24,34 @@ import simulizer.simulation.data.representation.Word;
 
 
 public class Assembler {
+    /**
+     * Performs the first stage of assembling a program. But stops once it
+     * determines whether the program is valid or not. This is useful when only
+     * the validity of the program needs to be known.
+     * @param input the program string to assemble
+     * @return any problems with the program (empty list if program valid)
+     */
+    public static List<Problem> checkForProblems(String input) {
+        StoreProblemLogger log = new StoreProblemLogger();
+
+        input += '\n'; // to parse correctly, must end with a newline
+
+        SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
+        SimpParser parser = new SimpParser(new CommonTokenStream(lexer));
+
+        // prevent outputting to the console
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
+
+        // try to parse a program from the input
+        SimpParser.ProgramContext tree = parser.program();
+
+        ProgramExtractor extractor = new ProgramExtractor(log);
+        ParseTreeWalker.DEFAULT.walk(extractor, tree);
+
+        return log.getProblems();
+    }
+
     /**
      * Assemble a problem and catch any problem output
      * @param input the program string to assemble
@@ -35,6 +64,10 @@ public class Assembler {
 
         SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
         SimpParser parser = new SimpParser(new CommonTokenStream(lexer));
+
+        // prevent outputting to the console
+        lexer.removeErrorListeners();
+        parser.removeErrorListeners();
 
         // try to parse a program from the input
         SimpParser.ProgramContext tree = parser.program();
