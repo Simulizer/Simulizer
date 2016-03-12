@@ -310,7 +310,7 @@ public class WindowManager extends GridPane {
 			cpu = new CPU(io);
 		}
 		cpu.registerListener(simListener);
-		if(oldCycleFreq < 0) {
+		if (oldCycleFreq < 0) {
 			cpu.setCycleFreq((Integer) settings.get("simulation.default-CPU-frequency"));
 		} else {
 			cpu.setCycleFreq(oldCycleFreq);
@@ -359,54 +359,37 @@ public class WindowManager extends GridPane {
 	public void motionBlur() {
 		if (!bluring) {
 			bluring = true;
-			MotionBlur mb = new MotionBlur();
-			setEffect(mb);
-			Thread t = new Thread(() -> {
-				double angle = 0;
-				int delay = 10;
-				for (double radius = 0; radius < 15; radius = radius + 0.01) {
-					angle += 1;
-					if (angle > 360)
-						angle = 0;
-					mb.setRadius(radius);
-					mb.setAngle(angle);
-					try {
-						Thread.sleep(delay);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					setEffect(mb);
+			Thread t = new Thread(new Runnable() {
+				double angle = 0, radius = 0;
+
+				@Override
+				public void run() {
+					for (radius = 0; radius < 15; radius = radius + 0.01) 
+						rotate();
+					for (int i = 0; i < 100; i++) 
+						rotate();
+					for (radius = 15; radius > 0; radius = radius - 0.01) 
+						rotate();
+					setEffect(null);
+					bluring = false;
 				}
 
-				for (int i = 0; i < 100; i++) {
-					angle += 1;
-					if (angle > 360)
-						angle = 0;
-					mb.setAngle(angle);
-					try {
-						Thread.sleep(delay);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					setEffect(mb);
-				}
-
-				for (double radius = 15; radius > 0; radius = radius - 0.01) {
+				private void rotate(){
 					angle += 1;
 					if (angle > 360)
 						angle = 0f;
+					MotionBlur mb = new MotionBlur();
 					mb.setRadius(radius);
 					mb.setAngle(angle);
+					setEffect(mb);
 					try {
-						Thread.sleep(delay);
+						Thread.sleep(10);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					setEffect(mb);
 				}
-				setEffect(null);
-				bluring = false;
-			} , "Motion-Blur");
+				
+			}, "Motion-Blur");
 			t.setDaemon(true);
 			t.start();
 		}
