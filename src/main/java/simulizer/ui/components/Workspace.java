@@ -8,6 +8,10 @@ import java.util.Observable;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javafx.application.Platform;
@@ -15,6 +19,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
@@ -38,6 +43,36 @@ public class Workspace extends Observable implements Themeable {
 	private final Pane pane = new Pane();
 	private WindowManager wm = null;
 
+	private static class ResizeListener implements ChangeListener<Object> {
+		private final Workspace w;
+		private ScheduledExecutorService executor;
+		private ScheduledFuture<?> shortTask;
+		private ScheduledFuture<?> longTask;
+		private int delay;
+
+		public ResizeListener(Workspace w, int delay) {
+			this.w = w;
+			executor = Executors.newSingleThreadScheduledExecutor(
+					new ThreadUtils.NamedThreadFactory("Window-Resizing"));
+			shortTask = null;
+			longTask = null;
+			this.delay = delay;
+		}
+
+		@Override
+		public synchronized void changed(ObservableValue<?> observable, Object oldValue, Object newValue) {
+			if(shortTask != null)
+				shortTask.cancel(true);
+			if(longTask != null)
+				longTask.cancel(true);
+
+			shortTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows),
+					delay, TimeUnit.MILLISECONDS);
+			longTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows),
+					1, TimeUnit.SECONDS);
+		}
+	}
+
 	/**
 	 * A workspace holds all the Internal Windows
 	 *
@@ -48,28 +83,16 @@ public class Workspace extends Observable implements Themeable {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
 		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
+			int delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
+			ResizeListener r = new ResizeListener(this, delay);
+
 			// Register event listeners
-			wm.getPrimaryStage().widthProperty().addListener((a, b, c) -> Platform.runLater(() -> resizeInternalWindows()));
-			wm.getPrimaryStage().heightProperty().addListener((a, b, c) -> Platform.runLater(() -> resizeInternalWindows()));
+			Stage window = wm.getPrimaryStage();
 
-			// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
-			wm.getPrimaryStage().maximizedProperty().addListener(new ChangeListener<Object>() {
-				final Timer timer = new Timer("Window-Resizing", true);
-				TimerTask task = null;
-				int delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
-
-				@Override
-				public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-					timer.purge();
-					task = new TimerTask() {
-						@Override
-						public void run() {
-							Platform.runLater(() -> resizeInternalWindows());
-						}
-					};
-					timer.schedule(task, delay);
-				}
-			});
+			window.widthProperty().addListener(r);
+			window.heightProperty().addListener(r);
+			window.fullScreenProperty().addListener(r);
+			window.maximizedProperty().addListener(r);
 		}
 	}
 

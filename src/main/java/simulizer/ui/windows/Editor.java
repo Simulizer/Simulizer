@@ -31,7 +31,7 @@ import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
-import simulizer.ui.components.TemporaryObserver;
+import simulizer.utils.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.*;
