@@ -50,9 +50,11 @@ public class Editor extends InternalWindow {
 	// TODO: update problems as the user types. maybe do this using ace's worker
 	// TODO: handle more keyboard shortcuts: C-f for find
 
+	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
+	private static File currentFile = null; // persists across instances of the window
+
 	private boolean pageLoaded;
 	private WebEngine engine;
-	private File currentFile;
 
 	private boolean changedSinceLastSave;
 	private boolean editedSinceLabelUpdate;
@@ -111,7 +113,6 @@ public class Editor extends InternalWindow {
 	public Editor() {
 		WebView view = new WebView();
 		pageLoaded = false;
-		currentFile = null;
 		bridge = new Bridge(this);
 
 		engine = view.getEngine();
@@ -165,7 +166,7 @@ public class Editor extends InternalWindow {
 			}
 		});
 
-		// other windows scan the contents of the editor continously
+		// other windows scan the contents of the editor continuously
 		editedSinceLabelUpdate = false;
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
@@ -189,32 +190,34 @@ public class Editor extends InternalWindow {
 		if(assembleTask != null) {
 			assembleTask.cancel(false); // wait to finish
 		}
-		assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
-			try {
-				FutureTask<String> text = new FutureTask<>(this::getText);
-				Platform.runLater(text);
+		if(!continuousAssembly.isShutdown()) {
+			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
+				try {
+					FutureTask<String> text = new FutureTask<>(this::getText);
+					Platform.runLater(text);
 
-				String program = text.get();
-				int thisProgramHash = program.hashCode();
+					String program = text.get();
+					int thisProgramHash = program.hashCode();
 
-				if(lastProgramHash != thisProgramHash) {
-					continuousAssemblyInProgress = true;
-					Platform.runLater(this::refreshTitle);
+					if (lastProgramHash != thisProgramHash) {
+						continuousAssemblyInProgress = true;
+						Platform.runLater(this::refreshTitle);
 
-					StoreProblemLogger problems = new StoreProblemLogger();
-					Assembler.assemble(program, problems);
-					Platform.runLater(() -> setProblems(problems.getProblems()));
-					lastProgramHash = thisProgramHash;
+						StoreProblemLogger problems = new StoreProblemLogger();
+						Assembler.assemble(program, problems);
+						Platform.runLater(() -> setProblems(problems.getProblems()));
+						lastProgramHash = thisProgramHash;
 
-					continuousAssemblyInProgress = false;
-					Platform.runLater(this::refreshTitle);
+						continuousAssemblyInProgress = false;
+						Platform.runLater(this::refreshTitle);
+					}
+				} catch (Exception e) {
+					UIUtils.showExceptionDialog(e);
+					assembleTask.cancel(false);
+					assembleTask = null;
 				}
-			} catch(Exception e) {
-				UIUtils.showExceptionDialog(e);
-				assembleTask.cancel(false);
-				assembleTask = null;
-			}
-		}, 0, continuousAssemblyRefreshPeriod, TimeUnit.SECONDS);
+			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.SECONDS);
+		}
 	}
 
 	/**
@@ -261,21 +264,35 @@ public class Editor extends InternalWindow {
 		continuousAssemblyEnabled = (boolean) settings.get("editor.continuous-assembly");
 		continuousAssemblyRefreshPeriod = (int) settings.get("editor.continuous-assembly-refresh-period");
 
-		String initialFilename = (String) settings.get("editor.initial-file");
-		if(initialFilename != null && !initialFilename.isEmpty()) {
-			File f = new File(initialFilename);
-			if(f.exists()) {
-				loadFile(f);
+		if(initialLoad) {
+			String initialFilename = (String) settings.get("editor.initial-file");
+			if (initialFilename != null && !initialFilename.isEmpty()) {
+				File f = new File(initialFilename);
+				if (f.exists()) {
+					loadFile(f);
+				} else {
+					UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
+					newFile();
+				}
 			} else {
-				UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
 				newFile();
 			}
 		} else {
-			newFile();
+			if(currentFile != null) {
+				loadFile(currentFile);
+			} else {
+				newFile();
+			}
 		}
+
+
+		if(getWindowManager().getCPU().isRunning())
+			executeMode();
 
 		// signals that all the editor methods are now safe to call
 		pageLoaded = true;
+		// signals that whenever the editor is opened again, it is not for the first time
+		initialLoad = false;
 	}
 
 	private void loadPage(Settings settings) {

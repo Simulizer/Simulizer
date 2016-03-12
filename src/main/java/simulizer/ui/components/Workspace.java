@@ -24,6 +24,7 @@ import simulizer.ui.layout.WindowLocation;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.theme.Themeable;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -175,13 +176,16 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	public void openEditorWithCallback(Consumer<Editor> callback) {
 		Editor e = (Editor) findInternalWindow(WindowEnum.EDITOR);
+
+		// most of the contents of this method have to be done on the FX thread anyway
+		// and this method should also be resilient to being run on any thread
+		if(!Platform.isFxApplicationThread()) {
+			Platform.runLater(() -> openEditorWithCallback(callback));
+			return;
+		}
+
 		if (e != null && e.hasLoaded()) {
-			if (Platform.isFxApplicationThread()) {
-				callback.accept(e);
-			} else {
-				final Editor finalE = e;
-				Platform.runLater(() -> callback.accept(finalE));
-			}
+			callback.accept(e);
 		} else {
 			// perform the job of openInternalWindow
 			e = (Editor) WindowEnum.EDITOR.createNewWindow();
@@ -190,7 +194,7 @@ public class Workspace extends Observable implements Themeable {
 			e.setWindowManager(wm);
 			wm.getLayouts().setWindowDimentions(e);
 			// starts the page loading
-			Platform.runLater(() -> addWindows(finalE));
+			addWindows(finalE);
 
 			// wait for the page to load (crucially: on a non JavaFX thread)
 			Thread waiting = new Thread(() -> {

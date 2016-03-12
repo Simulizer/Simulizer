@@ -63,6 +63,10 @@ public class UISimulationListener extends SimulationListener {
 				}
 
 				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
+				final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+				if(e != null) {
+					Platform.runLater(e::editMode);
+				}
 			} break;
 			default:break;
 		}
@@ -84,8 +88,10 @@ public class UISimulationListener extends SimulationListener {
 				if (lineNums.containsKey(m.statementAddress)) {
 					int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
 
-					wm.getWorkspace().openEditorWithCallback((editor) ->
-							editor.highlightPipeline(-1, -1, lineNum));
+					final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+					if(e != null) {
+						Platform.runLater(() -> e.highlightPipeline(-1, -1, lineNum));
+					}
 				}
 			}
 		}
