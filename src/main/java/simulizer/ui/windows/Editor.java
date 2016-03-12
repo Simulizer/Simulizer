@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.*;
 
+import javafx.application.Platform;
 import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
@@ -23,7 +25,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.Problem;
+import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
@@ -44,7 +48,7 @@ public class Editor extends InternalWindow {
 
 	// TODO: refresh current file if not edited
 	// TODO: update problems as the user types. maybe do this using ace's worker
-	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
+	// TODO: handle more keyboard shortcuts: C-f for find
 
 	private boolean pageLoaded;
 	private WebEngine engine;
@@ -74,6 +78,14 @@ public class Editor extends InternalWindow {
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
 
+	// to do with continuous assembling of
+	private boolean continuousAssemblyEnabled;
+	private int continuousAssemblyRefreshPeriod; // if changed, does not automatically change the running scheduler
+	private boolean continuousAssemblyInProgress; // used to set the window title
+	private final ScheduledExecutorService continuousAssembly;
+	private ScheduledFuture<?> assembleTask;
+	private int lastProgramHash; // used to avoid wasted effort if the file has not changed
+
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
@@ -94,6 +106,7 @@ public class Editor extends InternalWindow {
 	}
 
 	private Bridge bridge;
+
 
 	public Editor() {
 		WebView view = new WebView();
@@ -152,6 +165,7 @@ public class Editor extends InternalWindow {
 			}
 		});
 
+		// other windows scan the contents of the editor continously
 		editedSinceLabelUpdate = false;
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
@@ -162,7 +176,45 @@ public class Editor extends InternalWindow {
 
 		setOnClosedAction(e -> detachObservers());
 
+		// continuous assembly
+		continuousAssembly = Executors.newSingleThreadScheduledExecutor();
+		continuousAssemblyInProgress = false;
+		assembleTask = null;
+		lastProgramHash = 0;
+
 		getContentPane().getChildren().add(view);
+	}
+
+	private void startContinuousAssembly() {
+		if(assembleTask != null) {
+			assembleTask.cancel(false); // wait to finish
+		}
+		assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
+			try {
+				FutureTask<String> text = new FutureTask<>(this::getText);
+				Platform.runLater(text);
+
+				String program = text.get();
+				int thisProgramHash = program.hashCode();
+
+				if(lastProgramHash != thisProgramHash) {
+					continuousAssemblyInProgress = true;
+					Platform.runLater(this::refreshTitle);
+
+					StoreProblemLogger problems = new StoreProblemLogger();
+					Assembler.assemble(program, problems);
+					Platform.runLater(() -> setProblems(problems.getProblems()));
+					lastProgramHash = thisProgramHash;
+
+					continuousAssemblyInProgress = false;
+					Platform.runLater(this::refreshTitle);
+				}
+			} catch(Exception e) {
+				UIUtils.showExceptionDialog(e);
+				assembleTask.cancel(false);
+				assembleTask = null;
+			}
+		}, 0, continuousAssemblyRefreshPeriod, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -205,6 +257,9 @@ public class Editor extends InternalWindow {
 
 		boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
 		jsWindow.setMember("userInControl", userInControl);
+
+		continuousAssemblyEnabled = (boolean) settings.get("editor.continuous-assembly");
+		continuousAssemblyRefreshPeriod = (int) settings.get("editor.continuous-assembly-refresh-period");
 
 		String initialFilename = (String) settings.get("editor.initial-file");
 		if(initialFilename != null && !initialFilename.isEmpty()) {
@@ -273,6 +328,16 @@ public class Editor extends InternalWindow {
 				return;
 			}
 		}
+
+		// shutdown the continuous assembly thread
+		if(assembleTask != null) assembleTask.cancel(true);
+		continuousAssembly.shutdown();
+		try {
+			continuousAssembly.awaitTermination(3, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			continuousAssembly.shutdownNow();
+		}
+
 		super.close();
 	}
 
@@ -400,6 +465,9 @@ public class Editor extends InternalWindow {
 		editedSinceLabelUpdate = false;
 
 		updateObservers();
+
+		if(continuousAssemblyEnabled)
+			startContinuousAssembly();
 	}
 
 	public void newFile() {
@@ -409,6 +477,9 @@ public class Editor extends InternalWindow {
 		editedSinceLabelUpdate = false;
 
 		updateObservers();
+
+		if(continuousAssemblyEnabled)
+			startContinuousAssembly();
 	}
 
 	/**
@@ -424,9 +495,10 @@ public class Editor extends InternalWindow {
 	}
 
 	private void refreshTitle() {
-		String editedSymbol = changedSinceLastSave ? " *" : "";
 		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
-		setTitle(WindowEnum.getName(this) + modeString + " - " + getBackingFilename() + editedSymbol);
+		String assembling = continuousAssemblyInProgress ? " ~ " : " - ";
+		String editedSymbol = changedSinceLastSave ? " *" : "";
+		setTitle(WindowEnum.getName(this) + modeString + assembling + getBackingFilename() + editedSymbol);
 	}
 
 	/**

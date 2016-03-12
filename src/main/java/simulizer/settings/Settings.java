@@ -68,6 +68,8 @@ public class Settings {
 					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program", false))
 					.add(new BooleanSetting("vim-mode", "Vim mode", "Vim keybindings for the editor", false))
 					.add(new BooleanSetting("wrap", "Wrap long lines", "Wrap long lines", false))
+					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
+					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (seconds)", 3))
 					);
 		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
 					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
