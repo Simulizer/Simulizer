@@ -27,7 +27,6 @@ import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.Problem;
-import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
@@ -35,6 +34,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.utils.DebugUtils;
 import simulizer.utils.FileUtils;
 import simulizer.utils.SafeJSObject;
 import simulizer.utils.UIUtils;
@@ -192,6 +192,7 @@ public class Editor extends InternalWindow {
 		}
 		if(!continuousAssembly.isShutdown()) {
 			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
+
 				try {
 					FutureTask<String> text = new FutureTask<>(this::getText);
 					Platform.runLater(text);
@@ -215,7 +216,7 @@ public class Editor extends InternalWindow {
 					assembleTask.cancel(false);
 					assembleTask = null;
 				}
-			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.SECONDS);
+			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.MILLISECONDS);
 		}
 	}
 
