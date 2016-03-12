@@ -1,4 +1,4 @@
-package simulizer.ui.components;
+package simulizer.utils;
 
 /**
  * Represents an observer of another single object. It can respond to messages being fired. It can also stop observing
@@ -11,10 +11,10 @@ public interface TemporaryObserver {
 	/**
 	 * Update with whatever actions are suitable.
 	 */
-	public void update();
+	void update();
 
 	/**
 	 * Stop observing the object.
 	 */
-	public void stopObserving();
+	void stopObserving();
 }

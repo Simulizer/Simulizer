@@ -14,7 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import simulizer.ui.components.TemporaryObserver;
+import simulizer.utils.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.UIUtils;

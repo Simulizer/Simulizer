@@ -1,10 +1,8 @@
 package simulizer.ui.components;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
@@ -16,6 +14,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
@@ -154,13 +153,25 @@ public class MainMenuBar extends MenuBar {
 			}
 		});
 
-		// | | | -- Reload Layouts
+		// | | | -- Refresh Layouts
 		MenuItem reloadLayoutItem = new MenuItem("Refresh Layouts");
 		reloadLayoutItem.setOnAction(e -> {
 			wm.getLayouts().reload(false);
 			layoutMenu(menu);
 		});
-		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem);
+
+		// | | | -- Toggle Fullscreen
+		CheckMenuItem fullscreen = new CheckMenuItem("Fullscreen");
+		wm.getPrimaryStage().setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+		fullscreen.setAccelerator(new KeyCodeCombination(KeyCode.F11));
+		fullscreen.setSelected(wm.getPrimaryStage().isFullScreen());
+		fullscreen.setOnAction(e -> {
+			Stage wnd = wm.getPrimaryStage();
+			wnd.setFullScreen(!wnd.isFullScreen());
+		});
+
+
+		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem, fullscreen);
 	}
 
 	/**
@@ -227,7 +238,7 @@ public class MainMenuBar extends MenuBar {
 			}
 		});
 
-		MenuItem pauseResume = null;
+		MenuItem pauseResume;
 		if (!clock.isRunning()) {
 			pauseResume = new MenuItem("Resume Simulation");
 			pauseResume.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
@@ -248,12 +259,7 @@ public class MainMenuBar extends MenuBar {
 		singleStep.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
 		singleStep.setOnAction(e -> {
 			if (!clock.isRunning() && cpu.isRunning()) {
-				try {
-					cpu.resumeForOneCycle();
-				} catch (Exception ex) {
-					// TODO: Handle Exception properly
-					UIUtils.showExceptionDialog(ex);
-				}
+				cpu.resumeForOneCycle();
 			}
 		});
 
