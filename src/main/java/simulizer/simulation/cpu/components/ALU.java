@@ -234,7 +234,7 @@ public class ALU {
             	if(decodeS(firstValue) <= decodeS(secondValue)) {return encodeS(1);}
             	return encodeS(0);
             case sleu:
-            	if(decodeU(firstValue) >= decodeU(secondValue)) {return encodeS(1);}
+            	if(decodeU(firstValue) <= decodeU(secondValue)) {return encodeS(1);}
             	return encodeS(0);
             case slt:
             	if(decodeS(firstValue) < decodeS(secondValue)) {return encodeS(1);}
