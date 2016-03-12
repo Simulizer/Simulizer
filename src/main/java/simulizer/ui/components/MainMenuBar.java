@@ -239,9 +239,8 @@ public class MainMenuBar extends MenuBar {
 		pauseResume.setOnAction(e -> {
 			if (!clock.isRunning() && cpu.isRunning())
 				wm.getCPU().resume();
-			else if (clock.isRunning() && cpu.isRunning()) {
+			else if (clock.isRunning() && cpu.isRunning())
 				cpu.pause();
-			}
 		});
 
 		MenuItem singleStep = new MenuItem("Single Step");

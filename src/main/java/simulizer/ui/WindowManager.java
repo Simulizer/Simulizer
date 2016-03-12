@@ -191,7 +191,7 @@ public class WindowManager extends GridPane {
 	 * Assembles the SIMP program and executes it
 	 */
 	public void assembleAndRun() {
-		primaryStage.setTitle("Simulizer - Assembling Program");
+		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION + " - Assembling Program");
 
 		getWorkspace().openEditorWithCallback((editor) -> {
 			final String programText = editor.getText();
@@ -217,7 +217,7 @@ public class WindowManager extends GridPane {
 						runProgram(p); // spawns another thread
 					}
 				} finally {
-					Platform.runLater(() -> primaryStage.setTitle("Simulizer"));
+					Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
 				}
 
 			} , "Assemble");
