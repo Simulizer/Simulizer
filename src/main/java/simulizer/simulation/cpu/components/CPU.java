@@ -1,11 +1,11 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.BrokenBarrierException;
+
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;
@@ -37,7 +37,6 @@ import simulizer.simulation.listeners.SimulationListener;
 import simulizer.simulation.listeners.SimulationMessage;
 import simulizer.simulation.listeners.StageEnterMessage;
 import simulizer.simulation.listeners.StageEnterMessage.Stage;
-import simulizer.utils.UIUtils;
 
 /**
  * this is the central CPU class

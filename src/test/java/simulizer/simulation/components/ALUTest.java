@@ -100,6 +100,12 @@ public class ALUTest {
 			assertEquals(-6,executeS(Instruction.and,signedW(-5),signedW(-2)));
 		}
 		
+		{//andi
+			assertEquals(0,executeS(Instruction.andi,signedW(0),signedW(17)));
+			assertEquals(16,executeS(Instruction.andi,signedW(17),signedW(24)));
+			assertEquals(-6,executeS(Instruction.andi,signedW(-5),signedW(-2)));
+		}
+		
 		{//add
 			
 			assertEquals(11,executeS(Instruction.add,signedW(4),signedW(7)));
@@ -180,6 +186,18 @@ public class ALUTest {
 			assertEquals(0,executeU(Instruction.divu,unsignedW(0),unsignedW(4)));
 			assertEquals(1,executeU(Instruction.divu,unsignedW((long)(Math.pow(2, 32)-1)),unsignedW((long)(Math.pow(2, 32)-1))));
 			assertEquals(2,executeU(Instruction.divu,unsignedW(4),unsignedW(2)));
+		}
+		
+		{//rem
+			assertEquals(0,executeS(Instruction.rem,signedW(0),signedW(4)));
+			assertEquals(0,executeS(Instruction.rem,signedW(4),signedW(2)));
+			assertEquals(0,executeS(Instruction.rem,signedW(4),signedW(-2)));
+		}
+		
+		{//remu
+			assertEquals(0,executeU(Instruction.remu,unsignedW(0),unsignedW(4)));
+			assertEquals(0,executeU(Instruction.remu,unsignedW((long)(Math.pow(2, 32)-1)),unsignedW((long)(Math.pow(2, 32)-1))));
+			assertEquals(0,executeU(Instruction.remu,unsignedW(4),unsignedW(2)));
 		}
 		
 		{//neg
@@ -276,6 +294,126 @@ public class ALUTest {
 			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.beqz,signedW(0),Optional.empty()));
 			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beqz,signedW(-1),Optional.empty()));
 			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.beqz,signedW(1),Optional.empty()));
+		}
+		
+		{//bge
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bge,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bge,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bge,signedW(0),signedW(-1)));
+		}
+		
+		{//bgeu
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bgeu,unsignedW(0),unsignedW((long)Math.pow(2, 32)-1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bgeu,unsignedW(0),unsignedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bgeu,unsignedW((long)Math.pow(2, 32)-1),unsignedW(0)));
+		}
+		
+		{//bgt
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bgt,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.bgt,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.bgt,signedW(0),signedW(-1)));
+		}
+		
+		{//bgtu
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bgtu,unsignedW(0),unsignedW((long)Math.pow(2, 32)-1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bgtu,unsignedW(0),unsignedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bgtu,unsignedW((long)Math.pow(2, 32)-1),unsignedW(0)));
+		}
+		
+		{//ble
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.ble,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.ble,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.ble,signedW(0),signedW(-1)));
+		}
+		
+		{//bleu
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bleu,unsignedW(0),unsignedW((long)Math.pow(2, 32)-1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bleu,unsignedW(0),unsignedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bleu,unsignedW((long)Math.pow(2, 32)-1),unsignedW(0)));
+		}
+		
+		{//blt
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeS(Instruction.blt,signedW(0),signedW(1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.blt,signedW(0),signedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeS(Instruction.blt,signedW(0),signedW(-1)));
+		}
+		
+		{//bltu
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchTrue),executeU(Instruction.bltu,unsignedW(0),unsignedW((long)Math.pow(2, 32)-1)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bltu,unsignedW(0),unsignedW(0)));
+			assertEquals(DataConverter.decodeAsSigned(ALU.branchFalse),executeU(Instruction.bltu,unsignedW((long)Math.pow(2, 32)-1),unsignedW(0)));
+		}
+		
+		{//seq
+			assertEquals(0,executeS(Instruction.seq,signedW(0),signedW(1)));
+			assertEquals(1,executeS(Instruction.seq,signedW(0),signedW(0)));
+			assertEquals(0,executeS(Instruction.seq,signedW(0),signedW(-1)));
+		}
+		
+		{//sne
+			assertEquals(1,executeS(Instruction.sne,signedW(0),signedW(1)));
+			assertEquals(0,executeS(Instruction.sne,signedW(0),signedW(0)));
+			assertEquals(1,executeS(Instruction.sne,signedW(0),signedW(-1)));
+		}
+		
+		{//sge
+			assertEquals(0,executeS(Instruction.sge,signedW(0),signedW(1)));
+			assertEquals(1,executeS(Instruction.sge,signedW(0),signedW(0)));
+			assertEquals(1,executeS(Instruction.sge,signedW(0),signedW(-1)));
+		}
+		
+		{//sgeu
+			assertEquals(0,executeU(Instruction.sgeu,unsignedW(0),unsignedW((long)Math.pow(2,32)-1)));
+			assertEquals(1,executeU(Instruction.sgeu,unsignedW(0),unsignedW(0)));
+			assertEquals(1,executeU(Instruction.sgeu,unsignedW((long)Math.pow(2,32)-1),unsignedW(0)));
+		}
+		
+		{//sgt
+			assertEquals(0,executeS(Instruction.sgt,signedW(0),signedW(1)));
+			assertEquals(0,executeS(Instruction.sgt,signedW(0),signedW(0)));
+			assertEquals(1,executeS(Instruction.sgt,signedW(0),signedW(-1)));
+		}
+		
+		{//sgtu
+			assertEquals(0,executeU(Instruction.sgtu,unsignedW(0),unsignedW((long)Math.pow(2,32)-1)));
+			assertEquals(0,executeU(Instruction.sgtu,unsignedW(0),unsignedW(0)));
+			assertEquals(1,executeU(Instruction.sgtu,unsignedW((long)Math.pow(2,32)-1),unsignedW(0)));
+		}
+		
+		{//sle
+			assertEquals(1,executeS(Instruction.sle,signedW(0),signedW(1)));
+			assertEquals(1,executeS(Instruction.sle,signedW(0),signedW(0)));
+			assertEquals(0,executeS(Instruction.sle,signedW(0),signedW(-1)));
+		}
+		
+		{//sleu
+			assertEquals(1,executeU(Instruction.sleu,unsignedW(0),unsignedW((long)Math.pow(2,32)-1)));
+			assertEquals(1,executeU(Instruction.sleu,unsignedW(0),unsignedW(0)));
+			assertEquals(0,executeU(Instruction.sleu,unsignedW((long)Math.pow(2,32)-1),unsignedW(0)));
+		}
+		
+		{//slt
+			assertEquals(1,executeS(Instruction.slt,signedW(0),signedW(1)));
+			assertEquals(0,executeS(Instruction.slt,signedW(0),signedW(0)));
+			assertEquals(0,executeS(Instruction.slt,signedW(0),signedW(-1)));
+		}
+		
+		{//sltu
+			assertEquals(1,executeU(Instruction.sltu,unsignedW(0),unsignedW((long)Math.pow(2,32)-1)));
+			assertEquals(0,executeU(Instruction.sltu,unsignedW(0),unsignedW(0)));
+			assertEquals(0,executeU(Instruction.sltu,unsignedW((long)Math.pow(2,32)-1),unsignedW(0)));
+		}
+		
+		{//slti
+			assertEquals(1,executeS(Instruction.slti,signedW(0),signedW(1)));
+			assertEquals(0,executeS(Instruction.slti,signedW(0),signedW(0)));
+			assertEquals(0,executeS(Instruction.slti,signedW(0),signedW(-1)));
+		}
+		
+		{//sltiu
+			assertEquals(1,executeU(Instruction.sltiu,unsignedW(0),unsignedW((long)Math.pow(2,32)-1)));
+			assertEquals(0,executeU(Instruction.sltiu,unsignedW(0),unsignedW(0)));
+			assertEquals(0,executeU(Instruction.sltiu,unsignedW((long)Math.pow(2,32)-1),unsignedW(0)));
 		}
 		
 		{//move

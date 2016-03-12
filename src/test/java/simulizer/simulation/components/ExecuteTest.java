@@ -60,8 +60,7 @@ public class ExecuteTest {
 						 "main:\n" + 
 						 myInstructions;
 		
-		Assembler assembler = new Assembler();
-		return assembler.assemble(program, null);//assembling program
+		return Assembler.assemble(program, null);//assembling program
 	}
 	
 	/**method will access a register and get it's signed long value
@@ -1701,7 +1700,7 @@ public class ExecuteTest {
 			CPU cpu = createCPU(myInstructions);
 			
 			assertEquals("TH",this.io.scanner);
-			//assertEquals(54480000,accessRegisterSigned(cpu,Register.t1));
+			assertEquals(1414004736,accessRegisterSigned(cpu,Register.t1));
 			this.io.scanner = "";
 		}
 	}
@@ -1741,12 +1740,979 @@ public class ExecuteTest {
 		assertEquals(intendedHeapBreak,heapBreak);
 	}
 	
-	/**method will test the execution of the break instruction
+	/**method tests the execution of the andi instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 * 
 	 */
 	@Test
-	public void testBreakExecute()
+	public void testAndiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
-		//is it actually able to test this?
+		String myInstructions = "li $t1, 15;\n" +
+								"andi $t2, $t1 ,12;\n";
+
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(15,accessRegisterSigned(cpu,Register.t1));
+		assertEquals(12,accessRegisterSigned(cpu,Register.t2));
+	}
+	
+	/**method will test the execution of the rem instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testRemExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $t1, 17;\n" +
+								"li $t2, 2;\n" +
+								"rem $t0, $t1, $t2;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		assertEquals(17,accessRegisterSigned(cpu,Register.t1));
+		assertEquals(2,accessRegisterSigned(cpu,Register.t2));
+		assertEquals(1,accessRegisterSigned(cpu,Register.t0));
+	}
+	
+	/**method will test the execution of the remu instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testRemuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "li $t1, 17;\n" +
+								"li $t2, 2;\n" +
+								"remu $t0, $t1, $t2;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		assertEquals(17,accessRegisterUnsigned(cpu,Register.t1));
+		assertEquals(2,accessRegisterUnsigned(cpu,Register.t2));
+		assertEquals(1,accessRegisterUnsigned(cpu,Register.t0));
+	}
+	
+	/**method tests bge instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBgeExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"bge $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"bge $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests bgeu instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBgeuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"bgeu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterUnsigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"bgeu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterUnsigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests bgt instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBgtExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"bgt $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 5;\n" + 
+									"bgt $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests bgtu instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBgtuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"bgtu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterUnsigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 5;\n" + 
+									"bgtu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterUnsigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests ble instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBleExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"ble $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"ble $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests bleu instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBleuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"bleu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterUnsigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" + 
+									"bleu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterUnsigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests blt instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBltExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"blt $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" + 
+									"blt $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterSigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterSigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**method tests bltu instruction execution
+	 * 
+	 * @throws MemoryException
+	 * @throws DecodeException
+	 * @throws InstructionException
+	 * @throws ExecuteException
+	 * @throws HeapException
+	 * @throws StackException
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	@Test
+	public void testBltuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 4;\n" +
+									"li $a1, 5;\n" + 
+									"bltu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//+4 due to program counter at end of execution
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertNotEquals(7,accessRegisterUnsigned(cpu,Register.v0));//checking skiiped instructions aren't being executed
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" + 
+									"bltu $a0, $a1, TEST;\n"+
+									"li $v0, 7;\n" +
+									"TEST: li $v1, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			Address newPos = this.getProgramCounter(cpu);
+			Address testLabel = this.getLabels(cpu).get("TEST");
+			assertEquals(newPos.getValue(),testLabel.getValue()+4);//will still reach TEST so still worth checking
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.v1));//checking instruction on line of label is actually run
+			assertEquals(7,accessRegisterUnsigned(cpu,Register.v0));//this time the instruction should be run and so it should be set
+		}
+	}
+	
+	/**this method tests the execution of the seq instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSeqExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"seq $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"seq $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sne instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSneExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sne $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"sne $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sge instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSgeExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sge $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"sge $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sgeu instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSgeuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sgeu $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"sgeu $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sgt instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSgtExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sgt $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"sgt $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sgtu instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSgtuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sgtu $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"sgtu $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sle instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSleExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"sle $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sle $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sleu instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSleuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"sleu $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 5;\n" +
+									"sleu $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the slt instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSltExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"slt $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"slt $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sltu instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSltuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"li $a1, 6;\n" +
+									"sltu $a2, $a0, $a1;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"li $a1, 6;\n" +
+									"sltu $a2, $a0, $a1;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a1));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the slti instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSltiExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"slti $a2, $a0, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterSigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"slti $a2, $a0, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterSigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterSigned(cpu,Register.a0));
+		}
+	}
+	
+	/**this method tests the execution of the sltiu instruction
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testSltiuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
+	{
+		{//testing true
+			String myInstructions = "li $a0, 5;\n" +
+									"sltiu $a2, $a0, 6;\n";
+			
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(1,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(5,accessRegisterUnsigned(cpu,Register.a0));
+		}
+		
+		{//testing false
+			String myInstructions = "li $a0, 6;\n" +
+									"sltiu $a2, $a0, 6;\n";
+
+			CPU cpu = createCPU(myInstructions);
+			
+			assertEquals(0,accessRegisterUnsigned(cpu,Register.a2));
+			assertEquals(6,accessRegisterUnsigned(cpu,Register.a0));
+		}
+	}
+	
+	/**method will test the execution of the lui instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testLuiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstructions = "lui $v0, 1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals((long)Math.pow(2, 16),accessRegisterSigned(cpu,Register.v0));
 	}
 }
