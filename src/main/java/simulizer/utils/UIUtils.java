@@ -1,14 +1,18 @@
 package simulizer.utils;
 
-import java.awt.Font;
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javafx.application.Platform;
@@ -55,6 +59,22 @@ public class UIUtils {
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle(title);
+			alert.setHeaderText(header);
+			alert.setContentText(message);
+			alert.show();
+		});
+	}
+
+	public static void showInfoDialog(String title, String message) {
+		showInfoDialog(title, title, message);
+	}
+
+	public static void showInfoDialog(String title, String header, String message) {
+		System.out.println(title + "\n\t" + header + "\n\t" + message);
+
+		Platform.runLater(() -> {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle(title);
 			alert.setHeaderText(header);
 			alert.setContentText(message);
@@ -193,6 +213,43 @@ public class UIUtils {
 				file = new File(file.getAbsolutePath() + ".s");
 
 			callback.accept(file);
+		}
+	}
+
+	/**
+	 * Attempt to open a URL in the browser
+	 * @param url the url to open
+	 * @return whether the call succeeded
+	 */
+	public static boolean openURL(String url) {
+		if(!Desktop.isDesktopSupported() ||
+		   !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+			return false;
+		}
+
+		try {
+			URI uri = (new URL(url)).toURI();
+			AtomicBoolean status = new AtomicBoolean(true);
+			Thread browseThread = new Thread(() -> {
+				try {
+					Desktop.getDesktop().browse(uri);
+				} catch (IOException e) {
+					status.set(false);
+				}
+			}, "OpenURL-Thread");
+			browseThread.setDaemon(true);
+			browseThread.start();
+
+			browseThread.join(1000); // if timeout: Interrupted exception => false
+
+			return status.get();
+
+		} catch (IOException e) {
+			return false;
+		} catch (URISyntaxException e) {
+			return false;
+		} catch (InterruptedException e) {
+			return false;
 		}
 	}
 }

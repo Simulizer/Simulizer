@@ -25,6 +25,7 @@ import simulizer.simulation.listeners.InstructionTypeMessage;
 import simulizer.simulation.listeners.RegisterChangedMessage;
 import simulizer.simulation.listeners.StageEnterMessage;
 import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.utils.UIUtils;
 
 /**class is used for executing instructions (including syscall)
  * it is separate from the main CPU model due to it's size
@@ -249,14 +250,12 @@ public class Executor {
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		case 67697865://AND HIS NAME IS...
-    			try {
-    				Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=5LitDGyxFh4").toURI());
-    			} catch (IOException | URISyntaxException e) {System.out.println("JOHN CENA!!!");} 
+				UIUtils.openURL("https://www.youtube.com/watch?v=5LitDGyxFh4");
+				UIUtils.showInfoDialog("And His Name Is", "JOHN CENA!!!");
     			break;
     		case 82736775://RICK ASCII :)
-				try {
-					Desktop.getDesktop().browse(new URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").toURI());
-				} catch (IOException | URISyntaxException e) {System.out.println("Never gonna give you up");} 
+				UIUtils.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+				UIUtils.showInfoDialog("Never gonna give you up ;)", "");
 				break;
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);

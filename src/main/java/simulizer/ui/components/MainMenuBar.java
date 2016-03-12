@@ -355,10 +355,9 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
 		keyBinds.setOnAction(e -> {
-			try {
-				Desktop.getDesktop().browse(new URI("https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"));
-			} catch (Exception ex) {
-				UIUtils.showExceptionDialog(ex);
+			String url = "https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts";
+			if(!UIUtils.openURL(url)) {
+				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
 			}
 		});
 
