@@ -1,10 +1,10 @@
 package simulizer.ui.components.cpu.listeners;
 
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.InstructionTypeMessage;
-import simulizer.simulation.listeners.SimulationListener;
-import simulizer.simulation.listeners.StageEnterMessage;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.InstructionTypeMessage;
+import simulizer.simulation.messages.SimulationListener;
+import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.ui.windows.CPUVisualisation;
 import simulizer.utils.UIUtils;
 
@@ -19,9 +19,6 @@ public class CPUListener extends SimulationListener {
 
     /**
      * Sets the visualisation, cpu simulation and the visualisation
-     * @param cpu
-     * @param simCpu
-     * @param vis
      */
     public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, CPUVisualisation vis){
         this.vis = vis;

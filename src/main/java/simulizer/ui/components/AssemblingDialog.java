@@ -9,8 +9,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.listeners.Message;
-import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.messages.Message;
+import simulizer.simulation.messages.SimulationListener;
+import simulizer.simulation.messages.SimulationMessage;
 
 public class AssemblingDialog extends Alert {
 	private String contentText = "Your program is being assembled, please wait ";
@@ -23,13 +24,12 @@ public class AssemblingDialog extends Alert {
 
 		setContentText(contentText);
 
-		Platform.runLater(() -> show());
+		Platform.runLater(this::show);
 
-		cpu.registerListener(new AssemblingFinishedListener());
+		cpu.registerListener(new AssemblingFinishedListener(cpu));
 
-		FxTimer.runPeriodically(Duration.ofMillis(500), () -> {
-			setContentText(getNext(getContentText()));
-		});
+		FxTimer.runPeriodically(Duration.ofMillis(500), () ->
+				setContentText(getNext(getContentText())));
 	}
 
 	public String getNext(String current) {
@@ -47,15 +47,21 @@ public class AssemblingDialog extends Alert {
 	}
 
 	public void closeDown() {
-		Platform.runLater(() -> {
-			((Button) getDialogPane().lookupButton(ButtonType.OK)).fire();
-		});
+		Platform.runLater(() -> ((Button) getDialogPane().lookupButton(ButtonType.OK)).fire());
 	}
 
 	private class AssemblingFinishedListener extends SimulationListener {
+		CPU cpu;
+		public AssemblingFinishedListener(CPU cpu) {
+			this.cpu = cpu;
+		}
+
 		@Override
-		public void processMessage(Message m) {
-			closeDown();
+		public void processSimulationMessage(SimulationMessage m) {
+			if(m.detail == SimulationMessage.Detail.PROGRAM_LOADED) {
+				closeDown();
+				cpu.unregisterListener(this);
+			}
 		}
 	}
 }

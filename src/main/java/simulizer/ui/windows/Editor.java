@@ -34,10 +34,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.utils.DebugUtils;
-import simulizer.utils.FileUtils;
-import simulizer.utils.SafeJSObject;
-import simulizer.utils.UIUtils;
+import simulizer.utils.*;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)
@@ -178,7 +175,8 @@ public class Editor extends InternalWindow {
 		setOnClosedAction(e -> detachObservers());
 
 		// continuous assembly
-		continuousAssembly = Executors.newSingleThreadScheduledExecutor();
+		continuousAssembly = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Continuous-Assembly"));
 		continuousAssemblyInProgress = false;
 		assembleTask = null;
 		lastProgramHash = 0;
@@ -192,12 +190,18 @@ public class Editor extends InternalWindow {
 		}
 		if(!continuousAssembly.isShutdown()) {
 			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
-
 				try {
-					FutureTask<String> text = new FutureTask<>(this::getText);
+					FutureTask<String> text = new FutureTask<>(() -> {
+						try {
+							return getText();
+						} catch(Exception e) {
+							return null;
+						}
+					});
 					Platform.runLater(text);
 
-					String program = text.get();
+					String program = text.get(100, TimeUnit.MILLISECONDS);
+					if(program == null) return;
 					int thisProgramHash = program.hashCode();
 
 					if (lastProgramHash != thisProgramHash) {
@@ -211,6 +215,8 @@ public class Editor extends InternalWindow {
 						continuousAssemblyInProgress = false;
 						Platform.runLater(this::refreshTitle);
 					}
+				} catch(TimeoutException | InterruptedException ignored) {
+					// its fine, just don't compile
 				} catch (Exception e) {
 					UIUtils.showExceptionDialog(e);
 					assembleTask.cancel(false);
@@ -348,12 +354,7 @@ public class Editor extends InternalWindow {
 
 		// shutdown the continuous assembly thread
 		if(assembleTask != null) assembleTask.cancel(true);
-		continuousAssembly.shutdown();
-		try {
-			continuousAssembly.awaitTermination(3, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			continuousAssembly.shutdownNow();
-		}
+		continuousAssembly.shutdownNow();
 
 		super.close();
 	}

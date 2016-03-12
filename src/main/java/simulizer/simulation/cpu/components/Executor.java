@@ -1,9 +1,5 @@
 package simulizer.simulation.cpu.components;
 
-import java.awt.Desktop;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Optional;
 
 import simulizer.assembler.representation.Address;
@@ -20,11 +16,11 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.InstructionTypeMessage;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.StageEnterMessage;
-import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.InstructionTypeMessage;
+import simulizer.simulation.messages.RegisterChangedMessage;
+import simulizer.simulation.messages.StageEnterMessage;
+import simulizer.simulation.messages.StageEnterMessage.Stage;
 import simulizer.utils.UIUtils;
 
 /**class is used for executing instructions (including syscall)

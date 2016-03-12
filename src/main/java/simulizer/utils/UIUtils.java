@@ -61,7 +61,7 @@ public class UIUtils {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle(title);
 			alert.setHeaderText(header);
-			alert.setContentText(message);
+			alert.setContentText(StringUtils.wrapToWidth(message, 45));
 			alert.show();
 		});
 	}
@@ -77,7 +77,7 @@ public class UIUtils {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle(title);
 			alert.setHeaderText(header);
-			alert.setContentText(message);
+			alert.setContentText(StringUtils.wrapToWidth(message, 45));
 			alert.show();
 		});
 	}
@@ -125,37 +125,42 @@ public class UIUtils {
 			}
 
 			Platform.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Exception");
-				alert.setHeaderText("Something went wrong with Simulizer.");
-				alert.setContentText("The details of the problem are below.\nPlease contact the developers with this information:");
-				alert.getDialogPane().setPrefSize(720, 480);
+				try {
+					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.setTitle("Exception");
+					alert.setHeaderText("Something went wrong with Simulizer.");
+					alert.setContentText("The details of the problem are below.\nPlease contact the developers with this information:");
+					alert.getDialogPane().setPrefSize(720, 480);
 
-				Label label = new Label("Stacktrace:");
+					Label label = new Label("Stacktrace:");
 
-				TextArea stacktrace = new TextArea(exceptionText);
-				stacktrace.setEditable(false);
-				stacktrace.setWrapText(true);
-				stacktrace.setFont(javafx.scene.text.Font.font(Font.MONOSPACED));
+					TextArea stacktrace = new TextArea(exceptionText);
+					stacktrace.setEditable(false);
+					stacktrace.setWrapText(true);
+					stacktrace.setFont(javafx.scene.text.Font.font(Font.MONOSPACED));
 
-				stacktrace.setMaxWidth(Double.MAX_VALUE);
-				stacktrace.setMaxHeight(Double.MAX_VALUE);
-				GridPane.setVgrow(stacktrace, Priority.ALWAYS);
-				GridPane.setHgrow(stacktrace, Priority.ALWAYS);
+					stacktrace.setMaxWidth(Double.MAX_VALUE);
+					stacktrace.setMaxHeight(Double.MAX_VALUE);
+					GridPane.setVgrow(stacktrace, Priority.ALWAYS);
+					GridPane.setHgrow(stacktrace, Priority.ALWAYS);
 
-				GridPane expContent = new GridPane();
-				expContent.setMaxWidth(Double.MAX_VALUE);
-				expContent.setHgap(4);
-				expContent.add(label, 0, 0);
-				expContent.add(stacktrace, 0, 1);
+					GridPane expContent = new GridPane();
+					expContent.setMaxWidth(Double.MAX_VALUE);
+					expContent.setHgap(4);
+					expContent.add(label, 0, 0);
+					expContent.add(stacktrace, 0, 1);
 
-				alert.getDialogPane().setExpandableContent(expContent);
-				alert.getDialogPane().expandedProperty().set(true); // set expanded by default
+					alert.getDialogPane().setExpandableContent(expContent);
+					alert.getDialogPane().expandedProperty().set(true); // set expanded by default
 
-				alert.showAndWait();
+					alert.showAndWait();
+				} catch(Throwable t) {
+					System.err.println("Failed to show exception dialog with another exception:");
+					t.printStackTrace(System.err);
+				}
 			});
 		} catch(Throwable t) {
-			System.err.println("Failed to handle exception with another exception:");
+			System.err.println("Failed to show exception dialog with another exception:");
 			t.printStackTrace(System.err);
 		}
 	}

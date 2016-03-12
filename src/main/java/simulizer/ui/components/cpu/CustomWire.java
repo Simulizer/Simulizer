@@ -62,36 +62,32 @@ public class CustomWire extends Wire {
 
         switch (finalDirection){
             case UP:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart + 10,
                         xStart - 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case DOWN:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart + 10, yStart - 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case RIGHT:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart - 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case LEFT:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart - 10,
                         xStart + 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
         }
         reanimateData();

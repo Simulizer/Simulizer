@@ -7,7 +7,7 @@ import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.listeners.*;
+import simulizer.simulation.messages.*;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
@@ -73,8 +73,11 @@ public class UISimulationListener extends SimulationListener {
 
 	int count = 0;
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
+		// the annotations should all be completed before moving on to the next cycle
+		haltSimulation();
 		count++;
 		wm.getAnnotationManager().processAnnotationMessage(m);
+		releaseSimulation();
 	}
 
 	private void highlightAddresses(Address fetch, Address decode, Address execute) {
@@ -97,11 +100,6 @@ public class UISimulationListener extends SimulationListener {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		highlightAddresses(null, null, m.statementAddress);
 	}
 
 	@Override

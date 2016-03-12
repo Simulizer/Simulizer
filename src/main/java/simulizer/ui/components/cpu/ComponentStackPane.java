@@ -26,7 +26,7 @@ public class ComponentStackPane extends StackPane {
     double width;
     double height;
     CPUVisualisation vis;
-    boolean focused = false;
+    //boolean focused = false;
 
     /**
      * Sets the visualisation and sets up the label
@@ -134,12 +134,7 @@ public class ComponentStackPane extends StackPane {
      * @param label The component label
      */
     public void setLabel(String label){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                text.setText(label);
-            }
-        });
+        Platform.runLater(() -> text.setText(label));
     }
 
     /**
@@ -170,15 +165,12 @@ public class ComponentStackPane extends StackPane {
      * Highlights the shape to a red colour and back
      */
     public void highlight(){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                FillTransition ft = new FillTransition(Duration.millis(100), shape, Color.valueOf("#1e3c72"), Color.RED);
-                ft.setCycleCount(2);
-                ft.setAutoReverse(true);
-                ft.play();
-            }
-        });
+        Platform.runLater(() -> {
+			FillTransition ft = new FillTransition(Duration.millis(100), shape, Color.valueOf("#1e3c72"), Color.RED);
+			ft.setCycleCount(2);
+			ft.setAutoReverse(true);
+			ft.play();
+		});
     }
 
     /**
@@ -193,26 +185,22 @@ public class ComponentStackPane extends StackPane {
         tooltip.setWrapText(true);
         tooltip.setPrefWidth(350);
 
-        vis.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                double eventX = event.getX();
-                double eventY = event.getY();
-                double xMax = getX() + getShapeWidth();
-                double yMax = getY() + getShapeHeight();
+        vis.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
+			double eventX = event.getX();
+			double eventY = event.getY();
+			double xMax = getX() + getShapeWidth();
+			double yMax = getY() + getShapeHeight();
 
-                if(!vis.getMainWindowManager().getCPU().isRunning() && eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
-                    tooltip.setMaxWidth(vis.getWidth() - 40);
-                    tooltip.setMaxHeight(vis.getHeight());
-                    double x = vis.getScene().getWindow().getX() + vis.getLayoutX() + eventX - getShapeWidth() / 2;
-                    double y = vis.getScene().getWindow().getY() + vis.getLayoutY() + eventY - getShapeHeight()/2 - 20;
-                    tooltip.show(instance, x, y);
-                } else {
-                    tooltip.hide();
-                }
-
-            }
-        });
+			if(!vis.getMainWindowManager().getCPU().isRunning() && eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
+				tooltip.setMaxWidth(vis.getWidth() - 40);
+				tooltip.setMaxHeight(vis.getHeight());
+				double x1 = vis.getScene().getWindow().getX() + vis.getLayoutX() + eventX - getShapeWidth() / 2;
+				double y1 = vis.getScene().getWindow().getY() + vis.getLayoutY() + eventY - getShapeHeight()/2 - 20;
+				tooltip.show(instance, x1, y1);
+			} else {
+				tooltip.hide();
+			}
+		});
 
     }
 

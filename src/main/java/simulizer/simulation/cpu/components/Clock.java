@@ -1,5 +1,7 @@
 package simulizer.simulation.cpu.components;
 
+import simulizer.utils.ThreadUtils;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -21,18 +23,22 @@ public class Clock {
 	private ScheduledFuture<?> ticker;
 
 	/**
-     * Untested, but below a certain threshold the time taken to handle the
-     * clock may become significant and decrease performance (setting to 1ns
-     * would definitely be sub-optimal for example)
+     * Below a certain threshold the time taken to handle the
+     * clock may become significant and decrease performance
+	 * value in microseconds (1000 = 1 millisecond)
 	 */
-	private static final long MIN_PERIOD = 50;
+	private static final long MIN_PERIOD = 100;
+
+	// 5 seconds
+	private static final long MAX_PERIOD = 1000 * 1000 * 5;
 
 
 
 	public Clock() {
 		this.tickPeriod = MIN_PERIOD;
 		ticks = new LongAdder();
-		executor = Executors.newSingleThreadScheduledExecutor();
+		executor = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Clock"));
 		ticker = null;
 	}
 
@@ -50,7 +56,7 @@ public class Clock {
 	}
 
 	private synchronized void setTickPeriod(long tickPeriod) {
-		this.tickPeriod = Math.max(tickPeriod, MIN_PERIOD);
+		this.tickPeriod = Math.min(Math.max(tickPeriod, MIN_PERIOD), MAX_PERIOD);
 
 		if(isRunning()) {
 			start(); // stops current ticker and makes a new one
@@ -67,6 +73,11 @@ public class Clock {
 	}
 
 	public void waitForNextTick() throws InterruptedException {
+		// no point waiting, just carry on
+		if (tickPeriod <= MIN_PERIOD) {
+			return;
+		}
+
 		synchronized (ticks) {
 			ticks.wait();
 		}
@@ -95,7 +106,14 @@ public class Clock {
 		}
 		// let any threads waiting on the clock fall through
 		synchronized (ticks) {
-			ticks.notifyAll();
+			// one should be sufficient but this is to be safe
+			for(int i = 0; i < 5; i++) {
+				ticks.notifyAll();
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException ignored) {
+				}
+			}
 		}
 	}
 

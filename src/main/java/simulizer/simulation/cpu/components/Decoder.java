@@ -21,9 +21,9 @@ import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.LSInstruction;
 import simulizer.simulation.instructions.RTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.StageEnterMessage;
-import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.StageEnterMessage;
+import simulizer.simulation.messages.StageEnterMessage.Stage;
 
 /**class deals with the decoding of instructions
  * the code here is in it's own class as part of a refactoring of the system

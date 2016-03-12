@@ -76,44 +76,39 @@ public class ConnectorWire extends Wire {
             xEnd = to.layoutXProperty().add(to.getShapeWidth());
 
             if(arrowStart) {
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(5).getValue(), yStart.add(-5).getValue(),
                         xStart.add(5).getValue(), yStart.add(5).getValue(),
-                        xStart.getValue(), yStart.getValue()
-                });
+                        xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(10).getValue(), yEnd.add(10).getValue(),
-                        xEnd.getValue(), yEnd.getValue()
-                });
+                        xEnd.getValue(), yEnd.getValue());
             }
         } else {
 
             if(arrowStart){
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(10).getValue(), yStart.add(-10).getValue(),
                         xStart.add(10).getValue(), yStart.add(10).getValue(),
-                        xStart.getValue(), yStart.getValue()
-                });
+                        xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
-                        xEnd.getValue(), yEnd.getValue()
-                });
+                        xEnd.getValue(), yEnd.getValue());
             }
 
         }
 
-        line.getPoints().addAll(new Double[]{
+        line.getPoints().addAll(
                 xStart.getValue(), yStart.getValue(),
-                xEnd.getValue(), yEnd.getValue()
-        });
+                xEnd.getValue(), yEnd.getValue());
     }
 
     /**
@@ -134,44 +129,39 @@ public class ConnectorWire extends Wire {
             yEnd = to.layoutYProperty().add(to.getShapeHeight());
         }
 
-        line.getPoints().addAll(new Double[]{
+        line.getPoints().addAll(
                 xStart.getValue(), yStart.getValue(),
-                xEnd.getValue(), yEnd.getValue()
-        });
+                xEnd.getValue(), yEnd.getValue());
 
         if(arrowStart){
             if(rightOrBottom){
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(10).getValue(), yStart.add(10).getValue(),
                         xStart.add(-10).getValue(), yStart.add(10).getValue(),
-                        xStart.getValue(), yStart.getValue()
-                });
+                        xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(-10).getValue(), yStart.add(-10).getValue(),
                         xStart.add(10).getValue(), yStart.add(-10).getValue(),
-                        xStart.getValue(), yStart.getValue()
-                });
+                        xStart.getValue(), yStart.getValue());
             }
 
         } else {
 
             if(rightOrBottom){
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
-                        xEnd.getValue(), yEnd.getValue()
-                });
+                        xEnd.getValue(), yEnd.getValue());
             } else {
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(10).getValue(), yEnd.add(10).getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
-                        xEnd.getValue(), yEnd.getValue()
-                });
+                        xEnd.getValue(), yEnd.getValue());
             }
 
         }

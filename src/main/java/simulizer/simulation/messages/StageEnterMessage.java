@@ -1,4 +1,4 @@
-package simulizer.simulation.listeners;
+package simulizer.simulation.messages;
 
 /**
  * A message which is sent when the simulation enters a pipeline stage

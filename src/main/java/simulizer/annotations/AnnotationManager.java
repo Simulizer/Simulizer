@@ -2,11 +2,10 @@ package simulizer.annotations;
 
 import javax.script.ScriptException;
 
-import simulizer.assembler.representation.Annotation;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
-import simulizer.simulation.listeners.AnnotationMessage;
+import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.windows.HighLevelVisualisation;
 

@@ -1,4 +1,4 @@
-package simulizer.simulation.listeners;
+package simulizer.simulation.messages;
 
 import simulizer.simulation.instructions.AddressMode;
 
@@ -9,17 +9,17 @@ import simulizer.simulation.instructions.AddressMode;
  */
 public class InstructionTypeMessage extends Message{
 	private AddressMode mode;
-	
+
 	/**initialises field
-	 * 
+	 *
 	 * @param mode addressing mode of instruction, specifies data path
 	 */
 	public InstructionTypeMessage(AddressMode mode) {
 		this.mode = mode;
 	}
-	
+
 	/**gets the addressing mode used
-	 * 
+	 *
 	 * @return address mode
 	 */
 	public AddressMode getMode() {

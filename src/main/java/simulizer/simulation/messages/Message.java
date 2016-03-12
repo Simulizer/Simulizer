@@ -1,4 +1,4 @@
-package simulizer.simulation.listeners;
+package simulizer.simulation.messages;
 
 /**
  * A message about the internal workings of the simulator

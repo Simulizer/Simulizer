@@ -26,17 +26,8 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.listeners.AnnotationMessage;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.ExecuteStatementMessage;
-import simulizer.simulation.listeners.ListenerController;
-import simulizer.simulation.listeners.Message;
-import simulizer.simulation.listeners.ProblemMessage;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.SimulationListener;
-import simulizer.simulation.listeners.SimulationMessage;
-import simulizer.simulation.listeners.StageEnterMessage;
-import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.simulation.messages.*;
+import simulizer.simulation.messages.StageEnterMessage.Stage;
 
 /**
  * this is the central CPU class
@@ -54,18 +45,18 @@ import simulizer.simulation.listeners.StageEnterMessage.Stage;
  */
 public class CPU {
 
-	private ListenerController listenControl;
+	private MessageManager messageManager;
 
 	protected Address programCounter;
 	protected Statement instructionRegister;
 
 	private ALU Alu;
 	protected final Clock clock;
-	private long cycles;
+	protected long cycles;
 	/**
 	 * used for resume for single cycle
 	 */
-	private boolean breakAfterCycle;
+	protected boolean breakAfterCycle;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -91,7 +82,7 @@ public class CPU {
 	 *            the io type being used
 	 */
 	public CPU(IO io) {
-		this.listenControl = new ListenerController();
+		this.messageManager = new MessageManager(io);
 		this.clearRegisters();
 		this.clock = new Clock();
 		this.cycles = 0;
@@ -105,6 +96,7 @@ public class CPU {
 	public void shutdown() {
 		stopRunning();
 		clock.shutdown();
+		messageManager.shutdown();
 	}
 
 	public Clock getClock() {
@@ -112,20 +104,22 @@ public class CPU {
 	}
 
 	/**
-	 * set the number of cycles (fetch+decode+execute) to be run per second.
+	 * set the number of cycles (fetch + decode + execute) to be run per second.
      * This method provides the same observable results regardless of whether
      * the CPU is pipelined or not
 	 *
 	 * @param freq the number of cycles per second
 	 */
 	public void setCycleFreq(double freq) {
-		// 1 cycle = 1 wait on the clock for non-pipelined
-		// therefore the tick frequency == cycle frequency
-		clock.setTickFrequency(freq);
+		// non-pipelined: 1 cycle = 3 ticks
+		// => same speed requires ticks to be 3 times faster
+		clock.setTickFrequency(freq * 3);
 	}
 
 	public double getCycleFreq() {
-		return clock.getTickFrequency();
+		// non-pipelined: 1 cycle = 3 ticks
+		// => same speed requires ticks to be 3 times faster
+		return clock.getTickFrequency() / 3;
 	}
 
 
@@ -168,6 +162,17 @@ public class CPU {
 		}
 	}
 
+	protected void waitForNextTick() {
+		try {
+			if (isRunning) {
+				// if the clock is stopped then it advances by 1 tick to unlock this thread
+				clock.waitForNextTick();
+			}
+		} catch (InterruptedException e) {
+			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
+		}
+	}
+
 	/**
 	 * Register a listener to receive messages
 	 * wrapper for method in listener, makes more sense as wrapper for connecting to CPU
@@ -176,7 +181,7 @@ public class CPU {
 	 *            the listener to send messages to
 	 */
 	public void registerListener(SimulationListener l) {
-		this.listenControl.registerListener(l);
+		this.messageManager.registerListener(l);
 	}
 
 	/**
@@ -187,7 +192,7 @@ public class CPU {
 	 *            the listener to be removed
 	 */
 	public void unregisterListener(SimulationListener l) {
-		this.listenControl.unregisterListener(l);
+		this.messageManager.unregisterListener(l);
 	}
 
 	/**
@@ -198,7 +203,7 @@ public class CPU {
 	 *            the message to send
 	 */
 	protected void sendMessage(Message m) {
-		this.listenControl.sendMessage(m);
+		this.messageManager.sendMessage(m);
 	}
 
 	/**
@@ -245,6 +250,8 @@ public class CPU {
 
 		this.Alu = new ALU();// initialising Alu
 		this.lastAddress = program.textSegmentLast;
+
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.PROGRAM_LOADED));
 	}
 
 	/**
@@ -341,19 +348,39 @@ public class CPU {
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
 
+		messageManager.waitForCrucialTasks();
+
 		fetch();
-		sendMessage(new ExecuteStatementMessage(thisInstruction));
+		sendMessage(new PipelineStateMessage(thisInstruction, null, null));
+
+		waitForNextTick();
+
 		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
+		sendMessage(new PipelineStateMessage(null, thisInstruction, null));
+
+		waitForNextTick();
 
 		execute(instruction);
+		sendMessage(new PipelineStateMessage(null, null, thisInstruction));
+
 		if (annotations.containsKey(thisInstruction)) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
+
+		waitForNextTick();
+
 
 		if (this.programCounter.getValue() == this.lastAddress.getValue() + 4) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
 			stopRunning();
 			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. " + "This could be because you forgot to exit cleanly." + " To exit cleanly please call syscall with code 10."));
+			return;
+		}
+
+
+		cycles++;
+		if(breakAfterCycle) {
+			pause();
 		}
 	}
 
@@ -383,26 +410,14 @@ public class CPU {
 
 			try {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
-			} catch (MemoryException | DecodeException | InstructionException | ExecuteException | HeapException | StackException e) {
+			} catch (MemoryException | DecodeException | InstructionException
+					| ExecuteException | HeapException | StackException e) {
 				sendMessage(new ProblemMessage(e.getMessage()));
 				isRunning = false;
-			}
-			try {
-				if (isRunning) {
-					// if the clock is stopped then it advances by 1 tick to unlock this thread
-					clock.waitForNextTick();
-				}
-			} catch (InterruptedException e) {
-				sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
 			}
 
 			//TODO: aggregate stats like this into a window
 			long cycleDuration = System.currentTimeMillis() - cycleStart;
-
-			cycles++;
-			if(breakAfterCycle) {
-				pause();
-			}
 		}
 		stopRunning();
 	}
@@ -433,6 +448,6 @@ public class CPU {
 	}
 
 	public boolean isPipelined() {
-		return false; // overriden in CPUPipeline
+		return false; // overridden in CPUPipeline
 	}
 }

@@ -11,8 +11,8 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.messages.RegisterChangedMessage;
+import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
 /**

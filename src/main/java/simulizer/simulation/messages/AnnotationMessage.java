@@ -1,4 +1,4 @@
-package simulizer.simulation.listeners;
+package simulizer.simulation.messages;
 
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;

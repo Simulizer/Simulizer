@@ -3,8 +3,6 @@ package simulizer.ui.components;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.util.Duration;
@@ -88,43 +86,32 @@ public class CPU {
      */
     public void showText(String text, int time){
         if(time < 500) return;
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
 
-                int fadeTime = time / 4;
-                int delayTime = time / 2;
-                info.setLabel(text);
-                FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
-                ft.setFromValue(0);
-                ft.setToValue(1);
-                ft.setCycleCount(1);
+			int fadeTime = time / 4;
+			int delayTime = time / 2;
+			info.setLabel(text);
+			FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
+			ft.setFromValue(0);
+			ft.setToValue(1);
+			ft.setCycleCount(1);
 
-                ft.play();
+			ft.play();
 
-                ft.setOnFinished(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        FadeTransition fo = new FadeTransition(Duration.millis(fadeTime), info);
-                                        fo.setFromValue(1);
-                                        fo.setToValue(0);
-                                        fo.setCycleCount(1);
+			ft.setOnFinished(event -> new Timer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					Platform.runLater(() -> {
+						FadeTransition fo = new FadeTransition(Duration.millis(fadeTime), info);
+						fo.setFromValue(1);
+						fo.setToValue(0);
+						fo.setCycleCount(1);
 
-                                        fo.play();
-                                    }
-                                });
-                            }
-                        }, delayTime);
-                    }
-                });
-            }
-        });
+						fo.play();
+					});
+				}
+			}, delayTime));
+		});
     }
 
     /**
@@ -241,9 +228,6 @@ public class CPU {
         );
 
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, plusFour, signExtender, shiftLeft, adder, muxAdder, shiftLeftIR);
-
-        double width = vis.getWindowWidth();
-        double height = vis.getWindowHeight();
 
         allItems = new Group();
         allItems.getChildren().addAll(components, generalWires, complexWires, info);

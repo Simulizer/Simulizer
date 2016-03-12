@@ -1,10 +1,7 @@
 package simulizer.ui.components.cpu;
 
-import javafx.animation.FadeTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.shape.Circle;
@@ -32,7 +29,6 @@ public class Wire extends Group {
 	Path path;
 	int time;
 	Double progressed = 0.0;
-	boolean from;
 	boolean animating;
 	boolean reverse;
 	List<PathTransition> transitions;
@@ -49,7 +45,7 @@ public class Wire extends Group {
 		this.type = type;
 		this.animating = false;
 		this.reverse = false;
-		this.transitions = new LinkedList<PathTransition>();
+		this.transitions = new LinkedList<>();
 		this.path = new Path();
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
@@ -60,22 +56,19 @@ public class Wire extends Group {
 	 */
 	public void reanimateData() {
 
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				setUpAnimationPath();
-				if (!animating)
-					return;
+		Platform.runLater(() -> {
+			setUpAnimationPath();
+			if (!animating)
+				return;
 
-				for(PathTransition p : transitions){
-					p.stop();
-					p.setPath(path);
-					p.playFrom(new Duration(progressed));
-				}
+			for(PathTransition p : transitions){
+				p.stop();
+				p.setPath(path);
+				p.playFrom(new Duration(progressed));
+			}
 
-				synchronized(progressed){
-					progressed++;
-				}
+			synchronized(progressed){
+				progressed++;
 			}
 		});
 	}
@@ -117,41 +110,35 @@ public class Wire extends Group {
 	 * @param animTime The time for the animation to complete in
      */
 	public void animateData(int animTime) {
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
+		Platform.runLater(() -> {
+			animating = true;
+			PathTransition pathTransition = new PathTransition();
+			time = animTime;
 
-				animating = true;
-				PathTransition pathTransition = new PathTransition();
-				time = animTime;
+			transitions.add(pathTransition);
 
-				transitions.add(pathTransition);
+			pathTransition.setDuration(Duration.millis(time));
+			Circle data = new Circle(0, 0, 7.5);
+			data.getStyleClass().addAll("cpu-data");
+			pathTransition.setNode(data);
+			pathTransition.setPath(path);
+			pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+			pathTransition.setCycleCount(1);
+			pathTransition.setAutoReverse(false);
 
-				pathTransition.setDuration(Duration.millis(time));
-				Circle data = new Circle(0, 0, 7.5);
-				data.getStyleClass().addAll("cpu-data");
-				pathTransition.setNode(data);
-				pathTransition.setPath(path);
-				pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-				pathTransition.setCycleCount(1);
-				pathTransition.setAutoReverse(false);
+			data.setCache(true);
+			data.toFront();
 
-				data.setCache(true);
-				data.toFront();
+			getChildren().add(data);
+			pathTransition.play();
 
-				getChildren().add(data);
-				pathTransition.play();
+			pathTransition.setOnFinished(event -> {
+				getChildren().remove(data);
+				transitions.remove(pathTransition);
+			});
 
-				pathTransition.setOnFinished(new EventHandler<ActionEvent>() {
-					public void handle(ActionEvent event) {
-						getChildren().remove(data);
-						transitions.remove(pathTransition);
-					}
-				});
-
-				synchronized(progressed){
-					progressed++;
-				}
+			synchronized(progressed){
+				progressed++;
 			}
 		});
 	}

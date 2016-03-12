@@ -36,7 +36,7 @@ public class ALU extends ComponentStackPane {
         double leftHeight = (height - gapWidth) / 2;
 
         polyline.getPoints().clear();
-        polyline.getPoints().addAll(new Double[]{
+        polyline.getPoints().addAll(
                 baseX, baseY,
                 baseX + width, baseY + rightSmallHeight,
                 baseX + width, baseY + rightHeight + rightSmallHeight,
@@ -44,8 +44,7 @@ public class ALU extends ComponentStackPane {
                 baseX, baseY + gapWidth + leftHeight,
                 baseX + (width * 0.2), baseY + leftHeight + (gapWidth / 2),
                 baseX, baseY + leftHeight,
-                baseX, baseY
-        });
+                baseX, baseY);
 
         this.shape = polyline;
     }
@@ -59,7 +58,7 @@ public class ALU extends ComponentStackPane {
         double rightSmallHeight = (height - rightHeight) / 2;
 
         double gapWidth = height * 0.1;
-        double leftHeight = (height - gapWidth) / 2;
+        //double leftHeight = (height - gapWidth) / 2;
 
         return (height + (rightHeight + rightSmallHeight)) / 2;
     }

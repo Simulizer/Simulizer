@@ -22,6 +22,7 @@ import javafx.scene.layout.Priority;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -31,7 +32,8 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Logger extends InternalWindow implements Observer {
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(
+			new ThreadUtils.NamedThreadFactory("Logger"));
 	private static final long BUFFER_TIME = 20;
 	private volatile boolean callUpdate = true;
 
