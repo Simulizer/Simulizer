@@ -11,6 +11,7 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 import javax.script.*;
 
@@ -71,7 +72,7 @@ public class AnnotationExecutor {
 			filter.apiLoaded = true; // from now on restrict access to Java classes
 
 		} catch (ScriptException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 
@@ -86,7 +87,11 @@ public class AnnotationExecutor {
 					.append(name)
 					.append(",getS:function(){return simulation.getRegisterS(this.id);}")
 					.append(",getU:function(){return simulation.getRegisterU(this.id);}")
-					.append(",get:function(){return this.getS();}};");
+					.append(",setS:function(val){simulation.setRegisterS(this.id, val);}")
+					.append(",setU:function(val){simulation.setRegisterU(this.id, val);}")
+					.append(",get:function(){return this.getS();}")
+					.append(",set:function(val){this.setS(val);}")
+				.append("};");
 		}
 		exec(registerGlobals.toString());
 	}
@@ -110,21 +115,32 @@ public class AnnotationExecutor {
 		return tClass.cast(globals.get(name));
 	}
 
-	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn {
-		@SuppressWarnings("UnusedAssignment")
+	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn, AssertionError {
+		@SuppressWarnings("UnusedAssignment") // this is actually necessary
 		Object res = null;
+
+		// exceptions thrown from inside the script are wrapped in a ScriptException
+		// exceptions thrown from java executed from a script are not wrapped
 
 		try {
 			res = engine.eval(annotation.code);
 		} catch(ScriptException e) {
 			// exceptions thrown from inside the script are wrapped in a ScriptException
-			if (e.getCause() instanceof ECMAException &&
-					((ECMAException) e.getCause()).thrown instanceof AnnotationEarlyReturn) {
-				promoteToGlobal();
-				return null;
+			if (e.getCause() instanceof ECMAException) {
+				Object cause = ((ECMAException) e.getCause()).thrown;
+
+				if (cause instanceof AnnotationEarlyReturn) {
+					promoteToGlobal();
+					throw (AnnotationEarlyReturn) cause;
+				} else {
+					throw e;
+				}
 			} else {
 				throw e;
 			}
+		} catch(AssertionError e) {
+			promoteToGlobal();
+			throw new AssertionError(annotation.code); // exception message = code that caused it
 		} catch(Exception e) { // propagate the exception
 			throw new ScriptException(e);
 		}
@@ -167,14 +183,19 @@ public class AnnotationExecutor {
 			while(!getGlobal("stop", Boolean.class)) {
 				io.printString(IOStream.DEBUG, "js> ");
 				line = io.readString();
-				Object res = exec(new Annotation(line));
+				Object res = null;
+				try {
+					res = exec(new Annotation(line));
+				} catch(AssertionError | AnnotationEarlyReturn e) {
+					io.printString(IOStream.DEBUG, e.getClass().getName());
+				}
 				if(res != null) {
 					io.printString(IOStream.DEBUG, res.toString() + "\n");
 				}
 			}
 			io.printString(IOStream.DEBUG, "REPL stopped\n");
 		} catch (RuntimeException | ScriptException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 			io.printString(IOStream.DEBUG, "REPL stopped due to exception\n");
 		}
 	}

@@ -52,18 +52,23 @@ The debug bridge (named `debug` in JS) gives the annotations access to component
 
 Methods:
 - `log(msg)` write a message (implicitly converted to string) to the program I/O
+- `assertTrue(cond)` check that a condition holds. If it does not then a helpful message is displayed in the program I/O
 - `alert(msg)` show a popup message (implicitly converted to string)
 - `getCPU()` get the Java `CPU` object
 
 ## Simulation Bridge ##
 The simulation bridge (named `simulation` and `sim` in JS) gives limited access to the internals of the simulation, for example reading register values and setting the clock speed
 
+(note: the methods for accessing registers are more easily accessed through the register global variables (see below))
+
 Methods:
 - `stop()` stop the simulation (not able to resume)
-- `setClockSpeed(tickMillis)` set the simulation speed
+- `setSpeed(frequency)` set the simulation speed (cycle frequency)
 - `Word[] getRegisters()`
 - `long getRegisterS(Register)` get the current signed value of a register (identified using its enum)
 - `long getRegisterU(Register)` get the current unsigned value of a register (identified using its enum)
+- `setRegisterS(Register, long)` set the value (treated as signed) of a register (identified using its enum)
+- `setRegisterU(Register, long)` set the value (treated as unsigned) of a register (identified using its enum)
 
 ## Visualisation Bridge ##
 The visualisation bridge (named `visualisation` and `vis` in JS) manages the high level visualisation window, can load high level visualisations and feed them information about the state of the simulation so that they can visualise and animate the algorithm running in the simulation.
@@ -83,7 +88,10 @@ Each of the 32 general purpose registers are assigned as global variables (named
 - `id` the enum value of the register
 - `long getS()` a method which corresponds to `simulation.getRegisterS(this.id)`
 - `long getU()` a method which corresponds to `simulation.getRegisterU(this.id)`
+- `setS(long)` a method which corresponds to `simulation.setRegisterS(this.id, long)`
+- `setU(long)` a method which corresponds to `simulation.setRegisterU(this.id, long)`
 - `long get()` a method which corresponds to `simulation.getRegisterS(this.id)`
+- `set(long)` a method which corresponds to `simulation.setRegisterS(this.id, long)`
 
 Other variables
 - The variables `Register` and `reg` refer to the `Register` enum class in Java.
@@ -97,9 +105,10 @@ To increase brevity, certain commonly used methods from the bridges are assigned
 
 ```javascript
 // Debug Bridge
-log   = debug.log
-print = debug.log
-alert = debug.alert
+log    = debug.log
+print  = debug.log
+alert  = debug.alert
+assert = debug.assertTrue
 
 // Simulation Bridge
 stop     = simulation.stop

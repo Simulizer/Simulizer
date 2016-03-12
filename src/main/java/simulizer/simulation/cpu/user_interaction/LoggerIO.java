@@ -16,22 +16,25 @@ public class LoggerIO extends Observable implements IO {
 
 	@Override
 	public String readString() {
-		return requestInput();
+		String in = requestInput();
+		return in == null ? "" : in;
 	}
 
 	@Override
 	public int readInt() {
 		try {
-			return Integer.parseInt(requestInput());
+			String in = requestInput();
+			return in == null ? 0 : Integer.parseInt(in);
 		} catch (NumberFormatException e) {
-			System.err.println(e.getMessage());
+			printString(IOStream.ERROR, e.getClass().getName() + ":\n\t" + e.getMessage() + "\n");
 		}
 		return 0;
 	}
 
 	@Override
 	public char readChar() {
-		return requestInput().charAt(0);
+		String in = requestInput();
+		return in == null ? '\0' : in.charAt(0);
 	}
 
 	@Override

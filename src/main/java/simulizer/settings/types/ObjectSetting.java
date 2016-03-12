@@ -3,8 +3,16 @@ package simulizer.settings.types;
 import java.util.ArrayList;
 import java.util.List;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
+/**
+ * Represents an object setting
+ * This can be used to group settings together
+ * 
+ * @author Michael
+ *
+ */
 public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
 
 	public ObjectSetting(String jsonName, String humanName) {
@@ -26,8 +34,8 @@ public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Object";
+	public SettingType getSettingType() {
+		return SettingType.OBJECT;
 	}
 
 	public SettingValue<?> get(String jsonSetting) {

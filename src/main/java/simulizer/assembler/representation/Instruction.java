@@ -18,7 +18,7 @@ public enum Instruction {
     abs    (OperandFormat.destSrc,     "dest <- abs(src)"),
 
     and    (OperandFormat.destSrcSrc,  "logical AND"),
-    //andi   (OperandFormat.destSrcImm,  "logical and immediate (zero extended)"),
+    andi   (OperandFormat.destSrcImm,  "logical and immediate (zero extended)"),
 
     add    (OperandFormat.destSrcSrc,  "addition (with overflow)"),
     addu   (OperandFormat.destSrcSrc,  "addition (without overflow)"),
@@ -37,6 +37,9 @@ public enum Instruction {
     div    (OperandFormat.destSrcSrc,  "division (with overflow)"),
     divu   (OperandFormat.destSrcSrc,  "division (without overflow)"),
 
+    rem    (OperandFormat.destSrcSrc,  "remainder of division"),
+    remu   (OperandFormat.destSrcSrc,  "remainder of division (unsigned)"),
+    
     neg    (OperandFormat.destSrc,     "dest <- -(src) (with overflow)"),
     negu   (OperandFormat.destSrc,     "dest <- -(src) (without overflow)"),
 
@@ -47,15 +50,47 @@ public enum Instruction {
     xor    (OperandFormat.destSrcSrc,  "XOR"),
     xori   (OperandFormat.destSrcImm,  "XOR immediate"),
 
+// Instructions using lo and hi
+    //mult   (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo"),
+    //multu  (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo (unsigned)"),
+    //mfhi   (OperandFormat.destSrc,     "Move contents of hi to a register"),
+    //mflo   (OperandFormat.destSrc,     "Move contents of lo to a register"),
+    //mthi   (OperandFormat.destSrc,     "Move contents of register into hi"),
+    //mtlo   (OperandFormat.destSrc,     "Move contents of register into lo"),
+    
+    
+// Shift and Rotations
+    rol    (OperandFormat.destSrcSrc,  "rotate left"),
+    ror    (OperandFormat.destSrcSrc,  "rotate right"),
+    sll    (OperandFormat.destSrcImm,  "shift left logical"),
+    sllv   (OperandFormat.destSrcSrc,  "shift left logical variable"),
+    sra    (OperandFormat.destSrcImm,  "shift right arithmetic"),
+    srav   (OperandFormat.destSrcSrc,  "shift right arithmetic variable"),
+    srl    (OperandFormat.destSrcImm,  "shift right logical"),
+    srlv   (OperandFormat.destSrcSrc,  "shift right logical variable"),
+
+// Set Instructions    
+    seq    (OperandFormat.destSrcSrc, "set to 1 if equal"),
+    sge    (OperandFormat.destSrcSrc, "set to 1 if greater than or equal"),
+    sgeu   (OperandFormat.destSrcSrc, "set to 1 if greater than or equal (unsigned)"),
+    sgt    (OperandFormat.destSrcSrc, "set to 1 if greater than"),
+    sgtu   (OperandFormat.destSrcSrc, "set to 1 if greater than unsigned"),
+    sle    (OperandFormat.destSrcSrc, "set to 1 if less than or equal"),
+    sleu   (OperandFormat.destSrcSrc, "set to 1 if less than or equal (unsigned)"),
+    slt    (OperandFormat.destSrcSrc, "set to 1 if less than"),
+    slti   (OperandFormat.destSrcImm, "set to 1 if less than with immediate"),
+    sltu   (OperandFormat.destSrcSrc, "set to 1 if less than (unsigned)"),
+    sltiu  (OperandFormat.destSrcImm, "set to 1 if less than with immediate (unsigned)"),
+    sne    (OperandFormat.destSrcSrc, "set to 1 if not equal"),
+    
 // Constant-Manipulating Instructions
     li     (OperandFormat.destImm,     "load immediate"),
-
+    lui    (OperandFormat.destImm,     "load upper immediate"),
 
 // Comparison Instructions: ignored
 
 // Branch Instructions (limited range jump)
-    // ignoring many "and link" instructions
-    // ignoring many 2 register comparisons in favour of the compare to zero variety
+    // ignoring some "and link" instructions
     b      (OperandFormat.label,       "unconditional branch to label"),
     beq    (OperandFormat.cmpCmpLabel, "branch on equal"),
     bne    (OperandFormat.cmpCmpLabel, "branch on not equal"),
@@ -64,6 +99,15 @@ public enum Instruction {
     blez   (OperandFormat.cmpLabel,    "branch on <= zero"),
     bltz   (OperandFormat.cmpLabel,    "branch on < zero"),
     beqz   (OperandFormat.cmpLabel,    "branch on = zero"),
+    bge    (OperandFormat.cmpCmpLabel, "branch on cmp1 >= cmp2"),
+    bgeu   (OperandFormat.cmpCmpLabel, "branch on cmp1 >= cmp2 (unsigned)"),
+    bgt    (OperandFormat.cmpCmpLabel, "branch on cmp1 > cmp2"),
+    bgtu   (OperandFormat.cmpCmpLabel, "branch on cmp1 > cmp2 (unsigned)"),
+    ble    (OperandFormat.cmpCmpLabel, "branch on cmp1 <= cmp2"),
+    bleu   (OperandFormat.cmpCmpLabel, "branch on cmp1 <= cmp2 (unsigned)"),
+    blt    (OperandFormat.cmpCmpLabel, "branch on cmp1 < cmp2"),
+    bltu   (OperandFormat.cmpCmpLabel, "branch on cmp1 < cmp2 (unsigned)"),
+    
 
 // Jump Instructions
     j      (OperandFormat.label,       "unconditional jump to label"),

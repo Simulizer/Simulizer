@@ -11,10 +11,16 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.SimulationListener;
+import simulizer.simulation.messages.RegisterChangedMessage;
+import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
 
+/**
+ * Provides a visual representation of what each Register contains
+ * 
+ * @author Michael
+ *
+ */
 public class Registers extends InternalWindow implements CPUChangedListener {
 	private TableView<Data> table = new TableView<Data>();
 	private CPU cpu;
@@ -30,6 +36,9 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		table.setCursor(Cursor.DEFAULT);
 	}
 
+	/**
+	 * Refreshes the table data
+	 */
 	public void refreshData() {
 		ObservableList<Data> data = FXCollections.observableArrayList();
 		int i = 0;
@@ -58,7 +67,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	@SuppressWarnings("unchecked")
 	public void ready() {
 		getWindowManager().addCPUChangedListener(this);
-		
+
 		TableColumn<Data, String> register = new TableColumn<Data, String>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<Data, String>("name"));
 
@@ -78,13 +87,19 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		getContentPane().getChildren().add(table);
 		super.ready();
 	}
-	
+
 	@Override
 	public void close() {
 		getWindowManager().removeCPUChangedListener(this);
 		super.close();
 	}
 
+	/**
+	 * Data is a row in the table
+	 * 
+	 * @author Michael
+	 *
+	 */
 	public static class Data {
 
 		private final String name, hex, unsigned, signed;
@@ -96,18 +111,30 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			this.signed = signed;
 		}
 
+		/**
+		 * @return register name
+		 */
 		public String getName() {
 			return name;
 		}
 
+		/**
+		 * @return hex value
+		 */
 		public String getHex() {
 			return hex;
 		}
 
+		/**
+		 * @return unsigned value
+		 */
 		public String getUnsigned() {
 			return unsigned;
 		}
 
+		/**
+		 * @return signed value
+		 */
 		public String getSigned() {
 			return signed;
 		}

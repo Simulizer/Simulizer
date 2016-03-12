@@ -1,7 +1,14 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
+/**
+ * Represents an integer setting
+ * 
+ * @author Michael
+ *
+ */
 public class IntegerSetting extends SettingValue<Integer> {
 	private int lowBound, highBound;
 	private boolean boundsSet = false;
@@ -26,12 +33,20 @@ public class IntegerSetting extends SettingValue<Integer> {
 		if (!boundsSet)
 			return true;
 		else
-			return lowBound <= value && value <= highBound;
+			return getLowBound() <= value && value <= getHighBound();
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Integer";
+	public SettingType getSettingType() {
+		return SettingType.INTEGER;
+	}
+
+	public int getLowBound() {
+		return lowBound;
+	}
+
+	public int getHighBound() {
+		return highBound;
 	}
 
 }

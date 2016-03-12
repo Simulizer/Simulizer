@@ -8,7 +8,7 @@ package simulizer.simulation.data.representation;
  * @author Charlie Street
  */
 public class Word {
-	private byte[] word;
+	private final byte[] word;
 
 	public static final Word ZERO = new Word(new byte[] {0, 0, 0, 0});
 
@@ -24,7 +24,8 @@ public class Word {
 		}
 		else
 		{
-			//ERROR THROW LOGGER PROBLEM
+			//TODO: ERROR THROW LOGGER PROBLEM
+			this.word = null;
 		}
 	}
 

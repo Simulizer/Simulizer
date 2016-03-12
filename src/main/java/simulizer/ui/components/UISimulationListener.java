@@ -3,12 +3,11 @@ package simulizer.ui.components;
 import java.util.Map;
 
 import javafx.application.Platform;
+import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.listeners.AnnotationMessage;
-import simulizer.simulation.listeners.ExecuteStatementMessage;
-import simulizer.simulation.listeners.SimulationListener;
-import simulizer.simulation.listeners.SimulationMessage;
+import simulizer.simulation.messages.*;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
@@ -18,6 +17,7 @@ import simulizer.ui.windows.Editor;
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;
+	long startTime;
 
 	public UISimulationListener(WindowManager wm) {
 		this.wm = wm;
@@ -26,35 +26,45 @@ public class UISimulationListener extends SimulationListener {
 	@Override public void processSimulationMessage(SimulationMessage m) {
 		switch(m.detail) {
 			case SIMULATION_STARTED: {
-				Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-
-				if(editor != null) {
-					System.out.println("Simulation Started - running '" +
-							editor.getCurrentFile().getName() + "'" +
-							(editor.hasOutstandingChanges() ? " with outstanding changes" : "")
-					);
-				}
+				startTime = System.currentTimeMillis();
 
 				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 
-				if(editor != null) {
-					Platform.runLater(editor::executeMode);
-				}
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION + " - Simulation Running"));
+
+				wm.getWorkspace().openEditorWithCallback((editor) -> {
+					System.out.println("Simulation Started - running '" +
+							editor.getBackingFilename() + "'" +
+							(editor.hasOutstandingChanges() ? " with outstanding changes" : "") +
+							(wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)")
+					);
+
+					editor.executeMode();
+				});
 			} break;
 			case SIMULATION_INTERRUPTED: {
 				System.out.println("Simulation Interrupted");
 			} break;
 			case SIMULATION_STOPPED: {
 				System.out.println("Simulation Stopped");
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION));
 
 				//TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
 				wm.getAnnotationManager().onEndProgram();
 
 				System.out.println("Total annotations fired: " + count);
+				long duration = System.currentTimeMillis() - startTime;
+				long ticks = wm.getCPU().getClock().getTicks();
+				System.out.println("Total time: " + (duration / 1000.0) + " seconds");
+				System.out.println("Total ticks: " + ticks);
+				if(ticks != 0) { // this is actually possible (.text;main:nop)
+					System.out.println("Average time per tick: " + (duration / ticks) + " ms");
+				}
 
-				Editor editor = (Editor) wm.getWorkspace().openInternalWindow(WindowEnum.EDITOR);
-				if(editor != null) {
-					Platform.runLater(editor::editMode);
+				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
+				final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+				if(e != null) {
+					Platform.runLater(e::editMode);
 				}
 			} break;
 			default:break;
@@ -63,29 +73,37 @@ public class UISimulationListener extends SimulationListener {
 
 	int count = 0;
 	@Override public void processAnnotationMessage(AnnotationMessage m) {
+		// the annotations should all be completed before moving on to the next cycle
+		haltSimulation();
 		count++;
 		wm.getAnnotationManager().processAnnotationMessage(m);
+		releaseSimulation();
 	}
 
-	@Override
-	public void processExecuteStatementMessage(ExecuteStatementMessage m) {
-		// TODO clean up the simulation so less things become null
-		if (wm.getCPU() != null) {
+	private void highlightAddresses(Address fetch, Address decode, Address execute) {
+		final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+
+		if(e != null) {
 			CPU cpu = wm.getCPU();
-			if (cpu.getProgram() != null) {
-				Map<Address, Integer> lineNums = cpu.getProgram().lineNumbers;
-				if (lineNums.containsKey(m.statementAddress)) {
-					int lineNum = cpu.getProgram().lineNumbers.get(m.statementAddress);
-					// editor.setReadOnly(true);
-					Platform.runLater(() -> {
-						Editor editor = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-						if (editor != null) {
-							// these lines
-							editor.highlightPipeline(-1, -1, lineNum);
-						}
-					});
+
+			if (cpu != null) {
+				Program p = cpu.getProgram();
+
+				if (p != null) {
+					Map<Address, Integer> lineNums = p.lineNumbers;
+
+					int fetchL = lineNums.getOrDefault(fetch, -1);
+					int decodeL = lineNums.getOrDefault(decode, -1);
+					int executeL = lineNums.getOrDefault(execute, -1);
+
+					Platform.runLater(() -> e.highlightPipeline(fetchL, decodeL, executeL));
 				}
 			}
 		}
+	}
+
+	@Override
+	public void processPipelineStateMessage(PipelineStateMessage m) {
+		highlightAddresses(m.getFetched(), m.getDecoded(), m.getExecuted());
 	}
 }

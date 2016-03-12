@@ -26,8 +26,11 @@ public class SimulationBridge {
 		cpu.stopRunning();
 	}
 
-	public void setClockSpeed(double hertz) {
-		cpu.setClockHertz(hertz);
+	/**
+	 * Technically setting the frequency rather than 'speed'
+	 */
+	public void setSpeed(double freq) {
+		cpu.setCycleFreq(freq);
 	}
 
 	public Word[] getRegisters() {
@@ -41,6 +44,15 @@ public class SimulationBridge {
 	public long getRegisterS(Register r) {
 		Word[] regs = getRegisters();
 		return DataConverter.decodeAsSigned(regs[r.getID()].getWord());
+	}
+
+	public void setRegisterU(Register r, long val) {
+		Word w = new Word(DataConverter.encodeAsUnsigned(val));
+		getRegisters()[r.getID()] = w;
+	}
+	public void setRegisterS(Register r, long val) {
+		Word w = new Word(DataConverter.encodeAsSigned(val));
+		getRegisters()[r.getID()] = w;
 	}
 
 	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) throws MemoryException, HeapException, StackException {

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -44,6 +46,19 @@ import category.UnitTests;
 @Category({UnitTests.class})
 public class DecodeTest {
 
+	private CPU cpu;
+
+	@Before
+	public void setupCPU() {
+		cpu = new CPU(new IOConsole());
+	}
+
+	@After
+	public void shutdownCPU() {
+		cpu.shutdown();
+		cpu = null;
+	}
+
 	/**tests the decoding of operand format dest src src
 	 * the arbitrary instruction used to test is add
 	 * @throws DecodeException 
@@ -56,8 +71,6 @@ public class DecodeTest {
 	@Test
 	public void testDestSrcSrc() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.add;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
@@ -97,7 +110,6 @@ public class DecodeTest {
 	@Test
 	public void testDestSrcImm() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.addi;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
@@ -137,7 +149,6 @@ public class DecodeTest {
     @Test
 	public void testDestSrcImmU() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.addiu;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t1);
@@ -177,7 +188,6 @@ public class DecodeTest {
 	@Test
 	public void testDestSrc() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.abs;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		RegisterOperand op2 = new RegisterOperand(Register.t0);
@@ -212,7 +222,6 @@ public class DecodeTest {
 	@Test
 	public void testImm() throws DecodeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.li;
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		IntegerOperand op2 = new IntegerOperand(7);
@@ -247,7 +256,6 @@ public class DecodeTest {
 	@Test
 	public void testNoArguments() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.syscall;
 		
 		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
@@ -271,7 +279,6 @@ public class DecodeTest {
 	@Test
 	public void testLabel() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.j;
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
@@ -310,7 +317,6 @@ public class DecodeTest {
 	@Test
 	public void testRegister() throws DecodeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.jr;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
@@ -340,7 +346,6 @@ public class DecodeTest {
 	@Test
 	public void testCmpCmpLabel() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.beq;
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
@@ -388,7 +393,6 @@ public class DecodeTest {
 	@Test
 	public void testCmpLabel() throws DecodeException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.bltz;
 		
 		Field labels = cpu.getClass().getDeclaredField("labels");//accesing private stuff for testing
@@ -431,7 +435,6 @@ public class DecodeTest {
 	@Test
 	public void testSrcAddr() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.sw;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.s0);
@@ -466,7 +469,6 @@ public class DecodeTest {
 	@Test
 	public void testDestAddr() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.lw;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.s0);
@@ -500,7 +502,6 @@ public class DecodeTest {
 	@Test
 	public void testBadOperands() throws DecodeException, NoSuchMethodException, SecurityException
 	{
-		CPU cpu = new CPU(new IOConsole());
 		Instruction instruction = Instruction.add;
 		
 		List<Operand> opList = new ArrayList<>();//should take 3 operands giving it none

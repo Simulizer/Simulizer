@@ -1,5 +1,4 @@
 # Bubblesort
-# @{ setSpeed(500) }@
 # @{ var l = vis.load('list', false) }@
 
 # @{ var startAddress = null }@

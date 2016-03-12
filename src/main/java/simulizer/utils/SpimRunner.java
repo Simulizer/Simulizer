@@ -40,7 +40,7 @@ public class SpimRunner {
             w.close();
             tmpFilePath = tmp.getAbsolutePath();
         } catch(IOException e) {
-            e.printStackTrace();
+            UIUtils.showExceptionDialog(e);
         }
 
         assert tmp != null;
@@ -92,7 +92,7 @@ public class SpimRunner {
 
 
         } catch(IOException | InterruptedException e) {
-            e.printStackTrace();
+            UIUtils.showExceptionDialog(e);
         }
 
         tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits
@@ -108,7 +108,7 @@ public class SpimRunner {
 			w.write(program);
 			w.close();
 		} catch(IOException e) {
-			e.printStackTrace();
+            UIUtils.showExceptionDialog(e);
 		}
 
 		assert tmp != null;
@@ -116,7 +116,7 @@ public class SpimRunner {
         try {
             Runtime.getRuntime().exec(new String[] {"qtspim", "-file", tmp.getAbsolutePath()});
         } catch (IOException e) {
-            e.printStackTrace();
+            UIUtils.showExceptionDialog(e);
         }
 
         tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits

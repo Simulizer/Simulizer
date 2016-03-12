@@ -2,8 +2,12 @@ package simulizer.settings;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -13,18 +17,35 @@ import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
+import simulizer.utils.UIUtils;
 
+/**
+ * The settings of the application
+ * 
+ * @author Michael
+ *
+ */
 public class Settings {
 	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
+	private File json;
 
+	/**
+	 * Loads the passed json file into a Settings object
+	 * 
+	 * @param json
+	 *            the json file to load/parse
+	 * @return the settings object representing the json file
+	 * @throws IOException
+	 */
 	public static Settings loadSettings(File json) throws IOException {
 		JsonParser parser = new JsonParser();
 		JsonElement jsonElement = parser.parse(new FileReader(json));
 		JsonObject jsonObject = jsonElement.getAsJsonObject();
-		return new Settings(jsonObject);
+		return new Settings(json, jsonObject);
 	}
 
-	private Settings(JsonObject jsonObject) {
+	private Settings(File json, JsonObject jsonObject) {
+		this.json = json;
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new ObjectSetting("window", "Window")
@@ -47,20 +68,22 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new IntegerSetting("default-clock-speed", "Default Clock Speed", "Default value of the simulation clock delay (in milliseconds)", 250, 0, Integer.MAX_VALUE))
+						.add(new IntegerSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
 		settings.add(new ObjectSetting("editor", "Editor")
-					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas"))
-					.add(new IntegerSetting("font-size", "Font size", "Font size in px"))
+					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas", "monospace"))
+					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 20))
 					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
-					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed"))
-					.add(new BooleanSetting("soft-tabs", "Soft tabs", "Soft tabs"))
-					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme) monokai, ambiance, tomorrow_night_eighties"))
-					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program"))
-					.add(new BooleanSetting("vim-mode", "Vim mode", "Vim keybindings for the editor"))
-					.add(new BooleanSetting("wrap", "Wrap long lines", "Wrap long lines"))
+					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed", 0.1))
+					.add(new BooleanSetting("soft-tabs", "Soft tabs", "Soft tabs", true))
+					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme/) default, monokai, ambiance, chaos, tomorrow_night_eighties", "/ace/theme/default"))
+					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program", false))
+					.add(new BooleanSetting("vim-mode", "Vim mode", "Vim keybindings for the editor", false))
+					.add(new BooleanSetting("wrap", "Wrap long lines", "Wrap long lines", false))
+					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
+					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1500))
 					);
 		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
 					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
@@ -91,32 +114,30 @@ public class Settings {
 			setting.setValue(null);
 			return;
 		}
-
 		try {
 			switch (setting.getSettingType()) {
-				case "Boolean":
+				case BOOLEAN:
 					((BooleanSetting) setting).setValue(element.getAsBoolean());
 					break;
 
-				case "Double":
+				case DOUBLE:
 					((DoubleSetting) setting).setValue(element.getAsDouble());
 					break;
 
-				case "Integer":
+				case INTEGER:
 					((IntegerSetting) setting).setValue(element.getAsInt());
 					break;
 
-				case "Object":
+				case OBJECT:
 					for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
 						loadFromJson(element.getAsJsonObject(), s);
 					break;
 
-				case "String":
+				case STRING:
 					((StringSetting) setting).setValue(element.getAsString());
 					break;
-
 				default:
-					System.err.println("Unknown: " + setting.getSettingType());
+					UIUtils.showErrorDialog("Unknown Setting Type", "" + setting.getSettingType());
 			}
 		} catch (Exception e) {
 			// TODO: Find exact exception
@@ -126,7 +147,9 @@ public class Settings {
 
 	/**
 	 * get a loaded value for a setting, specified using a path eg "editor.font-size"
-	 * @param settingPath the path to the option, separated by a dot
+	 * 
+	 * @param settingPath
+	 *            the path to the option, separated by a dot
 	 * @return the requested setting
 	 */
 	public Object get(String settingPath) {
@@ -135,9 +158,61 @@ public class Settings {
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
-				return null;
+				return null; // TODO: handle failure more gracefully
 		}
 		return setting.getValue();
+	}
+
+	/**
+	 * @return all of the settings
+	 */
+	public ObjectSetting getAllSettings() {
+		return settings;
+	}
+
+	private void saveSetting(JsonObject parent, SettingValue<?> setting) {
+		try {
+			switch (setting.getSettingType()) {
+				case BOOLEAN:
+					parent.addProperty(setting.getJsonName(), (Boolean) setting.getValue());
+					break;
+				case DOUBLE:
+					parent.addProperty(setting.getJsonName(), (Double) setting.getValue());
+					break;
+				case INTEGER:
+					parent.addProperty(setting.getJsonName(), (Integer) setting.getValue());
+					break;
+				case OBJECT:
+					JsonObject element = new JsonObject();
+					parent.add(setting.getJsonName(), element);
+					for (SettingValue<?> s : ((ObjectSetting) setting).getValue())
+						saveSetting(element, s);
+					break;
+				case STRING:
+					parent.addProperty(setting.getJsonName(), (String) setting.getValue());
+					break;
+				default:
+					UIUtils.showErrorDialog("Unknown Setting Type", "" + setting.getSettingType());
+			}
+		} catch (Exception e) {
+			// TODO: Find exact exception
+			// Setting was of invalid type, ignoring
+		}
+	}
+
+	/**
+	 * Saves settings to the json file
+	 */
+	public void save() {
+		try (Writer writer = new FileWriter(json)) {
+			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().disableHtmlEscaping().create();
+			JsonObject element = new JsonObject();
+			for (SettingValue<?> s : settings.getValue())
+				saveSetting(element, s);
+			gson.toJson(element, writer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

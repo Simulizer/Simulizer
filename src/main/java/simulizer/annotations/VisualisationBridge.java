@@ -24,6 +24,7 @@ public class VisualisationBridge {
 		DataStructureModel output = wm.getHLVisualManager().create(visualisationName, showNow);
 
 		return output;
+
 	}
 
 	public void show() {

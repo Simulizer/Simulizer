@@ -26,6 +26,11 @@ public class DebugBridge {
 		}
 	}
 
+	public void assertTrue(boolean condition) {
+		if(!condition)
+			throw new AssertionError();
+	}
+
 	public void alert(String msg) {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);

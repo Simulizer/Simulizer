@@ -1,9 +1,16 @@
 package simulizer.settings.types;
 
+import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
+/**
+ * Represents a boolean setting
+ * 
+ * @author Michael
+ *
+ */
 public class BooleanSetting extends SettingValue<Boolean> {
-	
+
 	public BooleanSetting(String jsonName, String humanName, String description) {
 		super(jsonName, humanName, description, false);
 	}
@@ -18,8 +25,8 @@ public class BooleanSetting extends SettingValue<Boolean> {
 	}
 
 	@Override
-	public String getSettingType() {
-		return "Boolean";
+	public SettingType getSettingType() {
+		return SettingType.BOOLEAN;
 	}
 
 }

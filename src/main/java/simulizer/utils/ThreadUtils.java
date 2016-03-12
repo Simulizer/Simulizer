@@ -3,6 +3,7 @@ package simulizer.utils;
 import javafx.application.Platform;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -56,6 +57,30 @@ public class ThreadUtils {
 			} finally {
 				lock.unlock();
 			}
+		}
+	}
+
+	/**
+     * Given the name of the thread pool or other executor. This factory gives
+     * descriptive names to the threads in that pool
+	 */
+	public static class NamedThreadFactory implements ThreadFactory {
+		private final String poolName;
+		private int threadID;
+
+		public NamedThreadFactory(String poolName) {
+			this.poolName = poolName;
+			threadID = 0;
+		}
+
+		@SuppressWarnings("NullableProblems")
+		@Override
+		public Thread newThread(Runnable runnable) {
+			if(runnable == null) runnable = () -> {};
+
+			Thread t = new Thread(runnable, "Executor(" + poolName + "): Thread(" + (threadID++) + ")");
+			t.setDaemon(true);
+			return t;
 		}
 	}
 }

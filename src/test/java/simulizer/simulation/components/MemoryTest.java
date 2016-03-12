@@ -259,5 +259,7 @@ public class MemoryTest {
 				assertTrue(e.getMessage().equals("Reading from invalid area of memory"));
 			}
 		}
+
+		cpu.shutdown();
 	}
 }

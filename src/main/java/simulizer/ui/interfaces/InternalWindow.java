@@ -17,6 +17,12 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
+/**
+ * InternalWindow contains the standard methods for being a window in the workspace
+ * 
+ * @author Michael
+ *
+ */
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
@@ -181,6 +187,9 @@ public abstract class InternalWindow extends Window {
 		isClosed = true;
 	}
 
+	/**
+	 * @return if the window is closed or not
+	 */
 	public boolean isClosed() {
 		return isClosed;
 	}
@@ -192,6 +201,14 @@ public abstract class InternalWindow extends Window {
 		return WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
 	}
 
+	/**
+	 * Tells the InternalWindow the size of the workspace. The InternalWindow will resize accordingly
+	 * 
+	 * @param width
+	 *            the width of the workspace
+	 * @param height
+	 *            the height of the workspace
+	 */
 	public void setWorkspaceSize(double width, double height) {
 		if (width != Double.NaN && height != Double.NaN) {
 			setLayoutX(layX * width);
@@ -203,6 +220,9 @@ public abstract class InternalWindow extends Window {
 		}
 	}
 
+	/**
+	 * Calculates layout ratios
+	 */
 	private void calculateLayout() {
 		if (windowWidth > 0 && windowHeight > 0) {
 			layX = getLayoutX() / windowWidth;

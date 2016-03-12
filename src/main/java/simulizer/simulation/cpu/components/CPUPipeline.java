@@ -20,12 +20,11 @@ import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
-import simulizer.simulation.listeners.AnnotationMessage;
-import simulizer.simulation.listeners.ExecuteStatementMessage;
-import simulizer.simulation.listeners.PipelineHazardMessage;
-import simulizer.simulation.listeners.PipelineHazardMessage.Hazard;
-import simulizer.simulation.listeners.PipelineStateMessage;
-import simulizer.simulation.listeners.ProblemMessage;
+import simulizer.simulation.messages.AnnotationMessage;
+import simulizer.simulation.messages.PipelineHazardMessage;
+import simulizer.simulation.messages.PipelineHazardMessage.Hazard;
+import simulizer.simulation.messages.PipelineStateMessage;
+import simulizer.simulation.messages.ProblemMessage;
 
 /**this class is an extension of the original CPU class
  * the difference is that the order of execution follows a very 
@@ -53,15 +52,20 @@ public class CPUPipeline extends CPU {
 		this.ID = createNopInstruction();
 		this.canFetch = true;
 		this.isFinished = 0;
-		this.nopCount = 0;
+		this.nopCount = 2;//initially 2
 		
 	}
-	
-	/**overwrites the normal cpu clock speed to make it representative of pipeline speed
-	 *
-	 */
-	public void setClockSpeed(int millis) {
-		clock.tickMillis = millis;
+
+	@Override
+	public void setCycleFreq(double freq) {
+		// pipelined: 1 cycle = 1 tick
+		clock.setTickFrequency(freq);
+	}
+
+	@Override
+	public double getCycleFreq() {
+		// pipelined: 1 cycle = 1 tick
+		return clock.getTickFrequency();
 	}
 
 	/**method will go through a statement and extract the registers
@@ -155,9 +159,9 @@ public class CPUPipeline extends CPU {
 	 * @return whether or not there is a crossover between the two lists
 	 */
 	private <A> boolean needToBubble(List<A> reads, List<A> writes) {
-		for(int i = 0; i < writes.size(); i++) {
-			for(int j = 0; j < reads.size(); j++) {
-				if(writes.get(i).equals(reads.get(j))) {
+		for (A write : writes) {
+			for (A read : reads) {
+				if (write.equals(read)) {
 					return true;
 				}
 			}
@@ -184,12 +188,12 @@ public class CPUPipeline extends CPU {
 	/**method will overwrite the method in the CPU class for running a cycle
 	 * this method will mimic a primitive pipeline instead of a sequential execution
 	 */
-	public void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+	@Override
+	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
 
 		Address thisInstruction = programCounter;
 		if(this.canFetch&&this.isFinished==0){
 			fetch();
-			sendMessage(new ExecuteStatementMessage(thisInstruction));
 		} else if (!this.canFetch) {
 			this.canFetch = true;
 		} else if(this.isFinished==1) {//getting closer to termination
@@ -248,7 +252,7 @@ public class CPUPipeline extends CPU {
 		if(this.nopCount >= 1) {
 			executeAddress = null;
 		}
-		sendMessage(new PipelineStateMessage(thisInstruction,decodeAddress,executeAddress));
+		sendMessage(new PipelineStateMessage(thisInstruction, decodeAddress, executeAddress));
 		
 		this.nopCount = (this.nopCount==0) ? 0 : this.nopCount-1;//only decrementing if not 0
 		
@@ -257,17 +261,25 @@ public class CPUPipeline extends CPU {
 		} else if(jumped) {//if jump occurred in this cycle
 			this.nopCount = 2;
 		}
+
+		waitForNextTick();
+
+		cycles++;
+		if(breakAfterCycle) {
+			pause();
+		}
 	}
 	
 	/**overwriting the run program method of CPU but adding some field changes before execution
 	 * 
 	 */
+	@Override
 	public void runProgram()
 	{
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
-		this.nopCount = 0;
+		this.nopCount = 2;//decode and execute bubbled initially
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program
@@ -290,5 +302,10 @@ public class CPUPipeline extends CPU {
 		
 		super.execute(instruction);
 	}
-	
+
+
+	@Override
+	public boolean isPipelined() {
+		return true;
+	}
 }

@@ -16,11 +16,12 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.listeners.DataMovementMessage;
-import simulizer.simulation.listeners.InstructionTypeMessage;
-import simulizer.simulation.listeners.RegisterChangedMessage;
-import simulizer.simulation.listeners.StageEnterMessage;
-import simulizer.simulation.listeners.StageEnterMessage.Stage;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.InstructionTypeMessage;
+import simulizer.simulation.messages.RegisterChangedMessage;
+import simulizer.simulation.messages.StageEnterMessage;
+import simulizer.simulation.messages.StageEnterMessage.Stage;
+import simulizer.utils.UIUtils;
 
 /**class is used for executing instructions (including syscall)
  * it is separate from the main CPU model due to it's size
@@ -79,7 +80,7 @@ public class Executor {
                     syscall(v0);//carry out specified syscall op
                 }
                 else if(instruction.getInstruction().equals(Instruction.BREAK)) {
-                	cpu.pauseClock();//stop clock for now
+					cpu.pause();
                 }
                 else if(!instruction.getInstruction().equals(Instruction.nop)) {
                     throw new ExecuteException("Error with zero argument instruction", instruction);
@@ -99,7 +100,14 @@ public class Executor {
             case LSTYPE:
             	cpu.sendMessage(new InstructionTypeMessage(AddressMode.LSTYPE));
                 if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destImm)) {//li
-                    cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+                	if(instruction.getInstruction().equals(Instruction.li)) {
+                		  cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = instruction.asLSType().getImmediate().get();
+                	} else if(instruction.getInstruction().equals(Instruction.lui)) {
+                		byte[] immediate = instruction.asLSType().getImmediate().get().getWord();
+                		immediate = new byte[]{immediate[2],immediate[3],0x00,0x00};//lower half of immediate as upper half
+                		cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()] = new Word(immediate);
+                	}
+                  
                     cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[instruction.asLSType().getRegisterName().get().getID()]),Optional.empty()));
                     cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
 
@@ -237,6 +245,14 @@ public class Executor {
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
+    		case 67697865://AND HIS NAME IS...
+				UIUtils.openURL("https://www.youtube.com/watch?v=5LitDGyxFh4");
+				UIUtils.showInfoDialog("And His Name Is", "JOHN CENA!!!");
+    			break;
+    		case 82736775://RICK ASCII :)
+				UIUtils.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+				UIUtils.showInfoDialog("Never gonna give you up ;)", "");
+				break;
     		default://if invalid syscall code
     			throw new InstructionException("Invalid syscall operation", Instruction.syscall);
     	}

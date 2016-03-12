@@ -2,8 +2,17 @@ package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
 
+/**
+ * Represents a custom wire which travels in multiple directions
+ */
 public class CustomWire extends Wire {
 
+    /**
+     * Sets up a new custom wire
+     * @param xStart The starting x position
+     * @param yStart The starting y position
+     * @param customLines The custom lines for the wire
+     */
     public CustomWire(double xStart, double yStart, CustomLine... customLines){
         super(new Polyline(), new Polyline(), Type.CUSTOM);
 
@@ -15,6 +24,12 @@ public class CustomWire extends Wire {
         getChildren().addAll(line, arrowHead);
     }
 
+    /**
+     * Draws a line according to the custom lines
+     * @param xStart The starting x position
+     * @param yStart The starting y position
+     * @param customLines The custom lines to draw
+     */
     public void drawLine(double xStart, double yStart, CustomLine... customLines){
         line.getPoints().clear();
         arrowHead.getPoints().clear();
@@ -47,36 +62,32 @@ public class CustomWire extends Wire {
 
         switch (finalDirection){
             case UP:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart + 10,
                         xStart - 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case DOWN:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart + 10, yStart - 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case RIGHT:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart - 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
             case LEFT:
-                arrowHead.getPoints().addAll(new Double[]{
+                arrowHead.getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart - 10,
                         xStart + 10, yStart + 10,
-                        xStart, yStart,
-                });
+                        xStart, yStart);
                 break;
         }
         reanimateData();

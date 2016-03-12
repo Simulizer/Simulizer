@@ -5,7 +5,7 @@ import javax.script.ScriptException;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
-import simulizer.simulation.listeners.AnnotationMessage;
+import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -76,19 +76,28 @@ public class AnnotationManager {
 		setupBridges();
 	}
 
+	private String getAnnotationLineString(AnnotationMessage msg) {
+		if(msg.boundAddress != null) {
+			int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
+			return "the annotation bound to line: " + lineNum + ".";
+		} else {
+			return "the initial annotation.";
+		}
+	}
+
 	public void processAnnotationMessage(AnnotationMessage msg) {
 		try {
 			ex.exec(msg.annotation);
-		} catch (ScriptException e) {
-			// TODO: send to error stream instead
+		} catch(AnnotationEarlyReturn ignored) {
+		} catch(AssertionError e) {
 			IO io = wm.getIO();
-			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage());
-			if (msg.boundAddress != null) {
-				int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
-				io.printString(IOStream.ERROR, "\nFrom the annotation bound to line: " + lineNum + ".");
-			} else {
-				io.printString(IOStream.ERROR, "\nFrom the initial annotation.");
-			}
+			io.printString(IOStream.ERROR, "Assertion error:\n");
+			io.printString(IOStream.ERROR, "  From " + getAnnotationLineString(msg) + "\n");
+			io.printString(IOStream.ERROR, "  With the code: \"" + e.getMessage().trim() + "\"\n");
+		} catch (ScriptException e) {
+			IO io = wm.getIO();
+			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage() + "\n");
+			io.printString(IOStream.ERROR, "  From " + getAnnotationLineString(msg) + "\n");
 		}
 	}
 }

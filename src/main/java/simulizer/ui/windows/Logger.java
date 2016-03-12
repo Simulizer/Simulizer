@@ -14,7 +14,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -23,9 +22,17 @@ import javafx.scene.layout.Priority;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.ThreadUtils;
+import simulizer.utils.UIUtils;
 
+/**
+ * Provides Input/Output for SIMP programs and output for javascript debug/error messages
+ * 
+ * @author Michael
+ *
+ */
 public class Logger extends InternalWindow implements Observer {
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Logger"));
 	private static final long BUFFER_TIME = 20;
 	private volatile boolean callUpdate = true;
 
@@ -34,10 +41,11 @@ public class Logger extends InternalWindow implements Observer {
 
 	private CountDownLatch cdl = new CountDownLatch(1);
 	private String lastInput = "";
+	private boolean lastInputCancelled = false;
 
 	private TabPane tabPane;
 	private boolean[] ioChanged;
-	private StringBuilder[] logs;
+	private final StringBuilder[] logs;
 	private TextArea[] outputs;
 
 	private boolean emphasise = true;
@@ -83,7 +91,7 @@ public class Logger extends InternalWindow implements Observer {
 		submit.setOnAction((e) -> submitText());
 		submit.setDisable(true);
 		addEventHandler(KeyEvent.ANY, (e) -> {
-			if (input.isFocused() && e.getCode() == KeyCode.ENTER && !submit.isDisable())
+			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
 				submitText();
 		});
 		input.focusedProperty().addListener((e) -> {
@@ -99,12 +107,17 @@ public class Logger extends InternalWindow implements Observer {
 	}
 
 	private void submitText() {
-		lastInput = input.getText();
-		if (!lastInput.equals("")) {
-			input.setText("");
-			logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput + "\n");
-			callUpdate = true;
-			cdl.countDown();
+		if (!submit.isDisable()) {
+			lastInput = input.getText();
+			if (!lastInput.equals("")) {
+				input.setText("");
+				logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput).append("\n");
+				callUpdate = true;
+				cdl.countDown();
+			}
+		} else {
+			if (input.getText().toLowerCase().equals("i code better when i'm drunk"))
+				getWindowManager().motionBlur();
 		}
 	}
 
@@ -141,26 +154,40 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
-		for (int i = 0; i < outputs.length; i++)
-			outputs[i].setText("");
+		for (StringBuilder log : logs)
+			log.setLength(0);
+		for (TextArea output : outputs)
+			output.setText("");
 	}
 
+	/**
+	 * @return the user entered string (or null if cancelled)
+	 */
 	public String nextMessage() {
 		try {
 			if (emphasise)
 				Platform.runLater(this::emphasise);
 			submit.setDisable(false);
-			cdl = new CountDownLatch(1);
+			synchronized (this) { // cannot create new latch and count down at the same time
+				cdl = new CountDownLatch(1);
+				lastInputCancelled = false;
+			}
 			cdl.await();
 			submit.setDisable(true);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
-		return lastInput;
+
+		if (lastInputCancelled) {
+			return null;
+		} else {
+			return lastInput;
+		}
 	}
 
-	public void cancelNextMessage() {
+	public synchronized void cancelNextMessage() {
 		cdl.countDown();
+		lastInputCancelled = true;
 	}
 
 	@Override

@@ -6,13 +6,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.*;
 
-import javafx.scene.control.ButtonType;
+import javafx.application.Platform;
 import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -23,6 +25,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
@@ -31,9 +34,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.components.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.utils.FileUtils;
-import simulizer.utils.SafeJSObject;
-import simulizer.utils.UIUtils;
+import simulizer.utils.*;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)
@@ -43,12 +44,13 @@ import simulizer.utils.UIUtils;
 public class Editor extends InternalWindow {
 
 	// TODO: refresh current file if not edited
-	// TODO: update problems as the user types. maybe do this using ace's worker
-	// TODO: handle more keyboard shortcuts: C-s: save, C-n: new, F5: assemble/run?, C-f for find
+	// TODO: handle more keyboard shortcuts: C-f for find
 
-	WindowManager wm;
+	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
+	private static File currentFile = null; // persists across instances of the window
+
+	private boolean pageLoaded;
 	private WebEngine engine;
-	private File currentFile;
 
 	private boolean changedSinceLastSave;
 	private boolean editedSinceLabelUpdate;
@@ -64,11 +66,23 @@ public class Editor extends InternalWindow {
 	private SafeJSObject jsEditor;
 	private SafeJSObject jsSession;
 
+	public boolean hasLoaded() {
+		return pageLoaded;
+	}
+
 	// execute mode = simulation running
 	private enum Mode { EDIT_MODE, EXECUTE_MODE }
 	private Mode mode;
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
+
+	// to do with continuous assembling of
+	private boolean continuousAssemblyEnabled;
+	private int continuousAssemblyRefreshPeriod; // if changed, does not automatically change the running scheduler
+	private boolean continuousAssemblyInProgress; // used to set the window title
+	private final ScheduledExecutorService continuousAssembly;
+	private ScheduledFuture<?> assembleTask;
+	private int lastProgramHash; // used to avoid wasted effort if the file has not changed
 
 	/**
 	 * Communication between this class and the javascript running in the webview
@@ -91,9 +105,10 @@ public class Editor extends InternalWindow {
 
 	private Bridge bridge;
 
+
 	public Editor() {
 		WebView view = new WebView();
-		currentFile = null;
+		pageLoaded = false;
 		bridge = new Bridge(this);
 
 		engine = view.getEngine();
@@ -107,7 +122,10 @@ public class Editor extends InternalWindow {
 
 		// handle copy and paste manually
 		addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+
 			if (C_c.match(event)) {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
 				String clip = (String) jsEditor.call("getCopyText");
 
 				Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -116,22 +134,35 @@ public class Editor extends InternalWindow {
 				content.putString(clip);
 				clipboard.setContent(content);
 
+				event.consume();
+
 			} else if (C_v.match(event)) {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
 				Clipboard clipboard = Clipboard.getSystemClipboard();
 				String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
 
 				if (clip != null) {
 					jsEditor.call("insert", clip);
 				}
+
+				editedSinceLabelUpdate = true;
+				event.consume();
+
 			} else if(C_plus.match(event)) {
 				jsWindow.call("changeFontSize", 1);
+				event.consume();
 			} else if(C_minus.match(event)) {
 				jsWindow.call("changeFontSize", -1);
+				event.consume();
+			} else {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
+				editedSinceLabelUpdate = true;
 			}
-
-			editedSinceLabelUpdate = true;
 		});
 
+		// other windows scan the contents of the editor continuously
 		editedSinceLabelUpdate = false;
 		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
 			if (editedSinceLabelUpdate) {
@@ -142,10 +173,167 @@ public class Editor extends InternalWindow {
 
 		setOnClosedAction(e -> detachObservers());
 
+		// continuous assembly
+		continuousAssembly = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Continuous-Assembly"));
+		continuousAssemblyInProgress = false;
+		assembleTask = null;
+		lastProgramHash = 0;
+
 		getContentPane().getChildren().add(view);
 	}
 
+	/**
+	 * set continuous assembly 'on' for future file loads
+	 * also start continuous assembly now
+	 */
+	public void enableContinuousAssembly() {
+		continuousAssemblyEnabled = true;
+		startContinuousAssembly();
+	}
+
+	/**
+	 * set continuous assembly 'off' for future file loads
+	 * also stop continuous assembly now if it is running
+	 */
+	public void disableContinuousAssembly() {
+		continuousAssemblyEnabled = false;
+		stopContinuousAssembly();
+	}
+
+	public boolean isContinuousAssemblyEnabled() {
+		return continuousAssemblyEnabled;
+	}
+
+
+	public void startContinuousAssembly() {
+		if(assembleTask != null) {
+			assembleTask.cancel(false); // wait to finish
+		}
+		if(!continuousAssembly.isShutdown()) {
+			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
+				if(!continuousAssemblyEnabled || mode == Mode.EXECUTE_MODE)
+					return;
+
+				try {
+					FutureTask<String> text = new FutureTask<>(() -> {
+						try {
+							return getText();
+						} catch(Exception e) {
+							return null;
+						}
+					});
+					Platform.runLater(text);
+
+					String program = text.get(100, TimeUnit.MILLISECONDS);
+					if(program == null) return;
+					int thisProgramHash = program.hashCode();
+
+					if (lastProgramHash != thisProgramHash) {
+						continuousAssemblyInProgress = true;
+						Platform.runLater(this::refreshTitle);
+
+						final List<Problem> problems = Assembler.checkForProblems(program);
+						Platform.runLater(() -> setProblems(problems));
+						lastProgramHash = thisProgramHash;
+					}
+				} catch(TimeoutException | InterruptedException ignored) {
+					// its fine, just don't compile
+				} catch (Exception e) {
+					UIUtils.showExceptionDialog(e);
+				} finally {
+					continuousAssemblyInProgress = false;
+					Platform.runLater(this::refreshTitle);
+				}
+			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.MILLISECONDS);
+		}
+	}
+
+	public void stopContinuousAssembly() {
+		if(assembleTask != null) {
+			assembleTask.cancel(true);
+			assembleTask = null;
+		}
+	}
+
+	/**
+	 * called by loadPage once the document has loaded
+	 */
+	private void afterDocumentLoaded(Settings settings) {
+		// setup the javascript --> java bridge
+		jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
+		jsWindow.setMember("bridge", bridge);
+
+		engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-ambiance.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-chaos.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-tomorrow_night_eighties.js"));
+		initSyntaxHighlighter();
+
+		jsWindow.call("init");
+		jsEditor = new SafeJSObject((JSObject) engine.executeScript("editor")); // created by init() so must be set after
+		jsSession = new SafeJSObject((JSObject) engine.executeScript("session"));
+
+		//enableFirebug();
+
+		// load settings
+		setWrap((boolean) settings.get("editor.wrap"));
+		String fontFamily = (String) settings.get("editor.font-family");
+		int fontSize = (int) settings.get("editor.font-size");
+		jsWindow.call("setFont", fontFamily, fontSize);
+
+		jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+		engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
+		jsEditor.call("setTheme", (String) settings.get("editor.theme"));
+
+		boolean vim = (boolean) settings.get("editor.vim-mode");
+		if(vim) {
+			engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
+			jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
+		}
+
+		boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
+		jsWindow.setMember("userInControl", userInControl);
+
+		continuousAssemblyEnabled = (boolean) settings.get("editor.continuous-assembly");
+		continuousAssemblyRefreshPeriod = (int) settings.get("editor.continuous-assembly-refresh-period");
+
+		if(initialLoad) {
+			String initialFilename = (String) settings.get("editor.initial-file");
+			if (initialFilename != null && !initialFilename.isEmpty()) {
+				File f = new File(initialFilename);
+				if (f.exists()) {
+					loadFile(f);
+				} else {
+					UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
+					newFile();
+				}
+			} else {
+				newFile();
+			}
+		} else {
+			if(currentFile != null) {
+				loadFile(currentFile);
+			} else {
+				newFile();
+			}
+		}
+
+
+		if(getWindowManager().getCPU().isRunning())
+			executeMode();
+
+		// signals that all the editor methods are now safe to call
+		pageLoaded = true;
+		// signals that whenever the editor is opened again, it is not for the first time
+		initialLoad = false;
+	}
+
 	private void loadPage(Settings settings) {
+		UIUtils.assertFXThread();
+
 		engine.loadContent(FileUtils.getResourceContent("/editor/editor.html"));
 
 		// can only execute scripts once the page has loaded
@@ -154,53 +342,7 @@ public class Editor extends InternalWindow {
 			public void changed(ObservableValue<? extends Document> observableValue, Document oldDoc, Document newDoc) {
 				if (newDoc != null) {
 					// loaded, run this once then remove as a listener
-
-					// setup the javascript --> java bridge
-					jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
-					jsWindow.setMember("bridge", bridge);
-
-					engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
-					engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
-					initSyntaxHighlighter();
-
-					jsWindow.call("init");
-					jsEditor = new SafeJSObject((JSObject) engine.executeScript("editor")); // created by init() so must be set after
-					jsSession = new SafeJSObject((JSObject) engine.executeScript("session"));
-
-					//enableFirebug();
-
-					// load settings
-					setWrap((boolean) settings.get("editor.wrap"));
-					String fontFamily = (String) settings.get("editor.font-family");
-					int fontSize = (int) settings.get("editor.font-size");
-					jsWindow.call("setFont", fontFamily, fontSize);
-
-					jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
-					engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
-					jsEditor.call("setTheme", (String) settings.get("editor.theme"));
-
-					boolean vim = (boolean) settings.get("editor.vim-mode");
-					if(vim) {
-						engine.executeScript(FileUtils.getResourceContent("/external/keybinding-vim.js"));
-						jsEditor.call("setKeyboardHandler", "ace/keyboard/vim");
-					}
-
-					boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
-					jsWindow.setMember("userInControl", userInControl);
-
-					String initialFile = (String) settings.get("editor.initial-file");
-					if(initialFile != null) {
-						File f = new File(initialFile);
-						if(f.exists()) {
-							loadFile(f);
-						} else {
-							//TODO: log failure properly
-							throw new IllegalArgumentException("file not found");
-						}
-					} else {
-						newFile();
-					}
+					afterDocumentLoaded(settings);
 
 					engine.documentProperty().removeListener(this);
 				}
@@ -210,7 +352,7 @@ public class Editor extends InternalWindow {
 
 	@Override
 	public void ready() {
-		wm = getWindowManager();
+		WindowManager wm = getWindowManager();
 
 		loadPage(wm.getSettings());
 
@@ -218,16 +360,17 @@ public class Editor extends InternalWindow {
 
 		for (String className : observersToAdd) {
 			TemporaryObserver obs =
-				(TemporaryObserver) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.ofString(className));
+				(TemporaryObserver) wm.getWorkspace().findInternalWindow(WindowEnum.ofString(className));
 			if (obs != null) addObserver(obs);
 		}
 
 		super.ready();
 	}
 
-	@Override public void close() {
+	@Override
+	public void close() {
 		if(hasOutstandingChanges()) {
-			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + currentFile.getName() + "\"", "");
+			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
 
 			if(save == ButtonType.YES) {
 				saveFile();
@@ -238,6 +381,11 @@ public class Editor extends InternalWindow {
 				return;
 			}
 		}
+
+		stopContinuousAssembly();
+		// shutdown the continuous assembly thread
+		continuousAssembly.shutdownNow();
+
 		super.close();
 	}
 
@@ -328,8 +476,11 @@ public class Editor extends InternalWindow {
 		return (int) jsWindow.call("getLine");
 	}
 
-	public File getCurrentFile() {
-		return currentFile;
+	public boolean hasBackingFile() {
+		return currentFile != null;
+	}
+	public String getBackingFilename() {
+		return currentFile == null ? "Untitled" : currentFile.getName();
 	}
 
 	/**
@@ -338,7 +489,7 @@ public class Editor extends InternalWindow {
 	public void saveFile() {
 		String currentText = getText();
 
-		if(currentFile != null && changedSinceLastSave) {
+		if(hasBackingFile() && changedSinceLastSave) {
 			FileUtils.writeToFile(currentFile, currentText);
 			setEdited(false);
 			refreshTitle();
@@ -349,6 +500,10 @@ public class Editor extends InternalWindow {
 		if(file == null) return;
 
 		FileUtils.writeToFile(file, getText());
+
+		currentFile = file;
+		setEdited(false);
+		refreshTitle();
 	}
 
 	public void loadFile(File file) {
@@ -358,6 +513,9 @@ public class Editor extends InternalWindow {
 		editedSinceLabelUpdate = false;
 
 		updateObservers();
+
+		if(continuousAssemblyEnabled)
+			startContinuousAssembly();
 	}
 
 	public void newFile() {
@@ -367,6 +525,9 @@ public class Editor extends InternalWindow {
 		editedSinceLabelUpdate = false;
 
 		updateObservers();
+
+		if(continuousAssemblyEnabled)
+			startContinuousAssembly();
 	}
 
 	/**
@@ -382,10 +543,10 @@ public class Editor extends InternalWindow {
 	}
 
 	private void refreshTitle() {
-		String filename = currentFile != null ? currentFile.getName() : "New File";
-		String editedSymbol = changedSinceLastSave ? " *" : "";
 		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
-		setTitle(WindowEnum.getName(this) + modeString + " - " + filename + editedSymbol);
+		String assembling = continuousAssemblyInProgress ? " ~ " : " - ";
+		String editedSymbol = changedSinceLastSave ? " *" : "";
+		setTitle(WindowEnum.getName(this) + modeString + assembling + getBackingFilename() + editedSymbol);
 	}
 
 	/**

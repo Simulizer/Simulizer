@@ -1,18 +1,19 @@
 package simulizer.ui.components.cpu;
 
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Duration;
 import simulizer.ui.windows.CPUVisualisation;
 
+/**
+ * Represents an ALU in the CPU visualisation
+ */
 public class ALU extends ComponentStackPane {
 
-
+    /**
+     * Draws the shape, sets attributes and sets the text alignment
+     * @param vis The CPU visualisation
+     * @param label The label to use
+     */
     public ALU(CPUVisualisation vis, String label){
         super(vis, label);
         drawShape(new Polyline());
@@ -20,6 +21,10 @@ public class ALU extends ComponentStackPane {
         text.setTextAlignment(TextAlignment.RIGHT);
     }
 
+    /**
+     * Draws the shape, uses a polyline along with the width and height to calculate a suitable shape
+     * @param polyline The polyline to draw with
+     */
     public void drawShape(Polyline polyline){
         double baseX = x;
         double baseY = y;
@@ -31,7 +36,7 @@ public class ALU extends ComponentStackPane {
         double leftHeight = (height - gapWidth) / 2;
 
         polyline.getPoints().clear();
-        polyline.getPoints().addAll(new Double[]{
+        polyline.getPoints().addAll(
                 baseX, baseY,
                 baseX + width, baseY + rightSmallHeight,
                 baseX + width, baseY + rightHeight + rightSmallHeight,
@@ -39,30 +44,48 @@ public class ALU extends ComponentStackPane {
                 baseX, baseY + gapWidth + leftHeight,
                 baseX + (width * 0.2), baseY + leftHeight + (gapWidth / 2),
                 baseX, baseY + leftHeight,
-                baseX, baseY
-        });
+                baseX, baseY);
 
         this.shape = polyline;
     }
 
+    /**
+     * Gets the shape height
+     * @return The height of the shape
+     */
     public double getShapeHeight(){
         double rightHeight = height * 0.7;
         double rightSmallHeight = (height - rightHeight) / 2;
 
         double gapWidth = height * 0.1;
-        double leftHeight = (height - gapWidth) / 2;
+        //double leftHeight = (height - gapWidth) / 2;
 
         return (height + (rightHeight + rightSmallHeight)) / 2;
     }
 
+    /**
+     * Sets the shape width
+     * @param width The shape width
+     */
     public void setShapeWidth(double width){
         this.width = width;
     }
 
+    /**
+     * Sets the shape height
+     * @param height The shape height
+     */
     public void setShapeHeight(double height){
         this.height = height;
     }
 
+    /**
+     * Sets attributes on the shape, useful when resizing
+     * @param x The new x coordinate
+     * @param y The new y coordinate
+     * @param width The new width
+     * @param height The new height
+     */
     public void setAttrs(double x, double y, double width, double height){
         setLayoutX(x);
         shape.setLayoutX(x);
@@ -76,71 +99,6 @@ public class ALU extends ComponentStackPane {
         setPrefHeight(height);
         text.setWrappingWidth(width);
         drawShape(((Polyline) this.shape));
-    }
-
-    public void zoomOnHover(){
-
-        ComponentStackPane instance = this;
-
-//        vis.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//
-//                double eventX = event.getX();
-//                double eventY = event.getY();
-//                double xMax = getX() + getShapeWidth();
-//                double yMax = getY() + getShapeHeight();
-//
-//                if( eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
-//                    focused = !focused;
-//                    System.out.println("FOCUSED " + focused);
-//                    double scaleX = 2;
-//                    double scaleY = 2;
-//                    double translateX = 0 - (getLayoutX());
-//                    double translateY = 0 - (getLayoutY() - (getShapeHeight() / 2));
-//
-//                    if(!focused){
-//                        // Should zoom out
-//                        scaleX = 0 - scaleX;
-//                        scaleY = 0 - scaleY;
-//                        translateX = 0;
-//                        translateY = 0;
-//                    }
-//
-//                    System.out.println("LAYOUT X BEFORE " + getX());
-//
-//                    System.out.println("SHAPE WIDTH " + getShapeWidth());
-//
-//                    System.out.println("TRANSLTED BY X " + Math.abs(translateX));
-//
-//                    System.out.println("NEEDED 300");
-//
-//
-//                    ScaleTransition st = new ScaleTransition(Duration.millis(2000), vis.getCpu().allItems);
-//                    st.setByX(scaleX);
-//                    st.setByY(scaleY);
-//                    st.setCycleCount(1);
-//
-//                    st.play();
-//
-//                    TranslateTransition tt = new TranslateTransition(Duration.millis(2000), vis.getCpu().allItems);
-//                    tt.setToX(translateX);
-//                    tt.setToY(translateY);
-//                    tt.setCycleCount(1);
-//
-//                    tt.play();
-//
-//                    System.out.println("Layout x before is " + getLayoutX());
-//
-//                    st.setOnFinished(new EventHandler<ActionEvent>() {
-//                        @Override
-//                        public void handle(ActionEvent event) {
-//                            System.out.println("Layout x is " + getLayoutX());
-//                        }
-//                    });
-//                }
-//            }
-//        });
     }
 
 }
