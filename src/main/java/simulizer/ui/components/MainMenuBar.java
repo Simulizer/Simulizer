@@ -22,6 +22,7 @@ import simulizer.assembler.representation.ProgramStringBuilder;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.Clock;
 import simulizer.ui.WindowManager;
+import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
@@ -300,10 +301,30 @@ public class MainMenuBar extends MenuBar {
 	 */
 	private Menu windowsMenu() {
 		Menu windowsMenu = new Menu("Windows");
+		windowsMenu.setOnShowing(e -> windowsMenuHelper(windowsMenu));
+		windowsMenuHelper(windowsMenu);
+		return windowsMenu;
+	}
+
+	/**
+	 * Dynamically generates the windows menu items
+	 *
+	 * @param windowsMenu
+	 *            The windows menu to add the items to
+	 */
+	private void windowsMenuHelper(Menu windowsMenu) {
+		windowsMenu.getItems().clear();
 		for (WindowEnum wenum : WindowEnum.values()) {
 			if (wenum.showInWindowsMenu()) {
-				MenuItem item = new MenuItem(wenum.toString());
-				item.setOnAction(e -> wm.getWorkspace().openInternalWindow(wenum));
+				CheckMenuItem item = new CheckMenuItem(wenum.toString());
+				item.setSelected(wm.getWorkspace().findInternalWindow(wenum) != null);
+				item.setOnAction(e -> {
+					InternalWindow window = wm.getWorkspace().findInternalWindow(wenum);
+					if (window == null)
+						wm.getWorkspace().openInternalWindow(wenum);
+					else
+						window.close();
+				});
 				windowsMenu.getItems().add(item);
 			}
 		}
@@ -311,8 +332,6 @@ public class MainMenuBar extends MenuBar {
 		MenuItem delWindows = new MenuItem("Close All");
 		delWindows.setOnAction(e -> wm.getWorkspace().closeAll());
 		windowsMenu.getItems().addAll(new SeparatorMenuItem(), delWindows);
-
-		return windowsMenu;
 	}
 
 	/**
@@ -324,7 +343,10 @@ public class MainMenuBar extends MenuBar {
 		Menu helpMenu = new Menu("Help");
 
 		MenuItem guide = new MenuItem("Guide");
-		guide.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.GUIDE));
+		guide.setDisable(true);
+		guide.setOnAction(e -> {
+			// TODO: Open guide.pdf
+		});
 
 		MenuItem syscall = new MenuItem("Syscall Reference");
 		syscall.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.SYSCALL_REFERENCE));

@@ -18,7 +18,6 @@ public enum WindowEnum {
 	LOGGER("Logger"),
 	MEMORY_VIEW("MemoryView", "Memory View"),
 	REGISTERS("Registers"),
-	GUIDE("help.GuideWindow", "Guide", false),
 	SYSCALL_REFERENCE("help.SyscallReference", "Syscall Reference", false),
 	INSTRUCTION_REFERENCE("help.InstructionReference", "Instruction Reference", false);
 	// @formatter:on
