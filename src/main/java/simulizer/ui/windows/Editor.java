@@ -175,7 +175,10 @@ public class Editor extends InternalWindow {
 
 		engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
 		engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-ambiance.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-chaos.js"));
 		engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
+		engine.executeScript(FileUtils.getResourceContent("/external/theme-tomorrow_night_eighties.js"));
 		initSyntaxHighlighter();
 
 		jsWindow.call("init");
@@ -203,14 +206,14 @@ public class Editor extends InternalWindow {
 		boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
 		jsWindow.setMember("userInControl", userInControl);
 
-		String initialFile = (String) settings.get("editor.initial-file");
-		if(initialFile != null) {
-			File f = new File(initialFile);
+		String initialFilename = (String) settings.get("editor.initial-file");
+		if(initialFilename != null && !initialFilename.isEmpty()) {
+			File f = new File(initialFilename);
 			if(f.exists()) {
 				loadFile(f);
 			} else {
-				//TODO: log failure properly
-				throw new IllegalArgumentException("file not found");
+				UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
+				newFile();
 			}
 		} else {
 			newFile();
