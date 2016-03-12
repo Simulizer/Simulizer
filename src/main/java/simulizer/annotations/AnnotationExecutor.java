@@ -87,7 +87,11 @@ public class AnnotationExecutor {
 					.append(name)
 					.append(",getS:function(){return simulation.getRegisterS(this.id);}")
 					.append(",getU:function(){return simulation.getRegisterU(this.id);}")
-					.append(",get:function(){return this.getS();}};");
+					.append(",setS:function(val){simulation.setRegisterS(this.id, val);}")
+					.append(",setU:function(val){simulation.setRegisterU(this.id, val);}")
+					.append(",get:function(){return this.getS();}")
+					.append(",set:function(val){this.setS(val);}")
+				.append("};");
 		}
 		exec(registerGlobals.toString());
 	}

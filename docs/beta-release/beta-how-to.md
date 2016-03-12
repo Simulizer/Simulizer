@@ -25,6 +25,7 @@ Here are some general tips for you while using Simulizer:
 - **Debugging**: Everyone loves adding print lines into you high level program to check it's doing something, right? Well in MIPS, a simple task like this can take a few lines and possibly even mess your code. Instead, why not use the JavaScript annotation system to put those statements in instead! It's as easy as `# @{ log('pie!') }@` (see the annotation guide for more)
 - **Viewing the simulation**: Everything in Simulizer is synced up to each other, therefore if you set a really high clock speed, your program will run really fast, but all the visualisations will run really fast too! If you want to view the visualisations fully, it is suggested to use a relatively low clock speed (0.5 - 4 is a sensible range (but feel free to go crazy too))
 - **Shortcuts**: If you don't like clicking things, certain functions in Simulizer have shortcut keys. These can be viewed in the toolbar. Additionally, if you like vim, then you can toggle the editor to vim mode in the options menu.
+- **Prototyping**: Writing directly to a low level language can be challenging. By prototyping sections of code in javascript, you can get your algorithm working, then convert the javascript sections to SIMP. Try using the `get` and `set` methods of the registers inside annotations: `# @{ $s0.set($s0.get() + 15 + ($s1.get() * 2)) }@`
 
 
 ## Suggested Testing Tasks ##

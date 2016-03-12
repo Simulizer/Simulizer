@@ -46,6 +46,15 @@ public class SimulationBridge {
 		return DataConverter.decodeAsSigned(regs[r.getID()].getWord());
 	}
 
+	public void setRegisterU(Register r, long val) {
+		Word w = new Word(DataConverter.encodeAsUnsigned(val));
+		getRegisters()[r.getID()] = w;
+	}
+	public void setRegisterS(Register r, long val) {
+		Word w = new Word(DataConverter.encodeAsSigned(val));
+		getRegisters()[r.getID()] = w;
+	}
+
 	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) throws MemoryException, HeapException, StackException {
 		MainMemory mem = cpu.getMainMemory();
 		List<Long> words = new ArrayList<>();
