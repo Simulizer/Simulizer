@@ -1,7 +1,6 @@
 package simulizer.utils;
 
 import javafx.application.Platform;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
@@ -74,8 +73,11 @@ public class ThreadUtils {
 			threadID = 0;
 		}
 
+		@SuppressWarnings("NullableProblems")
 		@Override
-		public Thread newThread(@NotNull Runnable runnable) {
+		public Thread newThread(Runnable runnable) {
+			if(runnable == null) runnable = () -> {};
+
 			Thread t = new Thread(runnable, "Executor(" + poolName + "): Thread(" + (threadID++) + ")");
 			t.setDaemon(true);
 			return t;

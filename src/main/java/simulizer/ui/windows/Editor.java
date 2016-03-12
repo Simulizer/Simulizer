@@ -44,7 +44,6 @@ import simulizer.utils.*;
 public class Editor extends InternalWindow {
 
 	// TODO: refresh current file if not edited
-	// TODO: update problems as the user types. maybe do this using ace's worker
 	// TODO: handle more keyboard shortcuts: C-f for find
 
 	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
