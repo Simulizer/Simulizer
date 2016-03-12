@@ -34,14 +34,15 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private int FRAME_RATE = 45;
 	private AnimationTimer timer = new AnimationTimer() {
 		long lastTime = -1;
-	    @Override
-	    public void handle(long now) {
-	    	// 30 FPS
-	    	if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
-	    		lastTime = now;
-	    		repaint();
-	    	}
-	    }
+
+		@Override
+		public void handle(long now) {
+			// 30 FPS
+			if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
+				lastTime = now;
+				repaint();
+			}
+		}
 	};
 
 	// Dimensions used for calculations
@@ -77,7 +78,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		// If a new move has been given,
 		// add it to the queue and try to run it
 		if (obj != null) {
-			moves.add((Pair<Integer,Integer>) obj);
+			moves.add((Pair<Integer, Integer>) obj);
 			runAnimations();
 		}
 
@@ -85,7 +86,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	private void runAnimations() {
-		if (animating) return;
+		if (animating)
+			return;
 		else {
 			Pair<Integer, Integer> move = moves.poll();
 
@@ -115,6 +117,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			animatedDiscX.set(startX);
 			animatedDiscY.set(startY);
 
+			// @formatter:off
 			Timeline timeline = new Timeline(
 				new KeyFrame(Duration.seconds(0),
 					new KeyValue(animatedDiscX, startX),
@@ -144,7 +147,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 					new KeyValue(animatedDiscY, endY)
 				)
 			);
+			// @formatter:on
 			timeline.setCycleCount(1);
+			timeline.setRate(moves.size() + 1); // TODO: Be more accurate
 
 			timer.start();
 			timeline.play();
@@ -166,12 +171,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		drawBase(gc);
 		drawStaticDiscs(gc);
 		if (animating) {
-			drawBorderedRectangle(gc,
-					colorGradient[animatedDiscIndex % colorGradient.length],
-					animatedDiscX.doubleValue(),
-					animatedDiscY.doubleValue(),
-					animatedDiscWidth,
-					discHeight);
+			drawBorderedRectangle(gc, colorGradient[animatedDiscIndex % colorGradient.length], animatedDiscX.doubleValue(), animatedDiscY.doubleValue(), animatedDiscWidth, discHeight);
 		}
 	}
 
@@ -199,7 +199,8 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 				int n = peg.get(i);
 
 				// Don't draw the animated disc
-				if (animating && n == animatedDiscIndex) continue;
+				if (animating && n == animatedDiscIndex)
+					continue;
 
 				double discWidth = getDiscWidth(n, numDiscs);
 				double discY = getDiscY(i);
