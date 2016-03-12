@@ -2,6 +2,12 @@ package simulizer.ui.layout;
 
 import java.util.Arrays;
 
+/**
+ * Aligns InternalWindows to a Grid
+ * 
+ * @author Michael
+ *
+ */
 public class GridBounds {
 	private final int hor, ver, timeout; // Number of Horizontal and Vertical Lines
 	private double xGap, yGap; // Size of the Main Window
@@ -101,6 +107,9 @@ public class GridBounds {
 		gridSnap = value;
 	}
 
+	/**
+	 * @return the timeout before snapping to the grid
+	 */
 	public long getTimeout() {
 		return timeout;
 	}

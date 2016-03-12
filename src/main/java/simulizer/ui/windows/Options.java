@@ -27,6 +27,12 @@ import simulizer.ui.components.settings.StringControl;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
+/**
+ * An InternalWindow to change the settings of the application
+ * 
+ * @author Michael
+ *
+ */
 public class Options extends InternalWindow {
 
 	private GridPane pane, values;

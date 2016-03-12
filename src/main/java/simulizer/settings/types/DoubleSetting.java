@@ -3,6 +3,12 @@ package simulizer.settings.types;
 import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
+/**
+ * Represents a double setting
+ * 
+ * @author Michael
+ *
+ */
 public class DoubleSetting extends SettingValue<Double> {
 	private double lowBound = Double.NaN, highBound = Double.NaN;
 

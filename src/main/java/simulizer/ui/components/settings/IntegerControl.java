@@ -8,6 +8,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import simulizer.settings.types.IntegerSetting;
 
+/**
+ * Component to edit a IntegerSetting
+ * 
+ * @author Michael
+ *
+ */
 public class IntegerControl extends GridPane {
 
 	public IntegerControl(IntegerSetting setting) {

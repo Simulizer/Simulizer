@@ -14,7 +14,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -25,6 +24,12 @@ import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.utils.UIUtils;
 
+/**
+ * Provides Input/Output for SIMP programs and output for javascript debug/error messages
+ * 
+ * @author Michael
+ *
+ */
 public class Logger extends InternalWindow implements Observer {
 	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor();
 	private static final long BUFFER_TIME = 20;
@@ -85,7 +90,7 @@ public class Logger extends InternalWindow implements Observer {
 		submit.setOnAction((e) -> submitText());
 		submit.setDisable(true);
 		addEventHandler(KeyEvent.ANY, (e) -> {
-			if (input.isFocused() && e.getCode() == KeyCode.ENTER && !submit.isDisable())
+			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
 				submitText();
 		});
 		input.focusedProperty().addListener((e) -> {
@@ -101,12 +106,17 @@ public class Logger extends InternalWindow implements Observer {
 	}
 
 	private void submitText() {
-		lastInput = input.getText();
-		if (!lastInput.equals("")) {
-			input.setText("");
-			logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput).append("\n");
-			callUpdate = true;
-			cdl.countDown();
+		if (!submit.isDisable()) {
+			lastInput = input.getText();
+			if (!lastInput.equals("")) {
+				input.setText("");
+				logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput).append("\n");
+				callUpdate = true;
+				cdl.countDown();
+			}
+		} else {
+			if (input.getText().toLowerCase().equals("i code better when i'm drunk"))
+				getWindowManager().motionBlur();
 		}
 	}
 
@@ -143,7 +153,7 @@ public class Logger extends InternalWindow implements Observer {
 
 	public void clear() {
 		lastInput = "";
-		for(TextArea output : outputs)
+		for (TextArea output : outputs)
 			output.setText("");
 	}
 
@@ -165,7 +175,7 @@ public class Logger extends InternalWindow implements Observer {
 			UIUtils.showExceptionDialog(e);
 		}
 
-		if(lastInputCancelled) {
+		if (lastInputCancelled) {
 			return null;
 		} else {
 			return lastInput;

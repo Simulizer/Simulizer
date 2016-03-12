@@ -19,10 +19,24 @@ import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
 import simulizer.utils.UIUtils;
 
+/**
+ * The settings of the application
+ * 
+ * @author Michael
+ *
+ */
 public class Settings {
 	private ObjectSetting settings = new ObjectSetting("settings", "Settings");
 	private File json;
 
+	/**
+	 * Loads the passed json file into a Settings object
+	 * 
+	 * @param json
+	 *            the json file to load/parse
+	 * @return the settings object representing the json file
+	 * @throws IOException
+	 */
 	public static Settings loadSettings(File json) throws IOException {
 		JsonParser parser = new JsonParser();
 		JsonElement jsonElement = parser.parse(new FileReader(json));
@@ -149,6 +163,9 @@ public class Settings {
 		return setting.getValue();
 	}
 
+	/**
+	 * @return all of the settings
+	 */
 	public ObjectSetting getAllSettings() {
 		return settings;
 	}
@@ -183,6 +200,9 @@ public class Settings {
 		}
 	}
 
+	/**
+	 * Saves settings to the json file
+	 */
 	public void save() {
 		try (Writer writer = new FileWriter(json)) {
 			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().disableHtmlEscaping().create();

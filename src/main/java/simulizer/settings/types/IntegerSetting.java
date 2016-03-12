@@ -3,6 +3,12 @@ package simulizer.settings.types;
 import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 
+/**
+ * Represents an integer setting
+ * 
+ * @author Michael
+ *
+ */
 public class IntegerSetting extends SettingValue<Integer> {
 	private int lowBound, highBound;
 	private boolean boundsSet = false;
