@@ -25,6 +25,7 @@ import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
@@ -122,7 +123,10 @@ public class WindowManager extends GridPane {
 				try {
 					for (int i = 0; i < 100; i++) {
 						Thread.sleep(50);
-						Platform.runLater(workspace::resizeInternalWindows);
+						Platform.runLater(() -> {
+							workspace.resizeInternalWindows();
+							workspace.refreshTitles();
+						});
 					}
 				} catch (InterruptedException e1) {
 					UIUtils.showExceptionDialog(e1);

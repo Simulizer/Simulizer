@@ -1,13 +1,6 @@
 package simulizer.ui.components;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Observable;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,7 +32,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Workspace extends Observable implements Themeable {
-	private Set<InternalWindow> openWindows = new HashSet<InternalWindow>();
+	private Set<InternalWindow> openWindows = new HashSet<>();
 	private final Pane pane = new Pane();
 	private WindowManager wm = null;
 
@@ -107,6 +100,17 @@ public class Workspace extends Observable implements Themeable {
 	}
 
 	/**
+	 * force re-draw of the window titles to avoid "..."
+	 */
+	public void refreshTitles() {
+		for (InternalWindow window : openWindows) {
+			String oldTitle = window.getTitle();
+			window.setTitle(null);
+			window.setTitle(oldTitle);
+		}
+	}
+
+	/**
 	 * @return the content pane
 	 */
 	public Pane getPane() {
@@ -148,10 +152,6 @@ public class Workspace extends Observable implements Themeable {
 	 * @return The internal window if already open
 	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
-		// TODO: I (Matt) have (very occasionally) gotten a
-		// ConcurrentModificationException here, stemming from getting the editor in
-		// UISimulationListener just after the simulation starts (it might be the
-		// HLVis window opening at the same time which might be the problem)
 		Iterator<InternalWindow> windows = openWindows.iterator();
 		while (windows.hasNext()) {
 			InternalWindow w = windows.next();
@@ -286,17 +286,15 @@ public class Workspace extends Observable implements Themeable {
 	 *            The Internal Windows to keep open
 	 */
 	public void closeAllExcept(InternalWindow[] theseWindows) {
-		List<InternalWindow> keepOpen = new ArrayList<InternalWindow>();
-		for (int i = 0; i < theseWindows.length; i++)
-			keepOpen.add(theseWindows[i]);
+		List<InternalWindow> keepOpen = new ArrayList<>();
+		Collections.addAll(keepOpen, theseWindows);
 
-		List<InternalWindow> close = new ArrayList<InternalWindow>();
+		List<InternalWindow> close = new ArrayList<>();
 		for (InternalWindow window : openWindows)
 			if (!keepOpen.contains(window))
 				close.add(window);
 
-		for (InternalWindow window : close)
-			removeWindows(window);
+		close.forEach(this::removeWindows);
 	}
 
 	/**
