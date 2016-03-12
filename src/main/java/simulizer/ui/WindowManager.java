@@ -12,6 +12,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.Simulizer;
 import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
@@ -36,6 +37,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class WindowManager extends GridPane {
+	
 	private Stage primaryStage;
 
 	private Workspace workspace;
@@ -64,7 +66,7 @@ public class WindowManager extends GridPane {
 		// Set up the Primary Stage
 		primaryStage.setWidth((int) settings.get("window.width"));
 		primaryStage.setHeight((int) settings.get("window.height"));
-		primaryStage.setTitle("Simulizer");
+		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION);
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
 		primaryStage.setOnCloseRequest(e -> {

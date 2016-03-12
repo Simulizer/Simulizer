@@ -31,7 +31,7 @@ import simulizer.utils.UIUtils;
 
 public class Simulizer extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
-
+	public static final String VERSION = "0.1 (beta)";
 	public URI SPLASH_IMAGE;
 	private int SPLASH_WIDTH, SPLASH_HEIGHT;
 	private long splashStartTime;
@@ -63,7 +63,7 @@ public class Simulizer extends Application {
 		SPLASH_IMAGE = getResource("SimulizerLogo.png");
 		splash = new ImageView(new Image(SPLASH_IMAGE.toString(), SPLASH_WIDTH, SPLASH_HEIGHT, true, true));
 
-		progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n" + "Version: 0.0.1\n" + "https://github.com/ToastNumber/Simulizer");
+		progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n" + "Version: " + VERSION + "\n" + "https://github.com/ToastNumber/Simulizer");
 
 		splashLayout = new VBox();
 		splashLayout.getChildren().addAll(splash, progressText);
