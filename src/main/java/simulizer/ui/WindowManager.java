@@ -7,6 +7,7 @@ import java.util.Set;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.effect.MotionBlur;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -124,7 +125,7 @@ public class WindowManager extends GridPane {
 				} catch (InterruptedException e1) {
 					UIUtils.showExceptionDialog(e1);
 				}
-			}, "Layout-Fix-Thread");
+			} , "Layout-Fix-Thread");
 			layoutFixThread.setDaemon(true);
 			layoutFixThread.start();
 		});
@@ -342,5 +343,66 @@ public class WindowManager extends GridPane {
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen())
 			primaryStage.close();
+	}
+
+	private volatile boolean bluring = false;
+
+	/**
+	 * Not the most useful feature, nor is it the most reliable
+	 */
+	public void motionBlur() {
+		if (!bluring) {
+			bluring = true;
+			MotionBlur mb = new MotionBlur();
+			setEffect(mb);
+			Thread t = new Thread(() -> {
+				double angle = 0;
+				int delay = 10;
+				for (double radius = 0; radius < 15; radius = radius + 0.01) {
+					angle += 1;
+					if (angle > 360)
+						angle = 0;
+					mb.setRadius(radius);
+					mb.setAngle(angle);
+					try {
+						Thread.sleep(delay);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					setEffect(mb);
+				}
+
+				for (int i = 0; i < 100; i++) {
+					angle += 1;
+					if (angle > 360)
+						angle = 0;
+					mb.setAngle(angle);
+					try {
+						Thread.sleep(delay);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					setEffect(mb);
+				}
+
+				for (double radius = 15; radius > 0; radius = radius - 0.01) {
+					angle += 1;
+					if (angle > 360)
+						angle = 0f;
+					mb.setRadius(radius);
+					mb.setAngle(angle);
+					try {
+						Thread.sleep(delay);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					setEffect(mb);
+				}
+				setEffect(null);
+				bluring = false;
+			} , "Motion-Blur");
+			t.setDaemon(true);
+			t.start();
+		}
 	}
 }
