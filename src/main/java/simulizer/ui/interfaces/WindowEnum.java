@@ -4,7 +4,7 @@ import simulizer.utils.UIUtils;
 
 /**
  * Contains all possible InternalWindows
- * 
+ *
  * @author Michael
  *
  */
@@ -16,6 +16,7 @@ public enum WindowEnum {
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
 	LABELS("Labels"),
 	LOGGER("Logger"),
+	PIPELINE_VIEW("PipelineView", "Pipeline View"),
 	MEMORY_VIEW("MemoryView", "Memory View"),
 	REGISTERS("Registers"),
 	SYSCALL_REFERENCE("help.SyscallReference", "Syscall Reference", false),
@@ -53,7 +54,7 @@ public enum WindowEnum {
 
 	/**
 	 * Returns true if the current enum represents the passed InternalWindow
-	 * 
+	 *
 	 * @param w
 	 *            the InternalWindow to compare to
 	 * @return whether the enum represents the InternalWindow
@@ -66,7 +67,7 @@ public enum WindowEnum {
 
 	/**
 	 * Converts the InternalWindow to an enum
-	 * 
+	 *
 	 * @param w
 	 *            The InternalWindow to convert
 	 * @return the enum

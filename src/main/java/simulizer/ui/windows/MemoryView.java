@@ -24,8 +24,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
+import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
-import simulizer.utils.UIUtils;
 
 public class MemoryView extends InternalWindow {
 	@FXML
@@ -54,10 +54,10 @@ public class MemoryView extends InternalWindow {
 
 		try {
 			// This cannot be in the constructor, otherwise a stackoverflow error
-			BorderPane pane = FXMLLoader.load(getClass().getResource("/fxml/MemoryView.fxml"));
+			BorderPane pane = (BorderPane) FXMLLoader.load(getClass().getResource("/fxml/MemoryView.fxml"));
 			getContentPane().getChildren().add(pane);
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -87,7 +87,7 @@ public class MemoryView extends InternalWindow {
 	}
 
 	private void initStackPane() {
-		// TODO replace 40 with the width of the scroll bar (which should be set in CSS)
+		// TODO replace 20 with the width of the scroll bar (which should be set in CSS)
 		// TODO make scroll bar always ON in scroll panes (to make calculations easier)
 		canvasStack.widthProperty().bind(paneStack.widthProperty().subtract(20));
 		canvasStack.widthProperty().addListener(o -> drawTest());
@@ -205,26 +205,5 @@ public class MemoryView extends InternalWindow {
 			Integer length = e.getValue();
 			System.out.printf("Load Range: address=%s, length=%d%n", address, length);
 		});
-	}
-
-	// Thanks to http://stackoverflow.com/a/18959399
-	private class NumberTextField extends TextField {
-		@Override
-		public void replaceText(int start, int end, String text) {
-			if (validate(text)) {
-				super.replaceText(start, end, text);
-			}
-		}
-
-		@Override
-		public void replaceSelection(String text) {
-			if (validate(text)) {
-				super.replaceSelection(text);
-			}
-		}
-
-		private boolean validate(String text) {
-			return text.matches("[0-9]*");
-		}
 	}
 }
