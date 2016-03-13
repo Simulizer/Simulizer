@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
@@ -61,7 +62,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	private double h;
 	private double realH;
 
-
 	public PipelineView() {
 		setTitle("Pipeline");
 
@@ -91,6 +91,22 @@ public class PipelineView extends InternalWindow implements Observer {
 					Platform.runLater(() -> cycleInput.setText(""));
 				}
 			}
+		});
+
+		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> canvasPane.requestFocus());
+		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+			KeyCode code = e.getCode();
+
+			if (code == KeyCode.LEFT || code == KeyCode.KP_LEFT) {
+				setStartCycle(startCycle - 1);
+				repaint();
+			} else if (code == KeyCode.RIGHT || code == KeyCode.KP_RIGHT) {
+				setStartCycle(startCycle + 1);
+				repaint();
+			}
+
+			e.consume(); // the right arrow key seems to want to transfer the focus
+			canvasPane.requestFocus();
 		});
 
 		// Now add everything
@@ -290,7 +306,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawDividers(gc);
 			drawAddresses(gc);
 		} else {
-			gc.fillText("The CPU must be pipelined to view this window", w/2, h/2);
+			gc.fillText("The CPU must be pipelined to view this window", w / 2, h / 2);
 		}
 	}
 
