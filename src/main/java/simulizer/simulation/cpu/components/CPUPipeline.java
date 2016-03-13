@@ -41,6 +41,7 @@ public class CPUPipeline extends CPU {
 	private boolean canFetch;//useful for pipeline stalling
 	private int isFinished;//used for testing end of program
 	private int nopCount;//used to check for pipeline hazards when sending messages
+	private boolean rawOccured;//used to check if a raw hazard has just occured
 	
 	/**constructor calls the super constructor
 	 * as well as initialising the new pipeline related fields
@@ -53,6 +54,7 @@ public class CPUPipeline extends CPU {
 		this.canFetch = true;
 		this.isFinished = 0;
 		this.nopCount = 2;//initially 2
+		this.rawOccured = false;//initially false
 		
 	}
 
@@ -214,7 +216,6 @@ public class CPUPipeline extends CPU {
 		
 		InstructionFormat oldIDToExecute = ID;//storing old value of ID before overwritten, this is what I should be executing
 		if (needToBubbleRAWReg) { //if we need to stall to prevent incorrect reads
-			
 			sendMessage(new PipelineHazardMessage(Hazard.RAW));
 			Statement nopBubble = createNopStatement();
 			ID = decode(nopBubble.getInstruction(),nopBubble.getOperandList());
@@ -245,15 +246,23 @@ public class CPUPipeline extends CPU {
 		
 		//Dealing with pipeline state messages
 		Address decodeAddress = new Address(thisInstruction.getValue()-4);
+		
 		if(needToBubbleRAWReg) {//got bubbling slightly wrong with RAW, need to add this to fix
 			decodeAddress = null;
+			this.rawOccured = true;//need to treat raws differently to jump flushes
 		}
+		
 		Address executeAddress = executingAddress;
 		if(this.nopCount == 2) {
 			decodeAddress = null;
 		} 
 		if(this.nopCount >= 1) {
 			executeAddress = null;
+			if(this.rawOccured) {//need to do some additional stuff if a raw has previously occured
+				thisInstruction = new Address(thisInstruction.getValue()-4);
+				decodeAddress = new Address(thisInstruction.getValue()-4);
+				this.rawOccured = false;
+			}
 		}
 		sendMessage(new PipelineStateMessage(thisInstruction, decodeAddress, executeAddress));
 		
@@ -283,6 +292,7 @@ public class CPUPipeline extends CPU {
 		this.isFinished = 0;
 		this.isRunning = true;//allow the program to start
 		this.nopCount = 2;//decode and execute bubbled initially
+		this.rawOccured = false;
 		this.IF = createNopStatement();
 		this.ID = createNopInstruction();
 		super.runProgram();//calling original run program
