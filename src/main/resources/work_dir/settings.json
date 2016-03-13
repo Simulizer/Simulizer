@@ -29,7 +29,7 @@
     "font-size": 20,
     "initial-file" : "code/tower-of-hanoi.s",
     "continuous-assembly" : true,
-    "continuous-assembly-refresh-period": 3,
+    "continuous-assembly-refresh-period": 1000,
     "scroll-speed": 0.1,
     "soft-tabs": true,
     "theme" : "ace/theme/monokai",
