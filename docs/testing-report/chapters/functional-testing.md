@@ -80,6 +80,46 @@ Requirements
 
 **How it will be tested**: ?
 
+### Requirement 4.3.3.a
+**Description**: The user will only be able to open and save files with the “.s” extension - the extension for MIPS programs.
+
+**How it will be tested**: Click the `File->Open` menu item and check that only `.s` files are shown and only `.s` can be opened.
+
+### Requirement 4.3.3.b
+**Description**: The user will be able to choose between their existing programs they have written for the software (or create new ones), or open demo files bundled with the system.
+
+**How it will be tested**: Check that a `.s` file can be opened from anywhere on the system; that a new blank file can be created; and that the demo files are bundled in suitable folder.
+
+### Requirement 4.3.3.c
+**Description**: The user will be able to save their own programs as well as make updates to the bundled ones.
+
+**How it will be tested**: Test saving the text from a new file to the machine and check that this file actually exists on the machine. Also test that updates performed within the software are reflected on the machine.
+
+### Requirement 4.3.3.d
+**Description**: Syntax highlighting will be present on the assembly code, making code editing a simpler process.
+
+**How it will be tested**: Visual inspection of several programs to ensure the syntax highlighting is accurate. Test real-time syntax highlighting by modifying existing files to ensure the highlighting remains accurate throughout.
+
+### Requirement 4.3.3.e
+**Description**: Line numbers will be shown to help with locating errors identified by the logger.
+
+**How it will be tested**: Visual inspection to ensure line numbers are correct throughout and update when lines are deleted/inserted.
+
+### Requirement 4.3.3.f
+**Description**: The code editor will include a primitive logger/error checker, indicating that there is an error at a particular line number.
+
+**How it will be tested**: Load a program with errors and try to assemble the program. The editor should indicate lines with errors and have a corresponding message.
+
+### Requirement 4.3.3.g
+**Description**: There will be a run button in the code editor, which will parse the code and then, if successful, will start running on the visualiser. If there is already a simulation running, a prompt will be given to request whether the current process should be halted or not.
+
+**How it will be tested**: Try clicking the run button and a dialog should appear informing the user that the code is being parsed and assembled. Once this has finished, the program should start running and any visualisations, e.g. the CPU visualisation should start running.
+
+### Requirement 4.3.3.h
+**Description**: If the user tries to close the code editor having not saved, the system will prompt asking if they wish to save or not.
+
+**How it will be tested**: Try modifying a new file or an existing file and then try to close the program.
+
 
 
 Dummy appendix
