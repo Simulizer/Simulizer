@@ -121,6 +121,12 @@ public class Logger extends InternalWindow implements Observer {
 		}
 	}
 
+
+	@Override
+	public void setToDefaultDimensions() {
+		setNormalisedDimentions(0.8, 0.5, 0.2, 0.5);
+	}
+
 	@Override
 	public void ready() {
 		getWindowManager().getIO().addObserver(this);

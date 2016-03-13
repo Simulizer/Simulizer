@@ -44,6 +44,12 @@ public class HighLevelVisualisation extends InternalWindow {
 	}
 
 
+	@Override
+	public void setToDefaultDimensions() {
+		setNormalisedDimentions(0.0, 0.0, 0.3, 0.2);
+	}
+
+
 	//TODO: have these not be mutually exclusive
 	public void loadTowerOfHanoiVisualisation() {
 		this.visualiser = new TowerOfHanoiVisualiser(this, 0);

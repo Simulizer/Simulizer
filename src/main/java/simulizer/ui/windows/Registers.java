@@ -43,7 +43,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		ObservableList<Data> data = FXCollections.observableArrayList();
 		int i = 0;
 		for (Register r : Register.values()) {
-			String hex = "", unsigned = "", signed = "";
+			String hex, unsigned, signed;
 			try {
 				byte[] contents = getWindowManager().getCPU().getRegisters()[i].getWord();
 				unsigned = "" + DataConverter.decodeAsUnsigned(contents);
@@ -68,17 +68,17 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	public void ready() {
 		getWindowManager().addCPUChangedListener(this);
 
-		TableColumn<Data, String> register = new TableColumn<Data, String>("Register");
-		register.setCellValueFactory(new PropertyValueFactory<Data, String>("name"));
+		TableColumn<Data, String> register = new TableColumn<>("Register");
+		register.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		TableColumn<Data, String> hex = new TableColumn<Data, String>("Hexadecimal");
-		hex.setCellValueFactory(new PropertyValueFactory<Data, String>("hex"));
+		TableColumn<Data, String> hex = new TableColumn<>("Hexadecimal");
+		hex.setCellValueFactory(new PropertyValueFactory<>("hex"));
 
-		TableColumn<Data, String> unsigned = new TableColumn<Data, String>("Unsigned");
-		unsigned.setCellValueFactory(new PropertyValueFactory<Data, String>("unsigned"));
+		TableColumn<Data, String> unsigned = new TableColumn<>("Unsigned");
+		unsigned.setCellValueFactory(new PropertyValueFactory<>("unsigned"));
 
-		TableColumn<Data, String> signed = new TableColumn<Data, String>("Signed");
-		signed.setCellValueFactory(new PropertyValueFactory<Data, String>("signed"));
+		TableColumn<Data, String> signed = new TableColumn<>("Signed");
+		signed.setCellValueFactory(new PropertyValueFactory<>("signed"));
 
 		refreshData();
 		table.getColumns().addAll(register, hex, unsigned, signed);
@@ -86,6 +86,12 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 
 		getContentPane().getChildren().add(table);
 		super.ready();
+	}
+
+
+	@Override
+	public void setToDefaultDimensions() {
+		setNormalisedDimentions(0.5, 0.0, 0.5, 0.5);
 	}
 
 	@Override
