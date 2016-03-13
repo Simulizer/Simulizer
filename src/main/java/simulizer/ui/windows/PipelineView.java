@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -13,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -40,6 +42,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	private Label cycleInputLabel = new Label("Go to:");
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
+	private Tooltip instructionTooltip = new Tooltip();
 
 	// Model
 	private PipelineHistoryModel model = new PipelineHistoryModel();
@@ -93,6 +96,8 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 		});
 
+		Tooltip.install(canvasPane, instructionTooltip);
+
 		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> canvasPane.requestFocus());
 		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
 			KeyCode code = e.getCode();
@@ -107,6 +112,19 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			e.consume(); // the right arrow key seems to want to transfer the focus
 			canvasPane.requestFocus();
+		});
+		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
+			double eventX = e.getX(), eventY = e.getY();
+			Address address = getAddressAtPoint(eventX, eventY);
+
+			if (address == null) instructionTooltip.hide();
+			else {
+				instructionTooltip.setText(getInfo(address));
+
+				double x1 = getScene().getWindow().getX() + getLayoutX() + eventX + 15;
+				double y1 = getScene().getWindow().getY() + getLayoutY() + eventY - 20;
+				instructionTooltip.show(canvasPane, x1, y1);
+			}
 		});
 
 		// Now add everything
@@ -133,6 +151,41 @@ public class PipelineView extends InternalWindow implements Observer {
 		canvas.widthProperty().addListener(e -> repaint());
 
 		model.addObserver(this);
+	}
+
+	private Address getAddressAtPoint(double x, double y) {
+		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
+
+		// Loop over each column
+		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
+			PipelineHistoryModel.PipelineState state = history.get(cycle);
+
+			double xLeft = (col + 0.5) * cycleWidth - rectWidth / 2;
+			// If the x coordinate isn't right, then skip to the next iteration
+			if (x < xLeft || x > xLeft + rectWidth) continue;
+
+			double yTop = rectGap / 2;
+
+			List<Address> before = state.before;
+			for (int i = 0; i < before.size(); ++i) {
+				if (y >= yTop && y < yTop + rectWidth) return before.get(i);
+				else yTop += rectGap + rectWidth;
+			}
+
+			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
+			for (int i = 0; i < pipeline.size(); ++i) {
+				if (y >= yTop && y < yTop + rectWidth) return pipeline.get(i);
+				else yTop += rectGap + rectWidth;
+			}
+
+			List<Address> after = state.after;
+			for (int i = 0; i < after.size(); ++i) {
+				if (y >= yTop && y < yTop + rectWidth) return after.get(i);
+				else yTop += rectGap + rectWidth;
+			}
+		}
+
+		return null;
 	}
 
 	public PipelineHistoryModel getModel() {
@@ -306,7 +359,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawDividers(gc);
 			drawAddresses(gc);
 		} else {
-			gc.fillText("The CPU must be pipelined to view this window", w / 2, h / 2);
+			gc.fillText("Check the CPU is running in pipelined mode to view this window", w / 2, h / 2);
 		}
 	}
 
@@ -341,6 +394,18 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		String s = Long.toHexString(address.getValue());
 		return s.length() > 3 ? s.substring(s.length() - 3) : s;
+	}
+
+	private String getInfo(Address address) {
+		// @formatter:off
+		String svar =
+			"Short name: " + getShortName(address) + "\n" +
+			"Address value: " + address.getValue() + "\n" +
+			"Instruction type: dunno\n" +
+			"Operand: dunno\n" +
+			"Line number: dunno\n";
+		// @formatter:on
+		return svar;
 	}
 
 }
