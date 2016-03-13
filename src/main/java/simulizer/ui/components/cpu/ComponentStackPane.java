@@ -180,27 +180,19 @@ public class ComponentStackPane extends StackPane {
     public void setTooltip(String text){
         final ComponentStackPane instance = this;
         final Tooltip tooltip = new Tooltip(text);
-        Tooltip.install(instance, tooltip);
         tooltip.setAutoHide(true);
         tooltip.setWrapText(true);
-        tooltip.setPrefWidth(350);
+        tooltip.setPrefWidth(vis.getWindowWidth() / 2);
 
-        vis.addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
-			double eventX = event.getX();
-			double eventY = event.getY();
-			double xMax = getX() + getShapeWidth();
-			double yMax = getY() + getShapeHeight();
-
-			if(!vis.getMainWindowManager().getCPU().isRunning() && eventX > getX() && eventX < xMax && eventY > getY() && eventY < yMax){
-				tooltip.setMaxWidth(vis.getWidth() - 40);
-				tooltip.setMaxHeight(vis.getHeight());
-				double x1 = vis.getScene().getWindow().getX() + vis.getLayoutX() + eventX - getShapeWidth() / 2;
-				double y1 = vis.getScene().getWindow().getY() + vis.getLayoutY() + eventY - getShapeHeight()/2 - 20;
-				tooltip.show(instance, x1, y1);
-			} else {
-				tooltip.hide();
-			}
+        addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
+			double eventX = event.getSceneX();
+			double eventY = event.getSceneY();
+            tooltip.show(instance, eventX, eventY - 20 - (tooltip.getHeight() / 2));
 		});
+
+        addEventFilter(MouseEvent.MOUSE_EXITED_TARGET, event -> {
+            tooltip.hide();
+        });
 
     }
 
