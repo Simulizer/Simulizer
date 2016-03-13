@@ -46,8 +46,6 @@ public class UISimulationListener extends SimulationListener {
 					editor.executeMode();
 				});
 
-				System.out.println("-----------------------STARTED----------------------");
-
 				// Clear the pipeline model when a new simulation starts
 				PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
 				if (pipelineView != null) {
