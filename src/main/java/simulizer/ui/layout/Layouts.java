@@ -78,8 +78,18 @@ public class Layouts implements Iterable<Layout> {
 			UIUtils.showExceptionDialog(e);
 		}
 
-		// sort by layout name
-		layouts = layouts.stream().sorted((l1, l2) -> l1.getName().compareTo(l2.getName())).collect(Collectors.toList());
+		// sort by layout name, with "Default" always first
+		layouts = layouts.stream().sorted((l1, l2) -> {
+			String n1 = l1.getName();
+			String n2 = l2.getName();
+			if(n1.equals("Default"))
+				return -1;
+			else if(n2.equals("Default"))
+				return 1;
+			else
+				return n1.compareTo(n2);
+		}).collect(Collectors.toList());
+
 
 		if (defaultLayout == null)
 			defaultLayout = new Layout("MISSING_LAYOUT", new WindowLocation[0]);
@@ -153,8 +163,8 @@ public class Layouts implements Iterable<Layout> {
 			}
 		}
 
-		// If there are no bounds set in the layout, use this default
-		w.setNormalisedDimentions(0.1, 0.1, 0.8, 0.8);
+		// If there are no bounds set in the layout, use default
+		w.setToDefaultDimensions();
 		if (width > 0 && height > 0) {
 			w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
 		}

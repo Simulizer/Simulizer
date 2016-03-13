@@ -58,16 +58,20 @@ public abstract class InternalWindow extends Window {
 		setScaleY(0);
 	}
 
+	public void setToDefaultDimensions() {
+		setNormalisedDimentions(0.1, 0.1, 0.8, 0.8);
+	}
+
 	/**
 	 * Sets the normalised dimensions
 	 *
-	 * @param x
+	 * @param layX
 	 *            the normalised x location within the workspace
-	 * @param y
+	 * @param layY
 	 *            the normalised y location within the workspace
-	 * @param width
+	 * @param layWidth
 	 *            the normalised width of the InternalWindow
-	 * @param height
+	 * @param layHeight
 	 *            the normalised height of the InternalWindow
 	 */
 	public void setNormalisedDimentions(double layX, double layY, double layWidth, double layHeight) {
@@ -178,7 +182,7 @@ public abstract class InternalWindow extends Window {
 		ScaleTransition sc = new ScaleTransition(Duration.millis(250), this);
 		sc.setToX(1);
 		sc.setToY(1);
-		Platform.runLater(() -> sc.playFromStart());
+		Platform.runLater(sc::playFromStart);
 	}
 
 	@Override
@@ -196,9 +200,8 @@ public abstract class InternalWindow extends Window {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof InternalWindow))
-			return false;
-		return WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
+		return  obj instanceof InternalWindow &&
+				WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
 	}
 
 	/**

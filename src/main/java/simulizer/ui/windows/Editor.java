@@ -185,6 +185,11 @@ public class Editor extends InternalWindow {
 	}
 
 	@Override
+	public void setToDefaultDimensions() {
+		setNormalisedDimentions(0.0, 0.0, 0.5, 1.0);
+	}
+
+	@Override
 	public void setTheme(Theme theme) {
 		getStyleClass().add("editor");
 		super.setTheme(theme);
