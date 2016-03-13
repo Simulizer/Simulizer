@@ -1,38 +1,52 @@
 package simulizer.ui.components.highlevel;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Queue;
 import java.util.Stack;
 
-import javafx.animation.Animation;
-import javafx.animation.ParallelTransition;
-import javafx.animation.PathTransition;
-import javafx.application.Platform;
+import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.HLineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.VLineTo;
 import javafx.util.Duration;
+import javafx.util.Pair;
+import simulizer.highlevel.models.HanoiModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
-	private class MoveIndices {
-		public int a;
-		public int b;
+	private List<Stack<Integer>> pegs;
+	private Canvas canvas = new Canvas();
+	private HanoiModel model;
+	private Color[] colorGradient = { Color.RED, Color.ORANGE, Color.BLUE, Color.GREEN, Color.YELLOW };
 
-		public MoveIndices(int a, int b) {
-			this.a = a;
-			this.b = b;
+	private final Queue<Pair<Integer, Integer>> moves = new LinkedList<>();
+	private boolean animating = false;
+	private int animatedDiscIndex;
+	private DoubleProperty animatedDiscX = new SimpleDoubleProperty();
+	private DoubleProperty animatedDiscY = new SimpleDoubleProperty();
+	private double animatedDiscWidth;
+	private int FRAME_RATE = 45;
+	private AnimationTimer timer = new AnimationTimer() {
+		long lastTime = -1;
+
+		@Override
+		public void handle(long now) {
+			// 30 FPS
+			if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
+				lastTime = now;
+				repaint();
+			}
 		}
-	}
+	};
 
-	private int startingPeg;
-	private int numDiscs;
-	private List<Stack<Rectangle>> pegs = new ArrayList<>();
-
-	// Dimensions
+	// Dimensions used for calculations
 	private double xOffset;
 	private double pegY0;
 	private double pegHeight;
@@ -42,246 +56,205 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private double maxDiscWidth;
 	private double discWidthDelta;
 
-	private List<Animation> animationBuffer = new ArrayList<>();
-	private List<MoveIndices> moveIndices = new ArrayList<>();
+	public TowerOfHanoiVisualiser(HanoiModel model, HighLevelVisualisation vis) {
+		super(model, vis);
+		this.model = model;
+		pegs = model.getPegs();
+		getChildren().add(canvas);
 
-	private Color[] colorGradient = { Color.RED, Color.ORANGE, Color.BLUE, Color.GREEN, Color.YELLOW };
+		canvas.widthProperty().bind(super.widthProperty());
+		canvas.heightProperty().bind(super.heightProperty());
 
-	// Shapes
-	private Rectangle base;
-	private Rectangle[] vPegs = new Rectangle[3];
-	private Rectangle[] discs;
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc.setLineWidth(2);
+		gc.setStroke(Color.BLACK);
 
-	private boolean queuing;
-
-	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, int startingPeg) {
-		super(vis);
-
-		this.startingPeg = startingPeg;
-		calculateDimensions();
+		repaint();
 	}
 
-	public TowerOfHanoiVisualiser(HighLevelVisualisation vis, int startingPeg, int numDiscs) {
-		super(vis);
+	@SuppressWarnings("unchecked")
+	@Override
+	public void update(Observable o, Object obj) {
+		super.update(o, obj);
 
-		this.startingPeg = startingPeg;
-		setNumDisks(numDiscs);
+		// If a new move has been given,
+		// add it to the queue and try to run it
+		if (obj != null) {
+			moves.add((Pair<Integer, Integer>) obj);
+			runAnimations();
+		} else {
+			pegs = model.getPegs();
+		}
+
+		repaint();
 	}
 
-	public void setNumDisks(int n) {
-		numDiscs = n;
+	private void runAnimations() {
+		if (animating)
+			return;
+		Pair<Integer, Integer> move = moves.poll();
 
-		if(discs != null) {
-			for (Rectangle rect : discs)
-				vis.remove(rect);
-		}
+		int startPeg = move.getKey();
+		int numDiscs = model.getNumDiscs();
+		int endPeg = move.getValue();
 
-		discs = new Rectangle[numDiscs];
+		int numDiscsOnStart = pegs.get(startPeg).size();
+		int numDiscsOnEnd = pegs.get(endPeg).size();
 
-		calculateDimensions();
+		animatedDiscIndex = pegs.get(move.getKey()).peek();
+		this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, numDiscs);
 
-		Platform.runLater(() -> {
-			init();
-			resize();
-		});
+		double startX = getPegX(startPeg) - animatedDiscWidth / 2;
+		double startY = getDiscY(numDiscsOnStart);
+
+		double upX = startX;
+		double upY = pegY0 - canvas.getHeight() / 10;
+
+		double shiftX = getPegX(endPeg) - animatedDiscWidth / 2;
+		double shiftY = upY;
+
+		double endX = shiftX;
+		double endY = getDiscY(numDiscsOnEnd);
+
+		animatedDiscX.set(startX);
+		animatedDiscY.set(startY);
+
+		// @formatter:off
+		Timeline timeline = new Timeline(
+			new KeyFrame(Duration.seconds(0),
+				new KeyValue(animatedDiscX, startX),
+				new KeyValue(animatedDiscY, startY)
+			),
+			new KeyFrame(Duration.seconds(0.5),
+				new KeyValue(animatedDiscX, upX),
+				new KeyValue(animatedDiscY, upY)
+			),
+			new KeyFrame(Duration.seconds(0.8),
+				new KeyValue(animatedDiscX, shiftX),
+				new KeyValue(animatedDiscY, shiftY)
+			),
+			new KeyFrame(Duration.seconds(1.3),
+				e -> {
+					// Apply Update
+					pegs.get(endPeg).push(pegs.get(startPeg).pop());
+					
+					animating = false;
+					repaint();
+
+					if (moves.isEmpty()) {
+						timer.stop();
+						System.out.println("Hanoi animation timer stopped");
+					}
+					else runAnimations();
+				},
+				new KeyValue(animatedDiscX, endX),
+				new KeyValue(animatedDiscY, endY)
+			)
+		);
+		// @formatter:on
+		timeline.setCycleCount(1);
+		timeline.setRate(moves.size() + 1); // TODO: Be more accurate
+
+		timer.start();
+		timeline.play();
+
+		animating = true;
 	}
 
-	/**
-	 * Draws the platform and the initial discs
-	 */
-	private void init() {
-		vis.getDrawingPane().getChildren().clear();
+	@Override
+	public void repaint() {
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		final double width = canvas.getWidth();
+		final double height = canvas.getHeight();
 
-		this.base = new Rectangle(xOffset, pegY0 + pegHeight, platformWidth, discHeight);
-		vis.add(base);
+		calculateDimensions(gc, width, height);
 
-		for (int i = 0; i < 3; ++i) {
-			vPegs[i] = new Rectangle(getX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight);
-			vis.add(vPegs[i]);
-		}
-
-		for (int i = 0; i < 3; ++i) {
-			pegs.add(new Stack<Rectangle>());
-		}
-
-		// Draw discs
-		this.discs = new Rectangle[numDiscs];
-
-		for (Rectangle rect : discs)
-			vis.remove(rect);
-
-		double y = pegY0 + pegHeight - discHeight;
-		double width = maxDiscWidth;
-		double x = xOffset + 5 / 2;
-		for (int i = 0; i < numDiscs; ++i) {
-			discs[i] = new Rectangle(x, y, width, discHeight);
-			discs[i].setFill(colorGradient[i % colorGradient.length]);
-			discs[i].setStroke(Color.BLACK);
-
-			pegs.get(startingPeg).push(discs[i]);
-
-			vis.add(discs[i]);
-			x += (discWidthDelta / 2);
-			width -= discWidthDelta;
-			y -= discHeight;
+		// TODO Platform.runLater() ?
+		gc.clearRect(0, 0, width, height);
+		drawBase(gc);
+		drawStaticDiscs(gc);
+		if (animating) {
+			drawBorderedRectangle(gc, colorGradient[animatedDiscIndex % colorGradient.length], animatedDiscX.doubleValue(), animatedDiscY.doubleValue(), animatedDiscWidth, discHeight);
 		}
 	}
 
+	private void drawBase(GraphicsContext gc) {
+		gc.setFill(Color.BLACK);
+
+		// Draw the platform
+		gc.fillRect(xOffset, pegY0 + pegHeight, platformWidth, pegWidth);
+
+		// Draw the pegs
+		for (int i = 0; i < 3; ++i)
+			gc.fillRect(getPegX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight + 2); // + 2 to avoid gap between peg and platform
+	}
+
+	private void drawStaticDiscs(GraphicsContext gc) {
+		int numDiscs = model.getNumDiscs();
+
+		for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
+			Stack<Integer> peg = pegs.get(pegIndex);
+
+			for (int i = 0; i < peg.size(); ++i) {
+				// n will go from the disc at the bottom to the top
+				// 0 means it's the smallest disc
+				int n = peg.get(i);
+
+				// Don't draw the animated disc
+				if (animating && n == animatedDiscIndex)
+					continue;
+
+				double discWidth = getDiscWidth(n, numDiscs);
+				double discY = getDiscY(i);
+				double discX = getPegX(pegIndex) - discWidth / 2;
+
+				drawBorderedRectangle(gc, colorGradient[n % colorGradient.length], discX, discY, discWidth, discHeight);
+
+				gc.setFill(colorGradient[n % colorGradient.length]);
+				gc.fillRect(discX, discY, discWidth, discHeight);
+				gc.strokeRect(discX, discY, discWidth, discHeight);
+			}
+		}
+	}
+
+	private void drawBorderedRectangle(GraphicsContext gc, Color fill, double x, double y, double w, double h) {
+		gc.setFill(fill);
+		gc.fillRect(x, y, w, h);
+		gc.strokeRect(x, y, w, h);
+	}
 
 	/**
 	 * @param pegIndex
 	 *            the peg whose x coordinate will be calculated
 	 * @return the x coordinate of the specified peg
 	 */
-	private double getX(int pegIndex) {
+	private double getPegX(int pegIndex) {
 		return (int) (xOffset + (pegIndex + 0.5) * platformWidth / 3);
 	}
 
-	/**
-	 * @param pegIndex
-	 *            the index of the peg for the calculation
-	 * @return the y coordinate of the topmost disc on the specified peg
-	 */
-	private double getY(int pegIndex) {
-		int numdiscsOnPeg = pegs.get(pegIndex).size();
-		return ((pegY0 + pegHeight) - numdiscsOnPeg * discHeight);
+	private double getDiscWidth(int discIndex, int numDiscs) {
+		return maxDiscWidth - discWidthDelta * (numDiscs - 1 - discIndex);
 	}
 
-	public TowerOfHanoiVisualiser batch() {
-		this.queuing = true;
-		return this;
+	private double getDiscY(int fromBottom) {
+		return pegY0 + pegHeight - discHeight * (fromBottom + 1);
 	}
 
-	/**
-	 * Calculates the animation for moving the disc at peg i to peg j. If there
-	 * is no disc on peg i, then it does nothing
-	 *
-	 * @param i
-	 *            the index of the peg to move the disc from
-	 * @param j
-	 *            the index of the peg to move the disc to
-	 */
-	public TowerOfHanoiVisualiser move(int i, int j) {
-		if (i < 0 || j < 0 || i >= pegs.size() || j >= pegs.size() ||
-				pegs.get(i).size() == 0 || i == j) {
-			//TODO: log that a bad move was made to the logger
-			return this;
-		}
-
-		Rectangle disc = pegs.get(i).peek();
-
-		animationBuffer.add(getTransition(disc, getX(i), getY(i), getX(j), getY(j) - discHeight));
-		moveIndices.add(new MoveIndices(i, j));
-
-		if (queuing) return this;
-		else {
-			commit();
-			return this;
-		}
-	}
-
-	/**
-	 * Commits and animates any buffered animations.
-	 */
-	public void commit() {
-		queuing = false;
-
-		if (animationBuffer.isEmpty()) return;
-
-		ParallelTransition animation = new ParallelTransition();
-		animation.getChildren().addAll(animationBuffer);
-		animation.play();
-		animationBuffer.clear();
-
-		// Move the pegs in memory after animating them
-		for (MoveIndices m : moveIndices) {
-			pegs.get(m.b).push(pegs.get(m.a).pop());
-		}
-
-		moveIndices.clear();
-	}
-
-	/**
-	 * Calculates the transition for the given disc from the source to the
-	 * target.
-	 *
-	 * @param disc
-	 *            the disc to be animated
-	 * @param x1
-	 *            the starting x coordinate
-	 * @param y1
-	 *            the starting y coordinate
-	 * @param x2
-	 *            the destination x coordinate
-	 * @param y2
-	 *            the destination y coordinate
-	 * @return the transition representing the animation from the source to the
-	 *         target
-	 */
-	private PathTransition getTransition(Rectangle disc, double x1, double y1, double x2, double y2) {
-		int height = disc.heightProperty().intValue();
-		double arcHeight = vis.getWindowHeight() / 10;
-
-		Path path = new Path();
-		path.getElements().add(new MoveTo(x1, y1 + height / 2));
-		path.getElements().add(new VLineTo(pegY0 - arcHeight));
-		path.getElements().add(new HLineTo(x2));
-		path.getElements().add(new VLineTo(y2 + (height / 2)));
-
-		PathTransition pathTransition = new PathTransition();
-		pathTransition.setDuration(Duration.millis(getRate()));
-		pathTransition.setPath(path);
-		pathTransition.setNode(disc);
-		pathTransition.setCycleCount(1);
-
-		return pathTransition;
-	}
-
-	private void calculateDimensions() {
-		double width = vis.getWindowWidth();
-		double height = vis.getWindowHeight();
-
+	private void calculateDimensions(GraphicsContext gc, double width, double height) {
 		this.platformWidth = (4 * width) / 5;
 		this.xOffset = (width - platformWidth) / 2;
 		this.pegY0 = height / 3;
 		this.pegHeight = height / 2;
 		this.pegWidth = width / 40;
 
-		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
+		this.discHeight = Math.min(height / 14, pegHeight / model.getNumDiscs());
 		this.maxDiscWidth = platformWidth / 3 - width / 120;
-		this.discWidthDelta = Math.min(width / 30, (maxDiscWidth - pegWidth - width / 120) / (numDiscs - 1));
+		this.discWidthDelta = Math.min(width / 30, (maxDiscWidth - pegWidth - width / 120) / (model.getNumDiscs() - 1));
 	}
 
 	@Override
-	public void resize() {
-		double windowWidth = vis.getWindowWidth();
-		double windowHeight = vis.getWindowHeight();
-
-		calculateDimensions();
-
-		setAttrs(this.base, xOffset, pegY0 + pegHeight, platformWidth, discHeight);
-
-		for (int i = 0; i < 3; ++i) {
-			setAttrs(vPegs[i], getX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight);
-		}
-
-		double w = getWidth();
-		double h = getHeight();
-
-		// Draw discs
-		for (int i = 0; i < numDiscs; ++i) {
-			Rectangle disc = discs[i];
-
-			double newX = (disc.getX() / w) * windowWidth;
-			double newY = (disc.getY() / h) * windowHeight;
-			double newWidth = (disc.widthProperty().doubleValue() / w) * windowWidth;
-			double newHeight = (disc.heightProperty().doubleValue() / h) * windowHeight;
-
-			setAttrs(discs[i], newX, newY, newWidth, newHeight);
-		}
-
-		setWidth(windowWidth);
-		setHeight(windowHeight);
+	public String getName() {
+		return "Towers of Hanoi";
 	}
 
 }

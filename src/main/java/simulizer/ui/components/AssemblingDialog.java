@@ -1,20 +1,23 @@
 package simulizer.ui.components;
 
-import java.time.Duration;
-
-import org.reactfx.util.FxTimer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.messages.Message;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
+import simulizer.utils.ThreadUtils;
 
 public class AssemblingDialog extends Alert {
 	private String contentText = "Your program is being assembled, please wait ";
+	private final ScheduledExecutorService executor;
+	private final ScheduledFuture<?> updateTask;
 
 	public AssemblingDialog(CPU cpu) {
 		super(AlertType.INFORMATION);
@@ -28,8 +31,11 @@ public class AssemblingDialog extends Alert {
 
 		cpu.registerListener(new AssemblingFinishedListener(cpu));
 
-		FxTimer.runPeriodically(Duration.ofMillis(500), () ->
-				setContentText(getNext(getContentText())));
+		executor = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Assembling-Dialog"));
+		updateTask = executor.scheduleAtFixedRate(() ->
+				Platform.runLater(() -> setContentText(getNext(getContentText())))
+		, 0, 500, TimeUnit.MILLISECONDS);
 	}
 
 	public String getNext(String current) {
@@ -47,6 +53,8 @@ public class AssemblingDialog extends Alert {
 	}
 
 	public void closeDown() {
+		updateTask.cancel(true);
+		executor.shutdownNow();
 		Platform.runLater(() -> ((Button) getDialogPane().lookupButton(ButtonType.OK)).fire());
 	}
 

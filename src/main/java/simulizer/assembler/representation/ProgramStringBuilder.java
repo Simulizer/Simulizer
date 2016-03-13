@@ -6,6 +6,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * dump a program object to a string
@@ -23,8 +24,56 @@ public class ProgramStringBuilder {
         }
     }
 
+    public static class DescriptiveStringBuilder {
+		private final StringBuilder sb = new StringBuilder();
+
+		@Override public String toString() {
+			return sb.toString();
+		}
+
+		private DescriptiveStringBuilder append(Object o) {
+			sb.append(o);
+			return this;
+		}
+		private String giveName(Object o) {
+			return o.getClass().getSimpleName() + "(" + o.toString() + ")";
+		}
+
+		private DescriptiveStringBuilder appendNamed(Object o) {
+			return append(giveName(o));
+		}
+
+
+
+		public DescriptiveStringBuilder append(Address a) {
+			return appendNamed(a);
+		}
+		public DescriptiveStringBuilder append(Annotation a) {
+			return appendNamed(a);
+		}
+		public DescriptiveStringBuilder append(Label l) {
+			return
+			append("Label(").append(l.getName()).append("->").append(l.getLineNumber()).append(":")
+					.append(l.getType()).append(")");
+		}
+		public DescriptiveStringBuilder append(Statement s) {
+			String opString;
+			if(s.getOperandList().isEmpty())
+				opString = "no operands";
+			else
+				opString = s.getOperandList().stream()
+					.map(this::giveName)
+					.collect(Collectors.joining(", "));
+			return append("Statement(Instruction(").append(giveName(s.getInstruction())).append("), ").append(opString).append(")");
+		}
+		public DescriptiveStringBuilder append(Variable v) {
+			String initial = v.getInitialValue().isPresent() ? v.getInitialValue().get().toString() : "no initial value";
+			return append("Variable(").append(v.getType()).append("(").append(v.getSize()).append(" bytes) : ").append(initial).append(")");
+		}
+	}
+
     public static String dumpToString(Program p) {
-        StringBuilder sb = new StringBuilder();
+        DescriptiveStringBuilder sb = new DescriptiveStringBuilder();
 
         sb.append("# Misc Data #\n");
         sb.append("\tDynamic data segment (break) starting address: ").append(p.dynamicSegmentStart).append("\n");

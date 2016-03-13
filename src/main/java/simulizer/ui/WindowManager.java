@@ -17,6 +17,7 @@ import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
+import simulizer.highlevel.models.HLVisualManager;
 import simulizer.settings.Settings;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
@@ -38,7 +39,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class WindowManager extends GridPane {
-	
+
 	private Stage primaryStage;
 
 	private Workspace workspace;
@@ -49,10 +50,11 @@ public class WindowManager extends GridPane {
 
 	private Set<CPUChangedListener> cpuChangedListeners = new HashSet<>();
 	private CPU cpu = null;
-	private LoggerIO io;
+	private final LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private AnnotationManager annotationManager;
+	private HLVisualManager hlvisual = new HLVisualManager();
 
 	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
@@ -200,10 +202,9 @@ public class WindowManager extends GridPane {
 		getWorkspace().openEditorWithCallback((editor) -> {
 			final boolean CAWasEnabled = editor.isContinuousAssemblyEnabled();
 
-			if(CAWasEnabled)
+			if (CAWasEnabled)
 				editor.disableContinuousAssembly();
 			editor.stopContinuousAssembly();
-
 
 			final String programText = editor.getText();
 
@@ -229,7 +230,7 @@ public class WindowManager extends GridPane {
 					}
 				} finally {
 					Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
-					if(CAWasEnabled)
+					if (CAWasEnabled)
 						editor.enableContinuousAssembly();
 				}
 
@@ -364,6 +365,10 @@ public class WindowManager extends GridPane {
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen())
 			primaryStage.close();
+	}
+
+	public HLVisualManager getHLVisualManager() {
+		return hlvisual;
 	}
 
 	private volatile boolean bluring = false;

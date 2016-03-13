@@ -151,10 +151,16 @@ public enum Instruction {
     public OperandFormat getOperandFormat() {
         return this.f;
     }
-    
 
+	@Override
+	public String toString() {
+		if(this == BREAK)
+			return "break";
+		else
+			return super.toString();
+	}
 
-    /**
+	/**
      * get an instruction from a string, throws NoSuchElementException if no such instruction
      * @param name the name of the register
      * @return the register with the given name

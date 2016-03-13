@@ -17,6 +17,11 @@ public class Clock {
 	 * the duration of a single clock tick in microseconds (10^-6 seconds)
 	 */
 	private long tickPeriod;
+	/**
+     * Whether the clock is 'fast'. Indicates to listeners that they might want
+     * to drop some messages
+	 */
+	private boolean highSpeed;
 
 	private final LongAdder ticks;
 	private ScheduledExecutorService executor;
@@ -31,6 +36,11 @@ public class Clock {
 
 	// 5 seconds
 	private static final long MAX_PERIOD = 1000 * 1000 * 5;
+
+	/**
+	 * a delay <= this value is considered to be 'high speed'
+	 */
+	private static final long HIGH_SPEED_THRESHOLD = 1000;
 
 
 
@@ -55,14 +65,18 @@ public class Clock {
 		return 1000000.0 / tickPeriod;
 	}
 
-	private synchronized void setTickPeriod(long tickPeriod) {
-		this.tickPeriod = Math.min(Math.max(tickPeriod, MIN_PERIOD), MAX_PERIOD);
+	private synchronized void setTickPeriod(long requestedPeriod) {
+		tickPeriod = Math.min(Math.max(requestedPeriod, MIN_PERIOD), MAX_PERIOD);
+		highSpeed = tickPeriod <= HIGH_SPEED_THRESHOLD;
 
 		if(isRunning()) {
 			start(); // stops current ticker and makes a new one
 		}
 	}
 
+	public boolean isHighSpeed() {
+		return highSpeed;
+	}
 
 	public long getTicks() {
 		return ticks.longValue();

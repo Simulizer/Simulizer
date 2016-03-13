@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 import javafx.application.Platform;
-import org.reactfx.util.FxTimer;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
@@ -76,6 +75,8 @@ public class Editor extends InternalWindow {
 	private Mode mode;
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
+	private final ScheduledExecutorService changeNotifier;
+	private final ScheduledFuture<?> notifyTask;
 
 	// to do with continuous assembling of
 	private boolean continuousAssemblyEnabled;
@@ -165,14 +166,15 @@ public class Editor extends InternalWindow {
 
 		// other windows scan the contents of the editor continuously
 		editedSinceLabelUpdate = false;
-		FxTimer.runPeriodically(Duration.ofMillis(2000), () -> {
-			if (editedSinceLabelUpdate) {
+		changeNotifier = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Editor-Change-Notifier"));
+		notifyTask = changeNotifier.scheduleAtFixedRate(() -> {
+			if(editedSinceLabelUpdate) {
 				editedSinceLabelUpdate = false;
 				updateObservers();
 			}
-		});
+		}, 0, 2, TimeUnit.SECONDS);
 
-		setOnClosedAction(e -> detachObservers());
 
 		// continuous assembly
 		continuousAssembly = Executors.newSingleThreadScheduledExecutor(
@@ -400,6 +402,10 @@ public class Editor extends InternalWindow {
 		stopContinuousAssembly();
 		// shutdown the continuous assembly thread
 		continuousAssembly.shutdownNow();
+
+		notifyTask.cancel(true);
+		changeNotifier.shutdownNow();
+		detachObservers();
 
 		super.close();
 	}
