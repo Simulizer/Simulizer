@@ -124,7 +124,7 @@ defaultTasks 'build', 'run'
 
 
 def name = rootProject.name // defined in settings.gradle
-version = '0.01'
+version = '0.2'
 
 description = 'MIPS-like assembly language interpreter' +
         ' with CPU and high-level algorithm visualisations'
