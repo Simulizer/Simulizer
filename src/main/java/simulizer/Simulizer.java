@@ -31,7 +31,7 @@ import simulizer.utils.UIUtils;
 
 public class Simulizer extends Application {
 	// Thanks to: https://gist.github.com/jewelsea/2305098
-	public static final String VERSION = "0.1 (beta)";
+	public static final String VERSION = "0.2 (beta)";
 	public URI SPLASH_IMAGE;
 	private int SPLASH_WIDTH, SPLASH_HEIGHT;
 	private long splashStartTime;
