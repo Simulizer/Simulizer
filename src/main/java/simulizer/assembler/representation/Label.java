@@ -23,10 +23,6 @@ public class Label {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return "Label(" + name + "->" + lineNumber + ":" + type + ")";
-    }
 
     public String getName() {
         return name;

@@ -32,6 +32,19 @@ public class OperandFormat {
         }
     }
 
+    public enum EncodingFormat {
+        R_TYPE ("[6:opcode][5:rs][5:rt][5:rd][5:shamt][6:function]"),
+        I_TYPE ("[6:opcode][5:rs][5:rt][16:imm]"),
+        J_TYPE ("[6:opcode][26:pseudo-direct-addr]");
+
+        public final String layout;
+
+        EncodingFormat(String layout) {
+            this.layout = layout;
+        }
+
+    }
+
 
     public static final OperandFormat noArguments = new OperandFormat();
 
@@ -86,6 +99,7 @@ public class OperandFormat {
     public OperandType[] allowedPos1;
     public OperandType[] allowedPos2;
     public OperandType[] allowedPos3;
+    public EncodingFormat encodingFormat;
 
     public OperandFormat() {
         allowedPos1 = new OperandType[] {};
