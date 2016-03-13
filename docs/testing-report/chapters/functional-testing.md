@@ -120,7 +120,35 @@ Requirements
 
 **How it will be tested**: Try modifying a new file or an existing file and then try to close the program.
 
+### Requirement 4.4.3.a
+**Description**: Provides windows for the major components previously mentioned (code editor, CPU visualiser, data structure visualisation).
 
+**How it will be tested**: Test that each window can be opened from the menu bar.
+
+### Requirement 4.4.3.b
+**Description**: All components in the main window will be reconfigurable with respect to size and positioning. New widgets can be added or removed at the user’s wish.
+
+**How it will be tested**: Resize the main window and check that the internal windows resize relative to their original positions; and check that the various internal windows can be repeatedly be opened/closed and moved to wherever the user wishes.
+
+### Requirement 4.4.3.c
+**Description**: The interface will allow changing of colour schemes by specification of the user, based upon a set of files bundled with the software.
+
+**How it will be tested**: Check that the theme colour scheme of the software changes when the user selects a particular theme, and check that this colour scheme is faithful to the source file for the colour scheme.
+
+### Requirement 4.4.3.d
+**Description**: If the user attempts to close the application while a simulation is running, or the code editor is in use, they will be presented with a prompt confirming whether or not they wish to leave.
+
+**How it will be tested**: Try to close the program while a simulation is running and check that a dialog is shown.
+
+### Requirement 4.4.3.e
+**Description**: The main window will have a menu bar, allowing the user to carry out tasks, such as change colour scheme, open new widgets, open files, exit the system, run code, etc.
+
+**How it will be tested**: Check that each item in the menu bar responds to clicks and performs the expected task.
+
+### Requirement 4.4.3.f
+**Description**: The user will be able to save the current layout of the widgets to an external configuration file, which will be automatically loaded on startup.
+
+**How it will be tested**: Arrange the windows in a random configuration, save the layout, rearrange the windows, then try loading the original layout to check that it orders the windows accordingly.
 
 Dummy appendix
 --------------
