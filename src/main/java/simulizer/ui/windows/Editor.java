@@ -31,6 +31,7 @@ import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
+import simulizer.ui.theme.Theme;
 import simulizer.utils.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
@@ -182,6 +183,15 @@ public class Editor extends InternalWindow {
 
 		getContentPane().getChildren().add(view);
 	}
+
+	@Override
+	public void setTheme(Theme theme) {
+		getStyleClass().add("editor");
+		super.setTheme(theme);
+		getStylesheets().add(theme.getStyleSheet("editor.css"));
+	}
+
+
 
 	/**
 	 * set continuous assembly 'on' for future file loads

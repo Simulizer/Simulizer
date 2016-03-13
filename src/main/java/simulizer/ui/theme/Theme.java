@@ -6,6 +6,7 @@ package simulizer.ui.theme;
  * @author Michael
  *
  */
+@SuppressWarnings("unused")
 public class Theme implements Comparable<Theme> {
 	private String name, author, description;
 	private double version;

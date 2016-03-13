@@ -27,8 +27,8 @@ import simulizer.utils.UIUtils;
 public class Themes implements Iterable<Theme> {
 	private final String defaultTheme;
 	private final Path folder = Paths.get("themes");
-	private SortedSet<Theme> themes = new TreeSet<Theme>();
-	private Set<Themeable> themeables = new HashSet<Themeable>();
+	private SortedSet<Theme> themes = new TreeSet<>();
+	private Set<Themeable> themeables = new HashSet<>();
 	private Theme theme = null;
 
 	/**
@@ -53,34 +53,37 @@ public class Themes implements Iterable<Theme> {
 		themes.clear();
 		Gson g = new Gson();
 
-		// Check all folders in the theme folder
-		for (File themeFolder : folder.toFile().listFiles()) {
-			if (themeFolder.isDirectory()) {
-				// Check for a theme.json file
-				File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
-				if (themeJSONs.length == 1) {
-					File themeJSON = themeJSONs[0];
-					try (InputStream in = Files.newInputStream(themeJSON.toPath()); BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+
+		try {
+			File[] fs = folder.toFile().listFiles();
+
+			if(fs == null)
+				throw new NullPointerException();
+
+			// Check all folders in the theme folder
+			for (File themeFolder : fs) {
+				if (themeFolder.isDirectory()) {
+					// Check for a theme.json file
+					File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
+					if (themeJSONs.length == 1) {
+						File themeJSON = themeJSONs[0];
+						InputStream in = Files.newInputStream(themeJSON.toPath());
+						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
 						t.location = themeFolder.toURI().toString();
 						t.themes = this;
 						// @formatter:off
-						try {
-							// Selects the theme to start with (either default, or last selected) 
-							if ((theme == null && themeFolder.getName().equals(defaultTheme)) || 
-								(theme != null && t.getName().equals(theme.getName()))) 
-									theme = t;
+						// Selects the theme to start with (either default, or last selected)
+						if ((theme == null && themeFolder.getName().equals(defaultTheme)) ||
+								(theme != null && t.getName().equals(theme.getName())))
+							theme = t;
 						// @formatter:on
-							themes.add(t);
-						} catch (NullPointerException e) {
-							UIUtils.showExceptionDialog(e);
-						}
-
-					} catch (IOException e1) {
-						UIUtils.showExceptionDialog(e1);
+						themes.add(t);
 					}
 				}
 			}
+		} catch (Exception e) {
+			UIUtils.showExceptionDialog(e);
 		}
 
 		if (theme == null) {
