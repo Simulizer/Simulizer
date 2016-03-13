@@ -47,6 +47,8 @@ public class PipelineView extends InternalWindow implements Observer {
 	private int startCycle = 0;
 	private boolean snapToEnd;
 
+	private boolean isPipelined;
+
 	// Dimensions used for calculations
 	private double rectWidth;
 	private double cycleWidth;
@@ -58,6 +60,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	private double w;
 	private double h;
 	private double realH;
+
 
 	public PipelineView() {
 		setTitle("Pipeline");
@@ -175,11 +178,13 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	@Override
 	public void update(Observable o, Object pipelineState) {
-		snapToEnd = followCheckBox.isSelected();
+		this.isPipelined = getWindowManager().getCPU().isPipelined();
+
+		this.snapToEnd = followCheckBox.isSelected();
 		repaint();
 		// Should only snap to end when an update has been fire
 		// i.e. not when user is scrolling around
-		snapToEnd = false;
+		this.snapToEnd = false;
 	}
 
 	// TODO draw addresses before and after the pipeline
@@ -280,9 +285,13 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		gc.clearRect(0, 0, w, realH);
 
-		calculateParameters();
-		drawDividers(gc);
-		drawAddresses(gc);
+		if (isPipelined) {
+			calculateParameters();
+			drawDividers(gc);
+			drawAddresses(gc);
+		} else {
+			gc.fillText("The CPU must be pipelined to view this window", w/2, h/2);
+		}
 	}
 
 	// ***Utilities***

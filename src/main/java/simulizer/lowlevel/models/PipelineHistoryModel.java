@@ -83,6 +83,7 @@ public class PipelineHistoryModel {
 
 	public void clear() {
 		history.clear();
+		notifyObservers(null);
 	}
 
 	private void notifyObservers(PipelineState nextState) {
