@@ -185,9 +185,9 @@ public class ComponentStackPane extends StackPane {
         tooltip.setPrefWidth(vis.getWindowWidth() / 2);
 
         addEventFilter(MouseEvent.MOUSE_MOVED, event -> {
-			double eventX = event.getSceneX();
-			double eventY = event.getSceneY();
-            tooltip.show(instance, eventX, eventY - 20 - (tooltip.getHeight() / 2));
+            double eventX = vis.getScene().getWindow().getX() + vis.getLayoutX() + getLayoutX() + event.getX() - (tooltip.getWidth() / 2.5);
+			double eventY = vis.getScene().getWindow().getY() + vis.getLayoutY() + getLayoutY() + event.getY() - (tooltip.getHeight());
+            tooltip.show(instance, eventX, eventY);
 		});
 
         addEventFilter(MouseEvent.MOUSE_EXITED_TARGET, event -> {
