@@ -6,9 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,7 +28,7 @@ import simulizer.utils.UIUtils;
 public class Layouts implements Iterable<Layout> {
 
 	private final Path folder = Paths.get("layouts");
-	private Set<Layout> layouts = new HashSet<Layout>();
+	private List<Layout> layouts = new ArrayList<>();
 	private Layout layout, defaultLayout;
 	private Workspace workspace;
 
@@ -78,6 +77,9 @@ public class Layouts implements Iterable<Layout> {
 		} catch (IOException e) {
 			UIUtils.showExceptionDialog(e);
 		}
+
+		// sort by layout name
+		layouts = layouts.stream().sorted((l1, l2) -> l1.getName().compareTo(l2.getName())).collect(Collectors.toList());
 
 		if (defaultLayout == null)
 			defaultLayout = new Layout("MISSING_LAYOUT", new WindowLocation[0]);
@@ -140,10 +142,10 @@ public class Layouts implements Iterable<Layout> {
 		double width = workspace.getWidth(), height = workspace.getHeight();
 
 		WindowLocation[] wl = layout.getWindowLocations();
-		for (int i = 0; i < wl.length; i++) {
-			if (wl[i].getWindowEnum().equals(w)) {
+		for (WindowLocation loc : wl) {
+			if (loc.getWindowEnum().equals(w)) {
 				// Resize window to layout dimensions
-				w.setNormalisedDimentions(wl[i].getX(), wl[i].getY(), wl[i].getWidth(), wl[i].getHeight());
+				w.setNormalisedDimentions(loc.getX(), loc.getY(), loc.getWidth(), loc.getHeight());
 				if (width > 0 && height > 0) {
 					w.setWorkspaceSize(workspace.getWidth(), workspace.getHeight());
 				}
