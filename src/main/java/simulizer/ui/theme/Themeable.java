@@ -14,5 +14,5 @@ public interface Themeable {
 	 * @param theme
 	 *            the theme to set the component as
 	 */
-	public void setTheme(Theme theme);
+	void setTheme(Theme theme);
 }
