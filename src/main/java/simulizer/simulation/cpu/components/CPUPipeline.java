@@ -245,6 +245,9 @@ public class CPUPipeline extends CPU {
 		
 		//Dealing with pipeline state messages
 		Address decodeAddress = new Address(thisInstruction.getValue()-4);
+		if(needToBubbleRAWReg) {//got bubbling slightly wrong with RAW, need to add this to fix
+			decodeAddress = null;
+		}
 		Address executeAddress = executingAddress;
 		if(this.nopCount == 2) {
 			decodeAddress = null;
