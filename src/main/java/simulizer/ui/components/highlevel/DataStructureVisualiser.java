@@ -1,23 +1,23 @@
 package simulizer.ui.components.highlevel;
 
-import javafx.application.Platform;
+import java.util.Observable;
+import java.util.Observer;
+
+import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import simulizer.highlevel.models.DataStructureModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
-public abstract class DataStructureVisualiser {
-	private double width;
-	private double height;
+public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int rate = 1000;
 	protected HighLevelVisualisation vis;
+	private boolean showing = false;
+	private DataStructureModel model;
 
-	public DataStructureVisualiser(HighLevelVisualisation vis) {
-		this.width = vis.getWindowWidth();
-		this.height = vis.getWindowHeight();
+	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
+		this.model = model;
 		this.vis = vis;
-
-		// TODO use Platform.runLater somehow
-		vis.getDrawingPane().getChildren().clear();
-		//Platform.runLater(() -> vis.getDrawingPane().getChildren().clear());
+		model.addObserver(this);
 	}
 
 	/**
@@ -37,24 +37,8 @@ public abstract class DataStructureVisualiser {
 		return rate;
 	}
 
-	public double getWidth() {
-		return width;
-	}
-
-	public double getHeight() {
-		return height;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
-	public void setHeight(double height) {
-		this.height = height;
-	}
-
 	public void setAttrs(Rectangle rect, double x, double y, double width, double height) {
-		if(rect != null) {
+		if (rect != null) {
 			rect.setX(x);
 			rect.setY(y);
 			rect.setWidth(width);
@@ -62,6 +46,37 @@ public abstract class DataStructureVisualiser {
 		}
 	}
 
-	public abstract void resize();
+	public void show() {
+		if (!showing)
+			vis.addTab(this);
+		showing = true;
+	}
 
+	public void hide() {
+		if (showing)
+			vis.removeTab(this);
+		showing = false;
+	}
+
+	public abstract void repaint();
+
+	public abstract String getName();
+
+	public void close() {
+		model.deleteObserver(this);
+	}
+
+	public DataStructureModel getModel() {
+		return model;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (model.isVisible() != showing) {
+			if (model.isVisible())
+				show();
+			else
+				hide();
+		}
+	}
 }

@@ -1,7 +1,21 @@
 package simulizer.ui.windows;
 
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
+import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
+
+import javafx.application.Platform;
+import javafx.geometry.Side;
+import javafx.scene.Cursor;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.util.Pair;
+import simulizer.highlevel.models.Action;
+import simulizer.highlevel.models.DataStructureModel;
+import simulizer.highlevel.models.FrameModel;
+import simulizer.highlevel.models.HLVisualManager;
+import simulizer.highlevel.models.HanoiModel;
+import simulizer.highlevel.models.ListModel;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.FrameVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
@@ -9,80 +23,80 @@ import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
-public class HighLevelVisualisation extends InternalWindow {
+public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private double width = 400;
 	private double height = 300;
 
-	private DataStructureVisualiser visualiser;
-	private Pane drawingPane;
+	private TabPane tabs;
 
-	private void init() {
-		this.drawingPane = new Pane();
-
+	public HighLevelVisualisation() {
 		// TODO remove this
 		setCache(false);
 
 		// TODO check if all this `setXWidth/Height()` stuff is needed
-		getContentPane().getChildren().add(drawingPane);
+		tabs = new TabPane();
+		tabs.setSide(Side.BOTTOM);
+		tabs.setCursor(Cursor.DEFAULT);
+		getContentPane().getChildren().add(tabs);
 
 		setMinWidth(width);
 		setMinHeight(200);
 
 		getContentPane().widthProperty().addListener((o, old, newValue) -> {
 			width = newValue.doubleValue();
-			if(visualiser != null) {
-				visualiser.resize();
-			}
+			Iterator<Tab> i = tabs.getTabs().iterator();
+			while (i.hasNext())
+				((DataStructureVisualiser) i.next().getContent()).repaint();
 		});
 
 		getContentPane().heightProperty().addListener((o, old, newValue) -> {
 			height = newValue.doubleValue();
-			if(visualiser != null) {
-				visualiser.resize();
-			}
+			Iterator<Tab> i = tabs.getTabs().iterator();
+			while (i.hasNext())
+				((DataStructureVisualiser) i.next().getContent()).repaint();
 		});
 	}
-
 
 	@Override
 	public void setToDefaultDimensions() {
 		setNormalisedDimentions(0.0, 0.0, 0.3, 0.2);
 	}
 
+	@Override
+	public void ready() {
+		// Listened for visualisation changes
+		HLVisualManager hlvisual = getWindowManager().getHLVisualManager();
+		hlvisual.addObserver(this);
 
-	//TODO: have these not be mutually exclusive
-	public void loadTowerOfHanoiVisualisation() {
-		this.visualiser = new TowerOfHanoiVisualiser(this, 0);
-	}
-	public void loadListVisualisation() {
-		visualiser = new ListVisualiser(this);
-	}
-	public void loadFrameVisualisation() {
-		visualiser = new FrameVisualiser(this);
-	}
-
-    public void add(Node e){
-        drawingPane.getChildren().add(e);
-    }
-
-    public void addAll(Node... elements){
-        drawingPane.getChildren().addAll(elements);
-    }
-
-    public void remove(Node e){
-        drawingPane.getChildren().remove(e);
-    }
-
-    public void removeAll(Node... elements){
-        drawingPane.getChildren().removeAll(elements);
-    }
-
-	public void setPaneWidth(double width) {
-		drawingPane.setPrefWidth(width);
+		// Add already opened visualisations
+		Iterator<DataStructureModel> models = hlvisual.getModels().iterator();
+		while (models.hasNext()) {
+			addNewVisualisation(models.next());
+		}
+		super.ready();
 	}
 
-	public void setPaneHeight(double height) {
-		drawingPane.setPrefHeight(height);
+	@Override
+	public void close() {
+		super.close();
+
+		// Stop listening to visualisation changes
+		getWindowManager().getHLVisualManager().deleteObserver(this);
+	}
+
+	public void addTab(DataStructureVisualiser vis) {
+		Tab tab = new Tab(vis.getName());
+		tab.setContent(vis);
+		Platform.runLater(() -> tabs.getTabs().add(tab));
+	}
+
+	public void removeTab(DataStructureVisualiser vis) {
+		Iterator<Tab> iterator = tabs.getTabs().iterator();
+		while (iterator.hasNext()) {
+			Tab t = iterator.next();
+			if (t.getContent() == vis)
+				Platform.runLater(() -> tabs.getTabs().remove(t));
+		}
 	}
 
 	public double getWindowWidth() {
@@ -93,24 +107,40 @@ public class HighLevelVisualisation extends InternalWindow {
 		return height;
 	}
 
-	public DataStructureVisualiser getVisualiser() {
-		return this.visualiser;
-	}
-
-	public Pane getDrawingPane() {
-		return drawingPane;
-	}
-
-	@Override
-	public void ready() {
-		init();
-		super.ready();
-	}
-
 	@Override
 	public void setTheme(Theme theme) {
 		super.setTheme(theme);
 		getStylesheets().add(theme.getStyleSheet("highlevel.css"));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void update(Observable arg0, Object obj) {
+		Pair<Action, DataStructureModel> change = (Pair<Action, DataStructureModel>) obj;
+		if (change.getKey() == Action.CREATED) {
+			addNewVisualisation(change.getValue());
+		} else if (change.getKey() == Action.DELETED) {
+			Iterator<Tab> iterator = tabs.getTabs().iterator();
+			while (iterator.hasNext()) {
+				Tab t = iterator.next();
+				if (((DataStructureVisualiser) t.getContent()).getModel() == change.getValue())
+					Platform.runLater(() -> tabs.getTabs().remove(t));
+			}
+		}
+	}
+
+	private void addNewVisualisation(DataStructureModel model) {
+		switch (model.modelType()) {
+			case FRAME:
+				new FrameVisualiser((FrameModel) model, this);
+				break;
+			case HANOI:
+				new TowerOfHanoiVisualiser((HanoiModel) model, this);
+				break;
+			case LIST:
+				new ListVisualiser((ListModel) model, this);
+				break;
+		}
 	}
 
 }

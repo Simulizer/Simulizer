@@ -1,11 +1,13 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.Observable;
 import java.util.Random;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import simulizer.highlevel.models.FrameModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class FrameVisualiser extends DataStructureVisualiser {
@@ -14,28 +16,16 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	private int width = 240, height = 160;
 	private volatile boolean rendering = false;
 
-	public FrameVisualiser(HighLevelVisualisation vis) {
-		super(vis);
+	public FrameVisualiser(FrameModel model, HighLevelVisualisation vis) {
+		super(model, vis);
 
 		image = new ImageView();
 		image.setSmooth(false);
 		image.setCache(false);
-		vis.add(image);
-		commit();
+		getChildren().add(image);
 	}
 
-	public void commit() {
-		if (!rendering) {
-			rendering = true;
-			Thread t = new Thread(this::drawFrame, "Render");;
-			t.setDaemon(true);
-			t.start();
-		} else {
-			System.out.println("Missed frame");
-		}
-	}
-
-	private void drawFrame() {
+	private void drawFrame(double[][] img) {
 		WritableImage frame = new WritableImage(width, height);
 		PixelWriter pw = frame.getPixelWriter();
 		Random rand = new Random();
@@ -50,13 +40,35 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void resize() {
+	public void repaint() {
 		double windowWidth = vis.getWindowWidth(), windowHeight = vis.getWindowHeight();
 
 		image.setLayoutX(0);
 		image.setLayoutY(0);
 		image.setFitWidth(windowWidth);
 		image.setFitHeight(windowHeight);
+	}
+
+	@Override
+	public String getName() {
+		return "Frame";
+	}
+
+	@Override
+	public void close() {
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		super.update(o, arg);
+		if (!rendering) {
+			rendering = true;
+			Thread t = new Thread(() -> drawFrame((double[][]) arg), "Render");
+			t.setDaemon(true);
+			t.start();
+		} else {
+			System.out.println("Missed frame");
+		}
 	}
 
 }
