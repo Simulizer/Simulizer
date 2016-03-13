@@ -1,10 +1,9 @@
 package simulizer.ui.components.cpu.listeners;
 
+import javafx.concurrent.Task;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.messages.DataMovementMessage;
-import simulizer.simulation.messages.InstructionTypeMessage;
-import simulizer.simulation.messages.SimulationListener;
-import simulizer.simulation.messages.StageEnterMessage;
+import simulizer.simulation.messages.*;
+import simulizer.ui.components.cpu.AnimationProcessor;
 import simulizer.ui.windows.CPUVisualisation;
 import simulizer.utils.UIUtils;
 
@@ -16,14 +15,30 @@ public class CPUListener extends SimulationListener {
     CPUVisualisation vis;
     CPU simCpu;
     simulizer.ui.components.CPU cpu;
+    boolean replaying;
+    public AnimationProcessor animationProcessor;
 
     /**
      * Sets the visualisation, cpu simulation and the visualisation
      */
-    public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, CPUVisualisation vis){
+    public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, CPUVisualisation vis, AnimationProcessor animationProcessor){
         this.vis = vis;
         this.cpu = cpu;
         this.simCpu = simCpu;
+        this.animationProcessor = animationProcessor;
+        cpu.previousInstructions.attachListener(this);
+    }
+
+    public void replayInstruction(Message m){
+        replaying = true;
+        if (m instanceof DataMovementMessage){
+            processDataMovementMessage(((DataMovementMessage) m));
+        } else if(m instanceof InstructionTypeMessage){
+            processInstructionTypeMessage(((InstructionTypeMessage) m));
+        } else if(m instanceof StageEnterMessage){
+            processStageEnterMessage(((StageEnterMessage) m));
+        }
+        replaying = false;
     }
 
     /**
@@ -31,12 +46,12 @@ public class CPUListener extends SimulationListener {
      * @param oneOverFraction eg 3 => 1/3 of a cycle
      * @return the duration in ms
      */
-    private int getCycleFraction(int oneOverFraction) {
+    private double getCycleFraction(int oneOverFraction) {
 		double denominator = simCpu.getCycleFreq() * oneOverFraction;
 		if(denominator < 0.00001) {
 			return 0; // TODO: put a better value here
 		} else {
-			return (int) (1000 / denominator);
+			return (1000 / denominator);
 		}
     }
 
@@ -46,7 +61,7 @@ public class CPUListener extends SimulationListener {
      */
     public void processDataMovementMessage(DataMovementMessage m) {
         if(m.getInstruction().isPresent()){
-            switch(m.getInstruction().get().getInstruction()){
+            switch(m.getInstruction().get().getInstruction()) {
                 case beq:
                 case beqz:
                 case bgtz:
@@ -54,172 +69,307 @@ public class CPUListener extends SimulationListener {
                 case bne:
                 case blez:
                 case bltz:
-                    int speed = getCycleFraction(6);
+                    double speed = getCycleFraction(6);
 
-                    cpu.showText("BRANCH INSTRUCTION - Step 1 - Register operands are read and 16-bit immediate is sign extended", speed);
+                    Task<Void> task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 1 - Register operands are read and 16-bit immediate is sign extended", speed);
+                            cpu.ir.highlight();
+                            cpu.irToRegister1.animateData(speed);
+                            cpu.irToRegister2.animateData(speed);
+                            cpu.irToSignExtender.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.ir.highlight();
-                    cpu.irToRegister1.animateData(speed);
-                    cpu.irToRegister2.animateData(speed);
-                    cpu.irToSignExtender.animateData(speed);
-                    sleepFor(speed);
+                    Task<Void> task2 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 2 - Register operands are subtracted and 16-bit immediate is shifted left 2 bits",speed);
+                            cpu.register.highlight();
+                            cpu.signExtender.highlight();
+                            cpu.registerToALU1.animateData(speed);
+                            cpu.registerToALU2.animateData(speed);
+                            cpu.signExtenderToShift.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("BRANCH INSTRUCTION - Step 2 - Register operands are subtracted and 16-bit immediate is shifted left 2 bits", speed);
+                    Task<Void> task3 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 3 - 4 is added to PC value, so it's ready to be added to the offset", speed);
+                            cpu.pcToPlusFour.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.register.highlight();
-                    cpu.signExtender.highlight();
-                    cpu.registerToALU1.animateData(speed);
-                    cpu.registerToALU2.animateData(speed);
-                    cpu.signExtenderToShift.animateData(speed);
-                    sleepFor(speed);
+                    Task<Void> task4 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 4 - Next instructions address is calculated (assuming should branch)", speed);
+                            cpu.shiftToAdder.animateData(speed);
+                            cpu.plusFourToAdder.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("BRANCH INSTRUCTION - Step 3 - 4 is added to PC value, so it's ready to be added to the offset", speed);
+                    Task<Void> task5 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 5 - (PC + 4) and (PC + offset) are fed into the mux with the alu result, this decides the next value of the PC", speed);
 
-                    cpu.pcToPlusFour.animateData(speed);
-                    sleepFor(speed);
+                            cpu.alu.highlight();
+                            cpu.adder.highlight();
+                            cpu.aluToMux.animateData(speed);
+                            cpu.adderToMux.animateData(speed);
+                            cpu.plusFourToMux.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("BRANCH INSTRUCTION - Step 4 - Next instructions address is calculated (assuming should branch)", speed);
+                    Task<Void> task6 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("BRANCH INSTRUCTION - Step 6 - Next PC value is updated", speed);
+                            cpu.muxAdder.highlight();
+                            cpu.muxToPC.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.shiftToAdder.animateData(speed);
-                    cpu.plusFourToAdder.animateData(speed);
-                    sleepFor(speed);
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    cpu.animationProcessor.addAnimationTask(task2, speed);
+                    cpu.animationProcessor.addAnimationTask(task3, speed);
+                    cpu.animationProcessor.addAnimationTask(task4, speed);
+                    cpu.animationProcessor.addAnimationTask(task5, speed);
+                    cpu.animationProcessor.addAnimationTask(task6, speed);
 
-                    cpu.showText("BRANCH INSTRUCTION - Step 5 - (PC + 4) and (PC + offset) are fed into the mux with the alu result, this decides the next value of the PC", speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
-                    cpu.alu.highlight();
-                    cpu.adder.highlight();
-                    cpu.aluToMux.animateData(speed);
-                    cpu.adderToMux.animateData(speed);
-                    cpu.plusFourToMux.animateData(speed);
-                    sleepFor(speed);
-
-                    cpu.showText("BRANCH INSTRUCTION - Step 6 - Next PC value is updated", speed);
-
-                    cpu.muxAdder.highlight();
-                    cpu.muxToPC.animateData(speed);
-                    sleepFor(speed);
                     break;
                 case lw:
                     processIType();
                     break;
                 case sw:
+
                     speed = getCycleFraction(3);
 
-                    cpu.showText("SW INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("SW INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
+                            cpu.ir.highlight();
+                            cpu.irToRegister1.animateData(speed);
+                            cpu.irToRegister3.animateData(speed);
+                            cpu.irToSignExtender.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.ir.highlight();
-                    cpu.irToRegister1.animateData(speed);
-                    cpu.irToRegister3.animateData(speed);
-                    cpu.irToSignExtender.animateData(speed);
-                    sleepFor(speed);
+                    task2 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("SW INSTRUCTION - Step 2 - ALU computes sum of base address and sum extended offset", speed);
+                            cpu.register.highlight();
+                            cpu.signExtender.highlight();
+                            cpu.registerToALU1.animateData(speed);
+                            cpu.signExtenderToALU.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("SW INSTRUCTION - Step 2 - ALU computes sum of base address and sum extended offset", speed);
+                    task3 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("SW INSTRUCTION - Step 3 - Word is written to memory", speed);
+                            cpu.alu.highlight();
+                            cpu.aluToMemory.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.register.highlight();
-                    cpu.signExtender.highlight();
-                    cpu.registerToALU1.animateData(speed);
-                    cpu.signExtenderToALU.animateData(speed);
-                    sleepFor(speed);
 
-                    cpu.showText("SW INSTRUCTION - Step 3 - Word is written to memory", speed);
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    cpu.animationProcessor.addAnimationTask(task2, speed);
+                    cpu.animationProcessor.addAnimationTask(task3, speed);
 
-                    cpu.alu.highlight();
-                    cpu.aluToMemory.animateData(speed);
-                    sleepFor(speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
                     break;
                 case j:
                     speed = getCycleFraction(4);
 
-                    cpu.showText("JUMP INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JUMP INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
+                            cpu.ir.highlight();
+                            cpu.irToShift.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.ir.highlight();
-                    cpu.irToShift.animateData(speed);
-                    sleepFor(speed);
+                    task2 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JUMP INSTRUCTION - Step 2 - PC + 4 is calculated", speed);
+                            cpu.programCounter.highlight();
+                            cpu.pcToPlusFour.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JUMP INSTRUCTION - Step 2 - PC + 4 is calculated", speed);
+                    task3 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JUMP INSTRUCTION - Step 3 - PC + 4 is combined with the 28 bit immediate", speed);
+                            cpu.plusFour.highlight();
+                            cpu.shiftLeftIR.highlight();
+                            cpu.plusFourToMuxWithShift.animateData(speed);
+                            cpu.shiftToMux.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.programCounter.highlight();
-                    cpu.pcToPlusFour.animateData(speed);
-                    sleepFor(speed);
+                    task4 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JUMP INSTRUCTION - Step 4 - PC value is updated to (PC + 4 + immediate)", speed);
+                            cpu.muxAdder.highlight();
+                            cpu.muxToPC.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JUMP INSTRUCTION - Step 3 - PC + 4 is combined with the 28 bit immediate", speed);
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    cpu.animationProcessor.addAnimationTask(task2, speed);
+                    cpu.animationProcessor.addAnimationTask(task3, speed);
+                    cpu.animationProcessor.addAnimationTask(task4, speed);
 
-                    cpu.plusFour.highlight();
-                    cpu.shiftLeftIR.highlight();
-                    cpu.plusFourToMuxWithShift.animateData(speed);
-                    cpu.shiftToMux.animateData(speed);
-                    sleepFor(speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
-                    cpu.showText("JUMP INSTRUCTION - Step 4 - PC value is updated to (PC + 4 + immediate)", speed);
-
-                    cpu.muxAdder.highlight();
-                    cpu.muxToPC.animateData(speed);
-                    sleepFor(speed);
                     break;
                 case jal:
                     speed = getCycleFraction(5);
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JAL INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
+                            cpu.ir.highlight();
+                            cpu.irToShift.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JAL INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
+                    task2 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JAL INSTRUCTION - Step 2 - PC + 4 is calculated", speed);
+                            cpu.programCounter.highlight();
+                            cpu.pcToPlusFour.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.ir.highlight();
-                    cpu.irToShift.animateData(speed);
-                    sleepFor(speed);
 
-                    cpu.showText("JAL INSTRUCTION - Step 2 - PC + 4 is calculated", speed);
+                    task3 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JAL INSTRUCTION - Step 3 - PC + 4 is combined with the 28 bit immediate", speed);
+                            cpu.plusFour.highlight();
+                            cpu.shiftLeftIR.highlight();
+                            cpu.plusFourToMuxWithShift.animateData(speed);
+                            cpu.shiftToMux.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.programCounter.highlight();
-                    cpu.pcToPlusFour.animateData(speed);
-                    sleepFor(speed);
+                    task4 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JAL INSTRUCTION - Step 4 - PC value is updated to (PC + 4 + immediate)", speed);
+                            cpu.muxAdder.highlight();
+                            cpu.muxToPC.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JAL INSTRUCTION - Step 3 - PC + 4 is combined with the 28 bit immediate", speed);
 
-                    cpu.plusFour.highlight();
-                    cpu.shiftLeftIR.highlight();
-                    cpu.plusFourToMuxWithShift.animateData(speed);
-                    cpu.shiftToMux.animateData(speed);
-                    sleepFor(speed);
+                    task5 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JAL INSTRUCTION - Step 5 - $ra register is updated", speed);
+                            cpu.ir.highlight();
+                            cpu.irToRegister3.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JAL INSTRUCTION - Step 4 - PC value is updated to (PC + 4 + immediate)", speed);
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    cpu.animationProcessor.addAnimationTask(task2, speed);
+                    cpu.animationProcessor.addAnimationTask(task3, speed);
+                    cpu.animationProcessor.addAnimationTask(task4, speed);
+                    cpu.animationProcessor.addAnimationTask(task5, speed);
 
-                    cpu.muxAdder.highlight();
-                    cpu.muxToPC.animateData(speed);
-                    sleepFor(speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
-                    cpu.showText("JAL INSTRUCTION - Step 5 - $ra register is updated", speed);
-                    cpu.ir.highlight();
-                    cpu.irToRegister3.animateData(speed);
-                    sleepFor(speed);
                     break;
                 case jr:
                     speed = getCycleFraction(3);
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JR INSTRUCTION - Step 1 - Register value is read", speed);
+                            cpu.ir.highlight();
+                            cpu.irToRegister1.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JR INSTRUCTION - Step 1 - Register value is read", speed);
+                    task2 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JR INSTRUCTION - Step 2 - Register value is passed to mux", speed);
+                            cpu.register.highlight();
+                            cpu.registertoMux.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.ir.highlight();
-                    cpu.irToRegister1.animateData(speed);
-                    sleepFor(speed);
+                    task3 = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("JR INSTRUCTION - Step 3 - PC value is updated to register address", speed);
+                            cpu.muxAdder.highlight();
+                            cpu.muxToPC.animateData(speed);
+                            return null;
+                        }
+                    };
 
-                    cpu.showText("JR INSTRUCTION - Step 2 - Register value is passed to mux", speed);
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    cpu.animationProcessor.addAnimationTask(task2, speed);
+                    cpu.animationProcessor.addAnimationTask(task3, speed);
 
-                    cpu.register.highlight();
-                    cpu.registertoMux.animateData(speed);
-                    sleepFor(speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
-                    cpu.showText("JR INSTRUCTION - Step 3 - PC value is updated to register address", speed);
-
-                    cpu.muxAdder.highlight();
-                    cpu.muxToPC.animateData(speed);
-                    sleepFor(speed);
                     break;
                 case li:
                 case la:
                     speed = getCycleFraction(1);
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            cpu.showText("LI/LA INSTRUCTION - Step 1 - Register is written to with the new value", speed);
+                            cpu.ir.highlight();
+                            cpu.irToRegister3.animateData(speed);
+                            return null;
+                        }
+                    };
+                    cpu.animationProcessor.addAnimationTask(task, speed);
+                    if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
 
-                    cpu.showText("LI/LA INSTRUCTION - Step 1 - Register is written to with the new value", speed);
-                    cpu.ir.highlight();
-                    cpu.irToRegister3.animateData(speed);
-                    sleepFor(speed);
                     break;
             }
         }
@@ -233,9 +383,11 @@ public class CPUListener extends SimulationListener {
         switch(m.getMode()){
             case RTYPE:
                 processRType();
+                if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
                 break;
             case ITYPE:
                 processIType();
+                if (!replaying) vis.getCpu().previousInstructions.addInstruction(m);
                 break;
         }
     }
@@ -244,35 +396,56 @@ public class CPUListener extends SimulationListener {
      * Processes an I-TYPE instruction
      */
     public void processIType(){
-        int speed = getCycleFraction(4);
+        double speed = getCycleFraction(4);
 
-        cpu.showText("I-TYPE INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("I-TYPE INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
+                cpu.ir.highlight();
+                cpu.irToRegister1.animateData(speed);
+                cpu.irToRegister3.animateData(speed);
+                cpu.irToSignExtender.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.ir.highlight();
-        cpu.irToRegister1.animateData(speed);
-        cpu.irToRegister3.animateData(speed);
-        cpu.irToSignExtender.animateData(speed);
-        sleepFor(speed);
+        Task<Void> task2 = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("I-TYPE INSTRUCTION - Step 2 - ALU computes sum of base address and sum extended offset", speed);
+                cpu.register.highlight();
+                cpu.signExtender.highlight();
+                cpu.registerToALU1.animateData(speed);
+                cpu.signExtenderToALU.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.showText("I-TYPE INSTRUCTION - Step 2 - ALU computes sum of base address and sum extended offset", speed);
+        Task<Void> task3 = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("I-TYPE INSTRUCTION - Step 3 - Result is sent to memory", speed);
+                cpu.alu.highlight();
+                cpu.aluToMemory.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.register.highlight();
-        cpu.signExtender.highlight();
-        cpu.registerToALU1.animateData(speed);
-        cpu.signExtenderToALU.animateData(speed);
-        sleepFor(speed);
+        Task<Void> task4 = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("I-TYPE INSTRUCTION - Step 4 - Word is read from memory and written to a register", speed);
+                cpu.mainMemory.highlight();
+                cpu.dataMemoryToRegisters.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.showText("I-TYPE INSTRUCTION - Step 3 - Result is sent to memory", speed);
-
-        cpu.alu.highlight();
-        cpu.aluToMemory.animateData(speed);
-        sleepFor(speed);
-
-        cpu.showText("I-TYPE INSTRUCTION - Step 4 - Word is read from memory and written to a register", speed);
-
-        cpu.mainMemory.highlight();
-        cpu.dataMemoryToRegisters.animateData(speed);
-        sleepFor(speed);
+        cpu.animationProcessor.addAnimationTask(task, speed);
+        cpu.animationProcessor.addAnimationTask(task2, speed);
+        cpu.animationProcessor.addAnimationTask(task3, speed);
+        cpu.animationProcessor.addAnimationTask(task4, speed);
 
     }
 
@@ -280,29 +453,51 @@ public class CPUListener extends SimulationListener {
      * Processess an R-TYPE instruction
      */
     public void processRType(){
-        int speed = getCycleFraction(4);
+        double speed = getCycleFraction(4);
 
-        cpu.showText("R-TYPE INSTRUCTION - Step 1 - Both read registers and one write register are selected", speed);
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("R-TYPE INSTRUCTION - Step 1 - Both read registers and one write register are selected", speed);
+                cpu.ir.highlight();
+                cpu.irToRegister1.animateData(speed);
+                cpu.irToRegister2.animateData(speed);
+                cpu.irToRegister3.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.ir.highlight();
-        cpu.irToRegister1.animateData(speed);
-        cpu.irToRegister2.animateData(speed);
-        cpu.irToRegister3.animateData(speed);
-        sleepFor(speed);
+        Task<Void> task2 = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("R-TYPE INSTRUCTION - Step 2 - Two registers are added together via the ALU", speed);
+                cpu.register.highlight();
+                cpu.registerToALU1.animateData(speed);
+                cpu.registerToALU2.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.showText("R-TYPE INSTRUCTION - Step 2 - Two registers are added together via the ALU", speed);
+        Task<Void> task3 = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                cpu.showText("R-TYPE INSTRUCTION - Step 3 - Result is written back to the register", speed);
+                cpu.alu.highlight();
+                cpu.aluToRegisters.animateData(speed);
+                return null;
+            }
+        };
 
-        cpu.register.highlight();
-        cpu.registerToALU1.animateData(speed);
-        cpu.registerToALU2.animateData(speed);
-        sleepFor(speed);
+        cpu.animationProcessor.addAnimationTask(task, speed);
+        cpu.animationProcessor.addAnimationTask(task2, speed);
+        cpu.animationProcessor.addAnimationTask(task3, speed);
 
-        cpu.showText("R-TYPE INSTRUCTION - Step 3 - Result is written back to the register", speed);
+    }
 
-        cpu.alu.highlight();
-        cpu.aluToRegisters.animateData(speed);
-        sleepFor(speed);
-
+    public void startOfCycle(){
+        haltSimulation();
+        while(animationProcessor.getRemaining() > 0);
+        releaseSimulation();
     }
 
     /**
@@ -312,32 +507,63 @@ public class CPUListener extends SimulationListener {
     public void processStageEnterMessage(StageEnterMessage m) {
         switch (m.getStage()){
             case Fetch:
-                int speed = getCycleFraction(2);
+                startOfCycle();
+                double speed = getCycleFraction(2);
 
-                cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
-                cpu.programCounter.highlight();
-                cpu.PCToIM.animateData(speed);
-                sleepFor(speed);
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
+                        cpu.programCounter.highlight();
+                        cpu.PCToIM.animateData(speed);
+                        return null;
+                    }
+                };
 
-                cpu.showText("INSTRUCTION FETCH - Step 2 - The next instruction is passed from memory to the instruction register", speed);
+                Task<Void> task2 = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        cpu.showText("INSTRUCTION FETCH - Step 2 - The next instruction is passed from memory to the instruction register", speed);
+                        cpu.instructionMemory.highlight();
+                        cpu.codeMemoryToIR.animateData(speed);
+                        return null;
+                    }
+                };
 
-                cpu.instructionMemory.highlight();
-                cpu.codeMemoryToIR.animateData(speed);
-                sleepFor(speed);
 
-                cpu.showText("INSTRUCTION FETCH - Step 3 - PC is updated to the next instruction address", speed * 3);
+                Task<Void> task3 = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        cpu.showText("INSTRUCTION FETCH - Step 3 - PC is updated to the next instruction address", speed * 3);
+                        cpu.programCounter.highlight();
+                        cpu.pcToPlusFour.animateData(speed);
+                        return null;
+                    }
+                };
 
-                cpu.programCounter.highlight();
-                cpu.pcToPlusFour.animateData(speed);
-                sleepFor(speed);
+                Task<Void> task4 = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        cpu.plusFour.highlight();
+                        cpu.plusFourToMux.animateData(speed);
+                        return null;
+                    }
+                };
 
-                cpu.plusFour.highlight();
-                cpu.plusFourToMux.animateData(speed);
-                sleepFor(speed);
+                Task<Void> task5 = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        cpu.muxAdder.highlight();
+                        cpu.muxToPC.animateData(speed);
+                        return null;
+                    }
+                };
 
-                cpu.muxAdder.highlight();
-                cpu.muxToPC.animateData(speed);
-                sleepFor(speed);
+                cpu.animationProcessor.addAnimationTask(task, speed);
+                cpu.animationProcessor.addAnimationTask(task2, speed);
+                cpu.animationProcessor.addAnimationTask(task3, speed);
+                cpu.animationProcessor.addAnimationTask(task4, speed);
+                cpu.animationProcessor.addAnimationTask(task5, speed);
 
                 break;
         }

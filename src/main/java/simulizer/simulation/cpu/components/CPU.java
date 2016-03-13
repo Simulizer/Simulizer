@@ -204,7 +204,7 @@ public class CPU {
 	 * @param m
 	 *            the message to send
 	 */
-	protected void sendMessage(Message m) {
+	public void sendMessage(Message m) {
 		this.messageManager.sendMessage(m);
 	}
 
