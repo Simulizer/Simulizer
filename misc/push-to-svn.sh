@@ -3,6 +3,11 @@
 cd ..
 SVNREPO=../A4
 
+# Delete everything (other than hidden files) from the svn repo
+cd ${SVNREPO}
+ls | xargs rm -rf
+cd -
+
 echo "Copying files to ${SVNREPO} ..."
 for f in $(git ls-tree -r master --name-only); do
   cp --parents ${f} ${SVNREPO}
