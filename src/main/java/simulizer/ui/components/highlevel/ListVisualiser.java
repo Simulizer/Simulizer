@@ -6,6 +6,8 @@ import java.util.Observable;
 import java.util.Queue;
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.VPos;
@@ -14,15 +16,16 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Pair;
+import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class ListVisualiser extends DataStructureVisualiser {
 	private Canvas canvas = new Canvas();
+	private List<Long> list;
 	private ListModel model;
 
-	private final Queue<Pair<Integer, Integer>> swaps = new LinkedList<>();
+	private final Queue<ListModel.Action> actionQueue = new LinkedList<>();
 	private boolean animating = false;
 	private int animatedItemIndex;
 	private DoubleProperty animatedItemX = new SimpleDoubleProperty();
@@ -51,6 +54,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	public ListVisualiser(ListModel model, HighLevelVisualisation vis) {
 		super(model, vis);
 		this.model = model;
+		list = model.getList();
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
@@ -65,17 +69,57 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-
-		if (obj != null) {
-			swaps.add((Pair<Integer, Integer>) obj);
-
-			// runAnimations();
+		if (obj == null) {
+			list = model.getList();
+		} else if (obj instanceof ListModel.Swap) {
+			actionQueue.add((ListModel.Swap) obj);
+			runAnimations();
+		} else if (obj instanceof ListModel.Marker) {
+			// TODO: Render Markers
+		} else if (obj instanceof ListModel.Emphasise) {
+			// TODO: Render Emphasise
 		}
-
 		repaint();
+	}
+
+	private void runAnimations() {
+		if (animating)
+			return;
+		else {
+			ListModel.Action action = actionQueue.poll();
+
+			// Currently only swaps are implemented
+			if (!(action instanceof ListModel.Swap))
+				return;
+
+			ListModel.Swap swap = (ListModel.Swap) action;
+
+			Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.3), e -> {
+				// Apply Update
+				Long temp = list.get(swap.a);
+				list.set(swap.a, list.get(swap.b));
+				list.set(swap.b, temp);
+
+				animating = false;
+				repaint();
+
+				if (actionQueue.isEmpty()) {
+					timer.stop();
+					System.out.println("List animation timer stopped");
+				} else
+					runAnimations();
+			}));
+
+			timeline.setCycleCount(1);
+			timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
+
+			timer.start();
+			timeline.play();
+
+			animating = true;
+		}
 	}
 
 	@Override
@@ -95,8 +139,6 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawList(GraphicsContext gc) {
-		List<Long> list = model.getList();
-
 		for (int i = 0; i < list.size(); ++i) {
 			drawBorderedRectangle(gc, Color.SKYBLUE, getX(i), y0, rectLength, rectLength);
 

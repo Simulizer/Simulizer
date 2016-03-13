@@ -92,75 +92,73 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private void runAnimations() {
 		if (animating)
 			return;
-		else {
-			Pair<Integer, Integer> move = moves.poll();
+		Pair<Integer, Integer> move = moves.poll();
 
-			int startPeg = move.getKey();
-			int numDiscs = model.getNumDiscs();
-			int endPeg = move.getValue();
+		int startPeg = move.getKey();
+		int numDiscs = model.getNumDiscs();
+		int endPeg = move.getValue();
 
-			int numDiscsOnStart = pegs.get(startPeg).size();
-			int numDiscsOnEnd = pegs.get(endPeg).size();
+		int numDiscsOnStart = pegs.get(startPeg).size();
+		int numDiscsOnEnd = pegs.get(endPeg).size();
 
-			animatedDiscIndex = pegs.get(move.getKey()).peek();
-			this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, numDiscs);
+		animatedDiscIndex = pegs.get(move.getKey()).peek();
+		this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, numDiscs);
 
-			double startX = getPegX(startPeg) - animatedDiscWidth / 2;
-			double startY = getDiscY(numDiscsOnStart);
+		double startX = getPegX(startPeg) - animatedDiscWidth / 2;
+		double startY = getDiscY(numDiscsOnStart);
 
-			double upX = startX;
-			double upY = pegY0 - canvas.getHeight() / 10;
+		double upX = startX;
+		double upY = pegY0 - canvas.getHeight() / 10;
 
-			double shiftX = getPegX(endPeg) - animatedDiscWidth / 2;
-			double shiftY = upY;
+		double shiftX = getPegX(endPeg) - animatedDiscWidth / 2;
+		double shiftY = upY;
 
-			double endX = shiftX;
-			double endY = getDiscY(numDiscsOnEnd);
+		double endX = shiftX;
+		double endY = getDiscY(numDiscsOnEnd);
 
-			animatedDiscX.set(startX);
-			animatedDiscY.set(startY);
+		animatedDiscX.set(startX);
+		animatedDiscY.set(startY);
 
-			// @formatter:off
-			Timeline timeline = new Timeline(
-				new KeyFrame(Duration.seconds(0),
-					new KeyValue(animatedDiscX, startX),
-					new KeyValue(animatedDiscY, startY)
-				),
-				new KeyFrame(Duration.seconds(0.5),
-					new KeyValue(animatedDiscX, upX),
-					new KeyValue(animatedDiscY, upY)
-				),
-				new KeyFrame(Duration.seconds(0.8),
-					new KeyValue(animatedDiscX, shiftX),
-					new KeyValue(animatedDiscY, shiftY)
-				),
-				new KeyFrame(Duration.seconds(1.3),
-					e -> {
-						// Apply Update
-						pegs.get(endPeg).push(pegs.get(startPeg).pop());
-						
-						animating = false;
-						repaint();
+		// @formatter:off
+		Timeline timeline = new Timeline(
+			new KeyFrame(Duration.seconds(0),
+				new KeyValue(animatedDiscX, startX),
+				new KeyValue(animatedDiscY, startY)
+			),
+			new KeyFrame(Duration.seconds(0.5),
+				new KeyValue(animatedDiscX, upX),
+				new KeyValue(animatedDiscY, upY)
+			),
+			new KeyFrame(Duration.seconds(0.8),
+				new KeyValue(animatedDiscX, shiftX),
+				new KeyValue(animatedDiscY, shiftY)
+			),
+			new KeyFrame(Duration.seconds(1.3),
+				e -> {
+					// Apply Update
+					pegs.get(endPeg).push(pegs.get(startPeg).pop());
+					
+					animating = false;
+					repaint();
 
-						if (moves.isEmpty()) {
-							timer.stop();
-							System.out.println("Hanoi animation timer stopped");
-						}
-						else runAnimations();
-					},
-					new KeyValue(animatedDiscX, endX),
-					new KeyValue(animatedDiscY, endY)
-				)
-			);
-			// @formatter:on
-			timeline.setCycleCount(1);
-			timeline.setRate(moves.size() + 1); // TODO: Be more accurate
+					if (moves.isEmpty()) {
+						timer.stop();
+						System.out.println("Hanoi animation timer stopped");
+					}
+					else runAnimations();
+				},
+				new KeyValue(animatedDiscX, endX),
+				new KeyValue(animatedDiscY, endY)
+			)
+		);
+		// @formatter:on
+		timeline.setCycleCount(1);
+		timeline.setRate(moves.size() + 1); // TODO: Be more accurate
 
-			timer.start();
-			timeline.play();
+		timer.start();
+		timeline.play();
 
-			animating = true;
-		}
+		animating = true;
 	}
 
 	@Override

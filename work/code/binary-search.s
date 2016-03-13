@@ -38,7 +38,7 @@ main:
  # @{ startAddress = $a0.get() }@
  # @{ if(startAddress == -1) ret() // no elements }@
  # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get())) }@
- # @{ vis.show()   }@
+ # @{ l.show()     }@
  # @{ setSpeed(15) }@
 
     jal read_and_search
@@ -172,7 +172,8 @@ binary_search:
     li $t0, -1
     beq $a1, $t0 binary_search_NOT_FOUND
 
-nop # @{ l.setMarkers(addressToIndex($a1.get()), addressToIndex($a2.get())) }@
+nop # @{ l.setMarkers("Left", addressToIndex($a1.get())) }@
+    # @{ l.setMarkers("Right", addressToIndex($a2.get())) }@
 
     # no other calls are made so no need to store registers on the stack
 
