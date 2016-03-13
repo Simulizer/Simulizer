@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -26,6 +27,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.FileUtils;
 import simulizer.utils.SpimRunner;
 import simulizer.utils.UIUtils;
 
@@ -39,6 +41,25 @@ public class MainMenuBar extends MenuBar {
 
 	private WindowManager wm;
 
+	private Menu createButton(String imagePath, boolean disable, String tooltip, EventHandler<ActionEvent> onClick) {
+		Menu menu = new Menu();
+		Button button = new Button();
+
+		button.setGraphic(new ImageView(new Image(FileUtils.getResourcePath(imagePath))));
+
+		menu.setGraphic(button);
+		menu.setStyle("-fx-padding:1px;-fx-background-color:null;");
+		button.setAlignment(Pos.CENTER);
+
+		button.setStyle("-fx-padding:0px;-fx-background-radius:5em;");
+		button.setPadding(new Insets(1, 1, 1, 1));
+		button.setDisable(disable);
+		button.setTooltip(new Tooltip(tooltip));
+		button.setOnAction(onClick);
+
+		return menu;
+	}
+
 	/**
 	 * Creates a new MainMenuBar
 	 * 
@@ -47,7 +68,43 @@ public class MainMenuBar extends MenuBar {
 	 */
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu());
+
+		final CPU cpu = wm.getCPU();
+
+		Menu spacer = new Menu("");
+		spacer.setDisable(true);
+		spacer.setStyle("-fx-padding: 0px 0px 0px 50px");
+
+		Menu play = createButton(
+			"/img/play.png", cpu.isRunning(),
+			"Simulation > Assemble And Run",
+			(e) -> {
+				if (!cpu.isRunning()) {
+					UIUtils.showAssemblingDialog(cpu);
+					wm.assembleAndRun();
+				}
+			}
+		);
+
+		Menu pause = createButton(
+				"/img/pause.png", cpu.isRunning(),
+				"Simulation > Pause / Resume",
+				(e) -> {
+					if (!cpu.getClock().isRunning() && cpu.isRunning())
+						cpu.resume();
+					else if (cpu.getClock().isRunning() && cpu.isRunning())
+						cpu.pause();
+				}
+		);
+
+
+
+
+
+        getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(),
+                layoutsMenu(), helpMenu(), debugMenu(), spacer,
+				play, pause);
+
 	}
 
 	/**
@@ -249,7 +306,7 @@ public class MainMenuBar extends MenuBar {
 		pauseResume.setAccelerator(new KeyCodeCombination(KeyCode.F6));
 		pauseResume.setOnAction(e -> {
 			if (!clock.isRunning() && cpu.isRunning())
-				wm.getCPU().resume();
+				cpu.resume();
 			else if (clock.isRunning() && cpu.isRunning())
 				cpu.pause();
 		});

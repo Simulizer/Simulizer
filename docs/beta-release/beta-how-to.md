@@ -1,4 +1,4 @@
-![](../../src/main/resources/SimulizerLogo.png)
+![](../../src/main/resources/img/SimulizerLogo.png)
 
 # How to guide and suggested tasks #
 

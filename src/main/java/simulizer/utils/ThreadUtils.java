@@ -18,7 +18,7 @@ public class ThreadUtils {
 	 * based on: http://www.guigarage.com/2013/01/invokeandwait-for-javafx/
 	 * @param r the runnable to run in a JavaFX thread
 	 */
-	public static void platformRunAndWait(final Runnable r) throws InterruptedException, ExecutionException {
+	public static void platformRunAndWait(final Runnable r) throws Throwable {
 		if(Platform.isFxApplicationThread()) {
 			try {
 				r.run();
@@ -52,7 +52,7 @@ public class ThreadUtils {
 
 				if(ex[0] != null) {
 					// re-throw exception from the runLater thread
-					throw new ExecutionException(ex[0]);
+					throw ex[0];
 				}
 			} finally {
 				lock.unlock();

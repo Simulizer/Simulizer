@@ -1,6 +1,10 @@
 package simulizer.utils;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Wrappers for accessing files including bundled resources
@@ -39,6 +43,30 @@ public class FileUtils {
 			UIUtils.showExceptionDialog(e);
 		}
 	}
+
+	/**
+	 * Get the real path of a bundled resource
+	 * @param path A path relative to src/main/resources. Note: the path MUST start with '/'
+	 */
+	public static String getResourcePath(String path) {
+		assert path.charAt(0) == '/'; // must start with a slash
+		try {
+			return FileUtils.class.getResource(path).toURI().toString();
+		} catch (Exception e) {
+			UIUtils.showExceptionDialog(e);
+			return "";
+		}
+	}
+	public static String getResourceToExternalForm(String path) {
+		assert path.charAt(0) == '/'; // must start with a slash
+		try {
+			return FileUtils.class.getResource(path).toExternalForm();
+		} catch (Exception e) {
+			UIUtils.showExceptionDialog(e);
+			return "";
+		}
+	}
+
 
 	/**
 	 * get the content of a bundled resource. This is not built in...

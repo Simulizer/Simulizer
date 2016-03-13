@@ -24,6 +24,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import simulizer.Simulizer;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.components.AssemblingDialog;
 
@@ -50,6 +51,13 @@ public class UIUtils {
 		assemblingDialog = null;
 	}
 
+	// from http://stackoverflow.com/a/27983567
+	// it is OK if the icon is null, will reset to default icon
+	private static void setDialogBoxIcon(Alert alert) {
+		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(Simulizer.getIcon());
+	}
+
 	public static void showErrorDialog(String title, String message) {
 		showErrorDialog(title, title, message);
 	}
@@ -60,6 +68,7 @@ public class UIUtils {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setTitle(title);
+			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
 			alert.setContentText(StringUtils.wrapToWidth(message, 45));
 			alert.show();
@@ -76,6 +85,7 @@ public class UIUtils {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle(title);
+			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
 			alert.setContentText(StringUtils.wrapToWidth(message, 45));
 			alert.show();
@@ -128,6 +138,7 @@ public class UIUtils {
 				try {
 					Alert alert = new Alert(Alert.AlertType.ERROR);
 					alert.setTitle("Exception");
+					setDialogBoxIcon(alert);
 					alert.setHeaderText("Something went wrong with Simulizer.");
 					alert.setContentText("The details of the problem are below.\nPlease contact the developers with this information:");
 					alert.getDialogPane().setPrefSize(720, 480);
@@ -171,6 +182,7 @@ public class UIUtils {
 	public static boolean confirm(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setTitle("Confirmation");
+		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 
@@ -181,6 +193,7 @@ public class UIUtils {
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setTitle("Confirmation");
+		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 
