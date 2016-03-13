@@ -1,0 +1,40 @@
+{
+  "name": "Coding.json",
+  "windows": [
+    {
+      "id": "LABELS",
+      "x": 0.8,
+      "y": 0.5,
+      "width": 0.2,
+      "height": 0.5
+    },
+    {
+      "id": "EDITOR",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.6,
+      "height": 1.0
+    },
+    {
+      "id": "LOGGER",
+      "x": 0.6,
+      "y": 0.5,
+      "width": 0.2,
+      "height": 0.5
+    },
+    {
+      "id": "SYSCALL_REFERENCE",
+      "x": 0.8,
+      "y": 0.0,
+      "width": 0.2,
+      "height": 0.5
+    },
+    {
+      "id": "INSTRUCTION_REFERENCE",
+      "x": 0.6,
+      "y": 0.0,
+      "width": 0.2,
+      "height": 0.5
+    }
+  ]
+}

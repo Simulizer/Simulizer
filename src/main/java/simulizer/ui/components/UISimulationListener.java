@@ -74,7 +74,6 @@ public class UISimulationListener extends SimulationListener {
 					System.out.println("Average time per tick: " + (duration / ticks) + " ms");
 				}
 
-				wm.getWorkspace().openEditorWithCallback(Editor::editMode);
 				final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
 				if (e != null) {
 					Platform.runLater(e::editMode);
