@@ -5,7 +5,7 @@ VERSION=0.01
 
 # Generate the jar
 cd ..
-# gradle deploymentJar
+gradle deploymentJar
 
 # Copy the jar to a build directory
 mkdir ${BUILD_DIR}
