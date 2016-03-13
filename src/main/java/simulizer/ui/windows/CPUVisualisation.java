@@ -29,7 +29,7 @@ public class CPUVisualisation extends InternalWindow {
 	public CPUVisualisation() {
         width = 530;
         height = 415;
-        pane = new Pane();
+        pane = getContentPane();
         pane.setPrefWidth(width);
         pane.setMinWidth(width);
         pane.setMaxWidth(width);
@@ -38,7 +38,6 @@ public class CPUVisualisation extends InternalWindow {
         pane.setMaxHeight(height);
         setMinWidth(width);
         setMinHeight(getMinimalHeight());
-		getChildren().add(pane);
 		drawVisualisation();
 		pane.setCache(true);
 		pane.setCacheHint(CacheHint.SPEED);
@@ -197,7 +196,8 @@ public class CPUVisualisation extends InternalWindow {
 	 * @param simCpu The simulated cpu
 	 */
 	public void attachCPU(simulizer.simulation.cpu.components.CPU simCpu) {
-		cpuListener = new CPUListener(cpu, simCpu, this);
+		cpuListener = new CPUListener(cpu, simCpu, this, cpu.animationProcessor);
+		cpu.animationProcessor.setCpuListener(cpuListener);
 		simCpu.registerListener(cpuListener);
 	}
 }

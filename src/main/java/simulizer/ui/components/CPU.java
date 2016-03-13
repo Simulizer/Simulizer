@@ -10,6 +10,8 @@ import simulizer.ui.components.cpu.*;
 import simulizer.ui.windows.CPUVisualisation;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Represents a visualised CPU
@@ -61,11 +63,15 @@ public class CPU {
     public ConnectorWire registerToALU2;
     public ConnectorWire codeMemoryToIR;
 
+    public InstructionsWindow previousInstructions;
+
     public Group generalWires;
     public Group allItems;
     public Group components;
 
     public GeneralComponent info;
+
+    public AnimationProcessor animationProcessor;
 
     /**
      * Sets up the CPU
@@ -77,6 +83,7 @@ public class CPU {
         this.width = width;
         this.height = height;
         this.vis = vis;
+        this.animationProcessor = new AnimationProcessor();
     }
 
     /**
@@ -84,12 +91,12 @@ public class CPU {
      * @param text The text to show
      * @param time How long the caption should be displayed
      */
-    public void showText(String text, int time){
+    public void showText(String text, double time){
         if(time < 500) return;
         Platform.runLater(() -> {
 
-			int fadeTime = time / 4;
-			int delayTime = time / 2;
+            double fadeTime = time / 4;
+            double delayTime = time / 2;
 			info.setLabel(text);
 			FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
 			ft.setFromValue(0);
@@ -110,7 +117,7 @@ public class CPU {
 						fo.play();
 					});
 				}
-			}, delayTime));
+			}, (int) delayTime));
 		});
     }
 
@@ -139,6 +146,8 @@ public class CPU {
         shiftLeft = new GeneralComponent(vis, "<");
         adder = new ALU(vis, "+");
         shiftLeftIR = new GeneralComponent(vis, "<");
+
+        previousInstructions = new InstructionsWindow();
 
         controlUnit.setTooltip("The control unit (CU) is a component of a computer's central processing unit (CPU) that directs operation of the processor. It tells the computer's memory, arithmetic/logic unit and input and output devices how to respond to a program's instructions.");
 
@@ -230,7 +239,7 @@ public class CPU {
         components.getChildren().addAll(register, instructionMemory, alu, mainMemory, programCounter, ir, plusFour, signExtender, shiftLeft, adder, muxAdder, shiftLeftIR);
 
         allItems = new Group();
-        allItems.getChildren().addAll(components, generalWires, complexWires, info);
+        allItems.getChildren().addAll(components, generalWires, complexWires, info, previousInstructions);
         vis.add(allItems);
     }
 
@@ -254,6 +263,7 @@ public class CPU {
         plusFour.setAttrs(width * 0.415, height * 0.32, width * 0.04, height * 0.1);
         shiftLeftIR.setAttrs(width * 0.48, height * 0.40, width * 0.02, height * 0.07);
         info.setAttrs(width * 0.06, height * 0.09, width * 0.88, height * 0.1);
+        previousInstructions.setAttrs(0 - 15, height * 0.78, width * 0.33, height * 0.22 + 5);
 
         ObservableList<Node> wires = generalWires.getChildren();
 
@@ -367,28 +377,9 @@ public class CPU {
     }
 
     /**
-     * Closes all the threads for the wires
+     * Shutsdown the executor service and task
      */
     public void closeAllThreads(){
-        PCToIM.closeThread();
-        aluToMemory.closeThread();
-        codeMemoryToIR.closeThread();
-    	registerToALU1.closeThread();
-    	registerToALU2.closeThread();
-        irToRegister1.closeThread();
-        irToRegister2.closeThread();
-        irToRegister3.closeThread();
-        pcToPlusFour.closeThread();
-        muxToPC.closeThread();
-        plusFourToMux.closeThread();
-        signExtenderToShift.closeThread();
-        shiftToAdder.closeThread();
-        plusFourToAdder.closeThread();
-        muxToPC.closeThread();
-        irToSignExtender.closeThread();
-        signExtenderToALU.closeThread();
-        dataMemoryToRegisters.closeThread();
-        aluToRegisters.closeThread();
-        aluToMux.closeThread();
+        animationProcessor.shutdown();
     }
 }

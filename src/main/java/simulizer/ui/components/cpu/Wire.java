@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Represnts a wire in the cpu visualisation
+ * Represents a wire in the cpu visualisation
  */
 public class Wire extends Group {
 
@@ -27,7 +27,7 @@ public class Wire extends Group {
 	Polyline arrowHead;
 	Type type;
 	Path path;
-	int time;
+	double time;
 	Double progressed = 0.0;
 	boolean animating;
 	boolean reverse;
@@ -109,7 +109,7 @@ public class Wire extends Group {
 	 * Animates data along the wire
 	 * @param animTime The time for the animation to complete in
      */
-	public void animateData(int animTime) {
+	public void animateData(double animTime) {
 		Platform.runLater(() -> {
 			animating = true;
 			PathTransition pathTransition = new PathTransition();
@@ -127,7 +127,6 @@ public class Wire extends Group {
 			pathTransition.setAutoReverse(false);
 
 			data.setCache(true);
-			data.toFront();
 
 			getChildren().add(data);
 			pathTransition.play();
@@ -143,10 +142,4 @@ public class Wire extends Group {
 		});
 	}
 
-	/**
-	 * Closes the thread
-	 */
-	public void closeThread() {
-
-	}
 }
