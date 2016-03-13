@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
+import simulizer.lowlevel.models.PipelineHistoryModel;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.simulation.messages.PipelineStateMessage;
@@ -44,6 +45,13 @@ public class UISimulationListener extends SimulationListener {
 
 					editor.executeMode();
 				});
+
+				// Clear the pipeline model when a new simulation starts
+				PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
+				if (pipelineView != null) {
+					PipelineHistoryModel pipelineModel = pipelineView.getModel();
+					if (pipelineModel != null) pipelineModel.clear();
+				}
 			}
 				break;
 			case SIMULATION_INTERRUPTED: {
@@ -118,7 +126,7 @@ public class UISimulationListener extends SimulationListener {
 		// TODO have the model in a central place so that the view
 		// can sync up with it when it opens.
 		PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
-		if (pipelineView != null) {
+		if (pipelineView != null && wm.getCPU().isPipelined()) {
 			pipelineView.getModel().processPipelineStateMessage(m);
 		}
 	}
