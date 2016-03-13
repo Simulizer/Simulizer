@@ -45,6 +45,42 @@ Requirements
 
 **How it will be tested**: Test various programs specifying different high-level visualisations and check that these are shown and hidden at the correct times.
 
+### Requirement 4.2.3.a
+**Description**: The visualisation will display and simulate the following components of our abstract CPU: Program counter, Arithmetic and Logic Unit, Instruction register, Load/store unit, General purpose registers, Simplified buses, Simplified memory.
+
+**How it will be tested**: Checking that the CPU visualisation window always shows these components even after resizing, closing then re-opening, etc.
+
+### Requirement 4.2.3.b
+**Description**: The components of the CPU, when selected, will display a description of the purpose/use of that particular component.
+
+**How it will be tested**: By hovering over each component of the CPU and checking that it shows an appropriate tooltip. The tooltips should not be displayed while the CPU is running.
+
+### Requirement 4.2.3.c
+**Description**: The visualisation will animate the transportation of data/instructions throughout the processor during execution. This will be primarily through the activity of buses.
+
+**How it will be tested**: Run various small programs with the CPU visualisation window open and check that the data flow is represented between the expected components etc.
+
+### Requirement 4.2.3.d
+**Description**: The visualisation will contain abstractions to provide a clearer description of the features we deemed more important, e.g. a collection of related buses will be shown as a single connection between components.
+
+**How it will be tested**: Comparing a complex diagram of a CPU to our own.
+
+### Requirement 4.2.3.e
+**Description**: The visualisation, including animations, will be synchronised with the internal clock of the simulation. The animations will adaptable depending on what is feasible given the clock speed.
+
+**How it will be tested**: Similar to requirement 4.1.3.e, we can check that the data flow corresponds to the current instruction, and that they change speed accordingly to the clock speed.
+
+### Requirement 4.2.3.f
+**Description**: The visualisation can be played, paused, and the user will have the option to step forward tick by tick.
+
+**How it will be tested**: Test that the visualisation only updates when the user either presses play or steps forward, and check that the visualisation is static when the user pauses.
+
+### Requirement 4.2.3.g
+**Description**: The program will be run using a pipeline superscalar architecture, executing a MIPS-compatible RISC instruction set with significantly fewer instructions. The system will not use speculative execution.
+
+**How it will be tested**: ?
+
+
 
 Dummy appendix
 --------------
