@@ -1,9 +1,6 @@
 package simulizer.ui.windows;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 import javafx.application.Platform;
 import javafx.geometry.VPos;
@@ -25,7 +22,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Instruction;
+import simulizer.assembler.representation.Statement;
 import simulizer.lowlevel.models.PipelineHistoryModel;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -86,13 +86,11 @@ public class PipelineView extends InternalWindow implements Observer {
 		cycleInput.setPrefColumnCount(5);
 		cycleInput.setPromptText("Cycle no.");
 		cycleInput.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-			if (e.getCode() == KeyCode.ENTER) {
-				if (cycleInput.getText().isEmpty()) return;
-				else {
-					setStartCycle(Integer.valueOf(cycleInput.getText()));
-					repaint();
-					Platform.runLater(() -> cycleInput.setText(""));
-				}
+			if (e.getCode() == KeyCode.ENTER
+					&& !cycleInput.getText().isEmpty()) {
+				setStartCycle(Integer.valueOf(cycleInput.getText()));
+				repaint();
+				Platform.runLater(() -> cycleInput.setText(""));
 			}
 		});
 
@@ -167,21 +165,27 @@ public class PipelineView extends InternalWindow implements Observer {
 			double yTop = rectGap / 2;
 
 			List<Address> before = state.before;
-			for (int i = 0; i < before.size(); ++i) {
-				if (y >= yTop && y < yTop + rectWidth) return before.get(i);
-				else yTop += rectGap + rectWidth;
+			for (Address addr : before) {
+				if (y >= yTop && y < yTop + rectWidth)
+					return addr;
+				else
+					yTop += rectGap + rectWidth;
 			}
 
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
-			for (int i = 0; i < pipeline.size(); ++i) {
-				if (y >= yTop && y < yTop + rectWidth) return pipeline.get(i);
-				else yTop += rectGap + rectWidth;
+			for (Address stage : pipeline) {
+				if (y >= yTop && y < yTop + rectWidth)
+					return stage;
+				else
+					yTop += rectGap + rectWidth;
 			}
 
 			List<Address> after = state.after;
-			for (int i = 0; i < after.size(); ++i) {
-				if (y >= yTop && y < yTop + rectWidth) return after.get(i);
-				else yTop += rectGap + rectWidth;
+			for (Address addr : after) {
+				if (y >= yTop && y < yTop + rectWidth)
+					return addr;
+				else
+					yTop += rectGap + rectWidth;
 			}
 		}
 
@@ -276,12 +280,12 @@ public class PipelineView extends InternalWindow implements Observer {
 			double xCenter = (col + 0.5) * cycleWidth;
 			double xLeft = xCenter - rectWidth / 2;
 
-			for (int a = 0; a < before.size(); ++a) {
-				gc.setFill(getColor(before.get(a)));
+			for (Address addr : before) {
+				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
 				gc.setFill(Color.BLACK);
-				gc.fillText(getShortName(before.get(a)), xCenter, yCenter);
+				gc.fillText(getShortName(addr), xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -327,12 +331,12 @@ public class PipelineView extends InternalWindow implements Observer {
 			double xCenter = (col + 0.5) * cycleWidth;
 			double xLeft = xCenter - rectWidth / 2;
 
-			for (int a = 0; a < after.size(); ++a) {
-				gc.setFill(getColor(after.get(a)));
+			for (Address addr : after) {
+				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
 				gc.setFill(Color.BLACK);
-				gc.fillText(getShortName(after.get(a)), xCenter, yCenter);
+				gc.fillText(getShortName(addr), xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -392,20 +396,30 @@ public class PipelineView extends InternalWindow implements Observer {
 		// TODO don't check for null
 		if (address == null) return "null";
 
-		String s = Long.toHexString(address.getValue());
-		return s.length() > 3 ? s.substring(s.length() - 3) : s;
+		String hex = address.toString();
+		return hex.substring(Math.max(0, hex.length()-3));
 	}
 
 	private String getInfo(Address address) {
-		// @formatter:off
-		String svar =
-			"Short name: " + getShortName(address) + "\n" +
-			"Address value: " + address.getValue() + "\n" +
-			"Instruction type: dunno\n" +
-			"Operand: dunno\n" +
-			"Line number: dunno\n";
-		// @formatter:on
-		return svar;
+		//TODO: make popup monospaced and line the fields up
+
+		CPU cpu = getWindowManager().getCPU();
+		Map<Address, Statement> textSegment = cpu.getProgram().textSegment;
+
+		if(textSegment.containsKey(address)) {
+			Statement s = textSegment.get(address);
+			int lineNum = cpu.getProgram().lineNumbers.getOrDefault(address, -1);
+
+			return "" +
+					"Statement: " + s + "\n" +
+					"Address: " + address + "\n" +
+					"Instruction type: " + s.getInstruction() + "\n" + //TODO: (matt) working on it...
+					"Line number: " + lineNum + "\n";
+		} else {
+			return "" +
+					"Address: " + address + "\n" +
+					"Does not point to an instruction";
+		}
 	}
 
 }

@@ -31,13 +31,18 @@ public abstract class Operand {
             case Address:
                 AddressOperand ao = asAddressOp();
                 String l = ao.labelName.isPresent() ? ao.labelName.get() : "";
-                String c = ao.constant.isPresent() ? ao.constant.get().toString() : "";
+                String c = "";
+                if(ao.constant.isPresent()) {
+                    int v = ao.constant.get();
+                    c += Integer.signum(v) == -1 ? '-' : '+';
+                    c += Integer.toString(v);
+                }
                 String r = ao.register.isPresent() ? "($" + ao.register.get().toString() + ")" : "";
                 value =  l + c + r;
                 break;
             case Register: value = "$" + asRegisterOp().value.toString(); break;
         }
-        return "Operand(" + getType() + ": " + value + ")";
+        return value;
     }
 
     public AddressOperand  asAddressOp() { return null; }

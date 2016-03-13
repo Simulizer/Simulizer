@@ -26,7 +26,7 @@ public class Statement {
         String opString = operandList.stream()
             .map(Operand::toString)
             .collect(Collectors.joining(", "));
-        return "Statement(" + instruction + ", " + opString + ")";
+        return instruction + " " + opString;
     }
 
     public Instruction getInstruction() {

@@ -49,7 +49,7 @@ public class WindowManager extends GridPane {
 
 	private Set<CPUChangedListener> cpuChangedListeners = new HashSet<>();
 	private CPU cpu = null;
-	private LoggerIO io;
+	private final LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private AnnotationManager annotationManager;

@@ -19,7 +19,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return "Address(0x" + Integer.toHexString(value) + ")";
+		return "0x" + Integer.toHexString(value).toUpperCase();
     }
 
     @Override
