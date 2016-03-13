@@ -137,6 +137,8 @@ public class CPU {
 			isRunning = false;
 			io.cancelRead();
 			clock.stop();
+			// make sure the simulation stopped message is the very last message
+			messageManager.waitForAllRunningTasks();
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
 		}
 	}

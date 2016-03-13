@@ -88,6 +88,8 @@ public class MessageManager {
 	}
 
 	public void waitForCrucialTasks() {
+		tasks.removeIf(Future::isDone);
+
 		for(SimulationListener l : listeners) {
 			if(l.criticalProcesses.intValue() != 0) {
 
@@ -114,12 +116,14 @@ public class MessageManager {
 
 	public void waitForAllRunningTasks() {
 		for(Future t : tasks) {
-			try {
-				t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				UIUtils.showExceptionDialog(e);
+			if(!t.isDone()) {
+				try {
+					t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					UIUtils.showExceptionDialog(e);
+				}
+				t.cancel(true);
 			}
-			t.cancel(true);
 		}
 
 		tasks.clear();
