@@ -263,7 +263,7 @@ public class CPU {
         plusFour.setAttrs(width * 0.415, height * 0.32, width * 0.04, height * 0.1);
         shiftLeftIR.setAttrs(width * 0.48, height * 0.40, width * 0.02, height * 0.07);
         info.setAttrs(width * 0.06, height * 0.09, width * 0.88, height * 0.1);
-        previousInstructions.setAttrs(0 - 15, height * 0.78, width * 0.33, height * 0.22 + 5);
+        previousInstructions.setAttrs(0 - (width * 0.02), height * 0.78, width * 0.33, height * 0.24);
 
         ObservableList<Node> wires = generalWires.getChildren();
 

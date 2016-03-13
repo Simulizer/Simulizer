@@ -95,7 +95,6 @@ public class CPUVisualisation extends InternalWindow {
      */
 	public void setPaneWidth(double width) {
 		pane.setPrefWidth(width);
-		pane.setMinWidth(width);
 		pane.setMaxWidth(width);
 	}
 
@@ -105,7 +104,6 @@ public class CPUVisualisation extends InternalWindow {
      */
 	public void setPaneHeight(double height) {
 		pane.setPrefHeight(height);
-		pane.setMinHeight(height);
 		pane.setMaxHeight(height);
 	}
 
