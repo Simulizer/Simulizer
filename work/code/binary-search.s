@@ -1,7 +1,7 @@
 # binary search
 # enter numbers in ascending order, using 0 as an end marker
 # @{ var l = vis.load('list', false) }@
-
+# @{ sim.setSpeed(2000) }@
 # @{ var startAddress = null }@
 # @{ function addressToIndex(addr) { return (addr - startAddress) / 4; } }@
 

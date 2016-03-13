@@ -16,7 +16,7 @@ main:
 nop # @{ startAddress = $v0.get() }@
     # @{ if($v1.get() == -1) ret() // no elements }@
     # @{ l.setList(simulation.readUnsignedWordsFromMem($v1.get(), $v1.get()+4*($v0.get()-1))) }@
-    # @{ vis.show()    }@
+    # @{ l.show()     }@
     # @{ setSpeed(10) }@
 
 

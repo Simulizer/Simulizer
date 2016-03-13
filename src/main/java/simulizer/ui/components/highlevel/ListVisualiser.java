@@ -64,15 +64,14 @@ public class ListVisualiser extends DataStructureVisualiser {
 		repaint();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings("unchecked")
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
 
 		if (obj != null) {
 			swaps.add((Pair<Integer, Integer>) obj);
 
-			model.step();
 			// runAnimations();
 		}
 
@@ -81,7 +80,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void repaint() {
-		if (model.size() == 0) return;
+		if (model.size() == 0)
+			return;
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		final double width = canvas.getWidth();
@@ -95,7 +95,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawList(GraphicsContext gc) {
-		List<Object> list = model.getList();
+		List<Long> list = model.getList();
 
 		for (int i = 0; i < list.size(); ++i) {
 			drawBorderedRectangle(gc, Color.SKYBLUE, getX(i), y0, rectLength, rectLength);
@@ -105,7 +105,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 			gc.setTextAlign(TextAlignment.CENTER);
 			gc.setFont(new Font("Arial", 55));
 			gc.setFill(Color.BLACK);
-			gc.fillText(list.get(i).toString(), getX(i) + rectLength/2, y0 + rectLength / 2);
+			gc.fillText(list.get(i).toString(), getX(i) + rectLength / 2, y0 + rectLength / 2);
 		}
 	}
 
