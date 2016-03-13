@@ -250,6 +250,7 @@ public class CPUPipeline extends CPU {
 		if(needToBubbleRAWReg) {//got bubbling slightly wrong with RAW, need to add this to fix
 			decodeAddress = null;
 			this.rawOccured = true;//need to treat raws differently to jump flushes
+			thisInstruction = new Address(thisInstruction.getValue()-4);
 		}
 		
 		Address executeAddress = executingAddress;
