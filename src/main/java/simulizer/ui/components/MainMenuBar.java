@@ -1,14 +1,21 @@
 package simulizer.ui.components;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -75,35 +82,21 @@ public class MainMenuBar extends MenuBar {
 		spacer.setDisable(true);
 		spacer.setStyle("-fx-padding: 0px 0px 0px 50px");
 
-		Menu play = createButton(
-			"/img/play.png", cpu.isRunning(),
-			"Simulation > Assemble And Run",
-			(e) -> {
-				if (!cpu.isRunning()) {
-					UIUtils.showAssemblingDialog(cpu);
-					wm.assembleAndRun();
-				}
+		Menu play = createButton("/img/play.png", cpu.isRunning(), "Simulation > Assemble And Run", (e) -> {
+			if (!cpu.isRunning()) {
+				UIUtils.showAssemblingDialog(cpu);
+				wm.assembleAndRun();
 			}
-		);
+		});
 
-		Menu pause = createButton(
-				"/img/pause.png", cpu.isRunning(),
-				"Simulation > Pause / Resume",
-				(e) -> {
-					if (!cpu.getClock().isRunning() && cpu.isRunning())
-						cpu.resume();
-					else if (cpu.getClock().isRunning() && cpu.isRunning())
-						cpu.pause();
-				}
-		);
+		Menu pause = createButton("/img/pause.png", cpu.isRunning(), "Simulation > Pause / Resume", (e) -> {
+			if (!cpu.getClock().isRunning() && cpu.isRunning())
+				cpu.resume();
+			else if (cpu.getClock().isRunning() && cpu.isRunning())
+				cpu.pause();
+		});
 
-
-
-
-
-        getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(),
-                layoutsMenu(), helpMenu(), debugMenu(), spacer,
-				play, pause);
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu(), spacer, play, pause);
 
 	}
 
@@ -226,7 +219,6 @@ public class MainMenuBar extends MenuBar {
 			Stage wnd = wm.getPrimaryStage();
 			wnd.setFullScreen(!wnd.isFullScreen());
 		});
-
 
 		menu.getItems().addAll(new SeparatorMenuItem(), saveLayoutItem, reloadLayoutItem, fullscreen);
 	}
@@ -405,9 +397,12 @@ public class MainMenuBar extends MenuBar {
 		Menu helpMenu = new Menu("Help");
 
 		MenuItem guide = new MenuItem("Guide");
-		guide.setDisable(true);
 		guide.setOnAction(e -> {
-			// TODO: Open guide.pdf
+			try {
+				Desktop.getDesktop().open(new File("guide.pdf"));
+			} catch (Exception ex) {
+				UIUtils.showExceptionDialog(ex);
+			}
 		});
 
 		MenuItem syscall = new MenuItem("Syscall Reference");
@@ -419,7 +414,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
 		keyBinds.setOnAction(e -> {
 			String url = "https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts";
-			if(!UIUtils.openURL(url)) {
+			if (!UIUtils.openURL(url)) {
 				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
 			}
 		});
