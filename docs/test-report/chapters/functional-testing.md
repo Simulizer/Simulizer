@@ -80,7 +80,75 @@ Requirements
 
 **How it will be tested**: ?
 
+### Requirement 4.3.3.a
+**Description**: The user will only be able to open and save files with the “.s” extension - the extension for MIPS programs.
 
+**How it will be tested**: Click the `File->Open` menu item and check that only `.s` files are shown and only `.s` can be opened.
+
+### Requirement 4.3.3.b
+**Description**: The user will be able to choose between their existing programs they have written for the software (or create new ones), or open demo files bundled with the system.
+
+**How it will be tested**: Check that a `.s` file can be opened from anywhere on the system; that a new blank file can be created; and that the demo files are bundled in suitable folder.
+
+### Requirement 4.3.3.c
+**Description**: The user will be able to save their own programs as well as make updates to the bundled ones.
+
+**How it will be tested**: Test saving the text from a new file to the machine and check that this file actually exists on the machine. Also test that updates performed within the software are reflected on the machine.
+
+### Requirement 4.3.3.d
+**Description**: Syntax highlighting will be present on the assembly code, making code editing a simpler process.
+
+**How it will be tested**: Visual inspection of several programs to ensure the syntax highlighting is accurate. Test real-time syntax highlighting by modifying existing files to ensure the highlighting remains accurate throughout.
+
+### Requirement 4.3.3.e
+**Description**: Line numbers will be shown to help with locating errors identified by the logger.
+
+**How it will be tested**: Visual inspection to ensure line numbers are correct throughout and update when lines are deleted/inserted.
+
+### Requirement 4.3.3.f
+**Description**: The code editor will include a primitive logger/error checker, indicating that there is an error at a particular line number.
+
+**How it will be tested**: Load a program with errors and try to assemble the program. The editor should indicate lines with errors and have a corresponding message.
+
+### Requirement 4.3.3.g
+**Description**: There will be a run button in the code editor, which will parse the code and then, if successful, will start running on the visualiser. If there is already a simulation running, a prompt will be given to request whether the current process should be halted or not.
+
+**How it will be tested**: Try clicking the run button and a dialog should appear informing the user that the code is being parsed and assembled. Once this has finished, the program should start running and any visualisations, e.g. the CPU visualisation should start running.
+
+### Requirement 4.3.3.h
+**Description**: If the user tries to close the code editor having not saved, the system will prompt asking if they wish to save or not.
+
+**How it will be tested**: Try modifying a new file or an existing file and then try to close the program.
+
+### Requirement 4.4.3.a
+**Description**: Provides windows for the major components previously mentioned (code editor, CPU visualiser, data structure visualisation).
+
+**How it will be tested**: Test that each window can be opened from the menu bar.
+
+### Requirement 4.4.3.b
+**Description**: All components in the main window will be reconfigurable with respect to size and positioning. New widgets can be added or removed at the user’s wish.
+
+**How it will be tested**: Resize the main window and check that the internal windows resize relative to their original positions; and check that the various internal windows can be repeatedly be opened/closed and moved to wherever the user wishes.
+
+### Requirement 4.4.3.c
+**Description**: The interface will allow changing of colour schemes by specification of the user, based upon a set of files bundled with the software.
+
+**How it will be tested**: Check that the theme colour scheme of the software changes when the user selects a particular theme, and check that this colour scheme is faithful to the source file for the colour scheme.
+
+### Requirement 4.4.3.d
+**Description**: If the user attempts to close the application while a simulation is running, or the code editor is in use, they will be presented with a prompt confirming whether or not they wish to leave.
+
+**How it will be tested**: Try to close the program while a simulation is running and check that a dialog is shown.
+
+### Requirement 4.4.3.e
+**Description**: The main window will have a menu bar, allowing the user to carry out tasks, such as change colour scheme, open new widgets, open files, exit the system, run code, etc.
+
+**How it will be tested**: Check that each item in the menu bar responds to clicks and performs the expected task.
+
+### Requirement 4.4.3.f
+**Description**: The user will be able to save the current layout of the widgets to an external configuration file, which will be automatically loaded on startup.
+
+**How it will be tested**: Arrange the windows in a random configuration, save the layout, rearrange the windows, then try loading the original layout to check that it orders the windows accordingly.
 
 Dummy appendix
 --------------

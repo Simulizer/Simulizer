@@ -14,6 +14,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -22,6 +23,7 @@ import javafx.scene.layout.Priority;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.FileUtils;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
@@ -49,6 +51,7 @@ public class Logger extends InternalWindow implements Observer {
 	private TextArea[] outputs;
 
 	private boolean emphasise = true;
+	private final ImageView notifyIcon = new ImageView(new Image(FileUtils.getResourcePath("/img/notify.png")));
 
 	public Logger() {
 		setTitle("Program I/O");
@@ -140,7 +143,7 @@ public class Logger extends InternalWindow implements Observer {
 						for (int i = 0; i < outputs.length; i++) {
 							Tab t = tabPane.getTabs().get(i);
 							if (!t.isSelected() && ioChanged[i])
-								t.setGraphic(new ImageView("file:notify.png"));
+								t.setGraphic(notifyIcon);
 							outputs[i].setText(logs[i].toString());
 						}
 					}

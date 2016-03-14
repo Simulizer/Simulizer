@@ -1,16 +1,16 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{mystyle}
-%\usepackage[backend=biber,
-%  style=authoryear,
-%  sorting=nyt,
+%\usepackage[backend=biber, 
+%  style=authoryear, 
+%  sorting=nyt, 
 %  urldate=long,
 %  maxcitenames=2]{biblatex}
 %\addbibresource{main.bib}
 
 \title{
   \includegraphics[width=\textwidth]{segments/SimulizerLogo.png}
-  \huge\textbf{Final Report}
+  \huge\textbf{Test Report}
 }
 \author{
   Charlie Street
@@ -28,20 +28,14 @@
 \begin{document}
 \maketitle
 
-\begin{abstract}
-\noindent\lipsum[1]
-\end{abstract}
-
 % Section files
 \input{chapters/1-introduction.tex}
-\input{chapters/2-note-on-external.tex}
-\input{chapters/3-software-design.tex}
-\input{chapters/4-visualisation-design.tex}
-\input{chapters/5-software-engineering.tex}
-\input{chapters/6-evaluation.tex}
-\input{chapters/7-teamwork.tex}
-\input{chapters/summary.tex}
-\input{chapters/glossary.tex}
+
+\begin{landscape}
+\input{chapters/2-unit-testing.tex}
+\end{landscape}
+
+\input{chapters/functional-testing.tex}
 
 % These don't work on my machine at the moment,
 % but they should work fine on a properly configured

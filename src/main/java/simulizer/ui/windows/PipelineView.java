@@ -150,7 +150,15 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		model.addObserver(this);
 	}
-
+	
+	/**
+	 * Calculates the address shown at the point (x,y) on the screen.
+	 * Returns null if there is no address at the given point.
+	 *
+	 * @param x the x coordinate of the point on the screen
+	 * @param y the y coordinate of the point on the screen
+	 * @return the address at (x,y) on the screen; null if there is no address at this point
+	 */
 	private Address getAddressAtPoint(double x, double y) {
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
@@ -260,7 +268,6 @@ public class PipelineView extends InternalWindow implements Observer {
 		this.snapToEnd = false;
 	}
 
-	// TODO draw addresses before and after the pipeline
 	private void drawAddresses(GraphicsContext gc) {
 		// First need to draw the rectangles in the column
 		// We know the length of the rectangles and the gaps
@@ -393,9 +400,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private static String getShortName(Address address) {
-		// TODO don't check for null
-		if (address == null) return "null";
-
 		String hex = address.toString();
 		return hex.substring(Math.max(0, hex.length()-3));
 	}
