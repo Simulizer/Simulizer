@@ -1,5 +1,5 @@
-A note on external software/languages used in Simulizer
-=======================================================
+A note on external software/languages
+=====================================
 Throughout the development of Simulizer, in order to aid in the production of a highly functional system in a limited time, external software and libraries have been utilised in some specific cases. This section of the report will explicitly declare these, where it was used in Simulizer, the license it is released under, as well as a link to the software to be examined.
 
 **Ace Editor** - a highly customisable text editor:
