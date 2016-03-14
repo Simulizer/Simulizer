@@ -1,9 +1,7 @@
 package simulizer.ui.components;
 
-import com.sun.javafx.scene.control.skin.IntegerFieldSkin;
 import com.sun.javafx.scene.control.skin.resources.ControlResources;
 import javafx.application.Platform;
-import javafx.beans.NamedArg;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
@@ -13,10 +11,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 /**
- * A dialog that shows a text input control to the user.
- *
- * @see Dialog
- * @since JavaFX 8u40
+ * A dialog that shows a slider input control to the user.
  */
 public class SliderInputDialog extends Dialog<String> {
 
@@ -40,16 +35,16 @@ public class SliderInputDialog extends Dialog<String> {
      **************************************************************************/
 
     /**
-     * Creates a new TextInputDialog without a default value entered into the
-     * dialog {@link TextField}.
+     * Creates a new SliderInputDialog without default values entered into the
+     * dialog.
      */
     public SliderInputDialog() {
         this(0, 1000, 500);
     }
 
     /**
-     * Creates a new TextInputDialog with the default value entered into the
-     * dialog {@link TextField}.
+     * Creates a new SliderInputDialog with the default values entered into the
+     * dialog.
      */
     public SliderInputDialog(double min, double max, double value) {
         final DialogPane dialogPane = getDialogPane();
