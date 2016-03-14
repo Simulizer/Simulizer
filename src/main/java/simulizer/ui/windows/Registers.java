@@ -67,6 +67,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	@SuppressWarnings("unchecked")
 	public void ready() {
 		getWindowManager().addCPUChangedListener(this);
+		getWindowManager().getCPU().registerListener(listener);
 
 		TableColumn<Data, String> register = new TableColumn<>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -87,7 +88,6 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		getContentPane().getChildren().add(table);
 		super.ready();
 	}
-
 
 	@Override
 	public void setToDefaultDimensions() {
