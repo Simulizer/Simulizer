@@ -24,7 +24,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
 
 public class ListVisualiser extends DataStructureVisualiser {
 	private Canvas canvas = new Canvas();
-	private List<Long> list;
+	private long[] list;
 	private ListModel model;
 
 	private final Queue<Action> actionQueue = new LinkedList<>();
@@ -130,7 +130,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawList(GraphicsContext gc) {
-		for (int i = 0; i < list.size(); ++i) {
+		for (int i = 0; i < list.length; ++i) {
 			drawBorderedRectangle(gc, Color.SKYBLUE, getX(i), y0, rectLength, rectLength);
 
 			gc.setTextAlign(TextAlignment.CENTER);
@@ -138,7 +138,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 			gc.setTextAlign(TextAlignment.CENTER);
 			gc.setFont(new Font("Arial", 55));
 			gc.setFill(Color.BLACK);
-			gc.fillText(list.get(i).toString(), getX(i) + rectLength / 2, y0 + rectLength / 2);
+			gc.fillText(list[i] + "", getX(i) + rectLength / 2, y0 + rectLength / 2);
 		}
 	}
 

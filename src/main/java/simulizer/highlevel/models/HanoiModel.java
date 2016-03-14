@@ -7,7 +7,7 @@ import java.util.Stack;
 import javafx.util.Pair;
 
 public class HanoiModel extends DataStructureModel {
-	private final List<Stack<Integer>> pegs = new ArrayList<>();
+	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
 
 	public HanoiModel() {
@@ -46,7 +46,7 @@ public class HanoiModel extends DataStructureModel {
 	public List<Stack<Integer>> getPegs() {
 		synchronized (pegs) {
 			// Copies all the pegs to a new object
-			List<Stack<Integer>> pegsCopy = new ArrayList<>();
+			List<Stack<Integer>> pegsCopy = new ArrayList<>(3);
 			for (Stack<Integer> pegOrig : pegs) {
 				// Copy peg into revPeg
 				Stack<Integer> pegRev = new Stack<>();

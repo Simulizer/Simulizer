@@ -1,26 +1,24 @@
 package simulizer.highlevel.models;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.util.Pair;
-
 public class ListModel extends DataStructureModel {
-	private List<Long> list;
+	private long[] list;
 	private Map<String, Integer> markers = new HashMap<>();
-
-	public ListModel() {
-		this.list = new ArrayList<>();
-	}
 
 	public ListModel(List<Long> list) {
 		setList(list);
 	}
 
+	public ListModel() {
+		list = new long[0];
+	}
+
 	public void setList(List<Long> list) {
-		this.list = list;
+		this.list = new long[list.size()];
 
 		setChanged();
 		notifyObservers(new Action());
@@ -29,9 +27,9 @@ public class ListModel extends DataStructureModel {
 	public void swap(int i, int j) {
 		synchronized (list) {
 			// Apply Update
-			Long temp = list.get(i);
-			list.set(i, list.get(j));
-			list.set(j, temp);
+			long temp = list[i];
+			list[i] = list[j];
+			list[j] = temp;
 
 			// Notify Listeners
 			setChanged();
@@ -69,15 +67,12 @@ public class ListModel extends DataStructureModel {
 	}
 
 	public int size() {
-		return list.size();
+		return list.length;
 	}
 
-	public List<Long> getList() {
+	public long[] getList() {
 		synchronized (list) {
-			List<Long> copyList = new ArrayList<>();
-			for (Long item : list)
-				copyList.add(new Long(item));
-			return copyList;
+			return Arrays.copyOf(list, list.length);
 		}
 	}
 
@@ -87,7 +82,7 @@ public class ListModel extends DataStructureModel {
 	}
 
 	public class Action {
-		public final List<Long> list = getList();
+		public final long[] list = getList();
 	}
 
 	/**
