@@ -20,6 +20,9 @@ public class ListModel extends DataStructureModel {
 	public void setList(List<Long> list) {
 		this.list = new long[list.size()];
 
+		for (int i = 0; i < list.size(); i++)
+			this.list[i] = list.get(i);
+
 		setChanged();
 		notifyObservers(new Action());
 	}

@@ -10,7 +10,6 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.Canvas;
@@ -82,7 +81,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			moves.add((Action) obj);
 		}
 		runAnimations();
-		repaint();
 	}
 
 	private void runAnimations() {
@@ -94,11 +92,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			Discs discs = (Discs) action;
 			numberOfDiscs = discs.numDiscs;
 			pegs = discs.pegs;
-			Platform.runLater(() -> {
-				repaint();
-				animating = false;
-			});
-			animating = true;
+			repaint();
 		} else if (action instanceof Move) {
 			Move move = (Move) action;
 
