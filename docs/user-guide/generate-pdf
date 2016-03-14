@@ -1,0 +1,21 @@
+#!/bin/bash
+
+REPORT_HOME=./
+TARGET="main"
+DEST="Simulizer-User-Guide"
+
+cd ${REPORT_HOME}
+
+if [ $# -gt 1 ]
+then
+  echo "Usage: ./generate-pdf.sh [output-format]"
+elif [ $# -eq 0 ] || [ $1 == 'pdf' ]
+then
+  pdflatex ${TARGET}.tex -o ${DEST}.pdf
+  mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
+else
+  latex ${TARGET}.tex -o ${DEST}.pdf
+  mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
+fi
+
+cd -

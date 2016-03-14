@@ -71,6 +71,11 @@ docs/testing-report/chapters/*.tex
 docs/testing-report/*.pdf
 docs/testing-report/*.out
 
+docs/user-guide/segments/*.tex
+docs/user-guide/chapters/*.tex
+docs/user-guide/*.pdf
+docs/user-guide/*.out
+
 # Ignore personal helper scripts
 copy-settings.sh
 
