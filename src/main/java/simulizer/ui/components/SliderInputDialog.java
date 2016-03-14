@@ -24,7 +24,7 @@ public class SliderInputDialog extends Dialog<String> {
     private final GridPane grid;
     private final Label label;
     private final Slider sliderField;
-    private final Label resultField;
+    private final Spinner<Double> resultField;
 
 
 
@@ -59,13 +59,22 @@ public class SliderInputDialog extends Dialog<String> {
         this.sliderField.setMajorTickUnit(max / 2 - 1);
         this.sliderField.setMinorTickCount(5);
         this.sliderField.setBlockIncrement(0.1);
+        resultField = new Spinner(min, max, value);
 
         this.sliderField.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                resultField.setText(String.format("%.2f", newValue.doubleValue()));
+                resultField.getValueFactory().setValue(newValue.doubleValue());
             }
         });
+
+        resultField.valueProperty().addListener(new ChangeListener<Double>() {
+            @Override
+            public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+                sliderField.setValue(newValue);
+            }
+        });
+
 
         GridPane.setHgrow(sliderField, Priority.ALWAYS);
         GridPane.setFillWidth(sliderField, true);
@@ -79,11 +88,6 @@ public class SliderInputDialog extends Dialog<String> {
         label.setPrefWidth(360);
         label.setPrefWidth(Region.USE_COMPUTED_SIZE);
         label.textProperty().bind(dialogPane.contentTextProperty());
-
-        resultField = new Label(String.format("%.2f", sliderField.getValue()));
-        resultField.setWrapText(true);
-        resultField.setPrefWidth(75);
-        resultField.setAlignment(Pos.CENTER);
 
         this.grid = new GridPane();
         this.grid.setHgap(10);
