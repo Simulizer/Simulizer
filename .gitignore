@@ -67,11 +67,11 @@ docs/final-report/*.pdf
 docs/final-report/*.out
 docs/final-report/chapters/segments
 
-docs/testing-report/segments/*.tex
-docs/testing-report/chapters/*.tex
-docs/testing-report/*.pdf
-docs/testing-report/*.out
-docs/testing-report/chapters/segments
+docs/test-report/segments/*.tex
+docs/test-report/chapters/*.tex
+docs/test-report/*.pdf
+docs/test-report/*.out
+docs/test-report/chapters/segments
 
 docs/user-guide/segments/*.tex
 docs/user-guide/chapters/*.tex
