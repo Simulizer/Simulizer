@@ -11,10 +11,10 @@ then
   echo "Usage: ./generate-pdf.sh [output-format]"
 elif [ $# -eq 0 ] || [ $1 == 'pdf' ]
 then
-  pdflatex ${TARGET}.tex -o ${DEST}.pdf
+  pdflatex ${TARGET}.tex
   mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
 else
-  latex ${TARGET}.tex -o ${DEST}.pdf
+  latex ${TARGET}.tex
   mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
 fi
 

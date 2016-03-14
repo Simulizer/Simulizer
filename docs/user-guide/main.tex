@@ -1,9 +1,10 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{mystyle}
-%\usepackage[backend=biber, 
-%  style=authoryear, 
-%  sorting=nyt, 
+\usepackage[UKenglish]{datetime}
+%\usepackage[backend=biber,
+%  style=authoryear,
+%  sorting=nyt,
 %  urldate=long,
 %  maxcitenames=2]{biblatex}
 %\addbibresource{main.bib}
@@ -30,5 +31,19 @@
 
 % Section files
 \input{chapters/1-introduction.tex}
+\newpage
+\tableofcontents
+\newpage
 
+\input{chapters/user-interface.tex}
+\newpage
+
+\input{chapters/editor.tex}
+\input{chapters/annotations.tex}
+\input{chapters/high-level-vis.tex}
+\newpage
+
+\input{chapters/assembler.tex}
+\input{chapters/low-level-vis.tex}
+\newpage
 \end{document}
