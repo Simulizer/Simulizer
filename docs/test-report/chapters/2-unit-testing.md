@@ -11,7 +11,7 @@ Througout the development of Simulizer, it was made sure that any of the back-en
 **Stack**: These tests are very similar to the heap tests and check that read/write operations are working correctly as intended.
 **Parser**: Multiple sets of tests have been used to ensure that the parser is parsing the entered program text correctly, so it could be given to a simulation.
 
-All of these tests are available to view in svn via the src/test directory.
+All of these tests are available to view in svn via the src/test/java directory.
 
 
 
