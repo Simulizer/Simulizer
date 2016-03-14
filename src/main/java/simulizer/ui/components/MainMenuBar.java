@@ -278,9 +278,9 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
-			TextInputDialog clockSpeed = new TextInputDialog();
+			SliderInputDialog clockSpeed = new SliderInputDialog(0.1, 1000, cpu.getCycleFreq());
 			clockSpeed.setTitle("Clock Speed");
-			clockSpeed.setContentText("Enter Clock Speed:\n(cycles per second (Hz))");
+			clockSpeed.setContentText("Select Clock Speed:\n(cycles per second (Hz))");
 			clockSpeed.showAndWait().ifPresent(input -> {
 				double speed = -1;
 				try {

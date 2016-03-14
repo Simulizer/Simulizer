@@ -29,6 +29,10 @@ public class CPUListener extends SimulationListener {
         cpu.previousInstructions.attachListener(this);
     }
 
+    public CPU getSimCpu(){
+        return simCpu;
+    }
+
     public void replayInstruction(Message m){
         replaying = true;
         if (m instanceof DataMovementMessage){
