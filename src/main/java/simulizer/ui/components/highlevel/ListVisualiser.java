@@ -18,6 +18,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
+import simulizer.highlevel.models.ListModel.Action;
+import simulizer.highlevel.models.ListModel.Swap;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class ListVisualiser extends DataStructureVisualiser {
@@ -25,7 +27,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private List<Long> list;
 	private ListModel model;
 
-	private final Queue<ListModel.Action> actionQueue = new LinkedList<>();
+	private final Queue<Action> actionQueue = new LinkedList<>();
 	private boolean animating = false;
 	private int animatedItemIndex;
 	private DoubleProperty animatedItemX = new SimpleDoubleProperty();
@@ -71,36 +73,25 @@ public class ListVisualiser extends DataStructureVisualiser {
 	@Override
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-		if (obj == null) {
-			list = model.getList();
-		} else if (obj instanceof ListModel.Swap) {
-			actionQueue.add((ListModel.Swap) obj);
-			runAnimations();
-		} else if (obj instanceof ListModel.Marker) {
-			// TODO: Render Markers
-		} else if (obj instanceof ListModel.Emphasise) {
-			// TODO: Render Emphasise
-		}
-		repaint();
+		actionQueue.add((Action) obj);
+		runAnimations();
 	}
 
 	private void runAnimations() {
 		if (animating)
 			return;
 		else {
-			ListModel.Action action = actionQueue.poll();
+			Action action = actionQueue.poll();
 
 			// Currently only swaps are implemented
-			if (!(action instanceof ListModel.Swap))
+			if (!(action instanceof Swap))
 				return;
 
-			ListModel.Swap swap = (ListModel.Swap) action;
+			Swap swap = (Swap) action;
 
 			Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.3), e -> {
 				// Apply Update
-				Long temp = list.get(swap.a);
-				list.set(swap.a, list.get(swap.b));
-				list.set(swap.b, temp);
+				list = swap.list;
 
 				animating = false;
 				repaint();

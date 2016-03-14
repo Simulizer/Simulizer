@@ -28,20 +28,18 @@ public class HanoiModel extends DataStructureModel {
 			firstPeg.push(disc);
 
 		setChanged();
-		notifyObservers();
+		notifyObservers(new Discs(n));
 	}
 
 	public void move(int startPeg, int endPeg) {
 		synchronized (pegs) {
-			Pair<Integer, Integer> move = new Pair<>(startPeg, endPeg);
-
 			// Apply Update
 			int item = pegs.get(startPeg).pop();
 			pegs.get(endPeg).push(item);
 
 			// Notify Observers
 			setChanged();
-			notifyObservers(move);
+			notifyObservers(new Move(startPeg, endPeg));
 		}
 	}
 
@@ -56,9 +54,9 @@ public class HanoiModel extends DataStructureModel {
 
 				// Copy revPeg into a new peg
 				Stack<Integer> pegCopy = new Stack<>();
-				for (Integer item : pegRev) 
+				for (Integer item : pegRev)
 					pegCopy.add(new Integer(item));
-				
+
 				// Add new peg to pegsCopy
 				pegsCopy.add(pegCopy);
 			}
@@ -73,5 +71,26 @@ public class HanoiModel extends DataStructureModel {
 	@Override
 	public ModelType modelType() {
 		return ModelType.HANOI;
+	}
+
+	public class Action {
+		public final List<Stack<Integer>> pegs = getPegs();
+	}
+
+	public class Move extends Action {
+		public final int start, end;
+
+		private Move(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+	}
+
+	public class Discs extends Action {
+		public final int numDiscs;
+
+		private Discs(int numDiscs) {
+			this.numDiscs = numDiscs;
+		}
 	}
 }

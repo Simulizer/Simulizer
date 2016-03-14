@@ -50,6 +50,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		if (!showing)
 			vis.addTab(this);
 		showing = true;
+		repaint();
 	}
 
 	public void hide() {

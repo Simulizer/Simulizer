@@ -23,7 +23,7 @@ public class ListModel extends DataStructureModel {
 		this.list = list;
 
 		setChanged();
-		notifyObservers();
+		notifyObservers(new Action());
 	}
 
 	public void swap(int i, int j) {
@@ -65,7 +65,7 @@ public class ListModel extends DataStructureModel {
 
 	public void emphasise(int index) {
 		setChanged();
-		notifyObservers(index);
+		notifyObservers(new Emphasise(index));
 	}
 
 	public int size() {
@@ -87,6 +87,7 @@ public class ListModel extends DataStructureModel {
 	}
 
 	public class Action {
+		public final List<Long> list = getList();
 	}
 
 	/**
