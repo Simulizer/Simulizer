@@ -30,7 +30,13 @@ public class IntegerControl extends GridPane {
 		GridPane.setVgrow(value, Priority.SOMETIMES);
 		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.valueProperty().addListener((e) -> setting.setValue(value.getValue()));
+		value.valueProperty().addListener((e) -> {
+			try {
+				setting.setValue(value.getValue());
+			} catch (IllegalArgumentException ex) {
+				// TODO: Notify user of invalid setting
+			}
+		});
 		add(value, 1, 0);
 
 		// Tooltip
