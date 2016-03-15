@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.Set;
 
 import simulizer.assembler.representation.Address;
+import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.simulation.messages.PipelineStateMessage;
 
 public class PipelineHistoryModel {
 	private static final int MAX_SIZE = 10_000;
 	private List<PipelineState> history = new ArrayList<>();
 	private Set<Observer> observers = new HashSet<>();
+	private PipelineHazardMessage.Hazard currentHazard;
 
 	public class PipelineState {
 		public final List<Address> before;
@@ -21,6 +24,7 @@ public class PipelineHistoryModel {
 		public final Address executed;
 		public final List<Address> after;
 		public final boolean isJump;
+		public final Optional<PipelineHazardMessage.Hazard> hazard;
 
 		PipelineState(List<Address> before, Address fetch, Address decode, Address execute, List<Address> after, boolean isJump) {
 			this.before = before;
@@ -29,6 +33,11 @@ public class PipelineHistoryModel {
 			this.executed = execute;
 			this.after = after;
 			this.isJump = isJump;
+
+			if (fetch == null || decode == null || execute == null)
+				this.hazard = Optional.of(currentHazard);
+			else
+				this.hazard = Optional.empty();
 		}
 	}
 
@@ -82,6 +91,10 @@ public class PipelineHistoryModel {
 		PipelineState nextState = new PipelineState(before, m.getFetched(), m.getDecoded(), m.getExecuted(), after, isJump);
 		history.add(nextState);
 		notifyObservers(nextState);
+	}
+
+	public void processHazardStateMessage(PipelineHazardMessage m) {
+		this.currentHazard = m.getHazard();
 	}
 
 	public void clear() {

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -30,6 +31,7 @@ import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
 import simulizer.lowlevel.models.PipelineHistoryModel;
 import simulizer.simulation.cpu.components.CPU;
+import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
 
@@ -48,10 +50,11 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	private final String DEFAULT_INSTR =
 		// @formatter:off
-		  "       Statement:\n"
-		+ "         Address:\n"
-		+ "Instruction type:\n"
-		+ "     Line number:";
+//		  "       Statement:\n"
+//		+ "         Address:\n"
+//		+ "Instruction type:\n"
+//		+ "     Line number:";
+		"\n\n\n\n";
 		// @formatter:on
 	private Label instructionInfoLabel = new Label(DEFAULT_INSTR);
 
@@ -127,9 +130,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
 			double eventX = e.getX(), eventY = e.getY();
-			Address address = getAddressAtPoint(eventX, eventY);
-
-			String newText = address == null ? DEFAULT_INSTR : getInfo(address);
+			String newText = getInfoAtPoint(eventX, eventY);
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
@@ -161,15 +162,20 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	/**
 	 * Calculates the address shown at the point (x,y) on the screen.
-	 * Returns null if there is no address at the given point.
+	 * Returns a pair, where the first item indicates whether or not
+	 * there is a piece of information at the specified point, and the second
+	 * item specifies that piece of information.
+	 * (true, address) -- for an address at (x,y)
+	 * (true, null) -- for a hazard at (x,y)
+	 * (false, null) -- for nothing at (x,y)
 	 *
 	 * @param x
 	 *            the x coordinate of the point on the screen
 	 * @param y
 	 *            the y coordinate of the point on the screen
-	 * @return the address at (x,y) on the screen; null if there is no address at this point
+	 * @return a string describing the address/hazard at (x,y)
 	 */
-	private Address getAddressAtPoint(double x, double y) {
+	private String getInfoAtPoint(double x, double y) {
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
 		// Loop over each column
@@ -184,24 +190,26 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			List<Address> before = state.before;
 			for (Address addr : before) {
-				if (y >= yTop && y < yTop + rectWidth) return addr;
+				if (y >= yTop && y < yTop + rectWidth) return getAddressInfo(addr);
 				else yTop += rectGap + rectWidth;
 			}
 
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
 			for (Address stage : pipeline) {
-				if (y >= yTop && y < yTop + rectWidth) return stage;
-				else yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth) {
+					if (stage == null) return getHazardInfo(cycle);
+					else return getAddressInfo(stage);
+				} else yTop += rectGap + rectWidth;
 			}
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
-				if (y >= yTop && y < yTop + rectWidth) return addr;
+				if (y >= yTop && y < yTop + rectWidth) return getAddressInfo(addr);
 				else yTop += rectGap + rectWidth;
 			}
 		}
 
-		return null;
+		return DEFAULT_INSTR;
 	}
 
 	public PipelineHistoryModel getModel() {
@@ -272,7 +280,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		double x = 0.95 * x0;
 		double maxWidth = 0.90 * x0;
-		double y = h/6;
+		double y = h / 6;
 
 		gc.beginPath();
 		gc.fillText("Waiting\nInstructions", x, y, maxWidth);
@@ -434,6 +442,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.fillText(text, x, y, maxWidth);
 		gc.closePath();
 	}
+
 	private void drawText(GraphicsContext gc, String text, double x, double y) {
 		gc.beginPath();
 		gc.fillText(text, x, y);
@@ -459,7 +468,51 @@ public class PipelineView extends InternalWindow implements Observer {
 		return hex.substring(Math.max(0, hex.length() - 3));
 	}
 
-	private String getInfo(Address address) {
+	private String getHazardInfo(int cycle) {
+		Optional<PipelineHazardMessage.Hazard> hOpt = model.getHistory().get(cycle).hazard;
+		assert (hOpt.isPresent());
+
+		PipelineHazardMessage.Hazard h = hOpt.get();
+		String description;
+
+		// Descriptions from wikipedia: https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29#Read_After_Write_.28RAW.29
+		// @formatter:off
+		switch (h) {
+			case RAW:
+				description =
+								     "A read after write (RAW) data hazard refers\n"
+				  +"                  to a situation where an instruction refers to a result\n"
+				  +"                  that has not yet been calculated or retrieved.";
+				break;
+			case WAW:
+				description =
+				      				 "A write after write data hazard may occur in\n"
+				  +"                  a concurrent execution environment.\n"
+				  +					  "";
+				break;
+			case CONTROL:
+				description =
+					                 "Branching hazards (also known as control hazards)\n"
+				  +"                  occur with branches.\n"
+				  +                   "";
+				break;
+			default:
+				description =
+					"UNKNOWN\n"
+					+ "\n"
+					+ "";
+		}
+		// @formatter:on
+
+	// @formatter:off
+		return String.format(
+			  "          Hazard: %s%n"
+			+ "     Description: %s%n",
+				h.toString(), description);
+		// @formatter:on
+	}
+
+	private String getAddressInfo(Address address) {
 		// TODO: make popup monospaced and line the fields up
 
 		CPU cpu = getWindowManager().getCPU();
@@ -479,7 +532,12 @@ public class PipelineView extends InternalWindow implements Observer {
 					s.toString(), address.toString(), s.getInstruction(), lineNum);
 			// @formatter:on
 		} else {
-			return "" + "Address: " + address + "\n" + "Does not point to an instruction";
+			// @formatter:off
+			return "         Address: " + address + "\n"
+				  +"         Does not point to an instruction\n"
+				  + " \n"
+				  + " ";
+			// @formatter:on
 		}
 	}
 
