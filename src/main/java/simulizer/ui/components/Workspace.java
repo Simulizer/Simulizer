@@ -1,6 +1,12 @@
 package simulizer.ui.components;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Observable;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -45,8 +51,7 @@ public class Workspace extends Observable implements Themeable {
 
 		public ResizeListener(Workspace w, int delay) {
 			this.w = w;
-			executor = Executors.newSingleThreadScheduledExecutor(
-					new ThreadUtils.NamedThreadFactory("Window-Resizing"));
+			executor = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Window-Resizing"));
 			shortTask = null;
 			longTask = null;
 			this.delay = delay;
@@ -54,15 +59,13 @@ public class Workspace extends Observable implements Themeable {
 
 		@Override
 		public synchronized void changed(ObservableValue<?> observable, Object oldValue, Object newValue) {
-			if(shortTask != null)
+			if (shortTask != null)
 				shortTask.cancel(true);
-			if(longTask != null)
+			if (longTask != null)
 				longTask.cancel(true);
 
-			shortTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows),
-					delay, TimeUnit.MILLISECONDS);
-			longTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows),
-					1, TimeUnit.SECONDS);
+			shortTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows), delay, TimeUnit.MILLISECONDS);
+			longTask = executor.schedule(() -> Platform.runLater(w::resizeInternalWindows), 1, TimeUnit.SECONDS);
 		}
 	}
 
@@ -202,7 +205,7 @@ public class Workspace extends Observable implements Themeable {
 
 		// most of the contents of this method have to be done on the FX thread anyway
 		// and this method should also be resilient to being run on any thread
-		if(!Platform.isFxApplicationThread()) {
+		if (!Platform.isFxApplicationThread()) {
 			Platform.runLater(() -> openEditorWithCallback(callback));
 			return;
 		}

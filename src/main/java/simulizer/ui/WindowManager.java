@@ -26,7 +26,6 @@ import simulizer.simulation.cpu.user_interaction.LoggerIO;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
-import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
@@ -59,6 +58,10 @@ public class WindowManager extends GridPane {
 	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
 		this.settings = settings;
+
+		Scene scene = new Scene(this);
+		primaryStage.setScene(scene);
+
 		workspace = new Workspace(this);
 
 		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
@@ -116,9 +119,6 @@ public class WindowManager extends GridPane {
 	 * Shows the window
 	 */
 	public void show() {
-		Scene scene = new Scene(this);
-		primaryStage.setScene(scene);
-
 		// a hack to make the layout load properly
 		primaryStage.setOnShown((e) -> {
 			Thread layoutFixThread = new Thread(() -> {
@@ -384,17 +384,17 @@ public class WindowManager extends GridPane {
 
 				@Override
 				public void run() {
-					for (radius = 0; radius < 15; radius = radius + 0.01) 
+					for (radius = 0; radius < 15; radius = radius + 0.01)
 						rotate();
-					for (int i = 0; i < 100; i++) 
+					for (int i = 0; i < 100; i++)
 						rotate();
-					for (radius = 15; radius > 0; radius = radius - 0.01) 
+					for (radius = 15; radius > 0; radius = radius - 0.01)
 						rotate();
 					setEffect(null);
 					bluring = false;
 				}
 
-				private void rotate(){
+				private void rotate() {
 					angle += 1;
 					if (angle > 360)
 						angle = 0f;
@@ -408,7 +408,7 @@ public class WindowManager extends GridPane {
 						e.printStackTrace();
 					}
 				}
-				
+
 			}, "Motion-Blur");
 			t.setDaemon(true);
 			t.start();

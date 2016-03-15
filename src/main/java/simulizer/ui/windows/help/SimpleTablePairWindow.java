@@ -2,11 +2,11 @@ package simulizer.ui.windows.help;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.ui.interfaces.InternalWindow;
-import simulizer.ui.windows.Registers.Data;
 
 public class SimpleTablePairWindow extends InternalWindow {
 
@@ -22,6 +22,7 @@ public class SimpleTablePairWindow extends InternalWindow {
 
 		table.getColumns().addAll(col1, col2);
 		table.setEditable(false);
+		table.setCursor(Cursor.DEFAULT);
 		getContentPane().getChildren().add(table);
 	}
 	

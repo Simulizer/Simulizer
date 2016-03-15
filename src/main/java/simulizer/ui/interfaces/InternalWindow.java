@@ -45,7 +45,7 @@ public abstract class InternalWindow extends Window {
 		getRightIcons().add(close);
 
 		// Bring to front when clicked
-		onMouseClickedProperty().addListener((e) -> toFront());
+		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
 
 		// Update layout on move/resize
 		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(this::calculateLayout));
@@ -200,8 +200,7 @@ public abstract class InternalWindow extends Window {
 
 	@Override
 	public boolean equals(Object obj) {
-		return  obj instanceof InternalWindow &&
-				WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
+		return obj instanceof InternalWindow && WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
 	}
 
 	/**
