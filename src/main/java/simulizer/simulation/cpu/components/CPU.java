@@ -372,7 +372,7 @@ public class CPU {
 		waitForNextTick();
 
 
-		if (this.programCounter.getValue() == this.lastAddress.getValue() + 4) {// if end of program reached
+		if (this.programCounter.getValue() == this.lastAddress.getValue()+4&&this.isRunning) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
 			stopRunning();
 			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. " + "This could be because you forgot to exit cleanly." + " To exit cleanly please call syscall with code 10."));
