@@ -48,7 +48,7 @@ public abstract class InternalWindow extends Window {
 		onMouseClickedProperty().addListener((e) -> toFront());
 
 		// Update layout on move/resize
-		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(() -> calculateLayout()));
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(this::calculateLayout));
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));

@@ -1,11 +1,8 @@
 package simulizer.ui.windows;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUChangedListener;
 import simulizer.ui.components.cpu.listeners.CPUListener;
@@ -82,14 +79,6 @@ public class CPUVisualisation extends InternalWindow {
 	}
 
 	/**
-	 * Gets the window manager
-	 * @return The window manager
-     */
-	public WindowManager getMainWindowManager(){
-		return super.getWindowManager();
-	}
-
-	/**
 	 * Sets min, max, and preferred widths for the pane
 	 * @param width The width to set
      */
@@ -137,27 +126,22 @@ public class CPUVisualisation extends InternalWindow {
 		cpu = new CPU(this, width, height);
 		cpu.drawCPU();
 
-		widthProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				width = newValue.doubleValue();
-				setPaneWidth(width);
-				setPaneHeight(height);
-				cpu.resizeShapes();
-			}
+		widthProperty().addListener((observable, oldValue, newValue) -> {
+			width = newValue.doubleValue();
+			setPaneWidth(width);
+			setPaneHeight(height);
+			cpu.resizeShapes();
 		});
 
-		heightProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				height = newValue.doubleValue();
-				setPaneHeight(height);
-				setPaneWidth(width);
-				cpu.resizeShapes();
-			}
+		heightProperty().addListener((observable, oldValue, newValue) -> {
+			height = newValue.doubleValue();
+			setPaneHeight(height);
+			setPaneWidth(width);
+			cpu.resizeShapes();
 		});
 
 	}
+
 
 	/**
 	 * Gets the minimal height of the window
@@ -185,6 +169,7 @@ public class CPUVisualisation extends InternalWindow {
 	public void close() {
 		getWindowManager().getCPU().unregisterListener(cpuListener);
 		cpu.closeAllThreads();
+		cpu.animationProcessor.shutdown();
 		super.close();
 	}
 

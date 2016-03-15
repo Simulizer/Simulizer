@@ -327,15 +327,14 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
-			SliderInputDialog clockSpeed = new SliderInputDialog(0.1, 1000, cpu.getCycleFreq());
+			SliderInputDialog clockSpeed = new SliderInputDialog(0, 1000, cpu.getCycleFreq());
 			clockSpeed.setTitle("Clock Speed");
 			clockSpeed.setContentText("Select Clock Speed:\n(cycles per second (Hz))");
 			clockSpeed.showAndWait().ifPresent(input -> {
 				double speed = -1;
 				try {
 					speed = Double.parseDouble(input);
-				} catch (NumberFormatException ignored) {
-					/* speed == -1 */ }
+				} catch (NumberFormatException ignored) { /* speed == -1 */ }
 
 				if (speed >= 0) {
 					cpu.setCycleFreq(speed);

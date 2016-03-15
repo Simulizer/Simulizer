@@ -10,8 +10,6 @@ import simulizer.ui.components.cpu.*;
 import simulizer.ui.windows.CPUVisualisation;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Represents a visualised CPU

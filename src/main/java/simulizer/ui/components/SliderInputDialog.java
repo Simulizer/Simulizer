@@ -58,22 +58,16 @@ public class SliderInputDialog extends Dialog<String> {
         this.sliderField.setShowTickMarks(true);
         this.sliderField.setMajorTickUnit(max / 2 - 1);
         this.sliderField.setMinorTickCount(5);
-        this.sliderField.setBlockIncrement(0.1);
+        this.sliderField.setBlockIncrement(0.01);
         resultField = new Spinner(min, max, value);
 
-        this.sliderField.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                resultField.getValueFactory().setValue(newValue.doubleValue());
-            }
-        });
+        this.sliderField.valueProperty().addListener((observable, oldValue, newValue) -> {
+			resultField.getValueFactory().setValue(newValue.doubleValue());
+		});
 
-        resultField.valueProperty().addListener(new ChangeListener<Double>() {
-            @Override
-            public void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
-                sliderField.setValue(newValue);
-            }
-        });
+        resultField.valueProperty().addListener((observable, oldValue, newValue) -> {
+			sliderField.setValue(newValue);
+		});
 
 
         GridPane.setHgrow(sliderField, Priority.ALWAYS);
@@ -138,6 +132,6 @@ public class SliderInputDialog extends Dialog<String> {
         grid.add(resultField, 2, 0);
         getDialogPane().setContent(grid);
 
-        Platform.runLater(() -> sliderField.requestFocus());
+        Platform.runLater(sliderField::requestFocus);
     }
 }

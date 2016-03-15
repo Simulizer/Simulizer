@@ -17,7 +17,7 @@ public class SafeJSObject {
 		UIUtils.assertFXThread();
 		obj.setMember(s, o);
 	}
-	public Object call(String s, Object... args) {
+	public synchronized Object call(String s, Object... args) {
 		UIUtils.assertFXThread();
 		return obj.call(s, args);
 	}
