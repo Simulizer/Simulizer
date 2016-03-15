@@ -16,18 +16,22 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
-import javafx.util.Pair;
 import simulizer.highlevel.models.HanoiModel;
+import simulizer.highlevel.models.HanoiModel.Action;
+import simulizer.highlevel.models.HanoiModel.Discs;
+import simulizer.highlevel.models.HanoiModel.Move;
 import simulizer.ui.windows.HighLevelVisualisation;
 
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private List<Stack<Integer>> pegs;
+	private final Queue<Action> moves = new LinkedList<>();
+	private int numberOfDiscs = 0;
+
 	private Canvas canvas = new Canvas();
 	private HanoiModel model;
 	private Color[] colorGradient = { Color.RED, Color.ORANGE, Color.BLUE, Color.GREEN, Color.YELLOW };
 
-	private final Queue<Pair<Integer, Integer>> moves = new LinkedList<>();
-	private boolean animating = false;
+	private volatile boolean animating = false;
 	private int animatedDiscIndex;
 	private DoubleProperty animatedDiscX = new SimpleDoubleProperty();
 	private DoubleProperty animatedDiscY = new SimpleDoubleProperty();
@@ -68,97 +72,94 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setLineWidth(2);
 		gc.setStroke(Color.BLACK);
-
-		repaint();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-
-		// If a new move has been given,
-		// add it to the queue and try to run it
-		if (obj != null) {
-			moves.add((Pair<Integer, Integer>) obj);
-			runAnimations();
-		} else {
-			pegs = model.getPegs();
+		synchronized (moves) {
+			moves.add((Action) obj);
 		}
-
-		repaint();
+		runAnimations();
 	}
 
 	private void runAnimations() {
 		if (animating)
 			return;
-		Pair<Integer, Integer> move = moves.poll();
 
-		int startPeg = move.getKey();
-		int numDiscs = model.getNumDiscs();
-		int endPeg = move.getValue();
+		Action action = moves.poll();
+		if (action instanceof Discs) {
+			Discs discs = (Discs) action;
+			numberOfDiscs = discs.numDiscs;
+			pegs = discs.pegs;
+			repaint();
+		} else if (action instanceof Move) {
+			Move move = (Move) action;
 
-		int numDiscsOnStart = pegs.get(startPeg).size();
-		int numDiscsOnEnd = pegs.get(endPeg).size();
+			int numDiscsOnStart = pegs.get(move.start).size();
+			int numDiscsOnEnd = pegs.get(move.end).size();
 
-		animatedDiscIndex = pegs.get(move.getKey()).peek();
-		this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, numDiscs);
+			animatedDiscIndex = pegs.get(move.start).peek();
+			this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, model.getNumDiscs());
 
-		double startX = getPegX(startPeg) - animatedDiscWidth / 2;
-		double startY = getDiscY(numDiscsOnStart);
+			double startX = getPegX(move.start) - animatedDiscWidth / 2;
+			double startY = getDiscY(numDiscsOnStart);
 
-		double upX = startX;
-		double upY = pegY0 - canvas.getHeight() / 10;
+			double upX = startX;
+			double upY = pegY0 - canvas.getHeight() / 10;
 
-		double shiftX = getPegX(endPeg) - animatedDiscWidth / 2;
-		double shiftY = upY;
+			double shiftX = getPegX(move.end) - animatedDiscWidth / 2;
+			double shiftY = upY;
 
-		double endX = shiftX;
-		double endY = getDiscY(numDiscsOnEnd);
+			double endX = shiftX;
+			double endY = getDiscY(numDiscsOnEnd);
 
-		animatedDiscX.set(startX);
-		animatedDiscY.set(startY);
+			animatedDiscX.set(startX);
+			animatedDiscY.set(startY);
 
-		// @formatter:off
-		Timeline timeline = new Timeline(
-			new KeyFrame(Duration.seconds(0),
-				new KeyValue(animatedDiscX, startX),
-				new KeyValue(animatedDiscY, startY)
-			),
-			new KeyFrame(Duration.seconds(0.5),
-				new KeyValue(animatedDiscX, upX),
-				new KeyValue(animatedDiscY, upY)
-			),
-			new KeyFrame(Duration.seconds(0.8),
-				new KeyValue(animatedDiscX, shiftX),
-				new KeyValue(animatedDiscY, shiftY)
-			),
-			new KeyFrame(Duration.seconds(1.3),
-				e -> {
-					// Apply Update
-					pegs.get(endPeg).push(pegs.get(startPeg).pop());
-					
-					animating = false;
-					repaint();
+			// @formatter:off
+			Timeline timeline = new Timeline(
+				new KeyFrame(Duration.seconds(0),
+					new KeyValue(animatedDiscX, startX),
+					new KeyValue(animatedDiscY, startY)
+				),
+				new KeyFrame(Duration.seconds(0.5),
+					new KeyValue(animatedDiscX, upX),
+					new KeyValue(animatedDiscY, upY)
+				),
+				new KeyFrame(Duration.seconds(0.8),
+					new KeyValue(animatedDiscX, shiftX),
+					new KeyValue(animatedDiscY, shiftY)
+				),
+				new KeyFrame(Duration.seconds(1.3),
+					e -> {
+						// Apply Update
+						pegs = action.pegs;
+						
+						animating = false;
+						repaint();
+						
+						synchronized (moves) {
+							if (moves.isEmpty()) {
+								timer.stop();
+								System.out.println("Hanoi animation timer stopped");
+							}
+							else runAnimations();
+						}
+					},
+					new KeyValue(animatedDiscX, endX),
+					new KeyValue(animatedDiscY, endY)
+				)
+			);
+			// @formatter:on
+			timeline.setCycleCount(1);
+			timeline.setRate(moves.size() + 1); // TODO: Be more accurate
 
-					if (moves.isEmpty()) {
-						timer.stop();
-						System.out.println("Hanoi animation timer stopped");
-					}
-					else runAnimations();
-				},
-				new KeyValue(animatedDiscX, endX),
-				new KeyValue(animatedDiscY, endY)
-			)
-		);
-		// @formatter:on
-		timeline.setCycleCount(1);
-		timeline.setRate(moves.size() + 1); // TODO: Be more accurate
+			timer.start();
+			timeline.play();
 
-		timer.start();
-		timeline.play();
-
-		animating = true;
+			animating = true;
+		}
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package simulizer.ui.components.cpu;
 
 import javafx.concurrent.Task;
+import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUListener;
+import simulizer.ui.windows.CPUVisualisation;
 import simulizer.utils.ThreadUtils;
 
 import java.util.concurrent.*;
@@ -28,11 +30,16 @@ public class AnimationProcessor {
     public ScheduledFuture executorTask;
     public BlockingQueue<Animation> animationTasks;
     public CPUListener cpuListener;
+    public CPU cpuVisualisation;
     public int timeToNextAnimation;
     public int dispatchTime;
+    public boolean showingWarning;
 
-    public AnimationProcessor(){
+    public AnimationProcessor(CPU cpuVisualisation){
+        this.cpuVisualisation = cpuVisualisation;
         dispatchTime = 20;
+        timeToNextAnimation = 0;
+        showingWarning = false;
         animationTasks = new LinkedBlockingQueue<>();
         executorService = Executors.newSingleThreadScheduledExecutor(
                 new ThreadUtils.NamedThreadFactory("CPU-Visualisation-Job-Dispatch"));
@@ -41,6 +48,23 @@ public class AnimationProcessor {
             public void run() {
                 if(animationTasks.size() > 0){
                     // Are there animation jobs?
+                    if(cpuListener.getSimCpu().getCycleFreq() > 2){
+                        animationTasks.clear();
+                        if(!showingWarning) {
+                            new Thread(new Task<Void>() {
+                                @Override
+                                protected Void call() throws Exception {
+                                    cpuVisualisation.showText("Please lower the clock speed to less than 2Hz to see animations", 1000, false);
+                                    showingWarning = true;
+                                    return null;
+                                }
+                            }).start();
+                        }
+                        return;
+                    }
+
+                    showingWarning = false;
+
                     if(animationTasks.size() > 10){
                         // too many animations, remove some
                         for(int i = 0; i < animationTasks.size() / 2; i++){

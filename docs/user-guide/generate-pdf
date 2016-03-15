@@ -2,7 +2,7 @@
 
 REPORT_HOME=./
 TARGET="main"
-DEST="A4Report"
+DEST="Simulizer-User-Guide"
 
 cd ${REPORT_HOME}
 

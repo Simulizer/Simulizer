@@ -83,7 +83,11 @@ public class CPU {
         this.width = width;
         this.height = height;
         this.vis = vis;
-        this.animationProcessor = new AnimationProcessor();
+        this.animationProcessor = new AnimationProcessor(this);
+    }
+
+    public void showText(String text, double time){
+        showText(text, time, true);
     }
 
     /**
@@ -91,34 +95,31 @@ public class CPU {
      * @param text The text to show
      * @param time How long the caption should be displayed
      */
-    public void showText(String text, double time){
-        if(time < 500) return;
-        Platform.runLater(() -> {
+    public void showText(String text, double time, boolean fadeOut){
+        if(time < 250) return;
+        double fadeTime = time / 4;
+        double delayTime = time / 2;
+        info.setLabel(text);
+        FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.setCycleCount(1);
 
-            double fadeTime = time / 4;
-            double delayTime = time / 2;
-			info.setLabel(text);
-			FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
-			ft.setFromValue(0);
-			ft.setToValue(1);
-			ft.setCycleCount(1);
+        ft.play();
 
-			ft.play();
+        if(fadeOut) {
+            ft.setOnFinished(event -> new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                        FadeTransition fo = new FadeTransition(Duration.millis(fadeTime), info);
+                        fo.setFromValue(1);
+                        fo.setToValue(0);
+                        fo.setCycleCount(1);
 
-			ft.setOnFinished(event -> new Timer().schedule(new TimerTask() {
-				@Override
-				public void run() {
-					Platform.runLater(() -> {
-						FadeTransition fo = new FadeTransition(Duration.millis(fadeTime), info);
-						fo.setFromValue(1);
-						fo.setToValue(0);
-						fo.setCycleCount(1);
-
-						fo.play();
-					});
-				}
-			}, (int) delayTime));
-		});
+                        fo.play();
+                }
+            }, (int) delayTime));
+        }
     }
 
     /**

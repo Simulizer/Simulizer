@@ -14,7 +14,7 @@ for f in $(git ls-tree -r master --name-only); do
 done
  
 echo "Writing git log ..."
-git log > ${SVNREPO}/git-log.txt
+git log -p > ${SVNREPO}/git-log.txt
 
 echo "Generating statistics document ..."
 gitinspector --format=html --timeline --weeks --responsibilities >  ${SVNREPO}/stats.html

@@ -3,6 +3,7 @@ package simulizer.ui.windows;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -41,32 +42,34 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 */
 	public void refreshData() {
 		ObservableList<Data> data = FXCollections.observableArrayList();
-		int i = 0;
-		for (Register r : Register.values()) {
-			String hex, unsigned, signed;
-			try {
-				byte[] contents = getWindowManager().getCPU().getRegisters()[i].getWord();
-				unsigned = "" + DataConverter.decodeAsUnsigned(contents);
-				signed = "" + DataConverter.decodeAsSigned(contents);
-				hex = Long.toHexString(DataConverter.decodeAsUnsigned(contents));
-				while (hex.length() < 8)
-					hex = "0" + hex;
-				hex = "0x" + hex;
-			} catch (NullPointerException e) {
-				hex = "EMPTY";
-				unsigned = "EMPTY";
-				signed = "EMPTY";
-			}
-			data.add(new Data(r.getName(), hex, unsigned, signed));
-			i++;
-		}
+		for (Register r : Register.values())
+			data.add(createData(r));
 		Platform.runLater(() -> table.setItems(data));
+	}
+
+	private Data createData(Register r) {
+		String hex, unsigned, signed;
+		try {
+			byte[] contents = getWindowManager().getCPU().getRegisters()[r.getID()].getWord();
+			unsigned = "" + DataConverter.decodeAsUnsigned(contents);
+			signed = "" + DataConverter.decodeAsSigned(contents);
+			hex = Long.toHexString(DataConverter.decodeAsUnsigned(contents));
+			while (hex.length() < 8)
+				hex = "0" + hex;
+			hex = "0x" + hex;
+		} catch (NullPointerException e) {
+			hex = "EMPTY";
+			unsigned = "EMPTY";
+			signed = "EMPTY";
+		}
+		return new Data(r.getID(), r.getName(), hex, unsigned, signed);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public void ready() {
 		getWindowManager().addCPUChangedListener(this);
+		getWindowManager().getCPU().registerListener(listener);
 
 		TableColumn<Data, String> register = new TableColumn<>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -88,7 +91,6 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		super.ready();
 	}
 
-
 	@Override
 	public void setToDefaultDimensions() {
 		setNormalisedDimentions(0.5, 0.0, 0.5, 0.5);
@@ -107,10 +109,11 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 *
 	 */
 	public static class Data {
-
+		private final int id;
 		private final String name, hex, unsigned, signed;
 
-		public Data(String name, String hex, String unsigned, String signed) {
+		public Data(int id, String name, String hex, String unsigned, String signed) {
+			this.id = id;
 			this.name = name;
 			this.hex = hex;
 			this.unsigned = unsigned;
@@ -150,8 +153,15 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private class RegisterListener extends SimulationListener {
 		@Override
 		public void processRegisterChangedMessage(RegisterChangedMessage m) {
-			// TODO: Be less wasteful, only update changed register
-			refreshData();
+			try {
+				FilteredList<Data> items = table.getItems().filtered(d -> d.id != m.registerChanged.getID());
+				ObservableList<Data> list = FXCollections.observableArrayList(items);
+				list.add(createData(m.registerChanged));
+				list.sort((a, b) -> a.id - b.id);
+				Platform.runLater(() -> table.setItems(list));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

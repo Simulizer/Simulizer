@@ -3,6 +3,8 @@ package simulizer.ui.windows;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.application.Platform;
 import javafx.geometry.Side;
@@ -87,6 +89,20 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	public void addTab(DataStructureVisualiser vis) {
 		Tab tab = new Tab(vis.getName());
 		tab.setContent(vis);
+
+		// JavaFX doesn't appear to have an event to handle this
+		Timer t = new Timer();
+		t.scheduleAtFixedRate(new TimerTask() {
+			private int runs = 0;
+
+			@Override
+			public void run() {
+				if (runs++ == 10)
+					t.cancel();
+				Platform.runLater(() -> vis.repaint());
+			}
+		}, 0, 10);
+
 		Platform.runLater(() -> tabs.getTabs().add(tab));
 	}
 

@@ -3,6 +3,7 @@ package simulizer.ui.components.highlevel;
 import java.util.Observable;
 import java.util.Observer;
 
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import simulizer.highlevel.models.DataStructureModel;
