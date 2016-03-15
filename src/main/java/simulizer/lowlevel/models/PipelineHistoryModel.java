@@ -10,6 +10,7 @@ import simulizer.assembler.representation.Address;
 import simulizer.simulation.messages.PipelineStateMessage;
 
 public class PipelineHistoryModel {
+	private static final int MAX_SIZE = 10_000;
 	private List<PipelineState> history = new ArrayList<>();
 	private Set<Observer> observers = new HashSet<>();
 
@@ -44,10 +45,12 @@ public class PipelineHistoryModel {
 	}
 
 	public void processPipelineStateMessage(PipelineStateMessage m) {
+		if (size() >= MAX_SIZE) return;
+
 		int currentFetchAddress = m.getFetched().getValue();
 
 		// -- Calculate addresses before the pipeline
-		List<Address> before = new ArrayList<>();
+		List<Address> before = new ArrayList<>(3);
 		for (int i = 3; i >= 1; --i)
 			before.add(new Address(currentFetchAddress + 4 * i));
 
@@ -59,7 +62,7 @@ public class PipelineHistoryModel {
 			isJump = currentFetchAddress != lastFetchAddress && currentFetchAddress != lastFetchAddress + 4;
 		}
 
-		List<Address> after = new ArrayList<>();
+		List<Address> after = new ArrayList<>(3);
 		// If there has been a jump, clear what's after the pipeline
 		// otherwise, add calculate the appropriate things
 		if (!isJump) {

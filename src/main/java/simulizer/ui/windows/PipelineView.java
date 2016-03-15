@@ -1,8 +1,13 @@
 package simulizer.ui.windows;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -11,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -19,10 +23,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import simulizer.assembler.representation.Address;
-import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Statement;
 import simulizer.lowlevel.models.PipelineHistoryModel;
 import simulizer.simulation.cpu.components.CPU;
@@ -33,16 +37,23 @@ public class PipelineView extends InternalWindow implements Observer {
 	// Graphical things
 	private Canvas canvas = new Canvas();
 	private Pane canvasPane = new Pane();
-	private Canvas infoCanvas = new Canvas();
-	private Pane infoPane = new Pane();
 	private BorderPane borderPane = new BorderPane();
+
 	private FlowPane buttonPane = new FlowPane();
 	private Button leftButton = new Button("<");
 	private Button rightButton = new Button(">");
 	private Label cycleInputLabel = new Label("Go to:");
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
-	private Tooltip instructionTooltip = new Tooltip();
+
+	private final String DEFAULT_INSTR =
+		// @formatter:off
+		  "       Statement:\n"
+		+ "         Address:\n"
+		+ "Instruction type:\n"
+		+ "     Line number:";
+		// @formatter:on
+	private Label instructionInfoLabel = new Label(DEFAULT_INSTR);
 
 	// Model
 	private PipelineHistoryModel model = new PipelineHistoryModel();
@@ -62,7 +73,9 @@ public class PipelineView extends InternalWindow implements Observer {
 	// saved for reuse throughout calculations
 	// after resize
 	private double w;
+	private double x0;
 	private double h;
+	private double realW;
 	private double realH;
 
 	public PipelineView() {
@@ -86,15 +99,12 @@ public class PipelineView extends InternalWindow implements Observer {
 		cycleInput.setPrefColumnCount(5);
 		cycleInput.setPromptText("Cycle no.");
 		cycleInput.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-			if (e.getCode() == KeyCode.ENTER
-					&& !cycleInput.getText().isEmpty()) {
+			if (e.getCode() == KeyCode.ENTER && !cycleInput.getText().isEmpty()) {
 				setStartCycle(Integer.valueOf(cycleInput.getText()));
 				repaint();
 				Platform.runLater(() -> cycleInput.setText(""));
 			}
 		});
-
-		Tooltip.install(canvasPane, instructionTooltip);
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> canvasPane.requestFocus());
 		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
@@ -109,25 +119,23 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 
 			e.consume(); // the right arrow key seems to want to transfer the focus
-			canvasPane.requestFocus();
+			Platform.runLater(canvasPane::requestFocus);
 		});
+
+		instructionInfoLabel.setStyle("-fx-font-family: monospace");
+		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 50));
+
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
 			double eventX = e.getX(), eventY = e.getY();
 			Address address = getAddressAtPoint(eventX, eventY);
 
-			if (address == null) instructionTooltip.hide();
-			else {
-				instructionTooltip.setText(getInfo(address));
-
-				double x1 = getScene().getWindow().getX() + getLayoutX() + eventX + 15;
-				double y1 = getScene().getWindow().getY() + getLayoutY() + eventY - 20;
-				instructionTooltip.show(canvasPane, x1, y1);
-			}
+			String newText = address == null ? DEFAULT_INSTR : getInfo(address);
+			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
 		// Now add everything
 		canvasPane.getChildren().add(canvas);
-		buttonPane.getChildren().addAll(followCheckBox, leftButton, rightButton, cycleInputLabel, cycleInput);
+		buttonPane.getChildren().addAll(followCheckBox, leftButton, rightButton, cycleInputLabel, cycleInput, instructionInfoLabel);
 
 		borderPane.setCenter(canvasPane);
 		borderPane.setBottom(buttonPane);
@@ -139,24 +147,26 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.setLineWidth(2);
 		gc.setTextAlign(TextAlignment.CENTER);
 		gc.setTextBaseline(VPos.CENTER);
-		gc.setFont(new Font("Arial", 15));
+		gc.setFont(new Font("Monospace", 15));
 
 		// The canvas controls its own width, but it needs to know
 		// the height of the scroll pane
 		canvas.heightProperty().bind(canvasPane.heightProperty());
-		canvas.heightProperty().addListener(e -> repaint());
+		canvas.heightProperty().addListener(e -> Platform.runLater(this::repaint));
 		canvas.widthProperty().bind(canvasPane.widthProperty());
-		canvas.widthProperty().addListener(e -> repaint());
+		canvas.widthProperty().addListener(e -> Platform.runLater(this::repaint));
 
 		model.addObserver(this);
 	}
-	
+
 	/**
 	 * Calculates the address shown at the point (x,y) on the screen.
 	 * Returns null if there is no address at the given point.
 	 *
-	 * @param x the x coordinate of the point on the screen
-	 * @param y the y coordinate of the point on the screen
+	 * @param x
+	 *            the x coordinate of the point on the screen
+	 * @param y
+	 *            the y coordinate of the point on the screen
 	 * @return the address at (x,y) on the screen; null if there is no address at this point
 	 */
 	private Address getAddressAtPoint(double x, double y) {
@@ -166,7 +176,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
 			PipelineHistoryModel.PipelineState state = history.get(cycle);
 
-			double xLeft = (col + 0.5) * cycleWidth - rectWidth / 2;
+			double xLeft = x0 + (col + 0.5) * cycleWidth - rectWidth / 2;
 			// If the x coordinate isn't right, then skip to the next iteration
 			if (x < xLeft || x > xLeft + rectWidth) continue;
 
@@ -174,26 +184,20 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			List<Address> before = state.before;
 			for (Address addr : before) {
-				if (y >= yTop && y < yTop + rectWidth)
-					return addr;
-				else
-					yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth) return addr;
+				else yTop += rectGap + rectWidth;
 			}
 
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
 			for (Address stage : pipeline) {
-				if (y >= yTop && y < yTop + rectWidth)
-					return stage;
-				else
-					yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth) return stage;
+				else yTop += rectGap + rectWidth;
 			}
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
-				if (y >= yTop && y < yTop + rectWidth)
-					return addr;
-				else
-					yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth) return addr;
+				else yTop += rectGap + rectWidth;
 			}
 		}
 
@@ -220,6 +224,8 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private void calculateParameters() {
+		x0 = 0.1 * realW;
+
 		rectWidth = 2. / 21 * h;
 		cycleWidth = 3. / 2 * rectWidth;
 		// TODO figure out a proper calculation
@@ -241,13 +247,16 @@ public class PipelineView extends InternalWindow implements Observer {
 		// Draw the vertical dividers
 		gc.setStroke(Color.GRAY);
 
-		for (int i = 1; i <= numColumnsToDraw; ++i) {
-			double x = i * cycleWidth;
+		gc.beginPath();
+		for (int i = 0; i <= numColumnsToDraw; ++i) {
+			double x = x0 + i * cycleWidth;
 			gc.strokeLine(x, 0, x, h);
 		}
+		gc.closePath();
 
+		gc.beginPath();
 		if (numColumnsToDraw > 0) {
-			double xEnd = numColumnsToDraw * cycleWidth;
+			double xEnd = x0 + numColumnsToDraw * cycleWidth;
 			// Draw the horizontal dividers
 			gc.setStroke(Color.BLACK);
 			double y0 = h / 3;
@@ -255,6 +264,34 @@ public class PipelineView extends InternalWindow implements Observer {
 			gc.strokeLine(0, y0, xEnd, y0);
 			gc.strokeLine(0, y1, xEnd, y1);
 		}
+		gc.closePath();
+	}
+
+	private void drawExplainers(GraphicsContext gc) {
+		gc.setTextAlign(TextAlignment.RIGHT);
+
+		double x = 0.95 * x0;
+		double maxWidth = 0.90 * x0;
+		double y = h/6;
+
+		gc.beginPath();
+		gc.fillText("Waiting\nInstructions", x, y, maxWidth);
+
+		y = h / 3 + rectGap / 2 + rectWidth / 2;
+		gc.fillText("Stage 1: Fetch", x, y, maxWidth);
+
+		y += rectGap + rectWidth;
+		gc.fillText("Stage 2: Decode", x, y, maxWidth);
+
+		y += rectGap + rectWidth;
+		gc.fillText("Stage 3: Execute", x, y, maxWidth);
+
+		y = 5 * h / 6;
+		gc.fillText("Completed\nInstructions", x, y, maxWidth);
+
+		gc.closePath();
+
+		gc.setTextAlign(TextAlignment.CENTER);
 	}
 
 	@Override
@@ -273,7 +310,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		// We know the length of the rectangles and the gaps
 		// between them. Their position is just
 		// half way between the cycle boundaries then - rectWidth/2.
-		gc.setFill(Color.SKYBLUE);
+		gc.setFill(Paint.valueOf("skyblue"));
 
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
@@ -284,15 +321,15 @@ public class PipelineView extends InternalWindow implements Observer {
 			double yTracker = rectGap / 2;
 			double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = (col + 0.5) * cycleWidth;
+			double xCenter = x0 + (col + 0.5) * cycleWidth;
 			double xLeft = xCenter - rectWidth / 2;
 
 			for (Address addr : before) {
 				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Color.BLACK);
-				gc.fillText(getShortName(addr), xCenter, yCenter);
+				gc.setFill(Paint.valueOf("black"));
+				drawText(gc, getShortName(addr), xCenter, yCenter, rectWidth);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -306,7 +343,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			double yTracker = h / 3 + rectGap / 2; // starts at top of first rect to draw
 			double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = (col + 0.5) * cycleWidth;
+			double xCenter = x0 + (col + 0.5) * cycleWidth;
 			double xLeft = xCenter - rectWidth / 2;
 
 			Address[] parts = { state.fetched, state.decoded, state.executed };
@@ -316,16 +353,16 @@ public class PipelineView extends InternalWindow implements Observer {
 				if (parts[a] == null) drawBorderedCircle(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
-					gc.setFill(Color.BLACK);
-					gc.fillText(getShortName(parts[a]), xCenter, yCenter);
+					gc.setFill(Paint.valueOf("black"));
+					drawText(gc, getShortName(parts[a]), xCenter, yCenter);
 				}
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
 			}
 
-			gc.setFill(Color.BLACK);
-			gc.fillText("" + cycle, xCenter, 0.975 * realH);
+			gc.setFill(Paint.valueOf("black"));
+			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
 		}
 
 		// Draw the addresses after the pipeline
@@ -335,15 +372,15 @@ public class PipelineView extends InternalWindow implements Observer {
 			double yTracker = 2 * h / 3 + rectGap / 2;
 			double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = (col + 0.5) * cycleWidth;
+			double xCenter = x0 + (col + 0.5) * cycleWidth;
 			double xLeft = xCenter - rectWidth / 2;
 
 			for (Address addr : after) {
 				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Color.BLACK);
-				gc.fillText(getShortName(addr), xCenter, yCenter);
+				gc.setFill(Paint.valueOf("black"));
+				drawText(gc, getShortName(addr), xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -359,70 +396,90 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	public void repaint() {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-		this.w = canvas.getWidth();
+		this.realW = canvas.getWidth();
 		this.realH = canvas.getHeight();
+		this.w = 0.9 * realW;
 		this.h = 0.95 * realH;
 
-		gc.clearRect(0, 0, w, realH);
+		gc.clearRect(0, 0, realW, realH);
 
 		if (isPipelined) {
 			calculateParameters();
 			drawDividers(gc);
+			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
-			gc.fillText("Check the CPU is running in pipelined mode to view this window", w / 2, h / 2);
+			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, h / 2);
 		}
 	}
 
 	// ***Utilities***
 
 	private void drawBorderedRectangle(GraphicsContext gc, double x, double y, double w, double h) {
+		gc.beginPath();
 		gc.fillRect(x, y, w, h);
 		gc.strokeRect(x, y, w, h);
+		gc.closePath();
 	}
 
 	private void drawBorderedCircle(GraphicsContext gc, double x, double y, double w, double h) {
+		gc.beginPath();
 		gc.fillOval(x, y, w, h);
 		gc.strokeOval(x, y, w, h);
+		gc.closePath();
 	}
 
-	// Thanks to http://stackoverflow.com/a/4129754
-	private static Color getColor(Address address) {
+	private void drawText(GraphicsContext gc, String text, double x, double y, double maxWidth) {
+		gc.beginPath();
+		gc.fillText(text, x, y, maxWidth);
+		gc.closePath();
+	}
+	private void drawText(GraphicsContext gc, String text, double x, double y) {
+		gc.beginPath();
+		gc.fillText(text, x, y);
+		gc.closePath();
+	}
+
+	// Reading: http://krazydad.com/tutorials/makecolors.php
+	private static Paint getColor(Address address) {
 		if (address == null) return Color.RED.brighter();
 
-		int hex = address.getValue();
-		// int r = (hex & 0xFF0000) >> 16;
-		// int g = (hex & 0xFF00) >> 8;
-		// int b = (hex & 0xFF);
+		int hexM = address.getValue() % 128;
+		// @formatter:off
+		int red   = (int) (Math.sin(.3 * hexM + 0) * 127) + 128;
+		int green = (int) (Math.sin(.3 * hexM + 2) * 127) + 128;
+		int blue  = (int) (Math.sin(.3 * hexM + 4) * 127) + 128;
+		// @formatter:on
 
-		Color colors[] = { Color.ORANGE, Color.AQUA, Color.LAWNGREEN, Color.CORNFLOWERBLUE };
-		return colors[(hex % 16) / 4];
+		return Color.rgb(red, green, blue);
 	}
 
 	private static String getShortName(Address address) {
 		String hex = address.toString();
-		return hex.substring(Math.max(0, hex.length()-3));
+		return hex.substring(Math.max(0, hex.length() - 3));
 	}
 
 	private String getInfo(Address address) {
-		//TODO: make popup monospaced and line the fields up
+		// TODO: make popup monospaced and line the fields up
 
 		CPU cpu = getWindowManager().getCPU();
 		Map<Address, Statement> textSegment = cpu.getProgram().textSegment;
 
-		if(textSegment.containsKey(address)) {
+		if (textSegment.containsKey(address)) {
 			Statement s = textSegment.get(address);
 			int lineNum = cpu.getProgram().lineNumbers.getOrDefault(address, -1);
 
-			return "" +
-					"Statement: " + s + "\n" +
-					"Address: " + address + "\n" +
-					"Instruction type: " + s.getInstruction() + "\n" + //TODO: (matt) working on it...
-					"Line number: " + lineNum + "\n";
+			// @formatter:off
+			// TODO: (matt) working on it...
+			return String.format(
+				  "       Statement: %s%n"
+				+ "         Address: %s%n"
+				+ "Instruction type: %s%n"
+				+ "     Line number: %d",
+					s.toString(), address.toString(), s.getInstruction(), lineNum);
+			// @formatter:on
 		} else {
-			return "" +
-					"Address: " + address + "\n" +
-					"Does not point to an instruction";
+			return "" + "Address: " + address + "\n" + "Does not point to an instruction";
 		}
 	}
 
