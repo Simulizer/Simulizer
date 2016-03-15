@@ -247,11 +247,14 @@ public class PipelineView extends InternalWindow implements Observer {
 		// Draw the vertical dividers
 		gc.setStroke(Color.GRAY);
 
+		gc.beginPath();
 		for (int i = 0; i <= numColumnsToDraw; ++i) {
 			double x = x0 + i * cycleWidth;
 			gc.strokeLine(x, 0, x, h);
 		}
+		gc.closePath();
 
+		gc.beginPath();
 		if (numColumnsToDraw > 0) {
 			double xEnd = x0 + numColumnsToDraw * cycleWidth;
 			// Draw the horizontal dividers
@@ -261,6 +264,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			gc.strokeLine(0, y0, xEnd, y0);
 			gc.strokeLine(0, y1, xEnd, y1);
 		}
+		gc.closePath();
 	}
 
 	private void drawExplainers(GraphicsContext gc) {
@@ -429,17 +433,18 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.closePath();
 	}
 
-	// Thanks to http://stackoverflow.com/a/4129754
+	// Reading: http://krazydad.com/tutorials/makecolors.php
 	private static Paint getColor(Address address) {
 		if (address == null) return Color.RED.brighter();
 
-		int hex = address.getValue();
-		// int r = (hex & 0xFF0000) >> 16;
-		// int g = (hex & 0xFF00) >> 8;
-		// int b = (hex & 0xFF);
+		int hexM = address.getValue() % 128;
+		// @formatter:off
+		int red   = (int) (Math.sin(.3 * hexM + 0) * 127) + 128;
+		int green = (int) (Math.sin(.3 * hexM + 2) * 127) + 128;
+		int blue  = (int) (Math.sin(.3 * hexM + 4) * 127) + 128;
+		// @formatter:on
 
-		Paint colors[] = { Paint.valueOf("orange"), Paint.valueOf("aqua"), Paint.valueOf("lawngreen"), Paint.valueOf("cornflowerblue")};
-		return colors[(hex % 16) / 4];
+		return Color.rgb(red, green, blue);
 	}
 
 	private static String getShortName(Address address) {
