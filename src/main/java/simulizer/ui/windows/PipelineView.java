@@ -23,6 +23,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import simulizer.assembler.representation.Address;
@@ -297,7 +298,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		// We know the length of the rectangles and the gaps
 		// between them. Their position is just
 		// half way between the cycle boundaries then - rectWidth/2.
-		gc.setFill(Color.SKYBLUE);
+		gc.setFill(Paint.valueOf("skyblue"));
 
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
@@ -315,10 +316,8 @@ public class PipelineView extends InternalWindow implements Observer {
 				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Color.BLACK);
-				gc.beginPath();
-				gc.fillText(getShortName(addr), xCenter, yCenter);
-				gc.closePath();
+				gc.setFill(Paint.valueOf("black"));
+				drawText(gc, getShortName(addr), xCenter, yCenter, rectWidth);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -342,20 +341,16 @@ public class PipelineView extends InternalWindow implements Observer {
 				if (parts[a] == null) drawBorderedCircle(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
-					gc.setFill(Color.BLACK);
-					gc.beginPath();
-					gc.fillText(getShortName(parts[a]), xCenter, yCenter);
-					gc.closePath();
+					gc.setFill(Paint.valueOf("black"));
+					drawText(gc, getShortName(parts[a]), xCenter, yCenter);
 				}
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
 			}
 
-			gc.setFill(Color.BLACK);
-			gc.beginPath();
-			gc.fillText("" + cycle, xCenter, 0.975 * realH);
-			gc.closePath();
+			gc.setFill(Paint.valueOf("black"));
+			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
 		}
 
 		// Draw the addresses after the pipeline
@@ -372,10 +367,8 @@ public class PipelineView extends InternalWindow implements Observer {
 				gc.setFill(getColor(addr));
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Color.BLACK);
-				gc.beginPath();
-				gc.fillText(getShortName(addr), xCenter, yCenter);
-				gc.closePath();
+				gc.setFill(Paint.valueOf("black"));
+				drawText(gc, getShortName(addr), xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -404,9 +397,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
-			gc.beginPath();
-			gc.fillText("Check the CPU is running in pipelined mode to view this window", realW / 2, realH / 2);
-			gc.closePath();
+			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, realH / 2);
 		}
 	}
 
@@ -426,8 +417,20 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.closePath();
 	}
 
+	private void drawText(GraphicsContext gc, String text, double x, double y, double maxWidth) {
+		gc.beginPath();
+		gc.fillText(text, x, y, maxWidth);
+		gc.closePath();
+	}
+
+	private void drawText(GraphicsContext gc, String text, double x, double y) {
+		gc.beginPath();
+		gc.fillText(text, x, y);
+		gc.closePath();
+	}
+
 	// Thanks to http://stackoverflow.com/a/4129754
-	private static Color getColor(Address address) {
+	private static Paint getColor(Address address) {
 		if (address == null) return Color.RED.brighter();
 
 		int hex = address.getValue();
@@ -435,7 +438,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		// int g = (hex & 0xFF00) >> 8;
 		// int b = (hex & 0xFF);
 
-		Color colors[] = { Color.ORANGE, Color.AQUA, Color.LAWNGREEN, Color.CORNFLOWERBLUE };
+		Paint colors[] = { Paint.valueOf("orange"), Paint.valueOf("aqua"), Paint.valueOf("lawngreen"), Paint.valueOf("cornflowerblue")};
 		return colors[(hex % 16) / 4];
 	}
 
