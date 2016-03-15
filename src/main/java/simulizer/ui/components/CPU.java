@@ -146,7 +146,7 @@ public class CPU {
         adder = new ALU(vis, "+");
         shiftLeftIR = new GeneralComponent(vis, "<");
 
-        previousInstructions = new InstructionsWindow();
+        previousInstructions = new InstructionsWindow(animationProcessor);
 
         controlUnit.setTooltip("The control unit (CU) is a component of a computer's central processing unit (CPU) that directs operation of the processor. It tells the computer's memory, arithmetic/logic unit and input and output devices how to respond to a program's instructions.");
 

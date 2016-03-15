@@ -1,6 +1,7 @@
 package simulizer.ui.components.cpu;
 
 import javafx.concurrent.Task;
+import simulizer.assembler.representation.Instruction;
 import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.windows.help.SyscallReference;
@@ -25,7 +26,7 @@ public class AnimationProcessor {
 
 
     private final ScheduledExecutorService executorService;
-    private final ScheduledFuture executorTask;
+    private final ScheduledFuture<?> executorTask;
     private final PriorityBlockingQueue<Animation> animationTasks;
 	private long cycleStartTime; // in ms
 	private int dispatchInterval; // in ms
@@ -105,18 +106,31 @@ public class AnimationProcessor {
         executorService.shutdownNow();
     }
 
-    public void addAnimationTask(Runnable job, int delay) {
-        animationTasks.add(new Animation(delay, job));
-    }
+	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+		int thisDelay = 0;
+		for(Runnable r : jobs) {
+			animationTasks.add(new Animation(thisDelay, r));
+			thisDelay += delay;
+		}
+	}
 
 	/**
 	 * Schedule several animation tasks with a fixed delay in between
 	 */
-	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+	public void scheduleRegularAnimations(String instructionName, int delay, Runnable... jobs) {
 		int thisDelay = 0;
+		ArrayList<Animation> animationsForInstruction = new ArrayList<>();
 		for(Runnable r : jobs) {
-			addAnimationTask(r, thisDelay);
+			Animation animation = new Animation(thisDelay, r);
+			animationTasks.add(animation);
+			animationsForInstruction.add(animation);
 			thisDelay += delay;
 		}
+		cpuVisualisation.previousInstructions.addInstruction(instructionName, animationsForInstruction);
+	}
+
+	public void replayAnimations(ArrayList<Animation> animations){
+		newCycle();
+		animationTasks.addAll(animations);
 	}
 }
