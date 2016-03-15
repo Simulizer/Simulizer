@@ -370,7 +370,7 @@ public class CPU {
 		waitForNextTick();
 
 
-		if (this.programCounter.getValue() == this.lastAddress.getValue() + 4) {// if end of program reached
+		if (this.programCounter.getValue() == this.lastAddress.getValue()+4&&this.isRunning) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
 			stopRunning();
 			sendMessage(new ProblemMessage(

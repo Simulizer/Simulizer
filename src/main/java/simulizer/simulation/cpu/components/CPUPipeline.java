@@ -198,17 +198,20 @@ public class CPUPipeline extends CPU {
 			fetch();
 		} else if (!this.canFetch) {
 			this.canFetch = true;
-		} else if(this.isFinished==1) {//getting closer to termination
+		} else if(this.isFinished==1||this.isFinished==2) {//getting closer to termination
 			this.isFinished++;
-		} else if(this.isFinished==2) { //ending termination
+		} else if(this.isFinished==3 && this.isRunning) { //ending termination
 			//exiting cleanly but representing that in reality an error would be thrown
 			this.isRunning = false;
 
+			stopRunning();
 			sendMessage(new ProblemMessage(
 					new MemoryException(
 							"Program tried to execute a program outside the text segment.\n" +
 									"  This could be because you forgot to exit cleanly.\n" +
 									"  To exit cleanly please call syscall with code 10.\n", programCounter)));
+			return;
+
 		}
 		
 		if(this.programCounter.getValue() == this.lastAddress.getValue()+4 && this.isFinished == 0) {//if end of program reached
