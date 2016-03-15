@@ -75,7 +75,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	private double w;
 	private double x0;
 	private double h;
-	private double realH;
 	private double realW;
 
 	public PipelineView() {
@@ -119,7 +118,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 
 			e.consume(); // the right arrow key seems to want to transfer the focus
-			Platform.runLater(() -> canvasPane.requestFocus());
+			Platform.runLater(canvasPane::requestFocus);
 		});
 
 		instructionInfoLabel.setStyle("-fx-font-family: monospace");
@@ -152,9 +151,9 @@ public class PipelineView extends InternalWindow implements Observer {
 		// The canvas controls its own width, but it needs to know
 		// the height of the scroll pane
 		canvas.heightProperty().bind(canvasPane.heightProperty());
-		canvas.heightProperty().addListener(e -> repaint());
+		canvas.heightProperty().addListener(e -> Platform.runLater(this::repaint));
 		canvas.widthProperty().bind(canvasPane.widthProperty());
-		canvas.widthProperty().addListener(e -> repaint());
+		canvas.widthProperty().addListener(e -> Platform.runLater(this::repaint));
 
 		model.addObserver(this);
 	}
@@ -224,7 +223,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private void calculateParameters() {
-		x0 = 0.15 * realW;
+		x0 = 0.1 * realW;
 
 		rectWidth = 2. / 21 * h;
 		cycleWidth = 3. / 2 * rectWidth;
@@ -268,12 +267,16 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private void drawExplainers(GraphicsContext gc) {
-		gc.setTextAlign(TextAlignment.LEFT);
+		gc.setTextAlign(TextAlignment.RIGHT);
 
-		double x = 0.05 * x0;
+		double x = 0.95 * x0;
 		double maxWidth = 0.90 * x0;
-		double y = h / 3 + rectGap / 2 + rectWidth / 2;
+		double y = h/6;
+
 		gc.beginPath();
+		gc.fillText("Waiting\nInstructions", x, y, maxWidth);
+
+		y = h / 3 + rectGap / 2 + rectWidth / 2;
 		gc.fillText("Stage 1: Fetch", x, y, maxWidth);
 
 		y += rectGap + rectWidth;
@@ -281,6 +284,10 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		y += rectGap + rectWidth;
 		gc.fillText("Stage 3: Execute", x, y, maxWidth);
+
+		y = 5 * h / 6;
+		gc.fillText("Completed\nInstructions", x, y, maxWidth);
+
 		gc.closePath();
 
 		gc.setTextAlign(TextAlignment.CENTER);
@@ -354,7 +361,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 
 			gc.setFill(Paint.valueOf("black"));
-			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
+			drawText(gc, "" + cycle, xCenter, 0.975 * h);
 		}
 
 		// Draw the addresses after the pipeline
@@ -389,11 +396,10 @@ public class PipelineView extends InternalWindow implements Observer {
 	public void repaint() {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.realW = canvas.getWidth();
-		this.realH = canvas.getHeight();
-		this.w = 0.85 * realW;
-		this.h = 0.95 * realH;
+		this.h = canvas.getHeight();
+		this.w = 0.9 * realW;
 
-		gc.clearRect(0, 0, realW, realH);
+		gc.clearRect(0, 0, realW, h);
 
 		if (isPipelined) {
 			calculateParameters();
@@ -401,7 +407,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
-			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, realH / 2);
+			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, h / 2);
 		}
 	}
 
@@ -426,7 +432,6 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.fillText(text, x, y, maxWidth);
 		gc.closePath();
 	}
-
 	private void drawText(GraphicsContext gc, String text, double x, double y) {
 		gc.beginPath();
 		gc.fillText(text, x, y);
