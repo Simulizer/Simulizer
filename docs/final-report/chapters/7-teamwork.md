@@ -9,17 +9,15 @@ In order to keep track of the tasks for each sprint, and any issues in the proje
 
 We realised immediately that we would need some form of instant messaging for our communication outside meetings, so we wanted to find something that would be well suited to teamwork activities. We decided on [Slack](https://slack.com), which has many features particularly useful for software development. By using Slack, different team members could communicate in different channels about different issues. We were also able to integrate Taiga and our GitHub repository with Taiga. This notified us when a commit was made and when a task was changed on Taiga. It was easy to communicate with everyone on Slack, both because the software was useful, but also because everyone would keep Slack open at home, and messages wouldn't go unread or unanswered.
 
-<!--![](segments/slack.png)-->
-`slack.png`
+![Slack](segments/slack.png){width=80%}
 
-Occasionsally we would use Skype if we needed to talk about something in more depth that we didn't get enough time to discuss during our meetings.
+Occasionally we would use Skype if we needed to talk about something in more depth that we didn't get enough time to discuss during our meetings.
 
 Early in the project, we invested some time into investigating tools that would improve our productivity and efficiency in the future. For example, we looked into using build automation tools like [Maven](https://maven.apache.org). We believed this would be important because we would be working with various dependencies, IDEs, and operating systems. Once we decided to use [Gradle](http://gradle.org), we configured it to work with our various development environments, and it allowed each member to specify required dependencies in a single file, which would be available to everyone through GitHub, and then everyone was synced with the same setup. Investing some time into this research has caused future development to run very smoothly and has allowed us to avoid potential problems with dependencies and configurations.
 
 As a more general plan project management tool, we used [Wrike](https://www.wrike.com) as an idealistic model of how our project would develop. By being able to view the entire span of the project in a single place, it meant we could more selectively choose tasks for our sprints to ensure that we would meet these goals. For example, for the prototype presentation, we knew we had to focus more on visualisation so that we would have something to show for our work, even though a lot had been done in the backend.
 
-<!-- ![](segments/wrike.png) -->
-`wrike.png`
+![Wrike](segments/wrike.png){width=80%}
 
 We have been lucky to have very few conflicts in the team, and thankfully the conflicts that *did* happen where based around design methodology. As mentioned, our team was very dedicated to the project, and so the conflicts were usually out of passion for a particular idea, and the discussions about these ideas allowed even better ideas and designs to come about. Moreover, each conflict was resolved before we moved; there wasn't an instance where a member just decided to do it 'their way' without prior agreement.
 
@@ -30,5 +28,3 @@ A feature of our teamwork and communication which has been integral to our devel
 We chose git as our version control system for various reasons. All of us were very familiar with git, meaning that we saved time by not relearning everything in svn. In addition, our branching model was achieved quite painlessly by using git. Merges were much easier than they would have been in svn, which allowed us to save valuable time during development. A small amount of research into the comparison of svn and git also helped us make this decision.
 
 Throughout the development of our system we needed a repository for files such as design documents, presentation slides, images, etc. We decided to use a shared Google Drive folder for this rather than our GitHub repository because we wanted to upload binary files and visual-based documents, which otherwise would have been more awkward to view and modify.
-
-**TODO: write a summary paragraph**
