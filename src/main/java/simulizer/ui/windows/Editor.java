@@ -1,16 +1,20 @@
 package simulizer.ui.windows;
 
 import java.io.File;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import javafx.application.Platform;
 import org.w3c.dom.Document;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ButtonType;
@@ -30,11 +34,15 @@ import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
-import simulizer.ui.theme.Theme;
-import simulizer.utils.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
-import simulizer.utils.*;
+import simulizer.ui.theme.Theme;
+import simulizer.utils.DebugUtils;
+import simulizer.utils.FileUtils;
+import simulizer.utils.SafeJSObject;
+import simulizer.utils.TemporaryObserver;
+import simulizer.utils.ThreadUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * Embedded Ace editor (formerly Mozilla Bespin)

@@ -1,11 +1,16 @@
 package simulizer.ui.components;
 
 import com.sun.javafx.scene.control.skin.resources.ControlResources;
+
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -59,7 +64,7 @@ public class SliderInputDialog extends Dialog<String> {
         this.sliderField.setMajorTickUnit(max / 2 - 1);
         this.sliderField.setMinorTickCount(5);
         this.sliderField.setBlockIncrement(0.01);
-        resultField = new Spinner(min, max, value);
+        resultField = new Spinner<Double>(min, max, value);
 
         this.sliderField.valueProperty().addListener((observable, oldValue, newValue) -> {
 			resultField.getValueFactory().setValue(newValue.doubleValue());

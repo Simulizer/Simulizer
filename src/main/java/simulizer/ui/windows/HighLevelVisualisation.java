@@ -86,7 +86,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		tab.setContent(vis);
 
 		// JavaFX doesn't appear to have an event to handle this
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		t.scheduleAtFixedRate(new TimerTask() {
 			private int runs = 0;
 
