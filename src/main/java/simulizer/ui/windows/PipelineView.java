@@ -268,6 +268,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		double x = 0.05 * x0;
 		double maxWidth = 0.90 * x0;
 		double y = h / 3 + rectGap / 2 + rectWidth / 2;
+		gc.beginPath();
 		gc.fillText("Stage 1: Fetch", x, y, maxWidth);
 
 		y += rectGap + rectWidth;
@@ -275,6 +276,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		y += rectGap + rectWidth;
 		gc.fillText("Stage 3: Execute", x, y, maxWidth);
+		gc.closePath();
 
 		gc.setTextAlign(TextAlignment.CENTER);
 	}
@@ -314,7 +316,9 @@ public class PipelineView extends InternalWindow implements Observer {
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
 				gc.setFill(Color.BLACK);
+				gc.beginPath();
 				gc.fillText(getShortName(addr), xCenter, yCenter);
+				gc.closePath();
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -339,7 +343,9 @@ public class PipelineView extends InternalWindow implements Observer {
 				else {
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 					gc.setFill(Color.BLACK);
+					gc.beginPath();
 					gc.fillText(getShortName(parts[a]), xCenter, yCenter);
+					gc.closePath();
 				}
 
 				yTracker += rectGap + rectWidth;
@@ -347,7 +353,9 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 
 			gc.setFill(Color.BLACK);
+			gc.beginPath();
 			gc.fillText("" + cycle, xCenter, 0.975 * realH);
+			gc.closePath();
 		}
 
 		// Draw the addresses after the pipeline
@@ -365,7 +373,9 @@ public class PipelineView extends InternalWindow implements Observer {
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
 				gc.setFill(Color.BLACK);
+				gc.beginPath();
 				gc.fillText(getShortName(addr), xCenter, yCenter);
+				gc.closePath();
 
 				yTracker += rectGap + rectWidth;
 				yCenter += rectGap + rectWidth;
@@ -394,20 +404,26 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
+			gc.beginPath();
 			gc.fillText("Check the CPU is running in pipelined mode to view this window", realW / 2, realH / 2);
+			gc.closePath();
 		}
 	}
 
 	// ***Utilities***
 
 	private void drawBorderedRectangle(GraphicsContext gc, double x, double y, double w, double h) {
+		gc.beginPath();
 		gc.fillRect(x, y, w, h);
 		gc.strokeRect(x, y, w, h);
+		gc.closePath();
 	}
 
 	private void drawBorderedCircle(GraphicsContext gc, double x, double y, double w, double h) {
+		gc.beginPath();
 		gc.fillOval(x, y, w, h);
 		gc.strokeOval(x, y, w, h);
+		gc.closePath();
 	}
 
 	// Thanks to http://stackoverflow.com/a/4129754
