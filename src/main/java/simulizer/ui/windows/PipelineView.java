@@ -76,6 +76,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	private double x0;
 	private double h;
 	private double realW;
+	private double realH;
 
 	public PipelineView() {
 		setTitle("Pipeline");
@@ -361,7 +362,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			}
 
 			gc.setFill(Paint.valueOf("black"));
-			drawText(gc, "" + cycle, xCenter, 0.975 * h);
+			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
 		}
 
 		// Draw the addresses after the pipeline
@@ -396,10 +397,11 @@ public class PipelineView extends InternalWindow implements Observer {
 	public void repaint() {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.realW = canvas.getWidth();
-		this.h = canvas.getHeight();
+		this.realH = canvas.getHeight();
 		this.w = 0.9 * realW;
+		this.h = 0.95 * realH;
 
-		gc.clearRect(0, 0, realW, h);
+		gc.clearRect(0, 0, realW, realH);
 
 		if (isPipelined) {
 			calculateParameters();
