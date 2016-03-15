@@ -2,18 +2,18 @@ package simulizer.simulation.exceptions;
 
 import simulizer.assembler.representation.Instruction;
 
-/**exception to be thrown in the case of a bad instruction being detected
+/**
+ * exception for problems involving bad instruction decodes
  * 
  * @author Charlie Street
  *
  */
-public class InstructionException extends Exception
-{
-	private static final long serialVersionUID = 1L;
+public class InstructionException extends Exception {
+	private static final long serialVersionUID = -5766056399227203336L;
+
 	private Instruction instruction;
 	
-	/**this method will call the exception super constructor and store the
-	 * instruction object
+	/**
 	 * @param message the exception message
 	 * @param instruction the instruction which caused the exception
 	 */
@@ -22,7 +22,12 @@ public class InstructionException extends Exception
 		super(message);
 		this.instruction = instruction;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {instruction = " + instruction + "}";
+	}
+
 	/**method returns the instruction which caused the exception
 	 * 
 	 * @return the instruction that caused the exception

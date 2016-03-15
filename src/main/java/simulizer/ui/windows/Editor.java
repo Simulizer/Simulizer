@@ -250,9 +250,11 @@ public class Editor extends InternalWindow {
 						continuousAssemblyInProgress = true;
 						Platform.runLater(this::refreshTitle);
 
+						DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
 						final List<Problem> problems = Assembler.checkForProblems(program);
 						Platform.runLater(() -> setProblems(problems));
 						lastProgramHash = thisProgramHash;
+						t.stopAndPrint();
 					}
 				} catch(TimeoutException | InterruptedException ignored) {
 					// its fine, just don't compile
@@ -645,6 +647,7 @@ public class Editor extends InternalWindow {
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void highlightPipeline(int fetchLine, int decodeLine, int executeLine) {
+		//TODO: see if synchronizing this method helps
 		jsWindow.call("highlightPipeline", fetchLine, decodeLine, executeLine);
 	}
 }

@@ -2,18 +2,18 @@ package simulizer.simulation.exceptions;
 
 import simulizer.simulation.instructions.InstructionFormat;
 
-/**for exceptions thrown during execution
+/**
+ * exception for problems encountered during the execution stage
  * 
  * @author Charlie Street
  *
  */
 public class ExecuteException extends Exception {
-	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -6358895526749092340L;
+
 	private InstructionFormat instruction;
 	
-	/**constructor calls super constructor and intialises field
-	 * 
+	/**
 	 * @param message the exception message
 	 * @param instruction the instruction that couldn't execute
 	 */
@@ -22,7 +22,12 @@ public class ExecuteException extends Exception {
 		super(message);
 		this.instruction = instruction;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {instruction = " + instruction + "}";
+	}
+
 	/**returns the instruction which caused the exception
 	 * 
 	 * @return the problematic instruction

@@ -132,6 +132,6 @@ public class UISimulationListener extends SimulationListener {
 
 	@Override
 	public void processProblemMessage(ProblemMessage m) {
-		wm.getIO().printString(IOStream.ERROR, "Simulation Problem:\n  " + m.message);
+		wm.getIO().printString(IOStream.ERROR, "Simulation Problem:\n  " + m.e + "\n");
 	}
 }

@@ -2,18 +2,18 @@ package simulizer.simulation.exceptions;
 
 import simulizer.assembler.representation.Program;
 
-/**this class is in use for reporting errors related to
- * the program objects being used
+/**
+ * exception for problems relating to the program object
+ *
  * @author Charlie Street
  *
  */
 public class ProgramException extends Exception {
+	private static final long serialVersionUID = 8126064369945353195L;
 
-	private static final long serialVersionUID = 1L;
 	private Program programData;
 	
-	/**constructor calls super constructor and initialises the program object
-	 * 
+	/**
 	 * @param message the exception message
 	 * @param programData the program which caused the exception
 	 */
@@ -22,8 +22,13 @@ public class ProgramException extends Exception {
 		super(message);
 		this.programData = programData;
 	}
-	
-	/**this method returns the errornous program
+
+	@Override
+	public String toString() {
+		return getMessage(); // can't display whole program object
+	}
+
+	/**this method returns the erroneous program
 	 * 
 	 */
 	public Program getProgram()

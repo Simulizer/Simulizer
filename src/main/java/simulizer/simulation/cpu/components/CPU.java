@@ -242,7 +242,7 @@ public class CPU {
 		try {
 			this.programCounter = getEntryPoint();// set the program counter to the entry point to the program
 		} catch (Exception e) {// if entry point load fails
-			sendMessage(new ProblemMessage(e.getMessage()));// send problem to logger
+			sendMessage(new ProblemMessage(e));
 		}
 
 		this.registers[Register.gp.getID()] = this.program.initialGP;// setting global pointer
@@ -320,8 +320,6 @@ public class CPU {
 	 * 
 	 * @param instruction
 	 *            instruction set up with all necessary data
-	 * @throws Exception
-	 *             thrown from execute in executor, refer to that method for more precise infro
 	 */
 	protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
 		this.programCounter = this.executor.execute(instruction, this.getProgramCounter());// will set the program counter if changed
@@ -372,10 +370,14 @@ public class CPU {
 		waitForNextTick();
 
 
-		if (this.programCounter.getValue() == this.lastAddress.getValue() + 4) {// if end of program reached
+		if (this.programCounter.getValue() == this.lastAddress.getValue()+4&&this.isRunning) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
 			stopRunning();
-			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. " + "This could be because you forgot to exit cleanly." + " To exit cleanly please call syscall with code 10."));
+			sendMessage(new ProblemMessage(
+					new MemoryException(
+							"Program tried to execute a program outside the text segment.\n" +
+							"  This could be because you forgot to exit cleanly.\n" +
+							"  To exit cleanly please call syscall with code 10.\n", programCounter)));
 			return;
 		}
 
@@ -414,7 +416,7 @@ public class CPU {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
 			} catch (MemoryException | DecodeException | InstructionException
 					| ExecuteException | HeapException | StackException e) {
-				sendMessage(new ProblemMessage(e.getMessage()));
+				sendMessage(new ProblemMessage(e));
 				isRunning = false;
 			}
 

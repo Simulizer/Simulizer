@@ -115,7 +115,7 @@ public class MessageManager {
 	}
 
 	public void waitForAllRunningTasks() {
-		for(Future t : tasks) {
+		for(Future<Void> t : tasks) {
 			if(!t.isDone()) {
 				try {
 					t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
