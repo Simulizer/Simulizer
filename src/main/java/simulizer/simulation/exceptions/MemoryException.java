@@ -2,19 +2,18 @@ package simulizer.simulation.exceptions;
 
 import simulizer.assembler.representation.Address;
 
-/**class used to represent erros occuring due to access of main memory
+/**
+ * exception for problems occurring due to access of main memory
  * 
  * @author Charlie Street
  *
  */
 public class MemoryException extends Exception {
+	private static final long serialVersionUID = -1504303791781141514L;
 
-
-	private static final long serialVersionUID = 1L;
 	private Address addressOfError;
 	
-	/**constructor calls super constructor and initialises error address field
-	 * 
+	/**
 	 * @param message exception message
 	 * @param addressOfError address of access where the error was thrown
 	 */
@@ -23,6 +22,12 @@ public class MemoryException extends Exception {
 		super(message);
 		this.addressOfError = addressOfError;
 	}
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {addressOfError = " + addressOfError + "}";
+	}
+
 	
 	/**returns the address where the error occured
 	 * 

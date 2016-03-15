@@ -24,6 +24,10 @@ public class ProgramStringBuilder {
         }
     }
 
+	public static String lineNumString(Integer i) {
+		return "line:" + i.toString() + " (" + (i+1) + " in the editor)";
+	}
+
     public static class DescriptiveStringBuilder {
 		private final StringBuilder sb = new StringBuilder();
 
@@ -53,7 +57,7 @@ public class ProgramStringBuilder {
 		}
 		public DescriptiveStringBuilder append(Label l) {
 			return
-			append("Label(").append(l.getName()).append("->").append(l.getLineNumber()).append(":")
+			append("Label(").append(l.getName()).append("->").append(lineNumString(l.getLineNumber())).append(":")
 					.append(l.getType()).append(")");
 		}
 		public DescriptiveStringBuilder append(Statement s) {
@@ -142,7 +146,7 @@ public class ProgramStringBuilder {
 
             for(Map.Entry<Label, Address> e : entries) {
                 sb.append("\t").append(e.getKey().getName()).append(" --> ")
-                    .append(e.getValue()).append(" : ").append(e.getKey().getLineNumber())
+                    .append(e.getValue()).append(" : ").append(lineNumString(e.getKey().getLineNumber()))
                     .append(" (").append(e.getKey().getType()).append(")\n");
             }
             sb.append("\n\n");
@@ -167,7 +171,7 @@ public class ProgramStringBuilder {
                 Integer.compare(e1.getValue(), e2.getValue()));
 
             for(Map.Entry<Address, Integer> e : entries) {
-                sb.append("\t").append(e.getKey()).append(" --> ").append(e.getValue()).append("\n");
+                sb.append("\t").append(e.getKey()).append(" --> ").append(lineNumString(e.getValue())).append("\n");
             }
             sb.append("\n\n");
         }

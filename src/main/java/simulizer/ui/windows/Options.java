@@ -42,7 +42,7 @@ public class Options extends InternalWindow {
 	public Options() {
 		pane = new GridPane();
 
-		folders = new TreeView<String>();
+		folders = new TreeView<>();
 		GridPane.setVgrow(folders, Priority.ALWAYS);
 		GridPane.setHgrow(folders, Priority.SOMETIMES);
 		folders.getStyleClass().add("tree");
@@ -62,7 +62,7 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void ready() {
-		ObjectSetting settings = (ObjectSetting) getWindowManager().getSettings().getAllSettings();
+		ObjectSetting settings = getWindowManager().getSettings().getAllSettings();
 
 		FolderItem options = new FolderItem(settings);
 		options.setExpanded(true);
@@ -80,14 +80,14 @@ public class Options extends InternalWindow {
 	}
 
 	private void createTree(FolderItem root, ObjectSetting settings) {
-		for (SettingValue<?> value : settings.getValue()) {
-			if (value.getSettingType() == SettingType.OBJECT) {
-				FolderItem innerItem = new FolderItem((ObjectSetting) value);
-				createTree(innerItem, (ObjectSetting) value);
-				innerItem.setExpanded(true);
-				root.getChildren().add(innerItem);
-			}
-		}
+		settings.getValue().stream()
+				.filter(value -> value.getSettingType() == SettingType.OBJECT)
+				.forEach(value -> {
+			FolderItem innerItem = new FolderItem((ObjectSetting) value);
+			createTree(innerItem, (ObjectSetting) value);
+			innerItem.setExpanded(true);
+			root.getChildren().add(innerItem);
+		});
 		root.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 

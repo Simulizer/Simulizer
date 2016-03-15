@@ -1,13 +1,18 @@
 package simulizer.simulation.exceptions;
 
-/**class for exceptions raised by the stack
+/**
+ * exception for problems related to the stack
  * 
  * @author Charlie Street
  *
  */
 public class StackException extends Exception {
 	private static final long serialVersionUID = 3575131873818521606L;
-	private int stackAddress;//address relative 0 point of stack
+
+	/**
+	 * address relative to the base of the stack (index 0)
+	 */
+	private int stackAddress;
 	
 	/**constructor calls super constructor and initialises field
 	 * 
@@ -19,7 +24,12 @@ public class StackException extends Exception {
 		super(message);
 		this.stackAddress = stackAddress;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {stackAddress = " + stackAddress + "}";
+	}
+
 	/**method will return the internal address where there was an error with the stack
 	 * 
 	 * @return internal stack address of error
