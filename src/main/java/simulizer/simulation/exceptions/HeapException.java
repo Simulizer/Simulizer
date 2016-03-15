@@ -2,19 +2,19 @@ package simulizer.simulation.exceptions;
 
 import simulizer.assembler.representation.Address;
 
-/**this class used for reporting errors related with the heap
+/**
+ * exception for problems related to the heap
  * 
  * @author Charlie Street
  *
  */
-public class HeapException extends Exception
-{
-	private static final long serialVersionUID = 1L;
+public class HeapException extends Exception {
+	private static final long serialVersionUID = 6007698896140851786L;
+
 	private Address breakOfHeap;
 	private int heapSize;
 	
-	/**constructor sets up the exception and sets up the other data associated with the class
-	 * 
+	/**
 	 * @param message the error message of the exception
 	 * @param breakOfHeap the current location of the break
 	 * @param heapSize the current heap size
@@ -25,7 +25,12 @@ public class HeapException extends Exception
 		this.breakOfHeap = breakOfHeap;
 		this.heapSize = heapSize;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {breakOfHeap = " + breakOfHeap + ", heapSize=" + heapSize + "}";
+	}
+
 	/**return the current heap break point
 	 * 
 	 * @return the current break point

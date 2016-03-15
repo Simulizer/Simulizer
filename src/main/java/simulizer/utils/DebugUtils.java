@@ -32,9 +32,6 @@ public class DebugUtils {
 			start = System.currentTimeMillis();
 			duration = -1;
 		}
-		public Timer() {
-			this("Timer");
-		}
 
 		public long stop() {
 			duration = System.currentTimeMillis() - start;

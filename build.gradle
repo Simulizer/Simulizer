@@ -110,6 +110,7 @@ apply plugin: 'eclipse'
 compileJava {
     sourceCompatibility = 1.8   // JVM version to use when compiling
     targetCompatibility = 1.8   // JVM version to build for
+    options.compilerArgs << '-Xlint:all' << '-Werror'
 }
 
 defaultTasks 'build', 'run'

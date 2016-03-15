@@ -2,17 +2,18 @@ package simulizer.simulation.exceptions;
 
 import simulizer.assembler.representation.operand.Operand;
 
-/**this class is an exception for problems occuring during decode
+/**
+ * exception for problems encountered during the decode stage
  * 
  * @author Charlie Street
  *
  */
 public class DecodeException extends Exception {
-	
+	private static final long serialVersionUID = -8469924611641506049L;
+
 	private Operand operand;
 	
-	/**constructor calls super constructor of exception
-	 * and sets the operand
+	/**
 	 * @param message the exception message
 	 * @param operand the operand which caused the error
 	 */
@@ -21,7 +22,12 @@ public class DecodeException extends Exception {
 		super(message);
 		this.operand = operand;
 	}
-	
+
+	@Override
+	public String toString() {
+		return getMessage() + ". Details: {operand = " + operand + "}";
+	}
+
 	/**returns the operand which threw the exception
 	 * 
 	 * @return the operand which caused the exception

@@ -21,7 +21,11 @@ public class InstructionFormat {
 		this.instruction = instruction;
 		this.mode =  null;//will be set by subclasses 
 	}
-	
+
+	@Override public String toString() {
+		return "InstructionFormat(mode="+mode+", instruction="+instruction+")";
+	}
+
 	/**returns the instruction to be executed
 	 * 
 	 * @return the instruction encapsulated in this object

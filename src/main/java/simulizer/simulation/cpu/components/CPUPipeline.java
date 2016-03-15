@@ -203,9 +203,12 @@ public class CPUPipeline extends CPU {
 		} else if(this.isFinished==2) { //ending termination
 			//exiting cleanly but representing that in reality an error would be thrown
 			this.isRunning = false;
-			sendMessage(new ProblemMessage("Program tried to execute a program outside the text segment. "
-					+ "This could be because you forgot to exit cleanly."
-					+ " To exit cleanly please call syscall with code 10."));
+
+			sendMessage(new ProblemMessage(
+					new MemoryException(
+							"Program tried to execute a program outside the text segment.\n" +
+									"  This could be because you forgot to exit cleanly.\n" +
+									"  To exit cleanly please call syscall with code 10.\n", programCounter)));
 		}
 		
 		if(this.programCounter.getValue() == this.lastAddress.getValue()+4 && this.isFinished == 0) {//if end of program reached
