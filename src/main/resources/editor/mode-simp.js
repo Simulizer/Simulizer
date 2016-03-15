@@ -195,7 +195,7 @@ var DocumentHighlightRules = function() {
     SimpHighlightRules.call(this);
 
     var startRules = [
-        { token: 'keyword',
+        { token: 'support.function.directive.assembly.annotation',
           regex: '@\{',
           push: 'js-start'
         }
@@ -209,11 +209,11 @@ var DocumentHighlightRules = function() {
                   'variable.parameter.register.assembly'],// match register name
           regex: registerRegex,
         },
-        { token: 'keyword',
+        { token: 'support.function.directive.assembly.annotation',
           regex: '\}@$', // annotation right up to EOL
           next:  'start'
         },
-        { token: 'keyword',
+        { token: 'support.function.directive.assembly.annotation',
           regex: '\}@', // annotation with comment after
           next:  'comment'
         },
