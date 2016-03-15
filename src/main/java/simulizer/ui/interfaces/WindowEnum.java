@@ -20,6 +20,7 @@ public enum WindowEnum {
 	MEMORY_VIEW("MemoryView", "Memory View"),
 	REGISTERS("Registers"),
 	SYSCALL_REFERENCE("help.SyscallReference", "Syscall Reference", false),
+	REGISTER_REFERENCE("help.RegisterReference", "Register Reference", false),
 	INSTRUCTION_REFERENCE("help.InstructionReference", "Instruction Reference", false);
 	// @formatter:on
 

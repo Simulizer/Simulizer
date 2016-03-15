@@ -334,7 +334,8 @@ public class MainMenuBar extends MenuBar {
 				double speed = -1;
 				try {
 					speed = Double.parseDouble(input);
-				} catch (NumberFormatException ignored) { /* speed == -1 */ }
+				} catch (NumberFormatException ignored) {
+					/* speed == -1 */ }
 
 				if (speed >= 0) {
 					cpu.setCycleFreq(speed);
@@ -410,6 +411,9 @@ public class MainMenuBar extends MenuBar {
 		MenuItem instruction = new MenuItem("Instruction Reference");
 		instruction.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.INSTRUCTION_REFERENCE));
 
+		MenuItem register = new MenuItem("Register Reference");
+		register.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.REGISTER_REFERENCE));
+
 		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
 		keyBinds.setOnAction(e -> {
 			String url = "https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts";
@@ -418,7 +422,7 @@ public class MainMenuBar extends MenuBar {
 			}
 		});
 
-		helpMenu.getItems().addAll(guide, syscall, instruction, new SeparatorMenuItem(), keyBinds);
+		helpMenu.getItems().addAll(guide, syscall, instruction, register, new SeparatorMenuItem(), keyBinds);
 
 		return helpMenu;
 	}

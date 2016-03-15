@@ -45,7 +45,7 @@ public abstract class InternalWindow extends Window {
 		getRightIcons().add(close);
 
 		// Bring to front when clicked
-		onMouseClickedProperty().addListener((e) -> toFront());
+		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
 
 		// Update layout on move/resize
 		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(this::calculateLayout));
@@ -74,7 +74,7 @@ public abstract class InternalWindow extends Window {
 	 * @param layHeight
 	 *            the normalised height of the InternalWindow
 	 */
-	public void setNormalisedDimentions(double layX, double layY, double layWidth, double layHeight) {
+	public final void setNormalisedDimentions(double layX, double layY, double layWidth, double layHeight) {
 		this.layX = layX;
 		this.layY = layY;
 		this.layWidth = layWidth;
@@ -135,11 +135,11 @@ public abstract class InternalWindow extends Window {
 	 * @param grid
 	 *            the GridBounds to snap to
 	 */
-	public void setGridBounds(GridBounds grid) {
+	public final void setGridBounds(GridBounds grid) {
 		if (grid != null) {
 			// Thanks to: http://stackoverflow.com/questions/10773000/how-to-listen-for-resize-events-in-javafx#answer-25812859
 			addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-				private final Timer timer = new Timer();
+				private final Timer timer = new Timer(true);
 				private TimerTask task = null;
 				private final long delayTime = grid.getTimeout(); // Delay before resize to grid
 				private double width = getWidth(), height = getHeight();
@@ -194,14 +194,13 @@ public abstract class InternalWindow extends Window {
 	/**
 	 * @return if the window is closed or not
 	 */
-	public boolean isClosed() {
+	public final boolean isClosed() {
 		return isClosed;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return  obj instanceof InternalWindow &&
-				WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
+		return obj instanceof InternalWindow && WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
 	}
 
 	/**
