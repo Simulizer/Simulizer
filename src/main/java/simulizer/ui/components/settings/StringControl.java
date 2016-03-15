@@ -30,7 +30,13 @@ public class StringControl extends GridPane {
 		GridPane.setVgrow(value, Priority.SOMETIMES);
 		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.textProperty().addListener((e) -> setting.setValue(value.getText()));
+		value.textProperty().addListener(e -> {
+			try {
+				setting.setValue(value.getText());
+			} catch (IllegalArgumentException ex) {
+				// TODO: Notify user of invalid setting
+			}
+		});
 		add(value, 1, 0);
 
 		// Tooltip

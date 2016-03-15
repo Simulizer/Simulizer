@@ -70,6 +70,8 @@ public abstract class SettingValue<E> {
 	 *            the value to set the setting to
 	 */
 	public void setValue(E value) {
+		if (!isValid(value))
+			throw new IllegalArgumentException(value + " is not valid for this setting");
 		this.value = value;
 
 		// TODO: Check this doesn't need another thread

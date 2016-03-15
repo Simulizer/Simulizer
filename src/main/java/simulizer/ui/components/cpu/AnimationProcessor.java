@@ -1,58 +1,60 @@
 package simulizer.ui.components.cpu;
 
-import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
+import javafx.concurrent.Task;
+import simulizer.assembler.representation.Instruction;
 import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUListener;
+import simulizer.ui.windows.help.SyscallReference;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
+import java.util.ArrayList;
+import java.util.concurrent.*;
+
 public class AnimationProcessor {
 
-	class Animation {
-		public int time;
-		public Runnable job;
+    class Animation{
+        public int time;
+        public Runnable job;
 
-		public Animation(int time, Runnable job) {
-			this.time = time;
-			this.job = job;
-		}
+        public Animation(int time, Runnable job){
+            this.time = time;
+            this.job = job;
+        }
 
-	}
+    }
 
-	private final ScheduledExecutorService executorService;
-	private final ScheduledFuture<?> executorTask;
-	private final PriorityBlockingQueue<Animation> animationTasks;
+
+    private final ScheduledExecutorService executorService;
+    private final ScheduledFuture<?> executorTask;
+    private final PriorityBlockingQueue<Animation> animationTasks;
 	private long cycleStartTime; // in ms
 	private int dispatchInterval; // in ms
 
-	public CPUListener cpuListener;
-	public CPU cpuVisualisation;
+    public CPUListener cpuListener;
+    public CPU cpuVisualisation;
 
-	public boolean showingWarning;
+    public boolean showingWarning;
 
-	public AnimationProcessor(CPU cpuVisualisation) {
-		this.cpuVisualisation = cpuVisualisation;
+    public AnimationProcessor(CPU cpuVisualisation){
+        this.cpuVisualisation = cpuVisualisation;
 
-		dispatchInterval = 20;
-		cycleStartTime = -1;
+        dispatchInterval = 20;
+        cycleStartTime = -1;
 
-		showingWarning = false;
+        showingWarning = false;
 
-		animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.time, a2.time));
-		executorService = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("CPU-Visualisation-Job-Dispatch"));
-		executorTask = executorService.scheduleAtFixedRate(this::dispatchAnimationJobs, dispatchInterval, dispatchInterval, TimeUnit.MILLISECONDS);
+        animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.time, a2.time));
+        executorService = Executors.newSingleThreadScheduledExecutor(
+                new ThreadUtils.NamedThreadFactory("CPU-Visualisation-Job-Dispatch"));
+        executorTask = executorService.scheduleAtFixedRate(
+				this::dispatchAnimationJobs, dispatchInterval, dispatchInterval, TimeUnit.MILLISECONDS);
 
-	}
+    }
 
 	public synchronized void newCycle() {
 		cycleStartTime = System.currentTimeMillis();
-		if (!animationTasks.isEmpty()) {
+		if(!animationTasks.isEmpty()) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -63,11 +65,11 @@ public class AnimationProcessor {
 	}
 
 	private void dispatchAnimationJobs() {
-		if (!animationTasks.isEmpty()) {
+		if(!animationTasks.isEmpty()) {
 			// Are there animation jobs?
-			if (cpuListener.getSimCpu().getCycleFreq() > 2) {
+			if(cpuListener.getSimCpu().getCycleFreq() > 2) {
 				animationTasks.clear();
-				if (!showingWarning) {
+				if(!showingWarning) {
 					cpuVisualisation.showText("Please lower the clock speed to less than 2Hz to see animations", 1000, false);
 					showingWarning = true;
 				}
@@ -95,27 +97,40 @@ public class AnimationProcessor {
 		}
 	}
 
-	public void setCpuListener(CPUListener cpuListener) {
-		this.cpuListener = cpuListener;
-	}
+    public void setCpuListener(CPUListener cpuListener){
+        this.cpuListener = cpuListener;
+    }
 
-	public void shutdown() {
-		executorTask.cancel(true);
-		executorService.shutdownNow();
-	}
+    public void shutdown() {
+        executorTask.cancel(true);
+        executorService.shutdownNow();
+    }
 
-	public void addAnimationTask(Runnable job, int delay) {
-		animationTasks.add(new Animation(delay, job));
+	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+		int thisDelay = 0;
+		for(Runnable r : jobs) {
+			animationTasks.add(new Animation(thisDelay, r));
+			thisDelay += delay;
+		}
 	}
 
 	/**
 	 * Schedule several animation tasks with a fixed delay in between
 	 */
-	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+	public void scheduleRegularAnimations(String instructionName, int delay, Runnable... jobs) {
 		int thisDelay = 0;
-		for (Runnable r : jobs) {
-			addAnimationTask(r, thisDelay);
+		ArrayList<Animation> animationsForInstruction = new ArrayList<>();
+		for(Runnable r : jobs) {
+			Animation animation = new Animation(thisDelay, r);
+			animationTasks.add(animation);
+			animationsForInstruction.add(animation);
 			thisDelay += delay;
 		}
+		cpuVisualisation.previousInstructions.addInstruction(instructionName, animationsForInstruction);
+	}
+
+	public void replayAnimations(ArrayList<Animation> animations){
+		newCycle();
+		animationTasks.addAll(animations);
 	}
 }

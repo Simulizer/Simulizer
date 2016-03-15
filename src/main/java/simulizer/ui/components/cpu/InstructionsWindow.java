@@ -16,41 +16,53 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.util.Callback;
+import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.messages.DataMovementMessage;
 import simulizer.simulation.messages.InstructionTypeMessage;
 import simulizer.simulation.messages.Message;
 import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.ui.components.cpu.listeners.CPUListener;
 
+import java.util.ArrayList;
+
 public class InstructionsWindow extends StackPane {
 
-    ObservableList<Message> instructions;
-    ListView<Message> instructionsList;
-    CPUListener cpuListener;
+    ObservableList<PreviousAnimation> instructions;
+    ListView<PreviousAnimation> instructionsList;
+    AnimationProcessor animationProcessor;
 
-    static class ButtonCell extends ListCell<Message> {
+    public class PreviousAnimation{
+
+        public String name;
+        public ArrayList<AnimationProcessor.Animation> animations;
+
+        public PreviousAnimation(String name, ArrayList<AnimationProcessor.Animation> animations){
+            this.name = name;
+            this.animations = animations;
+        }
+
+    }
+
+    static class ButtonCell extends ListCell<PreviousAnimation> {
         HBox hbox = new HBox();
         Label label = new Label("(empty)");
         Pane pane = new Pane();
         Button button = new Button("Replay");
-        Message lastItem;
-        CPUListener cpuListener;
+        PreviousAnimation lastItem;
+        AnimationProcessor animationProcessor;
 
-        public ButtonCell(CPUListener cpuListener) {
+        public ButtonCell(AnimationProcessor animationProcessor) {
             super();
-            this.cpuListener = cpuListener;
+            this.animationProcessor = animationProcessor;
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
-            button.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    cpuListener.replayInstruction(lastItem);
-                }
+            button.setOnAction((e) -> {
+                animationProcessor.replayAnimations(lastItem.animations);
             });
         }
 
         @Override
-        protected void updateItem(Message t, boolean empty) {
+        protected void updateItem(PreviousAnimation t, boolean empty) {
             super.updateItem(t, empty);
             setText(null);  // No text in label of super class
             if (empty) {
@@ -59,13 +71,7 @@ public class InstructionsWindow extends StackPane {
             } else {
                 lastItem = t;
                 if (t != null) {
-                    if (t instanceof DataMovementMessage){
-                        label.setText(((DataMovementMessage) t).getInstruction().get().getInstruction().name());
-                    } else if(t instanceof InstructionTypeMessage){
-                        label.setText(((InstructionTypeMessage) t).getMode().name());
-                    } else if(t instanceof StageEnterMessage){
-                        label.setText(((StageEnterMessage) t).getStage().name());
-                    }
+                    label.setText(t.name);
                     label.setFont(new Font("Arial", 14));
                     button.setFont(new Font("Arial", 14));
                 }
@@ -75,47 +81,28 @@ public class InstructionsWindow extends StackPane {
         }
     }
 
-    public InstructionsWindow(){
+    public InstructionsWindow(AnimationProcessor animationProcessor){
         instructions = FXCollections.observableArrayList();
-        instructionsList = new ListView<Message>(instructions);
+        instructionsList = new ListView<PreviousAnimation>(instructions);
         getChildren().add(instructionsList);
+        this.animationProcessor = animationProcessor;
 
-        instructionsList.setCellFactory(new Callback<ListView<Message>, ListCell<Message>>(){
-
-            @Override
-            public ListCell<Message> call(ListView<Message> p) {
-
-                return new ButtonCell(cpuListener);
-            }
-        });
-
+        instructionsList.setCellFactory(e -> new ButtonCell(animationProcessor));
         instructionsList.setPlaceholder(new Label("No instructions to replay"));
 
     }
 
-    public void attachListener(CPUListener cpuListener){
-        this.cpuListener = cpuListener;
-    }
-
-    public void addInstruction(Message message){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                instructions.add(0, message);
-
-                if(instructions.size() > 10){
-                    instructions.remove(instructions.size() - 1);
-                }
-            }
+    public void addInstruction(String name, ArrayList<AnimationProcessor.Animation> animations){
+        Platform.runLater(() -> {
+            instructions.add(0, new PreviousAnimation(name, animations));
+            if(instructions.size() > 10)
+                instructions.remove(instructions.size() - 1);
         });
     }
 
     public void removeInstruction(Message message){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                instructions.remove(message);
-            }
+        Platform.runLater(() -> {
+            instructions.remove(message);
         });
     }
 
