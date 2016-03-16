@@ -1,7 +1,6 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Queue;
 
@@ -19,6 +18,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
 import simulizer.highlevel.models.ListModel.Action;
+import simulizer.highlevel.models.ListModel.Emphasise;
+import simulizer.highlevel.models.ListModel.Marker;
 import simulizer.highlevel.models.ListModel.Swap;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -73,8 +74,10 @@ public class ListVisualiser extends DataStructureVisualiser {
 	@Override
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-		actionQueue.add((Action) obj);
-		runAnimations();
+		if (obj != null) {
+			actionQueue.add((Action) obj);
+			runAnimations();
+		}
 	}
 
 	private void runAnimations() {
@@ -83,33 +86,44 @@ public class ListVisualiser extends DataStructureVisualiser {
 		else {
 			Action action = actionQueue.poll();
 
-			// Currently only swaps are implemented
-			if (!(action instanceof Swap))
-				return;
+			if (action instanceof Swap) {
+				// Swap action
+				Swap swap = (Swap) action;
 
-			Swap swap = (Swap) action;
+				Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.3), e -> {
+					// Apply Update
+					list = swap.list;
 
-			Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.3), e -> {
-				// Apply Update
-				list = swap.list;
+					animating = false;
+					repaint();
 
-				animating = false;
+					if (actionQueue.isEmpty()) {
+						timer.stop();
+						System.out.println("List animation timer stopped");
+					} else
+						runAnimations();
+				}));
+
+				timeline.setCycleCount(1);
+				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
+
+				timer.start();
+				timeline.play();
+
+				animating = true;
+			} else if (action instanceof Marker) {
+				// Marker Action
+				Marker marker = (Marker) action;
+				//TODO: Marker animation
+			} else if (action instanceof Emphasise) {
+				// Emphasise action
+				Emphasise emphasise = (Emphasise) action;
+				//TODO: Emphasise animation
+			} else {
+				// List changed
+				list = action.list;
 				repaint();
-
-				if (actionQueue.isEmpty()) {
-					timer.stop();
-					System.out.println("List animation timer stopped");
-				} else
-					runAnimations();
-			}));
-
-			timeline.setCycleCount(1);
-			timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
-
-			timer.start();
-			timeline.play();
-
-			animating = true;
+			}
 		}
 	}
 

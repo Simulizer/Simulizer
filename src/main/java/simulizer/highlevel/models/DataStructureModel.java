@@ -7,10 +7,14 @@ public abstract class DataStructureModel extends Observable {
 
 	public void show() {
 		visible = true;
+		setChanged();
+		notifyObservers();
 	}
 
 	public void hide() {
 		visible = false;
+		setChanged();
+		notifyObservers();
 	}
 
 	public boolean isVisible() {
