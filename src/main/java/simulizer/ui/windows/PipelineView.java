@@ -126,7 +126,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		});
 
 		instructionInfoLabel.setStyle("-fx-font-family: monospace");
-		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 50));
+		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 20));
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
 			double eventX = e.getX(), eventY = e.getY();
@@ -282,6 +282,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		double maxWidth = 0.90 * x0;
 		double y = h / 6;
 
+		gc.setFill(Paint.valueOf("black"));
+
 		gc.beginPath();
 		gc.fillText("Waiting\nInstructions", x, y, maxWidth);
 
@@ -333,10 +335,11 @@ public class PipelineView extends InternalWindow implements Observer {
 			double xLeft = xCenter - rectWidth / 2;
 
 			for (Address addr : before) {
-				gc.setFill(getColor(addr));
+				Color bg = getColor(addr);
+				gc.setFill(bg);
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Paint.valueOf("black"));
+				gc.setFill(getTextColor(bg));
 				drawText(gc, getShortName(addr), xCenter, yCenter, rectWidth);
 
 				yTracker += rectGap + rectWidth;
@@ -357,11 +360,12 @@ public class PipelineView extends InternalWindow implements Observer {
 			Address[] parts = { state.fetched, state.decoded, state.executed };
 
 			for (int a = 0; a < 3; ++a) {
-				gc.setFill(getColor(parts[a]));
+				Color bg = getColor(parts[a]);
+				gc.setFill(bg);
 				if (parts[a] == null) drawBorderedCircle(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
-					gc.setFill(Paint.valueOf("black"));
+					gc.setFill(getTextColor(bg));
 					drawText(gc, getShortName(parts[a]), xCenter, yCenter);
 				}
 
@@ -384,10 +388,11 @@ public class PipelineView extends InternalWindow implements Observer {
 			double xLeft = xCenter - rectWidth / 2;
 
 			for (Address addr : after) {
-				gc.setFill(getColor(addr));
+				Color bg = getColor(addr);
+				gc.setFill(bg);
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth);
 
-				gc.setFill(Paint.valueOf("black"));
+				gc.setFill(getTextColor(bg));
 				drawText(gc, getShortName(addr), xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
@@ -450,7 +455,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	// Reading: http://krazydad.com/tutorials/makecolors.php
-	private static Paint getColor(Address address) {
+	private static Color getColor(Address address) {
 		if (address == null) return Color.RED.brighter();
 
 		int hexM = address.getValue() % 128;
@@ -461,6 +466,18 @@ public class PipelineView extends InternalWindow implements Observer {
 		// @formatter:on
 
 		return Color.rgb(red, green, blue);
+	}
+
+	// Thanks to http://stackoverflow.com/a/3943023
+	private static Paint getTextColor(Color backgroundColor) {
+		double r = backgroundColor.getRed() * 255;
+		double g = backgroundColor.getGreen() * 255;
+		double b = backgroundColor.getBlue() * 255;
+
+		System.out.println(r * 0.299 + g * 0.587 + b * 0.114);
+
+		if (r * 0.299 + g * 0.587 + b * 0.114 > 90) return Paint.valueOf("black");
+		else return Paint.valueOf("white");
 	}
 
 	private static String getShortName(Address address) {
@@ -475,40 +492,42 @@ public class PipelineView extends InternalWindow implements Observer {
 		PipelineHazardMessage.Hazard h = hOpt.get();
 		String description;
 
+		// TODO format this tomorrow
 		// Descriptions from wikipedia: https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29#Read_After_Write_.28RAW.29
 		// @formatter:off
-		switch (h) {
-			case RAW:
-				description =
-								     "A read after write (RAW) data hazard refers\n"
-				  +"                  to a situation where an instruction refers to a result\n"
-				  +"                  that has not yet been calculated or retrieved.";
-				break;
-			case WAW:
-				description =
-				      				 "A write after write data hazard may occur in\n"
-				  +"                  a concurrent execution environment.\n"
-				  +					  "";
-				break;
-			case CONTROL:
-				description =
-					                 "Branching hazards (also known as control hazards)\n"
-				  +"                  occur with branches.\n"
-				  +                   "";
-				break;
-			default:
-				description =
-					"UNKNOWN\n"
-					+ "\n"
-					+ "";
-		}
-		// @formatter:on
+//		switch (h) {
+//			case RAW:
+//				description =
+//								     "Where an instruction refers\n"
+//				  +"			      to a result that has not\n"
+//				  +"                  yet been calculated or retrieved.";
+//				break;
+//			case WAW:
+//				description =
+//				      				 "A write after write data hazard\n"
+//				  +"                  may occur in a concurrent\n"
+//				  +"                  execution environment.\n"
+//				  +					  "";
+//				break;
+//			case CONTROL:
+//				description =
+//					                 "Branching hazards (also known\n"
+//				  +"                  as control hazards) occur with\n"
+//				  +"                  branches.";
+//				break;
+//			default:
+//				description =
+//					"UNKNOWN\n"
+//					+ "\n"
+//					+ "";
+//		}
+//		// @formatter:on
 
-	// @formatter:off
+		// @formatter:off
 		return String.format(
-			  "          Hazard: %s%n"
-			+ "     Description: %s%n",
-				h.toString(), description);
+			  "Hazard: %s%n %n %n ", h.toString());
+//			+ "     Description: %s%n",
+//				h.toString(), description);
 		// @formatter:on
 	}
 

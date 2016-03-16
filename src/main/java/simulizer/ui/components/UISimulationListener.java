@@ -9,11 +9,15 @@ import simulizer.assembler.representation.Program;
 import simulizer.lowlevel.models.PipelineHistoryModel;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IOStream;
-import simulizer.simulation.messages.*;
+import simulizer.simulation.messages.AnnotationMessage;
+import simulizer.simulation.messages.PipelineHazardMessage;
+import simulizer.simulation.messages.PipelineStateMessage;
+import simulizer.simulation.messages.ProblemMessage;
+import simulizer.simulation.messages.SimulationListener;
+import simulizer.simulation.messages.SimulationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
-import simulizer.ui.windows.Logger;
 import simulizer.ui.windows.PipelineView;
 
 /**
@@ -133,5 +137,15 @@ public class UISimulationListener extends SimulationListener {
 	@Override
 	public void processProblemMessage(ProblemMessage m) {
 		wm.getIO().printString(IOStream.ERROR, "Simulation Problem:\n  " + m.e + "\n");
+	}
+
+	@Override
+	public void processPipelineHazardMessage(PipelineHazardMessage m) {
+		PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
+		if (pipelineView != null) {
+			PipelineHistoryModel pipelineModel = pipelineView.getModel();
+			if (pipelineModel != null && wm.getCPU().isPipelined())
+				pipelineModel.processHazardStateMessage(m);
+		}
 	}
 }
