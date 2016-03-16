@@ -21,6 +21,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import simulizer.assembler.Assembler;
@@ -84,7 +85,7 @@ public class MainMenuBar extends MenuBar {
 
 		Menu play = createButton("/img/play.png", cpu.isRunning(), "Simulation > Assemble And Run", (e) -> {
 			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(cpu);
+				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		});
@@ -97,7 +98,7 @@ public class MainMenuBar extends MenuBar {
 		});
 
 		// Standard
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
+		getMenus().addAll(fileMenu(), editMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
 
 		// Debug
 		if ((boolean) wm.getSettings().get("debug"))
@@ -171,6 +172,72 @@ public class MainMenuBar extends MenuBar {
 		exitItem.setOnAction(e -> wm.shutdown());
 
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, options, exitItem);
+	}
+
+
+	private Menu editMenu() {
+		Menu editMenu = new Menu("Edit");
+		editMenu.setOnShowing((e) -> editMenuHelper(editMenu, true));
+		editMenuHelper(editMenu, false);
+		return editMenu;
+	}
+
+
+	private void passToEditor(KeyCode kc) {
+		Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+		if(e != null) {
+			e.handleKeyEvent(new KeyEvent(
+				KeyEvent.KEY_PRESSED, "", "", kc, false, true /*ctrl*/, false, false));
+		}
+	}
+	/**
+	 * Generates the edit menu
+	 */
+	private void editMenuHelper(Menu editMenu, boolean allowDisabling) {
+		// NOTE: these are handled inside the editor code instead (see Editor::Editor())
+		editMenu.getItems().clear();
+
+		Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+
+		MenuItem copy = new MenuItem("Copy");
+		copy.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
+		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+		copy.setOnAction((a) -> passToEditor(KeyCode.C));
+
+		MenuItem paste = new MenuItem("Paste");
+		paste.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
+		paste.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
+		paste.setOnAction((a) -> passToEditor(KeyCode.V));
+
+		MenuItem find = new MenuItem("Find");
+		find.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN));
+		find.setOnAction((a) -> passToEditor(KeyCode.F));
+
+		MenuItem gotoL = new MenuItem("Go To Line");
+		gotoL.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
+		gotoL.setOnAction((a) -> passToEditor(KeyCode.G));
+
+		MenuItem insertBreakpoint = new MenuItem("Insert Breakpoint");
+		insertBreakpoint.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
+		insertBreakpoint.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN));
+		insertBreakpoint.setOnAction((a) -> passToEditor(KeyCode.B));
+
+		MenuItem fontInc = new MenuItem("Increase Font Size");
+		fontInc.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN));
+		fontInc.setOnAction((a) -> passToEditor(KeyCode.PLUS));
+
+		MenuItem fontDec = new MenuItem("Decrease Font Size");
+		fontDec.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+		fontDec.setOnAction((a) -> passToEditor(KeyCode.MINUS));
+
+		CheckMenuItem wordWrap = new CheckMenuItem("Toggle Word Wrap");
+		wordWrap.setSelected(e!= null && e.getWrap());
+		wordWrap.setOnAction((a) -> {
+			if(e != null) e.setWrap(!e.getWrap());
+		});
+
+
+		editMenu.getItems().addAll(copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
 	}
 
 	/**
@@ -294,7 +361,7 @@ public class MainMenuBar extends MenuBar {
 		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
 			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(cpu);
+				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		});
