@@ -35,6 +35,7 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
 
 public class PipelineView extends InternalWindow implements Observer {
@@ -121,7 +122,17 @@ public class PipelineView extends InternalWindow implements Observer {
 				String name;
 				if (addr == null || (name = getShortName(addr)).equals(selectedAddress)) selectedAddress = null;
 				else selectedAddress = name;
+
+				int line = getWindowManager().getCPU().getProgram().lineNumbers.getOrDefault(ca.getValue(), -1);
+				if(line != -1) {
+					Editor ed = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+					if(ed != null) {
+						Platform.runLater(() -> ed.gotoLine(line));
+					}
+				}
+
 			} else selectedAddress = null;
+
 
 			repaint();
 
@@ -532,8 +543,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private String getAddressInfo(Address address) {
-		// TODO: make popup monospaced and line the fields up
-
 		CPU cpu = getWindowManager().getCPU();
 		Map<Address, Statement> textSegment = cpu.getProgram().textSegment;
 
