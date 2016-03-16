@@ -181,6 +181,8 @@ public class Editor extends InternalWindow {
 				editedSinceLabelUpdate = false;
 				updateObservers();
 			}
+			if(mode == Mode.EXECUTE_MODE && !getWindowManager().getCPU().isRunning())
+				editMode();
 		}, 0, 2, TimeUnit.SECONDS);
 
 
