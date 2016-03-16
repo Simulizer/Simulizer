@@ -270,7 +270,6 @@ public class PipelineView extends InternalWindow implements Observer {
 		assert (numColumnsToDraw >= 0);
 
 		if (snapToEnd) setStartCycle(model.size() - numColumnsToDraw);
-
 	}
 
 	/**
