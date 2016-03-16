@@ -107,10 +107,19 @@ public class UIUtils {
 			PrintWriter pw = new PrintWriter(sw);
 			pw.write("Thread:  " + where.getName() + "\n");
 			pw.write("At:      " + LocalDateTime.now().toString().replace("T", " ") + "\n");
-			pw.write("Cause:   " + e.getCause() + "\n");
-			pw.write("Message: " + e.getMessage() + "\n");
+			Throwable cause = e.getCause();
+			pw.write("Cause:   " + cause + "\n");
+			if(cause != null) {
+				pw.write("  Cause is another exception, see trace below the first.\n");
+			}
+			pw.write("Message: \"" + e.getMessage() + "\"\n");
 			pw.write("\n");
 			e.printStackTrace(pw);
+
+			if(cause != null) {
+				pw.write("\n\n--  Cause  --\n");
+				cause.printStackTrace(pw);
+			}
 			final String exceptionText = sw.toString();
 
 			// in case JavaFX is very broken

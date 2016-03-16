@@ -34,8 +34,9 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Logger extends InternalWindow implements Observer {
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Logger"));
-	private static final long BUFFER_TIME = 20;
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(
+			new ThreadUtils.NamedThreadFactory("Logger"));
+	private static final long BUFFER_TIME = 20; // milliseconds
 	private volatile boolean callUpdate = true;
 
 	private TextField input = new TextField();
@@ -47,7 +48,7 @@ public class Logger extends InternalWindow implements Observer {
 
 	private TabPane tabPane;
 	private boolean[] ioChanged;
-	private final StringBuilder[] logs;
+	private final StringBuilder[] logs; // the output streams
 	private TextArea[] outputs;
 
 	private boolean emphasise = true;
@@ -71,6 +72,7 @@ public class Logger extends InternalWindow implements Observer {
 			TextArea output = new TextArea();
 			output.setEditable(false);
 			output.textProperty().addListener((e) -> output.setScrollTop(Double.MAX_VALUE));
+			output.setOnMouseClicked((e) -> input.requestFocus());
 			tab.setContent(output);
 
 			ioChanged[i] = false;
@@ -175,7 +177,15 @@ public class Logger extends InternalWindow implements Observer {
 	public String nextMessage() {
 		try {
 			if (emphasise)
-				Platform.runLater(this::emphasise);
+				Platform.runLater(() -> {
+					// if already focused. Display a more subtle emphasis
+					if(input.isFocused())
+						emphasise(1.0); // scale factor 1 => no scale
+					else {
+						emphasise(1.1);
+						input.requestFocus();
+					}
+				});
 			submit.setDisable(false);
 			synchronized (this) { // cannot create new latch and count down at the same time
 				cdl = new CountDownLatch(1);
@@ -195,8 +205,8 @@ public class Logger extends InternalWindow implements Observer {
 	}
 
 	public synchronized void cancelNextMessage() {
-		cdl.countDown();
 		lastInputCancelled = true;
+		cdl.countDown();
 	}
 
 	@Override

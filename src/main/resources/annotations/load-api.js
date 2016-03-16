@@ -18,6 +18,7 @@ alert = function(msg){debug.alert(''+msg);};
 assert = function(cond){debug.assertTrue(cond);};
 
 // simulation bridge
+pause    = function(){simulation.pause();};
 stop     = function(){simulation.stop();};
 setSpeed = function(s){simulation.setSpeed(s);};
 

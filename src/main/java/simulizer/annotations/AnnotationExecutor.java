@@ -172,7 +172,7 @@ public class AnnotationExecutor {
 			if(sim == null || sim.cpu == null) {
 				io.printString(IOStream.DEBUG, "Simulation not running, REPL running in its own engine\n");
 			} else {
-				io.printString(IOStream.DEBUG, "Simulation running, REPL has access equal to annotations\n");
+				io.printString(IOStream.DEBUG, "Simulation running, REPL has the same access as annotations\n");
 			}
 
 			bindGlobal("io", io);

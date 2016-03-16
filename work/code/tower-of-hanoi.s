@@ -12,7 +12,7 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n?1 discs from pole 2 to pole 3 so they sit on disc n
 #
-# @{ var h = vis.load('tower-of-hanoi', false) }@
+# @{ var h = vis.load('tower-of-hanoi') }@
 
 
 .data    # variables section
@@ -46,8 +46,8 @@ main:
 
     blez $v0, ERROR_EXIT   # if input <= 0: exit
 
-nop # @{ h.show()                 }@
-    # @{ h.setNumDisks($v0.get()) }@
+nop # @{ h.setNumDisks($v0.get()) }@
+    # @{ h.show() }@ may open High Level Viz window depending on user settings
 
     # call function: MOVE
     li   $a0, 1

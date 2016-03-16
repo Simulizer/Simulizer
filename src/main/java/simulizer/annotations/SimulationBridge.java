@@ -22,6 +22,7 @@ public class SimulationBridge {
 	// set package-visible attributes using BridgeFactory
 	CPU cpu = null;
 
+	public void pause() { cpu.pause(); }
 	public void stop() {
 		cpu.stopRunning();
 	}

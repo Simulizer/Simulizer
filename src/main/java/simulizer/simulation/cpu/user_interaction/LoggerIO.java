@@ -24,7 +24,7 @@ public class LoggerIO extends Observable implements IO {
 	public int readInt() {
 		try {
 			String in = requestInput();
-			return in == null ? 0 : Integer.parseInt(in);
+			return in == null || in.isEmpty() ? 0 : Integer.parseInt(in);
 		} catch (NumberFormatException e) {
 			printString(IOStream.ERROR, e.getClass().getName() + ":\n\t" + e.getMessage() + "\n");
 		}
@@ -34,7 +34,7 @@ public class LoggerIO extends Observable implements IO {
 	@Override
 	public char readChar() {
 		String in = requestInput();
-		return in == null ? '\0' : in.charAt(0);
+		return in == null || in.isEmpty() ? '\0' : in.charAt(0);
 	}
 
 	@Override
@@ -47,19 +47,19 @@ public class LoggerIO extends Observable implements IO {
 	@Override
 	public void printString(IOStream stream, String str) {
 		setChanged();
-		notifyObservers(new Pair<IOStream, String>(stream, str));
+		notifyObservers(new Pair<>(stream, str));
 	}
 
 	@Override
 	public void printInt(IOStream stream, int num) {
 		setChanged();
-		notifyObservers(new Pair<IOStream, String>(stream, "" + num));
+		notifyObservers(new Pair<>(stream, "" + num));
 	}
 
 	@Override
 	public void printChar(IOStream stream, char letter) {
 		setChanged();
-		notifyObservers(new Pair<IOStream, String>(stream, "" + letter));
+		notifyObservers(new Pair<>(stream, "" + letter));
 	}
 
 	private String requestInput() {

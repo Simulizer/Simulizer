@@ -8,23 +8,20 @@ import simulizer.ui.interfaces.WindowEnum;
 /**
  * A collection of methods for controlling high level visualisations from annotations
  */
+@SuppressWarnings("unused")
 public class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
 	WindowManager wm;
 
 	public DataStructureModel load(String visualisationName) {
-		return load(visualisationName, true);
+		DataStructureModel m = wm.getHLVisualManager().create(visualisationName);
+		m.show();
+		return m;
 	}
 
-	public DataStructureModel load(String visualisationName, boolean showNow) {
-		// TODO: ThreadUtil.runAndWait()
-		if (showNow) show();
-
-		DataStructureModel output = wm.getHLVisualManager().create(visualisationName, showNow);
-
-		return output;
-
+	public DataStructureModel loadHidden(String visualisationName) {
+		return wm.getHLVisualManager().create(visualisationName);
 	}
 
 	public void show() {

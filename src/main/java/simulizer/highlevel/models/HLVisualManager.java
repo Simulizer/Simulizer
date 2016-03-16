@@ -9,10 +9,10 @@ import javafx.util.Pair;
 
 public class HLVisualManager extends Observable {
 
-	private final Set<DataStructureModel> models = new HashSet<DataStructureModel>();
+	private final Set<DataStructureModel> models = new HashSet<>();
 
-	public DataStructureModel create(String visualiser, boolean showNow) {
-		DataStructureModel model = null;
+	public DataStructureModel create(String visualiser) {
+		DataStructureModel model;
 		switch (visualiser) {
 			case "tower-of-hanoi":
 				model = new HanoiModel();
@@ -27,19 +27,15 @@ public class HLVisualManager extends Observable {
 				throw new IllegalArgumentException();
 		}
 		models.add(model);
-		if (showNow)
-			model.show();
-		else
-			model.hide();
 		setChanged();
-		notifyObservers(new Pair<Action, DataStructureModel>(Action.CREATED, model));
+		notifyObservers(new Pair<>(Action.CREATED, model));
 		return model;
 	}
 
 	public void remove(DataStructureModel model) {
 		models.remove(model);
 		setChanged();
-		notifyObservers(new Pair<Action, DataStructureModel>(Action.DELETED, model));
+		notifyObservers(new Pair<>(Action.DELETED, model));
 	}
 
 	public void removeAll() {
@@ -48,7 +44,7 @@ public class HLVisualManager extends Observable {
 			DataStructureModel model = iterator.next();
 			iterator.remove();
 			setChanged();
-			notifyObservers(new Pair<Action, DataStructureModel>(Action.DELETED, model));
+			notifyObservers(new Pair<>(Action.DELETED, model));
 		}
 	}
 

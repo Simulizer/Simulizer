@@ -101,14 +101,22 @@ public abstract class InternalWindow extends Window {
 	}
 
 	/**
-	 * Performs an animation to get the users attention
+	 * Emphasise a window to draw the user's attention
 	 */
 	public final void emphasise() {
+		emphasise(1.1);
+	}
+
+	/**
+	 * Performs an animation to get the users attention
+	 * @param sf the scale factor to enlarge the window by (1.0 => no scale)
+	 */
+	public final void emphasise(double sf) {
 		// Ignore if window is just being opened
 		if (getScaleX() == 1 && getScaleY() == 1) {
 			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
-			sc.setToX(1.15);
-			sc.setToY(1.15);
+			sc.setToX(sf);
+			sc.setToY(sf);
 			sc.setCycleCount(2);
 			sc.setAutoReverse(true);
 			getStyleClass().add("highlighting");
