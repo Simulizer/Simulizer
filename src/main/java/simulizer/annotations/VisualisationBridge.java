@@ -19,12 +19,12 @@ public class VisualisationBridge {
 
 	public DataStructureModel load(String visualisationName, boolean showNow) {
 		// TODO: ThreadUtil.runAndWait()
-		if (showNow) show();
 
 		DataStructureModel output = wm.getHLVisualManager().create(visualisationName, showNow);
+		if (showNow)
+			output.show();
 
 		return output;
-
 	}
 
 	public void show() {
