@@ -48,6 +48,7 @@ public class Settings {
 		this.json = json;
 		// Sets up the structure of the settings file
 		// @formatter:off
+		settings.add(new BooleanSetting("debug", "Debug Menu", "Show debug menu in the Menu Bar", false));
 		settings.add(new ObjectSetting("window", "Window")
 				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 300, Integer.MAX_VALUE))
 				.add(new IntegerSetting("height", "Height", "Default window height", 705, 300, Integer.MAX_VALUE))
@@ -87,7 +88,7 @@ public class Settings {
 					);
 		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
 					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
-					.add(new IntegerSetting("delay", "Display Time", "Minimum time the splash screen should be shown for", 750, 0, Integer.MAX_VALUE))
+					.add(new IntegerSetting("delay", "Display Time (in ms)", "Minimum time the splash screen should be shown for", 750, 0, Integer.MAX_VALUE))
 					.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
 					.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
 					);	
