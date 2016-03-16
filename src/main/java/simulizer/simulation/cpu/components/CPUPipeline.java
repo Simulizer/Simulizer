@@ -76,7 +76,7 @@ public class CPUPipeline extends CPU {
 	 * @return the list of registers to be read
 	 */
 	private List<Register> registersRead(Statement statement) {
-		ArrayList<Register> registers = new ArrayList<Register>();
+		ArrayList<Register> registers = new ArrayList<>();
 		
 		//now to get all registers read out from the statement
 		OperandFormat opForm = statement.getInstruction().getOperandFormat();
@@ -120,7 +120,7 @@ public class CPUPipeline extends CPU {
 	 * @return the registers being written to due to this instruction
 	 */
 	private List<Register> registersBeingWritten(InstructionFormat instruction) {
-		ArrayList<Register> registers = new ArrayList<Register>();
+		ArrayList<Register> registers = new ArrayList<>();
 		switch(instruction.mode) {
 			case RTYPE://all rtype instructions have a destination register
 				registers.add(instruction.asRType().getDestReg());
@@ -176,7 +176,7 @@ public class CPUPipeline extends CPU {
 	 * @return the dummy nop statement
 	 */
 	private Statement createNopStatement() {
-		return new Statement(Instruction.nop,new ArrayList<Operand>(),-1);
+		return new Statement(Instruction.nop,new ArrayList<>(),-1);
 	}
 	
 	/**method will create a dummy nop instruction for the ID register
@@ -202,14 +202,12 @@ public class CPUPipeline extends CPU {
 			this.isFinished++;
 		} else if(this.isFinished==3 && this.isRunning) { //ending termination
 			//exiting cleanly but representing that in reality an error would be thrown
-			this.isRunning = false;
-
-			stopRunning();
 			sendMessage(new ProblemMessage(
 					new MemoryException(
 							"Program tried to execute a program outside the text segment.\n" +
 									"  This could be because you forgot to exit cleanly.\n" +
 									"  To exit cleanly please call syscall with code 10.\n", programCounter)));
+			stopRunning();
 			return;
 
 		}
@@ -265,7 +263,7 @@ public class CPUPipeline extends CPU {
 		} 
 		if(this.nopCount >= 1) {
 			executeAddress = null;
-			if(this.rawOccured) {//need to do some additional stuff if a raw has previously occured
+			if(this.rawOccured) {//need to do some additional stuff if a raw has previously occurred
 				thisInstruction = new Address(thisInstruction.getValue()-4);
 				decodeAddress = new Address(thisInstruction.getValue()-4);
 				this.rawOccured = false;
@@ -297,7 +295,6 @@ public class CPUPipeline extends CPU {
 	{
 		this.canFetch = true;//resetting fields for new program
 		this.isFinished = 0;
-		this.isRunning = true;//allow the program to start
 		this.nopCount = 2;//decode and execute bubbled initially
 		this.rawOccured = false;
 		this.IF = createNopStatement();

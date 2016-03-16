@@ -130,16 +130,13 @@ public class CPU {
 	/**
 	 * stop the running of a program
 	 *
+	 * can be called multiple times, can be called from any thread
 	 */
 	public void stopRunning() {
-		// harmless to call multiple times, only want to send one message
 		if (isRunning) {
 			isRunning = false;
-			io.cancelRead();
-			clock.stop();
-			// make sure the simulation stopped message is the very last message
-			messageManager.waitForAllRunningTasks();
-			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
+			io.cancelRead(); // must cancel to release simulation thread
+			clock.stop(); // will send some pseudo-ticks to release the simulation thread
 		}
 	}
 
@@ -152,8 +149,6 @@ public class CPU {
 		if(isRunning) {
 			breakAfterCycle = false;
 			clock.start();
-		} else {
-			runProgram();
 		}
 	}
 
@@ -372,12 +367,12 @@ public class CPU {
 
 		if (this.programCounter.getValue() == this.lastAddress.getValue()+4&&this.isRunning) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
-			stopRunning();
 			sendMessage(new ProblemMessage(
 					new MemoryException(
 							"Program tried to execute a program outside the text segment.\n" +
 							"  This could be because you forgot to exit cleanly.\n" +
 							"  To exit cleanly please call syscall with code 10.\n", programCounter)));
+			stopRunning();
 			return;
 		}
 
@@ -417,13 +412,21 @@ public class CPU {
 			} catch (MemoryException | DecodeException | InstructionException
 					| ExecuteException | HeapException | StackException e) {
 				sendMessage(new ProblemMessage(e));
-				isRunning = false;
+				stopRunning();
 			}
 
 			//TODO: aggregate stats like this into a window
 			long cycleDuration = System.currentTimeMillis() - cycleStart;
 		}
-		stopRunning();
+
+		// clean up
+
+		if(clock.isRunning())
+			clock.stop();
+		io.cancelRead();
+		// make sure the simulation stopped message is the very last message
+		messageManager.waitForAllRunningTasks();
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
 	}
 
 	// Standard get methods, don't do anything special

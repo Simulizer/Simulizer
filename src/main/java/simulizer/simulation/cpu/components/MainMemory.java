@@ -42,7 +42,7 @@ public class MainMemory {
 
 
 	/**
-	 * this constructor just intialises the memory and then initialises all
+	 * this constructor just initialises the memory and then initialises all
 	 * partitions in it
 	 *
 	 */

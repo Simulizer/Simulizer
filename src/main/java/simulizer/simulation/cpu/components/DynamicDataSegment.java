@@ -22,7 +22,7 @@ public class DynamicDataSegment
 	 */
 	public DynamicDataSegment(Address startOfHeap)
 	{
-		this.heap = new ArrayList<Byte>();
+		this.heap = new ArrayList<>();
 		this.breakOfHeap = startOfHeap;
 		this.startOfHeap = startOfHeap;
 	}
@@ -67,7 +67,7 @@ public class DynamicDataSegment
 			{
 				if(heap.size() < this.megaByte)
 				{
-					this.heap.add(new Byte((byte) 0x00));//set to a 0 byte (probably fairly accurate to reality)
+					this.heap.add((byte) 0x00);//set to a 0 byte (probably fairly accurate to reality)
 				}
 				else
 				{

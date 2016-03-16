@@ -26,16 +26,16 @@ public class StackSegment {
 	{
 		this.stackPointer = stackPointer;
 		this.lowestAddress = lowestAddress;
-		this.stack = new ArrayList<Byte>();
+		this.stack = new ArrayList<>();
 		for(int i = 0; i < 4; i++)//giving stack an initial 4 bytes to work with, it then expands as necessary
 		{
-			this.stack.add(new Byte((byte)0x00));//initialising stack
+			this.stack.add((byte) 0x00);//initialising stack
 		}
 	}
 	
 	/**method reads a number of bytes from the stack
 	 * 
-	 * @param address the address realtive to the 0 point of the stacl
+	 * @param address the address relative to the 0 point of the stack
 	 * @param length the number of bytes to read
 	 * @return the byte array with the desired contents
 	 * @throws StackException if reading goes out of bounds

@@ -120,8 +120,8 @@ public class Executor {
                 	}
                 	else {
 	                    int length = 0;//length to read
-	                    byte[] read = new byte[]{};
-	                    
+	                    byte[] read;
+
 	                    if(instruction.getInstruction().equals(Instruction.lw)) {//checking length to read
 	                    	length = 4;
 	                    } else if(instruction.getInstruction().equals(Instruction.lb)||instruction.getInstruction().equals(Instruction.lbu)) {
