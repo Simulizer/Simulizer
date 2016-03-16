@@ -3,7 +3,6 @@ package simulizer.ui.components.highlevel;
 import java.util.Observable;
 import java.util.Observer;
 
-import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import simulizer.highlevel.models.DataStructureModel;
@@ -12,12 +11,13 @@ import simulizer.ui.windows.HighLevelVisualisation;
 public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int rate = 1000;
 	protected HighLevelVisualisation vis;
-	private boolean showing = false;
+	private boolean showing;
 	private DataStructureModel model;
 
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
 		this.vis = vis;
+		showing = model.isVisible();
 		model.addObserver(this);
 	}
 
@@ -73,11 +73,14 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (model.isVisible() != showing) {
-			if (model.isVisible())
-				show();
-			else
-				hide();
+		if (arg == null) {
+			if (model.isVisible() != showing) {
+				if (model.isVisible())
+					show();
+				else
+					hide();
+			}
+			repaint();
 		}
 	}
 }

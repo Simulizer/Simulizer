@@ -55,22 +55,19 @@ public class Wire extends Group {
 	 * Reanimates the data, used when resizing occurs
 	 */
 	public void reanimateData() {
+		setUpAnimationPath();
+		if (!animating)
+			return;
 
-		Platform.runLater(() -> {
-			setUpAnimationPath();
-			if (!animating)
-				return;
+		for(PathTransition p : transitions){
+			p.stop();
+			p.setPath(path);
+			p.playFrom(new Duration(progressed));
+		}
 
-			for(PathTransition p : transitions){
-				p.stop();
-				p.setPath(path);
-				p.playFrom(new Duration(progressed));
-			}
-
-			synchronized(progressed){
-				progressed++;
-			}
-		});
+		synchronized(progressed){
+			progressed++;
+		}
 	}
 
 	/**

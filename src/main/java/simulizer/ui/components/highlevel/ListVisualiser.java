@@ -19,6 +19,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
 import simulizer.highlevel.models.ListModel.Action;
+import simulizer.highlevel.models.ListModel.Emphasise;
+import simulizer.highlevel.models.ListModel.Marker;
 import simulizer.highlevel.models.ListModel.Swap;
 import simulizer.ui.windows.HighLevelVisualisation;
 
@@ -85,9 +87,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 	@Override
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-		actionQueue.add((Action) obj);
-		this.list = model.getList();
-		runAnimations();
+		if (obj != null) {
+			actionQueue.add((Action) obj);
+			this.list = model.getList();
+			runAnimations();
+		}
 	}
 
 	private void runAnimations() {
@@ -95,23 +99,21 @@ public class ListVisualiser extends DataStructureVisualiser {
 		else {
 			Action action = actionQueue.poll();
 
-			// Currently only swaps are implemented
-			if (!(action instanceof Swap)) return;
+			if (action instanceof Swap) {
+				Swap swap = (Swap) action;
 
-			Swap swap = (Swap) action;
+				animatedLeftIndex = swap.a;
+				animatedRightIndex = swap.b;
 
-			animatedLeftIndex = swap.a;
-			animatedRightIndex = swap.b;
+				// This is correct
+				animatedLeftLabel = "" + list[animatedRightIndex];
+				animatedRightLabel = "" + list[animatedLeftIndex];
 
-			// This is correct
-			animatedLeftLabel = "" + list[animatedRightIndex];
-			animatedRightLabel = "" + list[animatedLeftIndex];
+				double startXLeft = getX(animatedLeftIndex) / w;
+				double startXRight = getX(animatedRightIndex) / w;
 
-			double startXLeft = getX(animatedLeftIndex) / w;
-			double startXRight = getX(animatedRightIndex) / w;
-
-			double startY = y0 / h;
-			double upY = 0.8 * (y0 - rectLength) / h;
+				double startY = y0 / h;
+				double upY = 0.8 * (y0 - rectLength) / h;
 
 			// @formatter:off
 			Timeline timeline = new Timeline(
@@ -144,7 +146,6 @@ public class ListVisualiser extends DataStructureVisualiser {
 						synchronized (actionQueue) {
 							if (actionQueue.isEmpty()) {
 								timer.stop();
-								System.out.println("List animation timer stopped");
 							} else runAnimations();
 						}
 					},
@@ -156,13 +157,26 @@ public class ListVisualiser extends DataStructureVisualiser {
 			);
 			// @formatter:on
 
-			timeline.setCycleCount(1);
-			timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
+				timeline.setCycleCount(1);
+				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
 
-			timer.start();
-			timeline.play();
+				timer.start();
+				timeline.play();
 
-			animating = true;
+				animating = true;
+			} else if (action instanceof Marker) {
+				// Marker Action
+				Marker marker = (Marker) action;
+				// TODO: Marker animation
+			} else if (action instanceof Emphasise) {
+				// Emphasise action
+				Emphasise emphasise = (Emphasise) action;
+				// TODO: Emphasise animation
+			} else {
+				// List changed
+				list = action.list;
+				repaint();
+			}
 		}
 	}
 
