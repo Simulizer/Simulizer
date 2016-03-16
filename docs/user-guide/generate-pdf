@@ -11,7 +11,7 @@ then
   echo "Usage: ./generate-pdf.sh [output-format]"
 elif [ $# -eq 0 ] || [ $1 == 'pdf' ]
 then
-  pdflatex ${TARGET}.tex
+  pdflatex -interaction=nonstopmode ${TARGET}.tex
   mv ${TARGET}.pdf ${DEST}.pdf # Don't know why this happens ...
 else
   latex ${TARGET}.tex

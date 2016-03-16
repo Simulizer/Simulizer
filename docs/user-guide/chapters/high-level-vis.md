@@ -4,6 +4,7 @@ The high-level visualisations in Simulizer allow you to view the output of your 
 As well as making your programs easier to view and debug, the high-level visualisations also provide a satisfying result when an algorithm is implemented correctly, which will hopefully make writing assembly more fun!
 
 ## Tower of Hanoi ##
+$\TODO{take picture}$
 <!-- TODO take this picture
 ![](segments/tower-of-hanoi.png)
 -->
@@ -17,6 +18,7 @@ To use the Tower of Hanoi visualisation, add the comment
 to the start of your program. To set the initial number of discs, add `#@{h.setNumDisks(4)}@`, where 4 can be replaced with any positive integer you wish. To show the visualiser window, call `#@{vis.show()}@`. Finally, to indicate that you want to move a disc from peg $i$ to peg $j$, write `#@{ h.move(i,j)}@`.
 
 ## List Visualisation ##
+$\TODO{take picture}$
 <!-- TODO take this picture
 ![](segments/list-vis.png)
 -->
