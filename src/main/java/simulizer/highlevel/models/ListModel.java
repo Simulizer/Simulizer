@@ -75,7 +75,10 @@ public class ListModel extends DataStructureModel {
 
 	public long[] getList() {
 		synchronized (list) {
-			return Arrays.copyOf(list, list.length);
+			if (list.length == 0)
+				return new long[0];
+			else
+				return Arrays.copyOf(list, list.length);
 		}
 	}
 

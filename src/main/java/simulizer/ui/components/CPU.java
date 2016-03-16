@@ -94,30 +94,32 @@ public class CPU {
      * @param time How long the caption should be displayed
      */
     public void showText(String text, double time, boolean fadeOut){
-        if(time < 250) return;
-        double fadeTime = time / 4;
-        double delayTime = time / 2;
-        info.setLabel(text);
-        FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
-        ft.setFromValue(0);
-        ft.setToValue(1);
-        ft.setCycleCount(1);
+        Platform.runLater(() -> {
+            if (time < 250) return;
+            double fadeTime = time / 4;
+            double delayTime = time / 2;
+            info.setLabel(text);
+            FadeTransition ft = new FadeTransition(Duration.millis(fadeTime), info);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.setCycleCount(1);
 
-        ft.play();
+            ft.play();
 
-        if(fadeOut) {
-            ft.setOnFinished(event -> new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
+            if (fadeOut) {
+                ft.setOnFinished(event -> new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
                         FadeTransition fo = new FadeTransition(Duration.millis(fadeTime), info);
                         fo.setFromValue(1);
                         fo.setToValue(0);
                         fo.setCycleCount(1);
 
                         fo.play();
-                }
-            }, (int) delayTime));
-        }
+                    }
+                }, (int) delayTime));
+            }
+        });
     }
 
     /**

@@ -1,5 +1,5 @@
 # Bubblesort
-# @{ var l = vis.load('list', false) }@
+# @{ var l = vis.loadHidden('list') }@
 # @{ sim.setSpeed(200) }@
 # @{ var startAddress = null }@
 # @{ function addressToIndex(addr) { return (addr - startAddress) / 4; } }@
