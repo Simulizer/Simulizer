@@ -23,6 +23,16 @@
 %  maxcitenames=2]{biblatex}
 %\addbibresource{main.bib}
 
+
+% to avoid problems matt has with this command not being defined
+% solution from: http://tex.stackexchange.com/a/258486
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{color}
+\newcommand{\TODO}[1]{\textbf{{\color{red}TODO: }#1}}
+
+
 \title{
   \includegraphics[width=\textwidth]{segments/SimulizerLogo.png}
   \huge\textbf{Final Report}
