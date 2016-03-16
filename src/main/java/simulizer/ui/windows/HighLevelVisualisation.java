@@ -1,6 +1,5 @@
 package simulizer.ui.windows;
 
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
@@ -102,9 +101,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	}
 
 	public void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream()
-				.filter(t -> t.getContent() == vis)
-				.forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
+		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
 	}
 
 	public double getWindowWidth() {
@@ -128,24 +125,25 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		if (change.getKey() == Action.CREATED) {
 			addNewVisualisation(change.getValue());
 		} else if (change.getKey() == Action.DELETED) {
-			tabs.getTabs().stream()
-					.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == change.getValue())
-					.forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
+			tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == change.getValue()).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
 		}
 	}
 
 	private void addNewVisualisation(DataStructureModel model) {
+		DataStructureVisualiser vis = null;
 		switch (model.modelType()) {
 			case FRAME:
-				new FrameVisualiser((FrameModel) model, this);
+				vis = new FrameVisualiser((FrameModel) model, this);
 				break;
 			case HANOI:
-				new TowerOfHanoiVisualiser((HanoiModel) model, this);
+				vis = new TowerOfHanoiVisualiser((HanoiModel) model, this);
 				break;
 			case LIST:
-				new ListVisualiser((ListModel) model, this);
+				vis = new ListVisualiser((ListModel) model, this);
 				break;
 		}
+		if (vis != null && model.isVisible())
+			vis.show();
 	}
 
 }

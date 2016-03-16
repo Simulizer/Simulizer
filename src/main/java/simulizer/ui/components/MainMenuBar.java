@@ -96,7 +96,15 @@ public class MainMenuBar extends MenuBar {
 				cpu.pause();
 		});
 
-		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu(), debugMenu(), spacer, play, pause);
+		// Standard
+		getMenus().addAll(fileMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
+
+		// Debug
+		if ((boolean) wm.getSettings().get("debug"))
+			getMenus().add(debugMenu());
+
+		// Buttons
+		getMenus().addAll(spacer, play, pause);
 
 	}
 
@@ -154,11 +162,15 @@ public class MainMenuBar extends MenuBar {
 		saveAsItem.setDisable(wm.getCPU().isRunning());
 		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
+		// | |-- Options
+		MenuItem options = new MenuItem("Options");
+		options.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.OPTIONS));
+
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
 
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, exitItem);
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, options, exitItem);
 	}
 
 	/**

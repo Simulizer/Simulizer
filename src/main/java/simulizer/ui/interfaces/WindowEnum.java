@@ -12,13 +12,13 @@ public enum WindowEnum {
 	// @formatter:off
 	EDITOR("Editor", "Editor"),
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
-	OPTIONS("Options"),
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
 	LABELS("Labels"),
 	LOGGER("Logger"),
 	PIPELINE_VIEW("PipelineView", "Pipeline View"),
 	MEMORY_VIEW("MemoryView", "Memory View"),
 	REGISTERS("Registers"),
+	OPTIONS("Options", "Options", false),
 	SYSCALL_REFERENCE("help.SyscallReference", "Syscall Reference", false),
 	REGISTER_REFERENCE("help.RegisterReference", "Register Reference", false),
 	INSTRUCTION_REFERENCE("help.InstructionReference", "Instruction Reference", false);
