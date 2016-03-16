@@ -58,7 +58,7 @@ public class CPUListener extends SimulationListener {
                 case blez:
                 case bltz:
                 {
-                    int speed = getCycleFraction(6);
+                    int speed = getCycleFraction(9);
 
                     Runnable t1 = () -> {
 						cpu.showText("BRANCH INSTRUCTION - Step 1 - Register operands are read and 16-bit immediate is sign extended", speed);
@@ -111,8 +111,7 @@ public class CPUListener extends SimulationListener {
                     break;
                 case sw:
                 {
-
-                    int speed = getCycleFraction(3);
+                    int speed = getCycleFraction(6);
 
                     Runnable t1 = () -> {
                             cpu.showText("SW INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
@@ -140,7 +139,7 @@ public class CPUListener extends SimulationListener {
                 }   break;
                 case j:
                 {
-                    int speed = getCycleFraction(4);
+                    int speed = getCycleFraction(7);
 
                     Runnable t1 = () -> {
                             cpu.showText("JUMP INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
@@ -172,7 +171,7 @@ public class CPUListener extends SimulationListener {
                 }   break;
                 case jal:
                 {
-                    int speed = getCycleFraction(5);
+                    int speed = getCycleFraction(8);
 
                     Runnable t1 = () -> {
                             cpu.showText("JAL INSTRUCTION - Step 1 - 26 bit immediate is shifted left 2 bits", speed);
@@ -185,7 +184,6 @@ public class CPUListener extends SimulationListener {
                             cpu.programCounter.highlight();
                             cpu.pcToPlusFour.animateData(speed);
                     };
-
 
                     Runnable t3 = () -> {
                             cpu.showText("JAL INSTRUCTION - Step 3 - PC + 4 is combined with the 28 bit immediate", speed);
@@ -212,7 +210,7 @@ public class CPUListener extends SimulationListener {
                 }   break;
                 case jr:
                 {
-                    int speed = getCycleFraction(3);
+                    int speed = getCycleFraction(6);
 
                     Runnable t1 = () -> {
                             cpu.showText("JR INSTRUCTION - Step 1 - Register value is read", speed);
@@ -237,7 +235,7 @@ public class CPUListener extends SimulationListener {
                 case li:
                 case la:
                 {
-                    int speed = getCycleFraction(1);
+                    int speed = getCycleFraction(3);
 
                     Runnable t1 = () -> {
                             cpu.showText("LI/LA INSTRUCTION - Step 1 - Register is written to with the new value", speed);
@@ -270,7 +268,7 @@ public class CPUListener extends SimulationListener {
      * Processes an I-TYPE instruction
      */
     public void processIType(){
-        int speed = getCycleFraction(4);
+        int speed = getCycleFraction(7);
 
         Runnable t1 = () -> {
 			cpu.showText("I-TYPE INSTRUCTION - Step 1 - ReadReg and WriteReg are selected and 16-bit immediate is sign extended", speed);
@@ -307,7 +305,7 @@ public class CPUListener extends SimulationListener {
      * Processess an R-TYPE instruction
      */
     public void processRType(){
-        int speed = getCycleFraction(4);
+        int speed = getCycleFraction(6);
 
         Runnable t1 = () -> {
 			cpu.showText("R-TYPE INSTRUCTION - Step 1 - Both read registers and one write register are selected", speed);
@@ -325,9 +323,9 @@ public class CPUListener extends SimulationListener {
         };
 
         Runnable t3 = () -> {
-                cpu.showText("R-TYPE INSTRUCTION - Step 3 - Result is written back to the register", speed);
-                cpu.alu.highlight();
-                cpu.aluToRegisters.animateData(speed);
+            cpu.showText("R-TYPE INSTRUCTION - Step 3 - Result is written back to the register", speed);
+            cpu.alu.highlight();
+            cpu.aluToRegisters.animateData(speed);
         };
 
         cpu.animationProcessor.scheduleRegularAnimations("R-TYPE", speed, t1, t2, t3);
@@ -349,7 +347,7 @@ public class CPUListener extends SimulationListener {
         switch (m.getStage()){
             case Fetch:
                 startOfCycle();
-                int speed = getCycleFraction(2);
+                int speed = getCycleFraction(8);
 
                 Runnable t1 = () -> {
 					cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
@@ -362,7 +360,6 @@ public class CPUListener extends SimulationListener {
 					cpu.instructionMemory.highlight();
 					cpu.codeMemoryToIR.animateData(speed);
                 };
-
 
                 Runnable t3 = () -> {
 					cpu.showText("INSTRUCTION FETCH - Step 3 - PC is updated to the next instruction address", speed * 3);
@@ -383,18 +380,6 @@ public class CPUListener extends SimulationListener {
                 cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5);
 
                 break;
-        }
-    }
-
-    /**
-     * Sleep for a certain time
-     * @param millis The time in milliseconds to sleep for
-     */
-    private void sleepFor(long millis){
-        try{
-            Thread.sleep(millis);
-        } catch (InterruptedException e){
-            UIUtils.showExceptionDialog(e);
         }
     }
 
