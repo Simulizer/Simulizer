@@ -11,9 +11,8 @@ do
   cd "${REPORT_HOME}/${d}"
   for f in $( find . -name "*.md" )
   do
-    pandoc --from=markdown_github+tex_math_dollars -t latex ${f} > "$(basename ${f} .md).tex"
-
+    # This breaks images: pandoc --from=markdown_github+tex_math_dollars -t latex ${f} > "$(basename ${f} .md).tex"
+    pandoc -f markdown -t latex ${f} > "$(basename ${f} .md).tex"
   done
   cd -
 done
-

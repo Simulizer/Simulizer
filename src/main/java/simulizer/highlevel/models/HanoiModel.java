@@ -44,6 +44,7 @@ public class HanoiModel extends DataStructureModel {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Stack<Integer>> getPegs() {
 		synchronized (pegs) {
 			// Copies all the pegs to a new object
