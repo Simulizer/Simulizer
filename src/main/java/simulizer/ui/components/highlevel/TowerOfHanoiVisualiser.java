@@ -77,10 +77,12 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	@Override
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
-		synchronized (moves) {
-			moves.add((Action) obj);
+		if (obj != null) {
+			synchronized (moves) {
+				moves.add((Action) obj);
+			}
+			runAnimations();
 		}
-		runAnimations();
 	}
 
 	private void runAnimations() {

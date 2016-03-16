@@ -35,6 +35,7 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.ColorUtils;
 
 public class PipelineView extends InternalWindow implements Observer {
 	// Graphical things
@@ -347,11 +348,11 @@ public class PipelineView extends InternalWindow implements Observer {
 			for (Address addr : before) {
 				String name = getShortName(addr);
 
-				Color bg = getColor(addr);
+				Color bg = ColorUtils.getColor(addr);
 				gc.setFill(bg);
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(getTextColor(bg));
+				gc.setFill(ColorUtils.getTextColor(bg));
 				drawText(gc, name, xCenter, yCenter, rectWidth);
 
 				yTracker += rectGap + rectWidth;
@@ -372,13 +373,13 @@ public class PipelineView extends InternalWindow implements Observer {
 			Address[] parts = { state.fetched, state.decoded, state.executed };
 
 			for (int a = 0; a < 3; ++a) {
-				Color bg = getColor(parts[a]);
+				Color bg = ColorUtils.getColor(parts[a]);
 				gc.setFill(bg);
 				if (parts[a] == null) drawBorderedCircle(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					String name = getShortName(parts[a]);
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
-					gc.setFill(getTextColor(bg));
+					gc.setFill(ColorUtils.getTextColor(bg));
 					drawText(gc, name, xCenter, yCenter);
 				}
 
@@ -403,11 +404,11 @@ public class PipelineView extends InternalWindow implements Observer {
 			for (Address addr : after) {
 				String name = getShortName(addr);
 
-				Color bg = getColor(addr);
+				Color bg = ColorUtils.getColor(addr);
 				gc.setFill(bg);
 				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(getTextColor(bg));
+				gc.setFill(ColorUtils.getTextColor(bg));
 				drawText(gc, name, xCenter, yCenter);
 
 				yTracker += rectGap + rectWidth;
@@ -477,30 +478,6 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.beginPath();
 		gc.fillText(text, x, y);
 		gc.closePath();
-	}
-
-	// Reading: http://krazydad.com/tutorials/makecolors.php
-	private static Color getColor(Address address) {
-		if (address == null) return Color.RED.brighter();
-
-		int hexM = address.getValue() % 128;
-		// @formatter:off
-		int red   = (int) (Math.sin(.3 * hexM + 0) * 127) + 128;
-		int green = (int) (Math.sin(.3 * hexM + 2) * 127) + 128;
-		int blue  = (int) (Math.sin(.3 * hexM + 4) * 127) + 128;
-		// @formatter:on
-
-		return Color.rgb(red, green, blue);
-	}
-
-	// Thanks to http://stackoverflow.com/a/3943023
-	private static Paint getTextColor(Color backgroundColor) {
-		double r = backgroundColor.getRed() * 255;
-		double g = backgroundColor.getGreen() * 255;
-		double b = backgroundColor.getBlue() * 255;
-
-		if (r * 0.299 + g * 0.587 + b * 0.114 > 90) return Paint.valueOf("black");
-		else return Paint.valueOf("white");
 	}
 
 	private static String getShortName(Address address) {
