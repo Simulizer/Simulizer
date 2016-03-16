@@ -2,6 +2,17 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mystyle}
 \usepackage[UKenglish]{datetime}
+
+% Overwrite \begin{figure}[htbp] with \begin{figure}[H]
+\usepackage{float}
+\let\origfigure=\figure
+\let\endorigfigure=\endfigure
+\renewenvironment{figure}[1][]{%
+  \origfigure[H]
+}{%
+  \endorigfigure
+}
+
 %\usepackage[backend=biber,
 %  style=authoryear,
 %  sorting=nyt,
