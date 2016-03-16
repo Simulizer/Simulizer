@@ -43,7 +43,6 @@ public class AnimationProcessor {
 
         dispatchInterval = 20;
         cycleStartTime = -1;
-
         showingWarning = false;
 
 		animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.time, a2.time));
@@ -104,7 +103,6 @@ public class AnimationProcessor {
     }
 
     public void shutdown() {
-		System.out.println("shutdown");
 		executorTask.cancel(true);
         executorService.shutdownNow();
     }
