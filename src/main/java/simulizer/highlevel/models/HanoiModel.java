@@ -6,13 +6,14 @@ import java.util.Stack;
 
 import javafx.util.Pair;
 
+@SuppressWarnings("unused")
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
 
 	public HanoiModel() {
 		for (int pegCount = 0; pegCount < 3; pegCount++)
-			pegs.add(new Stack<Integer>());
+			pegs.add(new Stack<>());
 	}
 
 	public void setNumDisks(int n) {
@@ -20,7 +21,7 @@ public class HanoiModel extends DataStructureModel {
 		// Clear all pegs
 		pegs.clear();
 		for (int pegCount = 0; pegCount < 3; pegCount++)
-			pegs.add(new Stack<Integer>());
+			pegs.add(new Stack<>());
 
 		// Get the first peg and add all the discs
 		Stack<Integer> firstPeg = pegs.get(0);
@@ -48,17 +49,8 @@ public class HanoiModel extends DataStructureModel {
 			// Copies all the pegs to a new object
 			List<Stack<Integer>> pegsCopy = new ArrayList<>(3);
 			for (Stack<Integer> pegOrig : pegs) {
-				// Copy peg into revPeg
-				Stack<Integer> pegRev = new Stack<>();
-				pegRev.addAll(pegOrig);
-
-				// Copy revPeg into a new peg
-				Stack<Integer> pegCopy = new Stack<>();
-				for (Integer item : pegRev)
-					pegCopy.add(new Integer(item));
-
-				// Add new peg to pegsCopy
-				pegsCopy.add(pegCopy);
+				//noinspection unchecked
+				pegsCopy.add((Stack<Integer>) pegOrig.clone());
 			}
 			return pegsCopy;
 		}

@@ -21,7 +21,9 @@ public class VisualisationBridge {
 	}
 
 	public DataStructureModel loadHidden(String visualisationName) {
-		return wm.getHLVisualManager().create(visualisationName);
+		DataStructureModel m = wm.getHLVisualManager().create(visualisationName);
+		m.hide();
+		return m;
 	}
 
 	public void show() {

@@ -9,7 +9,12 @@
     bottom: 0;
     left: 0;
 }
+/* class for SIMP annotation in syntax highlighting, nothing to do with ace */
 .ace_annotation { font-weight: bold; }
+
+/* remove the 'i' background image when setting 'info' ace annotations (show up
+   in the gutter) but leaving the tooltip */
+.ace_info { background-image: none !important; }
 
 ::-webkit-scrollbar {
     width: 10px;
@@ -221,6 +226,14 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
     session.addGutterDecoration(fetchLine, 'fetch');
     session.addGutterDecoration(decodeLine, 'decode');
     session.addGutterDecoration(executeLine, 'execute');
+
+    // automatically clears old annotations
+    session.setAnnotations([
+        {row:fetchLine,column:0,text:'fetching',type:'info'},
+        {row:decodeLine,column:0,text:'decoding',type:'info'},
+        {row:executeLine,column:0,text:'executing',type:'info'}
+    ]);
+
     if(!userInControl) {
         if(executeLine != -1) {
             goto(executeLine);
@@ -243,6 +256,11 @@ function setFont(family, size) {
             fontSize: size
         });
     }
+}
+
+// poor man's breakpoint
+function insertBreakpoint() {
+    doc.insertLines(getLine(), ['#>> breakpoint: @{pause()}@']);
 }
 
 </script>

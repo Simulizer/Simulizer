@@ -68,7 +68,7 @@ public class MessageManager {
 	 * @param m the message to send
 	 */
 	public synchronized void sendMessage(Message m) {
-		List<Callable<Void>> jobs = new ArrayList<>();
+		List<Callable<Void>> jobs = new ArrayList<>(listeners.size());
 
 		synchronized (listeners) {
 			for (SimulationListener l : listeners) {
@@ -80,7 +80,9 @@ public class MessageManager {
 		}
 		try {
 			List<Future<Void>> newTasks = executor.invokeAll(jobs);
-			tasks.addAll(newTasks);
+			synchronized (tasks) {
+				tasks.addAll(newTasks);
+			}
 		} catch (InterruptedException e) {
 			UIUtils.showExceptionDialog(e);
 		}
@@ -88,7 +90,9 @@ public class MessageManager {
 	}
 
 	public void waitForCrucialTasks() {
-		tasks.removeIf(Future::isDone);
+		synchronized (tasks) {
+			tasks.removeIf(Future::isDone);
+		}
 
 		for(SimulationListener l : listeners) {
 			if(l.criticalProcesses.intValue() != 0) {
@@ -115,18 +119,20 @@ public class MessageManager {
 	}
 
 	public void waitForAllRunningTasks() {
-		for(Future<Void> t : tasks) {
-			if(!t.isDone()) {
-				try {
-					t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					UIUtils.showExceptionDialog(e);
+		synchronized (tasks) {
+			for (Future<Void> t : tasks) {
+				if (!t.isDone()) {
+					try {
+						t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						UIUtils.showExceptionDialog(e);
+					}
+					t.cancel(true);
 				}
-				t.cancel(true);
 			}
-		}
 
-		tasks.clear();
+			tasks.clear();
+		}
 	}
 
 }

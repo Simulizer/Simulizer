@@ -66,6 +66,7 @@ public class Editor extends InternalWindow {
 	// handle key combos for copy and paste
 	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_plus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
@@ -136,29 +137,22 @@ public class Editor extends InternalWindow {
 			if (C_c.match(event)) {
 				if(mode == Mode.EXECUTE_MODE)
 					return;
-				String clip = (String) jsEditor.call("getCopyText");
-
-				Clipboard clipboard = Clipboard.getSystemClipboard();
-				ClipboardContent content = new ClipboardContent();
-
-				content.putString(clip);
-				clipboard.setContent(content);
+				copy();
 
 				event.consume();
 
 			} else if (C_v.match(event)) {
 				if(mode == Mode.EXECUTE_MODE)
 					return;
-				Clipboard clipboard = Clipboard.getSystemClipboard();
-				String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
-
-				if (clip != null) {
-					jsEditor.call("insert", clip);
-				}
+				paste();
 
 				editedSinceLabelUpdate = true;
 				event.consume();
 
+			} else if (C_b.match(event)) {
+				if(mode == Mode.EXECUTE_MODE)
+					return;
+				insertBreakpoint();
 			} else if(C_plus.match(event)) {
 				jsWindow.call("changeFontSize", 1);
 				event.consume();
@@ -602,6 +596,25 @@ public class Editor extends InternalWindow {
 		refreshTitle();
 	}
 
+
+	public void copy() {
+		String clip = (String) jsEditor.call("getCopyText");
+
+		Clipboard clipboard = Clipboard.getSystemClipboard();
+		ClipboardContent content = new ClipboardContent();
+
+		content.putString(clip);
+		clipboard.setContent(content);
+	}
+	public void paste() {
+		Clipboard clipboard = Clipboard.getSystemClipboard();
+		String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
+
+		if (clip != null) {
+			jsEditor.call("insert", clip);
+		}
+	}
+
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
@@ -629,6 +642,10 @@ public class Editor extends InternalWindow {
 	 */
 	public void gotoLine(int line) {
 		jsWindow.call("goto", line);
+	}
+
+	public void insertBreakpoint() {
+		jsWindow.call("insertBreakpoint");
 	}
 
 	/**
