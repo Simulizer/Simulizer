@@ -106,7 +106,7 @@ Other variables
 ## Global Functions ##
 To increase brevity, certain commonly used methods from the bridges are assigned to global functions which can be called without qualification:
 
-```javascript
+```
 // Debug Bridge
 log    = debug.log
 print  = debug.log
