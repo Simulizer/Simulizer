@@ -15,15 +15,15 @@ public class LoggerIO extends Observable implements IO {
 	}
 
 	@Override
-	public String readString() {
-		String in = requestInput();
+	public String readString(IOStream stream) {
+		String in = requestInput(stream);
 		return in == null ? "" : in;
 	}
 
 	@Override
-	public int readInt() {
+	public int readInt(IOStream stream) {
 		try {
-			String in = requestInput();
+			String in = requestInput(stream);
 			return in == null || in.isEmpty() ? 0 : Integer.parseInt(in);
 		} catch (NumberFormatException e) {
 			printString(IOStream.ERROR, e.getClass().getName() + ":\n\t" + e.getMessage() + "\n");
@@ -32,8 +32,8 @@ public class LoggerIO extends Observable implements IO {
 	}
 
 	@Override
-	public char readChar() {
-		String in = requestInput();
+	public char readChar(IOStream stream) {
+		String in = requestInput(stream);
 		return in == null || in.isEmpty() ? '\0' : in.charAt(0);
 	}
 
@@ -62,9 +62,9 @@ public class LoggerIO extends Observable implements IO {
 		notifyObservers(new Pair<>(stream, "" + letter));
 	}
 
-	private String requestInput() {
+	private String requestInput(IOStream stream) {
 		Logger logger = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
-		return logger.nextMessage();
+		return logger.nextMessage(stream);
 	}
 
 	public void clear() {

@@ -54,7 +54,7 @@ public class WindowManager extends GridPane {
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private AnnotationManager annotationManager;
-	private HLVisualManager hlvisual = new HLVisualManager();
+	private HLVisualManager hlvisual;
 
 	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
 		this.primaryStage = primaryStage;
@@ -63,6 +63,7 @@ public class WindowManager extends GridPane {
 		Scene scene = new Scene(this);
 		primaryStage.setScene(scene);
 
+		// Create the Workspace
 		workspace = new Workspace(this);
 
 		// Create the GridPane to hold MainMenuBar and workspace for InternalWindow
@@ -105,6 +106,9 @@ public class WindowManager extends GridPane {
 		MainMenuBar bar = new MainMenuBar(this);
 		GridPane.setHgrow(bar, Priority.ALWAYS);
 		add(bar, 0, 0);
+
+		// HLVisualManager
+		hlvisual = new HLVisualManager(workspace, (boolean) settings.get("hlvis.auto-open"));
 
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus

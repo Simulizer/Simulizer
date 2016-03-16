@@ -94,7 +94,10 @@ public class Settings {
 					);	
 		settings.add(new ObjectSetting("logger", "Logger")
 				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
-				);	
+				);
+		settings.add(new ObjectSetting("hlvis", "High Level Visualiser")
+				.add(new BooleanSetting("auto-open", "Automatically Open High Level Visualiser", "Automatically Open High Level Visualiser when a new visualisation is shown", true))
+				);
 		// @formatter:on
 
 		// Loads all the values from jsonObject
@@ -159,7 +162,7 @@ public class Settings {
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
-				return null; // TODO: handle failure more gracefully
+				throw new IllegalArgumentException("Invalid Setting: " + settingPath);
 		}
 		return setting.getValue();
 	}

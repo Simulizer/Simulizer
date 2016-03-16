@@ -12,7 +12,7 @@
 # 2. move disc n from pole 1 to pole 3
 # 3. move n?1 discs from pole 2 to pole 3 so they sit on disc n
 #
-# @{ var h = vis.load('tower-of-hanoi') }@
+# @{ var h = vis.loadHidden('tower-of-hanoi') }@
 
 
 .data    # variables section

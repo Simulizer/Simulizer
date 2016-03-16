@@ -23,4 +23,6 @@ public abstract class DataStructureModel extends Observable {
 
 	public abstract ModelType modelType();
 
+	
+
 }
