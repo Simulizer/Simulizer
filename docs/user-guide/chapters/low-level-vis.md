@@ -14,6 +14,7 @@ The pipeline visualisation window allows you to view the contents of the pipelin
 Firstly, to use the pipeline view, the CPU must be running and in pipelined mode (to turn on pipelining, go to the `Simulation` menu and make sure `Toggle CPU Pipelining` is selected). Once running, the window will start to fill up from left to right with instructions being processed.
 
 Let's look at the components in the control bar at the bottom of the window:
+
 - `Follow` checkbox: allows you to toggle whether or not you want to snap to the most recent stage of the pipeline.
 - Left/Right buttons: allows you to move backwards/forwards cycles in the pipeline (this can also be achieved by using the left and right keys on your keyboard).
 - `Goto: ` field: allows you to jump to a specified cycle (indicated at the bottom of each stage of the pipeline) by entering the cycle number, e.g. 67, and then pressing enter. If you enter a number greater than the number of cycles, then it will jump to the last cycle.
@@ -22,7 +23,7 @@ You can view information about instructions in the window by hovering over them 
 
 You can highlight all occurrences of a particular instruction by clicking on it. This can be useful to track the state of the instruction through the pipeline and to spot past/future occurrences of the instruction.
 
-A maximum of 10,000 pipeline stages can currently be displayed (this is to mitigate against problems with infinite loops etc.)
+A maximum of 10,000 pipeline stages can currently be displayed (this is to mitigate problems with infinite loops etc.)
 
 ## Memory View ##
 <!-- TODO take a nice picture of the memory view window
