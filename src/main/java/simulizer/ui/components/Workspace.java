@@ -268,7 +268,10 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	private void removeWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
-			window.close();
+			// to prevent close being called twice, once now, once (earlier) when the user clicked (X)
+			if (!window.isClosed())
+				window.close();
+
 			if (window.isClosed())
 				openWindows.remove(window);
 		}

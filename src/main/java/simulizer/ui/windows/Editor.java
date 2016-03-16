@@ -393,12 +393,12 @@ public class Editor extends InternalWindow {
 
 	@Override
 	public void close() {
-		if(hasOutstandingChanges()) {
+		if (hasOutstandingChanges()) {
 			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
 
-			if(save == ButtonType.YES) {
+			if (save == ButtonType.YES) {
 				saveFile();
-			} else if(save == ButtonType.NO) {
+			} else if (save == ButtonType.NO) {
 				// fall through and call super.close()
 			} else {
 				// don't call super.close() => stays open

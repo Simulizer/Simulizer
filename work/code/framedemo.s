@@ -1,5 +1,5 @@
 # @{ vis.show() }@
-# @{ var f = vis.load('frame', true) }@
+# @{ var f = vis.load('frame') }@
 # @{ setSpeed(100); }@
 .text
 main:
