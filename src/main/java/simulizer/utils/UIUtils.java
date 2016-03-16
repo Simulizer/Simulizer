@@ -16,8 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
@@ -42,14 +41,6 @@ public class UIUtils {
 		}
 	}
 
-	private static AssemblingDialog assemblingDialog;
-	public static void showAssemblingDialog(CPU cpu) {
-		assemblingDialog = new AssemblingDialog(cpu);
-	}
-	public static void closeAssemblingDialog() {
-		assemblingDialog.closeDown();
-		assemblingDialog = null;
-	}
 
 	// from http://stackoverflow.com/a/27983567
 	// it is OK if the icon is null, will reset to default icon
@@ -183,6 +174,15 @@ public class UIUtils {
 			System.err.println("Failed to show exception dialog with another exception:");
 			t.printStackTrace(System.err);
 		}
+	}
+
+	public static void openTextInputDialog(String title, String header, String message, String defaultText, Consumer<String> callback) {
+		TextInputDialog dialog = new TextInputDialog(defaultText);
+		dialog.setTitle(title);
+		dialog.setHeaderText(header);
+		dialog.setContentText(message);
+
+		dialog.showAndWait().ifPresent(callback);
 	}
 
 	/**

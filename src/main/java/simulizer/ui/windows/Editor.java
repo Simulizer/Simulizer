@@ -51,9 +51,6 @@ import simulizer.utils.UIUtils;
  */
 public class Editor extends InternalWindow {
 
-	// TODO: refresh current file if not edited
-	// TODO: handle more keyboard shortcuts: C-f for find
-
 	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
 	private static File currentFile = null; // persists across instances of the window
 
@@ -67,6 +64,7 @@ public class Editor extends InternalWindow {
 	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
+	final KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_plus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
 	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
@@ -153,6 +151,9 @@ public class Editor extends InternalWindow {
 				if(mode == Mode.EXECUTE_MODE)
 					return;
 				insertBreakpoint();
+			} else if (C_f.match(event)) {
+				UIUtils.openTextInputDialog("Find", "Find",
+						"Please enter your search query:", "", this::findNext);
 			} else if(C_plus.match(event)) {
 				jsWindow.call("changeFontSize", 1);
 				event.consume();

@@ -123,7 +123,10 @@ function getColumn() {
 // 0-based line index
 function goto(line) {
     editor.gotoLine(line+1); // expects 1-based index
-    // line, center, animate, callback
+    centerLine(line);
+}
+function centerLine(line) {
+    // (line, center, animate, callback)
     // centers between two lines so 1/0-based index makes no difference really
     editor.scrollToLine(line, true, false, function() {});
 }
@@ -140,6 +143,8 @@ function find(pattern, backwards) {
 		editor.findPrevious(s, false);
 	else
 		editor.findNext(s, false);
+
+    centerLine(getLine());
 }
 function findAll(pattern) {
 	var s = new Search();

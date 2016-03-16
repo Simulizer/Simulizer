@@ -84,7 +84,7 @@ public class MainMenuBar extends MenuBar {
 
 		Menu play = createButton("/img/play.png", cpu.isRunning(), "Simulation > Assemble And Run", (e) -> {
 			if (!cpu.isRunning()) {
-				UIUtils.showAssemblingDialog(cpu);
+				AssemblingDialog.showAssemblingDialog(cpu);
 				wm.assembleAndRun();
 			}
 		});
@@ -294,7 +294,7 @@ public class MainMenuBar extends MenuBar {
 		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
 			if (!cpu.isRunning()) {
-				UIUtils.showAssemblingDialog(cpu);
+				AssemblingDialog.showAssemblingDialog(cpu);
 				wm.assembleAndRun();
 			}
 		});

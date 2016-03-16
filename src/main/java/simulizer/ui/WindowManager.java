@@ -23,6 +23,7 @@ import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
+import simulizer.ui.components.AssemblingDialog;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
@@ -221,7 +222,7 @@ public class WindowManager extends GridPane {
 						if (p == null) {
 							int size = log.getProblems().size();
 							UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
-							UIUtils.closeAssemblingDialog();
+							AssemblingDialog.closeAssemblingDialog();
 						}
 					});
 

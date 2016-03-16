@@ -19,6 +19,15 @@ public class AssemblingDialog extends Alert {
 	private final ScheduledExecutorService executor;
 	private final ScheduledFuture<?> updateTask;
 
+	private static AssemblingDialog assemblingDialog;
+	public static void showAssemblingDialog(CPU cpu) {
+		assemblingDialog = new AssemblingDialog(cpu);
+	}
+	public static void closeAssemblingDialog() {
+		assemblingDialog.closeDown();
+		assemblingDialog = null;
+	}
+
 	public AssemblingDialog(CPU cpu) {
 		super(AlertType.INFORMATION);
 
