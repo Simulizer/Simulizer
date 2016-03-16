@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import javafx.util.Pair;
-
-@SuppressWarnings("unused")
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
@@ -50,7 +47,7 @@ public class HanoiModel extends DataStructureModel {
 			// Copies all the pegs to a new object
 			List<Stack<Integer>> pegsCopy = new ArrayList<>(3);
 			for (Stack<Integer> pegOrig : pegs) {
-				//noinspection unchecked
+				// noinspection unchecked
 				pegsCopy.add((Stack<Integer>) pegOrig.clone());
 			}
 			return pegsCopy;

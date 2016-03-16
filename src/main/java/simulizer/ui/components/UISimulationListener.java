@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
-import simulizer.lowlevel.models.PipelineHistoryModel;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.simulation.messages.AnnotationMessage;
@@ -50,11 +49,7 @@ public class UISimulationListener extends SimulationListener {
 				});
 
 				// Clear the pipeline model when a new simulation starts
-				PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
-				if (pipelineView != null) {
-					PipelineHistoryModel pipelineModel = pipelineView.getModel();
-					if (pipelineModel != null) pipelineModel.clear();
-				}
+				PipelineView.model.clear();
 			}
 				break;
 			case SIMULATION_INTERRUPTED: {
@@ -130,7 +125,7 @@ public class UISimulationListener extends SimulationListener {
 		// can sync up with it when it opens.
 		PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
 		if (pipelineView != null && wm.getCPU().isPipelined()) {
-			pipelineView.getModel().processPipelineStateMessage(m);
+			PipelineView.model.processPipelineStateMessage(m);
 		}
 	}
 
@@ -141,11 +136,6 @@ public class UISimulationListener extends SimulationListener {
 
 	@Override
 	public void processPipelineHazardMessage(PipelineHazardMessage m) {
-		PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
-		if (pipelineView != null) {
-			PipelineHistoryModel pipelineModel = pipelineView.getModel();
-			if (pipelineModel != null && wm.getCPU().isPipelined())
-				pipelineModel.processHazardStateMessage(m);
-		}
+		PipelineView.model.processHazardStateMessage(m);
 	}
 }

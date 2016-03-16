@@ -63,14 +63,15 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	private String selectedAddress;
 
-	// Model
-	private PipelineHistoryModel model = new PipelineHistoryModel();
+	// Model (currently static - watch out)
+	public static PipelineHistoryModel model = new PipelineHistoryModel();
 	// Canvas has a maximum size, so don't draw more than it!
 	private int numColumnsToDraw;
 	private int startCycle = 0;
 	private boolean snapToEnd;
 
 	private boolean isPipelined;
+	private boolean isRunning;
 
 	// Dimensions used for calculations
 	private double rectWidth;
@@ -234,8 +235,10 @@ public class PipelineView extends InternalWindow implements Observer {
 		return Optional.empty();
 	}
 
-	public PipelineHistoryModel getModel() {
-		return model;
+	@Override
+	public void close() {
+		model.removeObserver(this);
+		super.close();
 	}
 
 	/**
@@ -329,6 +332,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	@Override
 	public void update(Observable o, Object pipelineState) {
 		this.isPipelined = getWindowManager().getCPU().isPipelined();
+		this.isRunning = getWindowManager().getCPU().isRunning();
 
 		this.snapToEnd = followCheckBox.isSelected();
 		repaint();
@@ -431,7 +435,11 @@ public class PipelineView extends InternalWindow implements Observer {
 	@Override
 	public void ready() {
 		super.ready();
+		isPipelined = getWindowManager().getCPU().isPipelined();
+		isRunning = getWindowManager().getCPU().isRunning();
+		this.snapToEnd = true;
 		repaint();
+		this.snapToEnd = false;
 	}
 
 	public void repaint() {
@@ -443,7 +451,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		gc.clearRect(0, 0, realW, realH);
 
-		if (isPipelined) {
+		if (isPipelined && isRunning) {
 			calculateParameters();
 			drawDividers(gc);
 			drawExplainers(gc);
