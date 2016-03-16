@@ -1,10 +1,7 @@
 \documentclass[12pt, a4paper]{article}
-\usepackage[utf8]{inputenc}
 \usepackage{mystyle}
-\usepackage[UKenglish]{datetime}
 
 % Overwrite \begin{figure}[htbp] with \begin{figure}[H]
-\usepackage{float}
 \let\origfigure=\figure
 \let\endorigfigure=\endfigure
 \renewenvironment{figure}[1][]{%
@@ -16,22 +13,20 @@
 % To stop `code` from flowing off the page
 \sloppypar
 
+% to avoid problems matt has with this command not being defined
+% solution from: http://tex.stackexchange.com/a/258486
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand{\TODO}[1]{\textbf{{\color{red}TODO: }#1}}
+
+% FIXME uncomment this and the references section at the bottom
 %\usepackage[backend=biber,
 %  style=authoryear,
 %  sorting=nyt,
 %  urldate=long,
 %  maxcitenames=2]{biblatex}
 %\addbibresource{main.bib}
-
-
-% to avoid problems matt has with this command not being defined
-% solution from: http://tex.stackexchange.com/a/258486
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-\usepackage{color}
-\newcommand{\TODO}[1]{\textbf{{\color{red}TODO: }#1}}
-
 
 \title{
   \includegraphics[width=\textwidth]{segments/SimulizerLogo.png}
