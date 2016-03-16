@@ -51,19 +51,19 @@ Each pane inside the application is called an Internal Window. This section will
 ### CPU Visualisation ###
 CPU visualisation is for demonstrating how the MIPS processor fetches, decodes and executes assembly instructions. To use this view, you must set the clock speed to below 2Hz [(see clock speed)](#clockspeed).
 
-![CPU Visualisation executing an R type instruction](segments/cpu-visualisation.png){width=60%}
+![CPU Visualisation executing an I-Type instruction](segments/cpu-visualisation.png){width=80%}
 
 For more information about the CPU Visualiser other low level visualisation see [Low Level Visualisations](#low-level)
 
 ### Editor ###
 The editor is the place to write assembly code. The program that is contained in the Editor is the one to be run on the MIPS processor. You will most likely want to keep this window open (as without it, you can't run any assembly code).
 
-![Editor with the binary search assembly code open](segments/editor.png){width=60%}
+![Editor running Bubble Sort](segments/editor.png){ width=60% }
 
 ### High Level Visualisation ###
 The High Level Visualisation window is where visualisations from the [annotations](#annotations) are displayed. There purpose is to demonstrate what your SIMP program is actually doing from a more human understandable view.
 
-![High Level Visualiser with Towers of Hanoi open](segments/high-level.png){width=60%}
+![High Level Visualiser with Towers of Hanoi open](segments/high-level.png){ width=60% }
 
 For more information about the different data structures Simulizer can visualise, see [High Level Visualisation](#high-level)
 

@@ -3,7 +3,7 @@ package simulizer.highlevel.models;
 import java.util.Observable;
 
 public abstract class DataStructureModel extends Observable {
-	private boolean visible = true;
+	private boolean visible = false;
 
 	public void show() {
 		visible = true;
