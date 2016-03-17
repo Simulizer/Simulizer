@@ -34,8 +34,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Logger extends InternalWindow implements Observer {
-	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(
-			new ThreadUtils.NamedThreadFactory("Logger"));
+	private ScheduledExecutorService flush = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Logger"));
 	private static final long BUFFER_TIME = 20; // milliseconds
 	private volatile boolean callUpdate = true;
 
@@ -55,8 +54,6 @@ public class Logger extends InternalWindow implements Observer {
 	private final ImageView notifyIcon = new ImageView(new Image(FileUtils.getResourcePath("/img/notify.png")));
 
 	public Logger() {
-		setTitle("Program I/O");
-
 		ioChanged = new boolean[IOStream.values().length];
 		logs = new StringBuilder[IOStream.values().length];
 		outputs = new TextArea[IOStream.values().length];
@@ -116,8 +113,6 @@ public class Logger extends InternalWindow implements Observer {
 			lastInput = input.getText();
 			if (!lastInput.equals("")) {
 				input.setText("");
-				logs[tabPane.getSelectionModel().getSelectedIndex()].append(lastInput).append("\n");
-				callUpdate = true;
 				cdl.countDown();
 			}
 		} else {
@@ -125,7 +120,6 @@ public class Logger extends InternalWindow implements Observer {
 				getWindowManager().motionBlur();
 		}
 	}
-
 
 	@Override
 	public void setToDefaultDimensions() {
@@ -147,6 +141,7 @@ public class Logger extends InternalWindow implements Observer {
 							if (!t.isSelected() && ioChanged[i])
 								t.setGraphic(notifyIcon);
 							outputs[i].setText(logs[i].toString());
+							ioChanged[i] = false;
 						}
 					}
 				});
@@ -174,12 +169,15 @@ public class Logger extends InternalWindow implements Observer {
 	/**
 	 * @return the user entered string (or null if cancelled)
 	 */
-	public String nextMessage() {
+	public String nextMessage(IOStream stream) {
 		try {
+			synchronized (logs) {
+				ioChanged[stream.getID()] = true;
+			}
 			if (emphasise)
 				Platform.runLater(() -> {
 					// if already focused. Display a more subtle emphasis
-					if(input.isFocused())
+					if (input.isFocused())
 						emphasise(1.0); // scale factor 1 => no scale
 					else {
 						emphasise(1.1);
@@ -200,6 +198,10 @@ public class Logger extends InternalWindow implements Observer {
 		if (lastInputCancelled) {
 			return null;
 		} else {
+			synchronized (logs) {
+				logs[stream.getID()].append(lastInput).append("\n");
+			}
+			callUpdate = true;
 			return lastInput;
 		}
 	}

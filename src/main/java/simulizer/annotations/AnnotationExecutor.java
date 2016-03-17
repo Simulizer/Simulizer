@@ -1,10 +1,15 @@
 package simulizer.annotations;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
+import javax.script.SimpleScriptContext;
+
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import jdk.nashorn.internal.runtime.ECMAErrors;
 import jdk.nashorn.internal.runtime.ECMAException;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Register;
@@ -12,8 +17,6 @@ import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
-
-import javax.script.*;
 
 /**
  * A JavaScript interpreter for executing annotations and coordinating the high level visualisations.
@@ -182,7 +185,7 @@ public class AnnotationExecutor {
 			String line;
 			while(!getGlobal("stop", Boolean.class)) {
 				io.printString(IOStream.DEBUG, "js> ");
-				line = io.readString();
+				line = io.readString(IOStream.DEBUG);
 				Object res = null;
 				try {
 					res = exec(new Annotation(line));

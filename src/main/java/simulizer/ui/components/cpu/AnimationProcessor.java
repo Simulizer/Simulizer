@@ -15,11 +15,13 @@ import java.util.concurrent.*;
 public class AnimationProcessor {
 
     class Animation{
-        public int time;
+        public int absoluteTime;
+		public int relativeTime;
         public Runnable job;
 
-        public Animation(int time, Runnable job){
-            this.time = time;
+        public Animation(int absoluteTime, int relativeTime, Runnable job){
+            this.absoluteTime = absoluteTime;
+			this.relativeTime = relativeTime;
             this.job = job;
         }
 
@@ -45,7 +47,7 @@ public class AnimationProcessor {
         cycleStartTime = -1;
         showingWarning = false;
 
-		animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.time, a2.time));
+		animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.absoluteTime, a2.absoluteTime));
         executorService = Executors.newSingleThreadScheduledExecutor(
                 new ThreadUtils.NamedThreadFactory("CPU-Visualisation-Job-Dispatch"));
         executorTask = executorService.scheduleAtFixedRate(
@@ -80,7 +82,7 @@ public class AnimationProcessor {
 
 			showingWarning = false;
 			synchronized (animationTasks) {
-				if (animationTasks.size() > 100) {
+				if (animationTasks.size() > 10) {
 					// too many animations, remove the lower priority ones
 					ArrayList<Animation> tmp = new ArrayList<>(10);
 					animationTasks.drainTo(tmp, 10);
@@ -90,7 +92,7 @@ public class AnimationProcessor {
 
 				long timeIntoCycle = System.currentTimeMillis() - cycleStartTime;
 
-				while (animationTasks.peek().time <= timeIntoCycle) {
+				if (animationTasks.peek().absoluteTime <= timeIntoCycle) {
 					System.out.println("running job at " + timeIntoCycle);
 					animationTasks.poll().job.run();
 				}
@@ -108,10 +110,12 @@ public class AnimationProcessor {
     }
 
 	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+		int thisDelay = 0;
 		for(Runnable r : jobs) {
-			animationTasks.add(new Animation(cycleDelay, r));
+			animationTasks.add(new Animation(cycleDelay, thisDelay, r));
 			System.out.println("Adding " + cycleDelay);
 			cycleDelay += delay;
+			thisDelay += delay;
 		}
 	}
 
@@ -119,19 +123,24 @@ public class AnimationProcessor {
 	 * Schedule several animation tasks with a fixed delay in between
 	 */
 	public void scheduleRegularAnimations(String instructionName, int delay, Runnable... jobs) {
+		int thisDelay = 0;
 		ArrayList<Animation> animationsForInstruction = new ArrayList<>();
 		for(Runnable r : jobs) {
-			Animation animation = new Animation(cycleDelay, r);
+			Animation animation = new Animation(cycleDelay, thisDelay, r);
 			animationTasks.add(animation);
 			animationsForInstruction.add(animation);
 			System.out.println("Adding " + instructionName + " " + cycleDelay);
 			cycleDelay += delay;
+			thisDelay += delay;
 		}
 		cpuVisualisation.previousInstructions.addInstruction(instructionName, animationsForInstruction);
 	}
 
 	public void replayAnimations(ArrayList<Animation> animations){
 		newCycle();
+		for (Animation a : animations){
+			a.absoluteTime = a.relativeTime;
+		}
 		animationTasks.addAll(animations);
 	}
 }
