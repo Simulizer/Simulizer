@@ -32,6 +32,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private final Queue<Action> actionQueue = new LinkedList<>();
 	private boolean animating = false;
 
+	// -- Animation parameters
+	// |-- Swaps
 	private int animatedLeftIndex;
 	private String animatedLeftLabel;
 	// Ratios of the width and height
@@ -113,49 +115,50 @@ public class ListVisualiser extends DataStructureVisualiser {
 				double startXRight = getX(animatedRightIndex) / w;
 
 				double startY = y0 / h;
-				double upY = 0.8 * (y0 - rectLength) / h;
+				double upY = (y0 - rectLength / 2 - 10) / h;
+				double downY = (y0 + rectLength / 2 + 10) / h;
 
-			// @formatter:off
-			Timeline timeline = new Timeline(
-				new KeyFrame(Duration.seconds(0),
-					new KeyValue(animatedLeftX, startXLeft),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXRight),
-					new KeyValue(animatedRightY, startY)
-				),
-				new KeyFrame(Duration.seconds(0.5),
-					new KeyValue(animatedLeftX, startXLeft),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXRight),
-					new KeyValue(animatedRightY, upY)
-				),
-				new KeyFrame(Duration.seconds(0.8),
-					new KeyValue(animatedLeftX, startXRight),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXLeft),
-					new KeyValue(animatedRightY, upY)
-				),
-				new KeyFrame(Duration.seconds(1.3),
-					e -> {
-						// Apply Update
-						list = swap.list;
+				// @formatter:off
+				Timeline timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0),
+						new KeyValue(animatedLeftX, startXLeft),
+						new KeyValue(animatedLeftY, startY),
+						new KeyValue(animatedRightX, startXRight),
+						new KeyValue(animatedRightY, startY)
+					),
+					new KeyFrame(Duration.seconds(0.5),
+						new KeyValue(animatedLeftX, startXLeft),
+						new KeyValue(animatedLeftY, downY),
+						new KeyValue(animatedRightX, startXRight),
+						new KeyValue(animatedRightY, upY)
+					),
+					new KeyFrame(Duration.seconds(0.8),
+						new KeyValue(animatedLeftX, startXRight),
+						new KeyValue(animatedLeftY, downY),
+						new KeyValue(animatedRightX, startXLeft),
+						new KeyValue(animatedRightY, upY)
+					),
+					new KeyFrame(Duration.seconds(1.3),
+						e -> {
+							// Apply Update
+							list = swap.list;
 
-						animating = false;
-						repaint();
+							animating = false;
+							repaint();
 
-						synchronized (actionQueue) {
-							if (actionQueue.isEmpty()) {
-								timer.stop();
-							} else runAnimations();
-						}
-					},
-					new KeyValue(animatedLeftX, startXRight),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXLeft),
-					new KeyValue(animatedRightY, startY)
-				)
-			);
-			// @formatter:on
+							synchronized (actionQueue) {
+								if (actionQueue.isEmpty()) {
+									timer.stop();
+								} else runAnimations();
+							}
+						},
+						new KeyValue(animatedLeftX, startXRight),
+						new KeyValue(animatedLeftY, startY),
+						new KeyValue(animatedRightX, startXLeft),
+						new KeyValue(animatedRightY, startY)
+					)
+				);
+				// @formatter:on
 
 				timeline.setCycleCount(1);
 				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
