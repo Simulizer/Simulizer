@@ -15,7 +15,6 @@ public class CPUListener extends SimulationListener {
     CPUVisualisation vis;
     CPU simCpu;
     simulizer.ui.components.CPU cpu;
-    boolean replaying;
     public AnimationProcessor animationProcessor;
 
     /**
@@ -347,7 +346,7 @@ public class CPUListener extends SimulationListener {
         switch (m.getStage()){
             case Fetch:
                 startOfCycle();
-                int speed = getCycleFraction(8);
+                int speed = getCycleFraction(9);
 
                 Runnable t1 = () -> {
 					cpu.showText("INSTRUCTION FETCH - Step 1 - The PC value (address of next instruction) is sent to main memory to read the next instruction", speed);
