@@ -30,10 +30,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private ListModel model;
 
 	private final Queue<Action> actionQueue = new LinkedList<>();
-	private boolean animating = false;
 
 	// -- Animation parameters
 	// |-- Swaps
+	private boolean swapping = false;
+
 	private int animatedLeftIndex;
 	private String animatedLeftLabel;
 	// Ratios of the width and height
@@ -45,6 +46,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 	// Ratios of the width and height
 	private DoubleProperty animatedRightX = new SimpleDoubleProperty();
 	private DoubleProperty animatedRightY = new SimpleDoubleProperty();
+
+	// |-- Emphasis
+	private boolean emphasising = false;
+	private int emphasiseIndex;
+	private DoubleProperty emphasiseProgress = new SimpleDoubleProperty();
 
 	private int FRAME_RATE = 30;
 	private AnimationTimer timer = new AnimationTimer() {
@@ -95,13 +101,20 @@ public class ListVisualiser extends DataStructureVisualiser {
 		}
 	}
 
+	private boolean isAnimating() {
+		return swapping || emphasising;
+	}
+
 	private void runAnimations() {
-		if (animating) return;
+		if (isAnimating()) return;
 		else {
 			Action action = actionQueue.poll();
+			Timeline timeline = null;
 
 			if (action instanceof Swap) {
 				Swap swap = (Swap) action;
+
+				swapping = true;
 
 				animatedLeftIndex = swap.a;
 				animatedRightIndex = swap.b;
@@ -118,7 +131,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 				double downY = (y0 + rectLength / 2 + 10) / h;
 
 				// @formatter:off
-				Timeline timeline = new Timeline(
+				timeline = new Timeline(
 					new KeyFrame(Duration.seconds(0),
 						new KeyValue(animatedLeftX, startXLeft),
 						new KeyValue(animatedLeftY, startY),
@@ -127,22 +140,22 @@ public class ListVisualiser extends DataStructureVisualiser {
 					),
 					new KeyFrame(Duration.seconds(0.5),
 						new KeyValue(animatedLeftX, startXLeft),
-						new KeyValue(animatedLeftY, downY),
+						new KeyValue(animatedLeftY, upY),
 						new KeyValue(animatedRightX, startXRight),
-						new KeyValue(animatedRightY, upY)
+						new KeyValue(animatedRightY, downY)
 					),
 					new KeyFrame(Duration.seconds(0.8),
 						new KeyValue(animatedLeftX, startXRight),
-						new KeyValue(animatedLeftY, downY),
+						new KeyValue(animatedLeftY, upY),
 						new KeyValue(animatedRightX, startXLeft),
-						new KeyValue(animatedRightY, upY)
+						new KeyValue(animatedRightY, downY)
 					),
 					new KeyFrame(Duration.seconds(1.3),
 						e -> {
 							// Apply Update
 							list = swap.list;
 
-							animating = false;
+							swapping = false;
 							repaint();
 
 							synchronized (actionQueue) {
@@ -161,23 +174,49 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 				timeline.setCycleCount(1);
 				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
-
-				timer.start();
-				timeline.play();
-
-				animating = true;
 			} else if (action instanceof Marker) {
 				// Marker Action
 				Marker marker = (Marker) action;
 				// TODO: Marker animation
 			} else if (action instanceof Emphasise) {
-				// Emphasise action
-				Emphasise emphasise = (Emphasise) action;
-				// TODO: Emphasise animation
+				this.emphasiseIndex = ((Emphasise) action).index;
+				emphasising = true;
+
+				// @formatter:off
+				timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0),
+						new KeyValue(emphasiseProgress, 0.0)
+					),
+					new KeyFrame(Duration.seconds(0.5),
+						new KeyValue(emphasiseProgress, 1.0)
+					),
+					new KeyFrame(Duration.seconds(1),
+						e -> {
+							emphasising = false;
+							repaint();
+
+							synchronized (actionQueue) {
+								if (actionQueue.isEmpty()) {
+									timer.stop();
+								} else runAnimations();
+							}
+						},
+						new KeyValue(emphasiseProgress, 0.0)
+					)
+				);
+				// @formatter:on
+
+				timeline.setCycleCount(1);
+				timeline.setRate(1); // TODO: Be more accurate
 			} else {
 				// List changed
 				list = action.list;
 				repaint();
+			}
+
+			if (timeline != null) {
+				timer.start();
+				timeline.play();
 			}
 		}
 	}
@@ -195,7 +234,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 		calculateDimensions(gc);
 
 		drawList(gc);
-		if (animating) {
+		if (swapping) {
 			drawTextBox(gc, animatedLeftX.doubleValue() * w, animatedLeftY.doubleValue() * h, animatedLeftLabel);
 			drawTextBox(gc, animatedRightX.doubleValue() * w, animatedRightY.doubleValue() * h, animatedRightLabel);
 		}
@@ -203,7 +242,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private void drawList(GraphicsContext gc) {
 		for (int i = 0; i < list.length; ++i) {
-			if (animating && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
+			if (swapping && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
+			else if (emphasising && i == emphasiseIndex) {
+				Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
+				drawTextBox(gc, i, list[i]+"", blend);
+			}
 			else drawTextBox(gc, i, list[i] + "");
 		}
 	}
@@ -212,8 +255,16 @@ public class ListVisualiser extends DataStructureVisualiser {
 		drawTextBox(gc, getX(i), y0, text);
 	}
 
+	private void drawTextBox(GraphicsContext gc, int i, String text, Color bg) {
+		drawTextBox(gc, getX(i), y0, text, bg);
+	}
+
 	private void drawTextBox(GraphicsContext gc, double x, double y, String text) {
-		drawBorderedRectangle(gc, Color.SKYBLUE, x, y, rectLength, rectLength);
+		drawTextBox(gc, x, y, text, Color.SKYBLUE);
+	}
+
+	private void drawTextBox(GraphicsContext gc, double x, double y, String text, Color bg) {
+		drawBorderedRectangle(gc, bg, x, y, rectLength, rectLength);
 
 		gc.setFont(new Font("Arial", 55));
 		gc.setFill(Color.BLACK);
