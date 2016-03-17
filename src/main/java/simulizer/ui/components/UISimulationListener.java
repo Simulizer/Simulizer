@@ -121,12 +121,7 @@ public class UISimulationListener extends SimulationListener {
 		highlightAddresses(m.getFetched(), m.getDecoded(), m.getExecuted());
 
 		// Update the pipeline model
-		// TODO have the model in a central place so that the view
-		// can sync up with it when it opens.
-		PipelineView pipelineView = (PipelineView) wm.getWorkspace().findInternalWindow(WindowEnum.PIPELINE_VIEW);
-		if (pipelineView != null && wm.getCPU().isPipelined()) {
-			PipelineView.model.processPipelineStateMessage(m);
-		}
+		PipelineView.model.processPipelineStateMessage(m);
 	}
 
 	@Override
