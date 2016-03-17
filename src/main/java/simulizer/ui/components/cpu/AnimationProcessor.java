@@ -1,16 +1,15 @@
 package simulizer.ui.components.cpu;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import simulizer.assembler.representation.Instruction;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUListener;
-import simulizer.ui.windows.help.SyscallReference;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
-
-import java.util.ArrayList;
-import java.util.concurrent.*;
 
 public class AnimationProcessor {
 

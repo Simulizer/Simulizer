@@ -2,7 +2,6 @@ package simulizer.ui.components.cpu;
 
 import javafx.animation.FillTransition;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.control.Tooltip;

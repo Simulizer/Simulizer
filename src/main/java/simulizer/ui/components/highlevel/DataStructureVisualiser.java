@@ -2,7 +2,6 @@ package simulizer.ui.components.highlevel;
 
 import java.util.Observable;
 import java.util.Observer;
-
 import javafx.scene.layout.Pane;
 import simulizer.highlevel.models.DataStructureModel;
 import simulizer.ui.windows.HighLevelVisualisation;

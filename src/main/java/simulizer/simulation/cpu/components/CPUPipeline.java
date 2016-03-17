@@ -3,9 +3,10 @@ package simulizer.simulation.cpu.components;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import simulizer.assembler.representation.*;
-import simulizer.assembler.representation.operand.Operand;
+import simulizer.assembler.representation.Address;
+import simulizer.assembler.representation.Instruction;
+import simulizer.assembler.representation.Register;
+import simulizer.assembler.representation.Statement;
 import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;

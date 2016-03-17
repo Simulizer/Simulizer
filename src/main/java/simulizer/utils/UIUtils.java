@@ -1,6 +1,7 @@
 package simulizer.utils;
 
-import java.awt.*;
+import java.awt.Desktop;
+import java.awt.Font;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -14,18 +15,17 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
 import javafx.application.Platform;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import simulizer.Simulizer;
-import simulizer.simulation.cpu.components.CPU;
-import simulizer.ui.components.AssemblingDialog;
 
 /**
  * Utilities for UI related utilities
