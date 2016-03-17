@@ -169,7 +169,6 @@ public class CPUVisualisation extends InternalWindow {
 	public void close() {
 		getWindowManager().getCPU().unregisterListener(cpuListener);
 		cpu.closeAllThreads();
-		cpu.animationProcessor.shutdown();
 		super.close();
 	}
 
