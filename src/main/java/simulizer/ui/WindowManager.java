@@ -332,7 +332,7 @@ public class WindowManager extends GridPane {
 		}
 		cpu.registerListener(simListener);
 		if (oldCycleFreq < 0) {
-			cpu.setCycleFreq((Integer) settings.get("simulation.default-CPU-frequency"));
+			cpu.setCycleFreq((Double) settings.get("simulation.default-CPU-frequency"));
 		} else {
 			cpu.setCycleFreq(oldCycleFreq);
 		}
