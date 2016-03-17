@@ -1,6 +1,8 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
 
@@ -8,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.VPos;
@@ -52,6 +55,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private int emphasiseIndex;
 	private DoubleProperty emphasiseProgress = new SimpleDoubleProperty();
 
+	// |-- Markers
+	private Map<Integer, String> markers = new HashMap<>();
+
 	private int FRAME_RATE = 30;
 	private AnimationTimer timer = new AnimationTimer() {
 		long lastTime = -1;
@@ -81,7 +87,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
+		canvas.widthProperty().addListener(e -> Platform.runLater(this::repaint));
 		canvas.heightProperty().bind(super.heightProperty());
+		canvas.heightProperty().addListener(e -> Platform.runLater(this::repaint));
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setLineWidth(2);
@@ -175,9 +183,22 @@ public class ListVisualiser extends DataStructureVisualiser {
 				timeline.setCycleCount(1);
 				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
 			} else if (action instanceof Marker) {
-				// Marker Action
 				Marker marker = (Marker) action;
-				// TODO: Marker animation
+
+				if (marker.index.isPresent()) {
+					int index = marker.index.get();
+					if (marker.name.isPresent()) {
+						// We need to add the marker
+						String name = marker.name.get();
+						String existing = markers.get(index);
+						if (existing != null) markers.put(index, existing + " " + name);
+						else markers.put(index, name);
+					} else {
+						// We need to clear the marker
+						markers.remove(index);
+					}
+				} else markers.clear();
+
 			} else if (action instanceof Emphasise) {
 				this.emphasiseIndex = ((Emphasise) action).index;
 				emphasising = true;
@@ -211,13 +232,14 @@ public class ListVisualiser extends DataStructureVisualiser {
 			} else {
 				// List changed
 				list = action.list;
-				repaint();
 			}
 
 			if (timeline != null) {
 				timer.start();
 				timeline.play();
 			}
+
+			repaint();
 		}
 	}
 
@@ -233,6 +255,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		calculateDimensions(gc);
 
+		drawMarkers(gc);
 		drawList(gc);
 		if (swapping) {
 			drawTextBox(gc, animatedLeftX.doubleValue() * w, animatedLeftY.doubleValue() * h, animatedLeftLabel);
@@ -240,14 +263,28 @@ public class ListVisualiser extends DataStructureVisualiser {
 		}
 	}
 
+	private final Font markerFont = new Font("Arial", 25);
+	private void drawMarkers(GraphicsContext gc) {
+		gc.setFont(markerFont);
+		gc.setTextBaseline(VPos.BOTTOM);
+
+		for (Map.Entry<Integer, String> entry : markers.entrySet()) {
+			double x = getX(entry.getKey());
+			gc.beginPath();
+			gc.fillText(entry.getValue(), x + rectLength / 2, y0 - 7, rectLength);
+			gc.closePath();
+		}
+	}
+
 	private void drawList(GraphicsContext gc) {
+		gc.setTextBaseline(VPos.CENTER);
+
 		for (int i = 0; i < list.length; ++i) {
 			if (swapping && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
 			else if (emphasising && i == emphasiseIndex) {
 				Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
-				drawTextBox(gc, i, list[i]+"", blend);
-			}
-			else drawTextBox(gc, i, list[i] + "");
+				drawTextBox(gc, i, list[i] + "", blend);
+			} else drawTextBox(gc, i, list[i] + "");
 		}
 	}
 
@@ -263,10 +300,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 		drawTextBox(gc, x, y, text, Color.SKYBLUE);
 	}
 
+	private final Font itemFont = new Font("Arial", 55);
 	private void drawTextBox(GraphicsContext gc, double x, double y, String text, Color bg) {
 		drawBorderedRectangle(gc, bg, x, y, rectLength, rectLength);
 
-		gc.setFont(new Font("Arial", 55));
+		gc.setFont(itemFont);
 		gc.setFill(Color.BLACK);
 		gc.beginPath();
 		gc.fillText(text, x + rectLength / 2, y + rectLength / 2, rectLength);
@@ -288,8 +326,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawBorderedRectangle(GraphicsContext gc, Color fill, double x, double y, double w, double h) {
-		gc.beginPath();
 		gc.setFill(fill);
+		gc.beginPath();
 		gc.fillRect(x, y, w, h);
 		gc.strokeRect(x, y, w, h);
 		gc.closePath();

@@ -10,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.Canvas;
@@ -66,7 +67,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
+		canvas.widthProperty().addListener(e -> Platform.runLater(this::repaint));
 		canvas.heightProperty().bind(super.heightProperty());
+		canvas.heightProperty().addListener(e -> Platform.runLater(this::repaint));
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setLineWidth(2);
