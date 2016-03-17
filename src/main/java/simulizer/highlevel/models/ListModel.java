@@ -53,8 +53,7 @@ public class ListModel extends DataStructureModel {
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
 			ArrayList<String> exMarkers = markers.get(index);
-			if (exMarkers != null)
-				exMarkers.add(markerName);
+			if (exMarkers != null) exMarkers.add(markerName);
 			else {
 				exMarkers = new ArrayList<>(2);
 				markers.put(index, exMarkers);
@@ -63,6 +62,11 @@ public class ListModel extends DataStructureModel {
 			setChanged();
 			notifyObservers(new Marker(index, markerName));
 		}
+	}
+
+	public void highlightMarker(int index) {
+		setChanged();
+		notifyObservers(new Highlight(index));
 	}
 
 	public void clearMarker(int index) {
@@ -92,10 +96,8 @@ public class ListModel extends DataStructureModel {
 
 	public long[] getList() {
 		synchronized (list) {
-			if (list.length == 0)
-				return new long[0];
-			else
-				return Arrays.copyOf(list, list.length);
+			if (list.length == 0) return new long[0];
+			else return Arrays.copyOf(list, list.length);
 		}
 	}
 
@@ -186,6 +188,14 @@ public class ListModel extends DataStructureModel {
 		public final int index;
 
 		private Emphasise(final int index) {
+			this.index = index;
+		}
+	}
+
+	public class Highlight extends Action {
+		public final int index;
+
+		private Highlight(final int index) {
 			this.index = index;
 		}
 	}

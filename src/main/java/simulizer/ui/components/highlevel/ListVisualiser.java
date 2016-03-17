@@ -1,10 +1,12 @@
 package simulizer.ui.components.highlevel;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
+import java.util.Set;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -23,6 +25,7 @@ import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
 import simulizer.highlevel.models.ListModel.Action;
 import simulizer.highlevel.models.ListModel.Emphasise;
+import simulizer.highlevel.models.ListModel.Highlight;
 import simulizer.highlevel.models.ListModel.Marker;
 import simulizer.highlevel.models.ListModel.Swap;
 import simulizer.ui.windows.HighLevelVisualisation;
@@ -57,6 +60,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	// |-- Markers
 	private Map<Integer, String> markers = new HashMap<>();
+	private Set<Integer> highlightedMarkers = new HashSet<>();
 
 	private int FRAME_RATE = 30;
 	private AnimationTimer timer = new AnimationTimer() {
@@ -104,7 +108,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
 		if (obj != null) {
-			actionQueue.add((Action) obj);
+			synchronized (actionQueue) {
+				actionQueue.add((Action) obj);
+			}
 			runAnimations();
 		}
 	}
@@ -196,9 +202,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 					} else {
 						// We need to clear the marker
 						markers.remove(index);
+						highlightedMarkers.remove(index);
 					}
-				} else markers.clear();
-
+				} else {
+					markers.clear();
+					highlightedMarkers.clear();
+				}
 			} else if (action instanceof Emphasise) {
 				this.emphasiseIndex = ((Emphasise) action).index;
 				emphasising = true;
@@ -228,7 +237,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 				// @formatter:on
 
 				timeline.setCycleCount(1);
-				timeline.setRate(1); // TODO: Be more accurate
+				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
+			} else if (action instanceof Highlight) {
+				highlightedMarkers.add(((Highlight) action).index);
 			} else {
 				// List changed
 				list = action.list;
@@ -264,11 +275,13 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private final Font markerFont = new Font("Arial", 25);
+
 	private void drawMarkers(GraphicsContext gc) {
 		gc.setFont(markerFont);
 		gc.setTextBaseline(VPos.BOTTOM);
 
 		for (Map.Entry<Integer, String> entry : markers.entrySet()) {
+			gc.setFill(highlightedMarkers.contains(entry.getKey()) ? Color.RED : Color.BLACK);
 			double x = getX(entry.getKey());
 			gc.beginPath();
 			gc.fillText(entry.getValue(), x + rectLength / 2, y0 - 7, rectLength);
@@ -301,6 +314,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private final Font itemFont = new Font("Arial", 55);
+
 	private void drawTextBox(GraphicsContext gc, double x, double y, String text, Color bg) {
 		drawBorderedRectangle(gc, bg, x, y, rectLength, rectLength);
 
