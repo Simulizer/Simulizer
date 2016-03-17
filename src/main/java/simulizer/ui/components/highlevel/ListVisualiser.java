@@ -46,7 +46,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private DoubleProperty animatedRightX = new SimpleDoubleProperty();
 	private DoubleProperty animatedRightY = new SimpleDoubleProperty();
 
-	private int FRAME_RATE = 10;
+	private int FRAME_RATE = 30;
 	private AnimationTimer timer = new AnimationTimer() {
 		long lastTime = -1;
 
@@ -91,7 +91,6 @@ public class ListVisualiser extends DataStructureVisualiser {
 		super.update(o, obj);
 		if (obj != null) {
 			actionQueue.add((Action) obj);
-			this.list = model.getList();
 			runAnimations();
 		}
 	}
@@ -107,9 +106,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 				animatedLeftIndex = swap.a;
 				animatedRightIndex = swap.b;
 
-				// This is correct
-				animatedLeftLabel = "" + list[animatedRightIndex];
-				animatedRightLabel = "" + list[animatedLeftIndex];
+				// This is correct (I don't believe you)
+				animatedLeftLabel = "" + list[animatedLeftIndex];
+				animatedRightLabel = "" + list[animatedRightIndex];
 
 				double startXLeft = getX(animatedLeftIndex) / w;
 				double startXRight = getX(animatedRightIndex) / w;
