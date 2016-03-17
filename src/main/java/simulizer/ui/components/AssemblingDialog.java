@@ -6,39 +6,48 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
+import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
+import simulizer.ui.WindowManager;
+import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.windows.Editor;
 import simulizer.utils.ThreadUtils;
 
 public class AssemblingDialog extends Alert {
 	private String contentText = "Your program is being assembled, please wait ";
 	private final ScheduledExecutorService executor;
 	private final ScheduledFuture<?> updateTask;
+	private WindowManager wm;
 
-	private static AssemblingDialog assemblingDialog;
-	public static void showAssemblingDialog(CPU cpu) {
-		assemblingDialog = new AssemblingDialog(cpu);
+	private static AssemblingDialog assemblingDialog = null;
+	public static void showAssemblingDialog(WindowManager wm) {
+		assemblingDialog = new AssemblingDialog(wm);
 	}
 	public static void closeAssemblingDialog() {
-		assemblingDialog.closeDown();
-		assemblingDialog = null;
+		if (assemblingDialog != null) {
+			assemblingDialog.closeDown();
+			assemblingDialog = null;
+		}
 	}
 
-	public AssemblingDialog(CPU cpu) {
+	private AssemblingDialog(WindowManager wm) {
 		super(AlertType.INFORMATION);
+
+		this.wm = wm;
 
 		setTitle("Information Dialog");
 		setHeaderText("Assembling");
 
 		setContentText(contentText);
 
-		Platform.runLater(this::show);
+		Platform.runLater(() -> {
+			show();
+			getDialogPane().setCursor(Cursor.WAIT);
+		});
 
-		cpu.registerListener(new AssemblingFinishedListener(cpu));
+		wm.getCPU().registerListener(new AssemblingFinishedListener());
 
 		executor = Executors.newSingleThreadScheduledExecutor(
 				new ThreadUtils.NamedThreadFactory("Assembling-Dialog"));
@@ -47,7 +56,7 @@ public class AssemblingDialog extends Alert {
 		, 0, 500, TimeUnit.MILLISECONDS);
 	}
 
-	public String getNext(String current) {
+	private String getNext(String current) {
 		int count = 0;
 		for (int i = 0; i < current.length(); ++i)
 			if (current.charAt(i) == '.') ++count;
@@ -61,23 +70,29 @@ public class AssemblingDialog extends Alert {
 		return svar;
 	}
 
-	public void closeDown() {
+	private void closeDown() {
 		updateTask.cancel(true);
 		executor.shutdownNow();
-		Platform.runLater(() -> ((Button) getDialogPane().lookupButton(ButtonType.OK)).fire());
+		Platform.runLater(() -> {
+			close();
+
+			// to fix an annoyance with focus not returning properly and
+			// when it does, having the wrong cursor
+			wm.getPrimaryStage().requestFocus();
+			Editor e = (Editor)wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+			if(e != null) {
+				e.requestFocus();
+				e.setCursor(Cursor.DEFAULT);
+			}
+		});
 	}
 
 	private class AssemblingFinishedListener extends SimulationListener {
-		CPU cpu;
-		public AssemblingFinishedListener(CPU cpu) {
-			this.cpu = cpu;
-		}
-
 		@Override
 		public void processSimulationMessage(SimulationMessage m) {
 			if(m.detail == SimulationMessage.Detail.PROGRAM_LOADED) {
 				closeDown();
-				cpu.unregisterListener(this);
+				wm.getCPU().unregisterListener(this);
 			}
 		}
 	}

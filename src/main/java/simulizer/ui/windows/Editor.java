@@ -55,18 +55,23 @@ public class Editor extends InternalWindow {
 	private static File currentFile = null; // persists across instances of the window
 
 	private boolean pageLoaded;
-	private WebEngine engine;
+	private final WebEngine engine;
 
 	private boolean changedSinceLastSave;
-	private boolean editedSinceLabelUpdate;
+	private boolean changedSinceLastNotify;
 
 	// handle key combos for copy and paste
-	final KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
-	final KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
-	final KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
-	final KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
-	final KeyCombination C_plus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
-	final KeyCombination C_minus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN); // Caps lock + =
+	final static KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
+	final static KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
 	// references to javascript objects
 	private SafeJSObject jsWindow;
@@ -78,7 +83,7 @@ public class Editor extends InternalWindow {
 	}
 
 	// execute mode = simulation running
-	private enum Mode { EDIT_MODE, EXECUTE_MODE }
+	public enum Mode { EDIT_MODE, EXECUTE_MODE }
 	private Mode mode;
 
 	private Set<TemporaryObserver> observers = new HashSet<>();
@@ -126,58 +131,29 @@ public class Editor extends InternalWindow {
 		// calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));
 
+		mode = Mode.EDIT_MODE;
+
 		// javascript does not have access to the outside clipboard
 		view.setContextMenuEnabled(false);
 
 		// handle copy and paste manually
-		addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-
-			if (C_c.match(event)) {
-				if(mode == Mode.EXECUTE_MODE)
-					return;
-				copy();
-
-				event.consume();
-
-			} else if (C_v.match(event)) {
-				if(mode == Mode.EXECUTE_MODE)
-					return;
-				paste();
-
-				editedSinceLabelUpdate = true;
-				event.consume();
-
-			} else if (C_b.match(event)) {
-				if(mode == Mode.EXECUTE_MODE)
-					return;
-				insertBreakpoint();
-			} else if (C_f.match(event)) {
-				UIUtils.openTextInputDialog("Find", "Find",
-						"Please enter your search query:", "", this::findNext);
-			} else if(C_plus.match(event)) {
-				jsWindow.call("changeFontSize", 1);
-				event.consume();
-			} else if(C_minus.match(event)) {
-				jsWindow.call("changeFontSize", -1);
-				event.consume();
-			} else {
-				if(mode == Mode.EXECUTE_MODE)
-					return;
-				editedSinceLabelUpdate = true;
-			}
-		});
+		addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyEvent);
 
 		// other windows scan the contents of the editor continuously
-		editedSinceLabelUpdate = false;
+		changedSinceLastNotify = false;
 		changeNotifier = Executors.newSingleThreadScheduledExecutor(
 				new ThreadUtils.NamedThreadFactory("Editor-Change-Notifier"));
 		notifyTask = changeNotifier.scheduleAtFixedRate(() -> {
-			if(editedSinceLabelUpdate) {
-				editedSinceLabelUpdate = false;
+			if(changedSinceLastNotify) {
+				changedSinceLastNotify = false;
 				updateObservers();
 			}
+
+			// a hack to make absolutely sure that the editor doesn't stay read only
+			// even if the simulation crashes
 			if(mode == Mode.EXECUTE_MODE && !getWindowManager().getCPU().isRunning())
 				editMode();
+
 		}, 0, 2, TimeUnit.SECONDS);
 
 
@@ -203,6 +179,51 @@ public class Editor extends InternalWindow {
 		getStylesheets().add(theme.getStyleSheet("editor.css"));
 	}
 
+	public void handleKeyEvent(KeyEvent event) {
+		if (C_c.match(event)) {
+			if(mode == Mode.EXECUTE_MODE)
+				return;
+
+			copy();
+			event.consume();
+
+		} else if (C_v.match(event)) {
+			System.out.println("is paste");
+			if(mode == Mode.EXECUTE_MODE)
+				return;
+
+			paste();
+			event.consume();
+
+		} else if (C_b.match(event)) {
+			if(mode == Mode.EXECUTE_MODE)
+				return;
+
+			insertBreakpoint();
+			event.consume();
+		} else if (C_g.match(event)) {
+			if(mode == Mode.EXECUTE_MODE)
+				return;
+
+			UIUtils.openIntInputDialog("Go To Line", "Go To Line",
+					"Enter a line number:", 1, (l) -> gotoLine(l-1));
+			event.consume();
+		} else if (C_f.match(event)) {
+			UIUtils.openTextInputDialog("Find", "Find",
+					"Please enter your search query:", "", this::findNext);
+			event.consume();
+		} else if(C_plus.match(event) || C_add.match(event) || C_eq.match(event) || C_S_eq.match(event)) {
+			changeFontSize(1);
+			event.consume();
+		} else if(C_minus.match(event) || C_subtract.match(event)) {
+			changeFontSize(-1);
+			event.consume();
+		} else {
+			if(mode == Mode.EXECUTE_MODE)
+				return;
+			changedSinceLastNotify = true;
+		}
+	}
 
 
 	/**
@@ -255,11 +276,11 @@ public class Editor extends InternalWindow {
 						continuousAssemblyInProgress = true;
 						Platform.runLater(this::refreshTitle);
 
-						DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
+						//DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
 						final List<Problem> problems = Assembler.checkForProblems(program);
 						Platform.runLater(() -> setProblems(problems));
 						lastProgramHash = thisProgramHash;
-						t.stopAndPrint();
+						//t.stopAndPrint();
 					}
 				} catch(TimeoutException | InterruptedException ignored) {
 					// its fine, just don't compile
@@ -538,7 +559,7 @@ public class Editor extends InternalWindow {
 		currentFile = file;
 		jsWindow.call("loadText", FileUtils.getFileContent(file));
 		setEdited(false);
-		editedSinceLabelUpdate = false;
+		changedSinceLastNotify = true;
 
 		updateObservers();
 
@@ -550,7 +571,7 @@ public class Editor extends InternalWindow {
 		currentFile = null;
 		jsWindow.call("loadText", "");
 		setEdited(false);
-		editedSinceLabelUpdate = false;
+		changedSinceLastNotify = true;
 
 		updateObservers();
 
@@ -597,22 +618,31 @@ public class Editor extends InternalWindow {
 		refreshTitle();
 	}
 
+	public Mode getMode() {
+		return mode;
+	}
+
 
 	public void copy() {
-		String clip = (String) jsEditor.call("getCopyText");
+		if(mode == Mode.EDIT_MODE) {
+			String clip = (String) jsEditor.call("getCopyText");
 
-		Clipboard clipboard = Clipboard.getSystemClipboard();
-		ClipboardContent content = new ClipboardContent();
+			Clipboard clipboard = Clipboard.getSystemClipboard();
+			ClipboardContent content = new ClipboardContent();
 
-		content.putString(clip);
-		clipboard.setContent(content);
+			content.putString(clip);
+			clipboard.setContent(content);
+		}
 	}
 	public void paste() {
-		Clipboard clipboard = Clipboard.getSystemClipboard();
-		String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
+		if(mode == Mode.EDIT_MODE) {
+			Clipboard clipboard = Clipboard.getSystemClipboard();
+			String clip = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
 
-		if (clip != null) {
-			jsEditor.call("insert", clip);
+			if (clip != null) {
+				jsEditor.call("insert", clip);
+			}
+			changedSinceLastNotify = true;
 		}
 	}
 
@@ -646,7 +676,10 @@ public class Editor extends InternalWindow {
 	}
 
 	public void insertBreakpoint() {
-		jsWindow.call("insertBreakpoint");
+		if(mode == Mode.EDIT_MODE) {
+			jsWindow.call("insertBreakpoint");
+			changedSinceLastNotify = true;
+		}
 	}
 
 	/**
@@ -654,6 +687,13 @@ public class Editor extends InternalWindow {
 	 */
 	public void setFontSize(int size) {
 		jsEditor.call("setFontSize", size);
+	}
+
+	/**
+	 * @param relativeChange the number of px to add or subtract
+	 */
+	public void changeFontSize(int relativeChange) {
+		jsWindow.call("changeFontSize", relativeChange);
 	}
 
 	/**
@@ -675,7 +715,6 @@ public class Editor extends InternalWindow {
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void highlightPipeline(int fetchLine, int decodeLine, int executeLine) {
-		//TODO: see if synchronizing this method helps
 		jsWindow.call("highlightPipeline", fetchLine, decodeLine, executeLine);
 	}
 }

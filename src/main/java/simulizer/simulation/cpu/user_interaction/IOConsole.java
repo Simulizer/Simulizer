@@ -50,7 +50,7 @@ public class IOConsole implements IO
 	 * 
 	 * @return the string read from the console
 	 */
-	public String readString()
+	public String readString(IOStream stream)
 	{
 		
 		String read = scan.nextLine();
@@ -61,7 +61,7 @@ public class IOConsole implements IO
 	 * 
 	 * @return the integer read from the console
 	 */
-	public int readInt()
+	public int readInt(IOStream stream)
 	{
 		int num = scan.nextInt();
 		return num;
@@ -71,7 +71,7 @@ public class IOConsole implements IO
 	 * 
 	 * @return the character read from the console
 	 */
-	public char readChar()
+	public char readChar(IOStream stream)
 	{
 		char letter = scan.next().charAt(0);
 		return letter;

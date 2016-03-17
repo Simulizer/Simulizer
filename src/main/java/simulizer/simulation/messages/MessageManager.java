@@ -18,28 +18,34 @@ public class MessageManager {
 	private final long allowedProcessingTime = 100; // milliseconds
 
 	private final List<SimulationListener> listeners;
-	private final ExecutorService executor;
+	private final ThreadPoolExecutor executor;
 	private final List<Future<Void>> tasks;
+	private final static int maxTasks = 8;
 
 	private final IO io;
 
 	public MessageManager(IO io) {
-		int expectedListeners = 5; // to preallocate
+		listeners = new ArrayList<>(maxTasks);
+		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks,
+				new ThreadUtils.NamedThreadFactory("Message-Manager"));
 
-		listeners = new ArrayList<>(expectedListeners);
-		executor = Executors.newFixedThreadPool(expectedListeners, new ThreadUtils.NamedThreadFactory("Message-Manager"));
-		tasks = new ArrayList<>(expectedListeners);
+		// if the executor runs out of threads, the calling thread to submit the tasks has to run them
+		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+
+		tasks = new ArrayList<>(maxTasks);
 		this.io = io;
 	}
 
 	public void shutdown() {
 		waitForAllRunningTasks();
 
-		executor.shutdown();
-		try {
-			executor.awaitTermination(allowedProcessingTime, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			executor.shutdownNow();
+		synchronized (executor) {
+			executor.shutdown();
+			try {
+				executor.awaitTermination(allowedProcessingTime, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				executor.shutdownNow();
+			}
 		}
 	}
 
@@ -79,7 +85,17 @@ public class MessageManager {
 			}
 		}
 		try {
-			List<Future<Void>> newTasks = executor.invokeAll(jobs);
+			List<Future<Void>> newTasks;
+
+			// make sure not to add any more tasks than the executor can cope with
+
+			// make sure not to add tasks after shutdown
+			// to avoid java.util.concurrent.RejectedExecutionException
+			synchronized (executor) {
+				if(executor.isShutdown()) return;
+				newTasks = executor.invokeAll(jobs);
+			}
+
 			synchronized (tasks) {
 				tasks.addAll(newTasks);
 			}

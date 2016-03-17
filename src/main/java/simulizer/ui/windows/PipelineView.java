@@ -35,6 +35,7 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
 
 public class PipelineView extends InternalWindow implements Observer {
@@ -62,14 +63,15 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	private String selectedAddress;
 
-	// Model
-	private PipelineHistoryModel model = new PipelineHistoryModel();
+	// Model (currently static - watch out)
+	public static PipelineHistoryModel model = new PipelineHistoryModel();
 	// Canvas has a maximum size, so don't draw more than it!
 	private int numColumnsToDraw;
 	private int startCycle = 0;
 	private boolean snapToEnd;
 
 	private boolean isPipelined;
+	private boolean isRunning;
 
 	// Dimensions used for calculations
 	private double rectWidth;
@@ -121,7 +123,17 @@ public class PipelineView extends InternalWindow implements Observer {
 				String name;
 				if (addr == null || (name = getShortName(addr)).equals(selectedAddress)) selectedAddress = null;
 				else selectedAddress = name;
+
+				int line = getWindowManager().getCPU().getProgram().lineNumbers.getOrDefault(ca.getValue(), -1);
+				if(line != -1) {
+					Editor ed = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
+					if(ed != null) {
+						Platform.runLater(() -> ed.gotoLine(line));
+					}
+				}
+
 			} else selectedAddress = null;
+
 
 			repaint();
 
@@ -223,8 +235,10 @@ public class PipelineView extends InternalWindow implements Observer {
 		return Optional.empty();
 	}
 
-	public PipelineHistoryModel getModel() {
-		return model;
+	@Override
+	public void close() {
+		model.removeObserver(this);
+		super.close();
 	}
 
 	/**
@@ -318,6 +332,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	@Override
 	public void update(Observable o, Object pipelineState) {
 		this.isPipelined = getWindowManager().getCPU().isPipelined();
+		this.isRunning = getWindowManager().getCPU().isRunning();
 
 		this.snapToEnd = followCheckBox.isSelected();
 		repaint();
@@ -420,7 +435,11 @@ public class PipelineView extends InternalWindow implements Observer {
 	@Override
 	public void ready() {
 		super.ready();
+		isPipelined = getWindowManager().getCPU().isPipelined();
+		isRunning = getWindowManager().getCPU().isRunning();
+		this.snapToEnd = true;
 		repaint();
+		this.snapToEnd = false;
 	}
 
 	public void repaint() {
@@ -432,7 +451,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		gc.clearRect(0, 0, realW, realH);
 
-		if (isPipelined) {
+		if (isPipelined && isRunning) {
 			calculateParameters();
 			drawDividers(gc);
 			drawExplainers(gc);
@@ -532,8 +551,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private String getAddressInfo(Address address) {
-		// TODO: make popup monospaced and line the fields up
-
 		CPU cpu = getWindowManager().getCPU();
 		Map<Address, Statement> textSegment = cpu.getProgram().textSegment;
 

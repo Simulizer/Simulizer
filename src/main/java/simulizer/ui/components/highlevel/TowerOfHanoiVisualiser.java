@@ -25,7 +25,6 @@ import simulizer.ui.windows.HighLevelVisualisation;
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private List<Stack<Integer>> pegs;
 	private final Queue<Action> moves = new LinkedList<>();
-	private int numberOfDiscs = 0;
 
 	private Canvas canvas = new Canvas();
 	private HanoiModel model;
@@ -92,7 +91,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		Action action = moves.poll();
 		if (action instanceof Discs) {
 			Discs discs = (Discs) action;
-			numberOfDiscs = discs.numDiscs;
 			pegs = discs.pegs;
 			repaint();
 		} else if (action instanceof Move) {
@@ -137,10 +135,10 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 					e -> {
 						// Apply Update
 						pegs = action.pegs;
-						
+
 						animating = false;
 						repaint();
-						
+
 						synchronized (moves) {
 							if (moves.isEmpty()) {
 								timer.stop();

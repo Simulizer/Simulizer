@@ -14,7 +14,7 @@ public enum WindowEnum {
 	CPU_VISUALISATION("CPUVisualisation", "CPU Visualisation"),
 	HIGH_LEVEL_VISUALISATION("HighLevelVisualisation", "High Level Visualisation"),
 	LABELS("Labels"),
-	LOGGER("Logger"),
+	LOGGER("Logger", "Program I/O"),
 	PIPELINE_VIEW("PipelineView", "Pipeline View"),
 	MEMORY_VIEW("MemoryView", "Memory View"),
 	REGISTERS("Registers"),

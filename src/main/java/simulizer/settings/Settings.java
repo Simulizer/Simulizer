@@ -69,7 +69,7 @@ public class Settings {
 					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new IntegerSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
+						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
 					);
@@ -94,7 +94,10 @@ public class Settings {
 					);	
 		settings.add(new ObjectSetting("logger", "Logger")
 				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
-				);	
+				);
+		settings.add(new ObjectSetting("hlvis", "High Level Visualiser")
+				.add(new BooleanSetting("auto-open", "Automatically Open High Level Visualiser", "Automatically Open High Level Visualiser when a new visualisation is shown", true))
+				);
 		// @formatter:on
 
 		// Loads all the values from jsonObject
@@ -159,7 +162,7 @@ public class Settings {
 		for (int i = 0; i < path.length; i++) {
 			setting = ((ObjectSetting) setting).get(path[i]);
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
-				return null; // TODO: handle failure more gracefully
+				throw new IllegalArgumentException("Invalid Setting: " + settingPath);
 		}
 		return setting.getValue();
 	}

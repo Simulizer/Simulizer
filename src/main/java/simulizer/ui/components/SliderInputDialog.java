@@ -64,7 +64,9 @@ public class SliderInputDialog extends Dialog<String> {
         this.sliderField.setMajorTickUnit(max / 2 - 1);
         this.sliderField.setMinorTickCount(5);
         this.sliderField.setBlockIncrement(0.01);
+        
         resultField = new Spinner<Double>(min, max, value);
+        resultField.setEditable(true);
 
         this.sliderField.valueProperty().addListener((observable, oldValue, newValue) -> {
 			resultField.getValueFactory().setValue(newValue.doubleValue());

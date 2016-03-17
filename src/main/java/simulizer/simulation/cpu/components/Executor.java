@@ -199,14 +199,14 @@ public class Executor {
     			cpu.getIO().printString(IOStream.STANDARD, toPrint);
     			break;
     		case 5://read int
-    			int read = cpu.getIO().readInt();//reading in from console
+    			int read = cpu.getIO().readInt(IOStream.STANDARD);//reading in from console
     			Word readAsWord = new Word(DataConverter.encodeAsSigned((long)read));
     			cpu.getRegisters()[Register.v0.getID()] = readAsWord;//storing in v0
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
     			break;
     		case 8://read string
-    			String readInString = cpu.getIO().readString();//this string will be cut to maxChars -1 i.e last one will be null terminator
+    			String readInString = cpu.getIO().readString(IOStream.STANDARD);//this string will be cut to maxChars -1 i.e last one will be null terminator
     			int a1 = (int)DataConverter.decodeAsSigned(cpu.getRegisters()[Register.a1.getID()].getWord());//max chars stored here
     			int addressIBuf = a0;//start of input buffer
     			if(readInString.length() >= a1) {//truncating string
@@ -237,7 +237,7 @@ public class Executor {
     			cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
     			break;
     		case 12://read char
-    			String readChar = cpu.getIO().readChar() + "";//from console
+    			String readChar = cpu.getIO().readChar(IOStream.STANDARD) + "";//from console
     			byte[] asBytes = readChar.getBytes();
     			long asLong = DataConverter.decodeAsSigned(asBytes);
     			Word toWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage

@@ -13,21 +13,21 @@ public class IOTest implements IO {
 	public String scanner = "";//used for taking output/input
 	
 	@Override
-	public String readString() {
+	public String readString(IOStream stream) {
 		String scanned = scanner;
 		scanner = "";
 		return scanned;
 	}
 
 	@Override
-	public int readInt() {
+	public int readInt(IOStream stream) {
 		int scanned = Integer.parseInt(scanner);
 		scanner = "";
 		return scanned;
 	}
 
 	@Override
-	public char readChar() {
+	public char readChar(IOStream stream) {
 		char scanned = scanner.charAt(0);
 		scanner = "";
 		return scanned;

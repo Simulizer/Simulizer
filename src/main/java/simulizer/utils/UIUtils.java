@@ -184,6 +184,23 @@ public class UIUtils {
 
 		dialog.showAndWait().ifPresent(callback);
 	}
+	public static void openIntInputDialog(String title, String header, String message, Integer defaultInt, Consumer<Integer> callback) {
+		TextInputDialog dialog = new TextInputDialog(""+defaultInt);
+		dialog.setTitle(title);
+		dialog.setHeaderText(header);
+		dialog.setContentText(message);
+
+		dialog.showAndWait().ifPresent((text) -> {
+			int val = defaultInt;
+			try {
+				val = Integer.parseInt(text);
+			} catch(NumberFormatException ignored) {
+			}
+
+			callback.accept(val);
+
+		});
+	}
 
 	/**
 	 * get user confirmation using an OK / Cancel dialog

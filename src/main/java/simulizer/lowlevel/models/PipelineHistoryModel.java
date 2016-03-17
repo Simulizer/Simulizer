@@ -53,6 +53,10 @@ public class PipelineHistoryModel {
 		observers.add(observer);
 	}
 
+	public void removeObserver(Observer observer) {
+		observers.remove(observer);
+	}
+
 	public void processPipelineStateMessage(PipelineStateMessage m) {
 		if (size() >= MAX_SIZE) return;
 
