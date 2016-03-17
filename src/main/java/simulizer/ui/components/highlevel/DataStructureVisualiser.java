@@ -11,13 +11,12 @@ import simulizer.ui.windows.HighLevelVisualisation;
 public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int rate = 1000;
 	protected HighLevelVisualisation vis;
-	private boolean showing;
+	private boolean showing = false;
 	private DataStructureModel model;
 
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
 		this.vis = vis;
-		showing = model.isVisible();
 		model.addObserver(this);
 	}
 
