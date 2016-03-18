@@ -72,4 +72,8 @@ public class HLVisualManager extends Observable implements Observer {
 				workspace.openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
 		}
 	}
+
+	public enum Action {
+		CREATED, DELETED;
+	}
 }

@@ -63,23 +63,21 @@ public class HanoiModel extends DataStructureModel {
 		return ModelType.HANOI;
 	}
 
-	public class Action {
-		public final List<Stack<Integer>> pegs = getPegs();
-	}
-
-	public class Move extends Action {
+	public class Move extends ModelAction<List<Stack<Integer>>> {
 		public final int start, end;
 
 		private Move(int start, int end) {
+			super(getPegs(), true);
 			this.start = start;
 			this.end = end;
 		}
 	}
 
-	public class Discs extends Action {
+	public class Discs extends ModelAction<List<Stack<Integer>>> {
 		public final int numDiscs;
 
 		private Discs(int numDiscs) {
+			super(getPegs(), false);
 			this.numDiscs = numDiscs;
 		}
 	}
