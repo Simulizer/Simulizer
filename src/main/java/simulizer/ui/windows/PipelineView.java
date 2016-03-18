@@ -1,6 +1,12 @@
 package simulizer.ui.windows;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -51,14 +57,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
 
-	private final String DEFAULT_INSTR =
-		// @formatter:off
-//		  "       Statement:\n"
-//		+ "         Address:\n"
-//		+ "Instruction type:\n"
-//		+ "     Line number:";
-		"\n\n\n\n";
-		// @formatter:on
+	private final String DEFAULT_INSTR = "\n\n\n\n";
 	private Label instructionInfoLabel = new Label(DEFAULT_INSTR);
 
 	private String selectedAddress;
@@ -518,8 +517,27 @@ public class PipelineView extends InternalWindow implements Observer {
 		Optional<PipelineHazardMessage.Hazard> hOpt = model.getHistory().get(cycle).hazard;
 		assert (hOpt.isPresent());
 
+		String fortune = " ";
+		if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0)
+			fortune = fortunes.get(cycle/100);
+
 		PipelineHazardMessage.Hazard h = hOpt.get();
-		return String.format("Hazard: %s%n %n %n ", h.toString());
+		return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
+	}
+
+	private static List<String> fortunes = new ArrayList<>();
+	{
+		try
+		(BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
+
+			String s;
+			while ((s = reader.readLine()) != null)
+				if (!s.trim().isEmpty()) fortunes.add(s);
+
+			Collections.shuffle(fortunes);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String getAddressInfo(Address address) {
