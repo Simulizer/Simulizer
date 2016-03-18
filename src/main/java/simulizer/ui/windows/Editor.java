@@ -11,7 +11,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.w3c.dom.Document;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -116,7 +118,6 @@ public class Editor extends InternalWindow {
 
 	private Bridge bridge;
 
-
 	public Editor() {
 		WebView view = new WebView();
 		pageLoaded = false;
@@ -143,7 +144,7 @@ public class Editor extends InternalWindow {
 		notifyTask = changeNotifier.scheduleAtFixedRate(() -> {
 			if(changedSinceLastNotify) {
 				changedSinceLastNotify = false;
-				updateObservers();
+				Platform.runLater(this::updateObservers);
 			}
 
 			// a hack to make absolutely sure that the editor doesn't stay read only
