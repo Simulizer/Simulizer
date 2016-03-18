@@ -24,6 +24,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private AnimationTimer timer;
 
 	protected volatile int rate = 1;
+	private long[] updateTimes = { -1, -1, -1 }, processTimes = { -1, -1, -1 };
+
 	private Thread updateThread;
 	private CountDownLatch updateWait;
 	private volatile boolean updatePaused = false;
@@ -35,16 +37,6 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		model.addObserver(this);
 
 		widthProperty().addListener(e -> repaint());
-	}
-
-	/**
-	 * Sets the rate of the animation in milliseconds
-	 *
-	 * @param rate
-	 *            the rate of the animation
-	 */
-	public void setRate(int rate) {
-		this.rate = rate;
 	}
 
 	public void show() {
@@ -70,7 +62,6 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	public abstract String getName();
 
 	public void close() {
-		System.out.println("Closed");
 		stopUpdateThreads();
 		model.deleteObserver(this);
 	}
@@ -91,7 +82,20 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			repaint();
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
+			for (int i = 1; i < updateTimes.length - 1; i++)
+				updateTimes[i - 1] = updateTimes[i];
+			updateTimes[updateTimes.length - 1] = System.currentTimeMillis();
+			rateSkips();
 		}
+	}
+
+	private long averageTime(long[] times) {
+		boolean containsNegative = false;
+
+		if (containsNegative)
+			return -1L;
+
+		return 0L;
 	}
 
 	private void startUpdateThreads() {
@@ -104,9 +108,18 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 					// Wait if paused
 					if (updatePaused)
 						updateWait.await();
+
 					// Process change
 					if (alive)
 						processChange(changes.take());
+
+					// Add process time
+					for (int i = 1; i < processTimes.length - 1; i++)
+						processTimes[i - 1] = processTimes[i];
+					processTimes[processTimes.length - 1] = System.currentTimeMillis();
+
+					// Recalculate rate/skips
+					rateSkips();
 				} catch (InterruptedException e) {
 				}
 			}
@@ -126,6 +139,30 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			}
 		};
 		timer.start();
+	}
+
+	private synchronized void rateSkips() {
+		long avgUpdate = averageTime(updateTimes);
+		long avgProcess = averageTime(processTimes);
+		if (avgUpdate != -1 && avgProcess != -1) {
+			int newRate = rate;
+			if (avgUpdate + 3 > avgProcess && avgUpdate < avgProcess + 3) {
+				// Averages are roughly the same, do nothing
+			} else if (avgUpdate < avgProcess) {
+				// Average update is faster, increase rate
+				newRate += 0.2;
+			} else {
+				// Average update is slower, decrease rate
+				newRate -= 0.2;
+			}
+
+			// Limit the rate between 1 and 10
+			if (newRate > 10)
+				newRate = 10;
+			else if (newRate < 1)
+				newRate = 1;
+			rate = newRate;
+		}
 	}
 
 	private void stopUpdateThreads() {
