@@ -77,12 +77,14 @@ public String getName() {
 Now we need to link our model and visualiser to the rest of the system so that they can be accessed via annotations. We need to modify the following classes:
 
 1. `ModelType`: we need to add a constant to the enum, e.g.
+
   ```java
   public enum ModelType {
     HANOI, LIST, FRAME, GRAPH;
   }
   ```
 2. `HighLevelVisualisation`: we need to add our `GRAPH` enum as a case in the switch statement in the `addNewVisualisation` method:
+
   ```java
   switch (model.modelType()) {
     ...
@@ -93,6 +95,7 @@ Now we need to link our model and visualiser to the rest of the system so that t
   }
   ```
 3. `HLVisualManager`: we need to allow the user to load the visualisation from their annotations using a user-friendly name, e.g. "graph" in the `create` method:
+
   ```java
   switch (visualiser) {
       ...
