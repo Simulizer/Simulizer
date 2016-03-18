@@ -2,8 +2,9 @@
 The user interface is designed to be as configurable as possible, so that the application can fulfil your needs. Don't need to visualise the internals of the CPU? Just close the CPU visualiser. Need to make the editor a bit bigger? Then resize the editor. It's very simple.
 
 ## Menu Bar ##
+The menu bar contains a collection of useful controls organised for easy of use. Below describes the tree structure of the menu so that is clear what each menu item is for.
 
-- **File**: Contains the standard settings found in most applications
+- **File**: Contains the standard controls found in most applications.
 
     - **New** (`CTRL+N`): Creates a new blank program and opens the Editor Internal Window.
 
@@ -17,7 +18,25 @@ The user interface is designed to be as configurable as possible, so that the ap
 
     - **Exit**: Exits Simulizer.
 
-- **Simulation**:
+- **Edit**: Contains standard controls found in most text editor.
+
+    - **Copy** (`CTRL+C`): Copies text from the editor.
+
+    - **Paste** (`CTRL+V`): Pastes text in the editor.
+
+    - **Find** (`CTRL+F`): Finds text in the editor.
+
+    - **Go To Line** (`CTRL+G`): Goes to a specified line in the editor.
+
+    - **Insert Breakpoint** (`CTRL+B`): Inserts a Breakpoint for the simulation on the currently selected line in the editor.
+
+    - **Increase Font Size** (`CTRL++`): Increases the font size of the editor.
+
+    - **Decrease Font Size** (`CTRL+-`): Decreases the font size of the editor.
+
+    - **Toggle Word Wrap**: Switches between line wrapping and not.
+
+- **Simulation**: Controls for the simulation of the MIPS processor.
 
     - **Assemble and Run** (`F5`): Assembles the SIMP Program and (if it is a valid program) executes it. On an invalid program, hints to what went wrong will be displayed in the Editor.
 
@@ -33,17 +52,25 @@ The user interface is designed to be as configurable as possible, so that the ap
 
 - **Windows**: This contains a sub-menu with all the Internal Windows. This allows you to open and close each Internal Windows more easily.
 
-    - **Close All**: Closes all open Internal Windows
+    - **Close All**: Closes all open Internal Windows.
 
 - **Layouts**: Contains a list of all layouts saved in the layouts folder. This allows you to easily switch between different common workspace layouts.
 
     - **Save Layout**: Saves the current workspace layout to a new file
 
-    - **Refresh Layouts**: Refreshes the list of layouts
+    - **Refresh Layouts**: Refreshes the list of layouts.
 
-- **Help**:
+- **Help**: Useful help materials.
 
-- **Debug**:
+    - **Guide**: Opens this user guide.
+
+    - **Syscall Reference**: Opens an Internal Window describing what each syscall is for.
+
+    - **Instruction Reference**: Opens an Internal Window describing what each instruction is for.
+
+    - **Register Reference**: Opens an Internal Window describing the common use for each register.
+
+    - **Editor Shortcuts**: Opens the web browser to a page describing keyboard shortcuts for the Editor.
 
 ## Internal Windows ##
 Each pane inside the application is called an Internal Window. This section will give a brief description of what all the different Internal Windows are for, and why you might want to use them.
@@ -68,7 +95,9 @@ The High Level Visualisation window is where visualisations from the [annotation
 For more information about the different data structures Simulizer can visualise, see [High Level Visualisation](#high-level)
 
 ### Labels ###
-$\TODO{write section}$
+![Labels window](segments/labels-window.png){ width=60% }
+
+The labels window allows you to view a quick outline of the labels in your program. By clicking on a row in the table, it will jump to the line where the label is defined. You can move to the next/previous occurrence of the label by clicking on the `Next`/`Previous` buttons. The `Select All` button will select each occurrence of the selected label, allowing you to easily see its usage.
 
 ### Program I/O ###
 $\TODO{write section}$
@@ -80,7 +109,20 @@ $\TODO{write section}$
 $\TODO{write section}$
 
 ### Pipeline View ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+Here you can see the contents of the pipeline during each CPU cycle. To view the contents of this window, the CPU must be *running* and in *pipelined* mode. Once the simulation is running, you will see the screen start to fill up (from left to right) with instructions. The numbers at the bottom indicate which CPU cycle is shown in that column.
+
+The two horizontal lines in the center separate the pipeline instructions from the waiting and completed instructions, as indicated by the labels at the left of the window. The red circles indicate hazards.
+
+The control bar at the bottom of the window has the following features:
+
+1. `Follow` checkbox: when this is selected, the window will snap to the most recent cycle, otherwise the window will keep showing what it currently shows.
+2. Left/right arrows: clicking the left and right arrows will move backwards/forwards cycles. You can also move backwards and forwards cycles by pressing the left and right arrow keys.
+3. `Go to` field: you can enter a cycle number here, e.g. `56` and the window will snap to that cycle, showing it as the leftmost column.
+4. Information label: when hovering over an instruction or a hazard, information about that instruction/hazard will be displayed in this label.  
+
+Clicking on an instruction will highlight all of its occurrences.
 
 ### Registers ###
 $\TODO{write section}$

@@ -1,10 +1,9 @@
 package simulizer.ui.components.cpu;
 
+import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,15 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
-import javafx.util.Callback;
-import simulizer.assembler.representation.Instruction;
-import simulizer.simulation.messages.DataMovementMessage;
-import simulizer.simulation.messages.InstructionTypeMessage;
 import simulizer.simulation.messages.Message;
-import simulizer.simulation.messages.StageEnterMessage;
-import simulizer.ui.components.cpu.listeners.CPUListener;
-
-import java.util.ArrayList;
 
 public class InstructionsWindow extends StackPane {
 

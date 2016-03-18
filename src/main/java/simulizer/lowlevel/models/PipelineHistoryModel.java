@@ -34,10 +34,10 @@ public class PipelineHistoryModel {
 			this.after = after;
 			this.isJump = isJump;
 
-			if (fetch == null || decode == null || execute == null)
-				this.hazard = Optional.of(currentHazard);
-			else
-				this.hazard = Optional.empty();
+			if (fetch == null || decode == null || execute == null) {
+				if (currentHazard == null) this.hazard = Optional.empty();
+				else this.hazard = Optional.of(currentHazard);
+			} else this.hazard = Optional.empty();
 		}
 	}
 
@@ -57,25 +57,35 @@ public class PipelineHistoryModel {
 		observers.remove(observer);
 	}
 
-	public void processPipelineStateMessage(PipelineStateMessage m) {
+	public void processPipelineStateMessage(final PipelineStateMessage m) {
 		if (size() >= MAX_SIZE) return;
 
-		int currentFetchAddress = m.getFetched().getValue();
+		final Address fetched = m.getFetched();
+		final Address decoded = m.getDecoded();
+		final Address executed = m.getExecuted();
 
-		// -- Calculate addresses before the pipeline
 		List<Address> before = new ArrayList<>(3);
-		for (int i = 3; i >= 1; --i)
-			before.add(new Address(currentFetchAddress + 4 * i));
-
-		// -- Get the addresses after the pipeline
+		List<Address> after = new ArrayList<>(3);
 		boolean isJump = false;
-		// It *is* a jump if the current fetch address is not equal to `last` or `last + 4`
-		if (history.size() > 0) {
-			int lastFetchAddress = history.get(history.size() - 1).fetched.getValue();
-			isJump = currentFetchAddress != lastFetchAddress && currentFetchAddress != lastFetchAddress + 4;
+
+		if (fetched != null) {
+			int currentFetchAddress = fetched.getValue();
+
+			// -- Calculate addresses before the pipeline
+			for (int i = 3; i >= 1; --i)
+				before.add(new Address(currentFetchAddress + 4 * i));
+
+			// -- Get the addresses after the pipeline
+			// It *is* a jump if the current fetch address is not equal to `last` or `last + 4`
+			if (history.size() > 0) {
+				Address lastFetch = history.get(history.size() - 1).fetched;
+				if (lastFetch != null) {
+					int lastFetchAddress = lastFetch.getValue();
+					isJump = currentFetchAddress != lastFetchAddress && currentFetchAddress != lastFetchAddress + 4;
+				}
+			}
 		}
 
-		List<Address> after = new ArrayList<>(3);
 		// If there has been a jump, clear what's after the pipeline
 		// otherwise, add calculate the appropriate things
 		if (!isJump) {
@@ -86,13 +96,13 @@ public class PipelineHistoryModel {
 			PipelineState state;
 			for (int i = history.size() - 1; i >= 0 && count < 3 && !(state = history.get(i)).isJump; --i) {
 				if (state.executed != null) {
-					after.add(history.get(i).executed);
+					after.add(state.executed);
 					++count;
 				}
 			}
 		}
 
-		PipelineState nextState = new PipelineState(before, m.getFetched(), m.getDecoded(), m.getExecuted(), after, isJump);
+		PipelineState nextState = new PipelineState(before, fetched, decoded, executed, after, isJump);
 		history.add(nextState);
 		notifyObservers(nextState);
 	}

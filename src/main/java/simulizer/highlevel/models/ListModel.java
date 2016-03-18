@@ -1,13 +1,15 @@
 package simulizer.highlevel.models;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ListModel extends DataStructureModel {
 	private long[] list;
-	private Map<String, Integer> markers = new HashMap<>();
+	private Map<Integer, ArrayList<String>> markers = new HashMap<>();
 
 	public ListModel(List<Long> list) {
 		setList(list);
@@ -27,6 +29,14 @@ public class ListModel extends DataStructureModel {
 		notifyObservers(new Action());
 	}
 
+	public void set(int i, Long item) {
+		synchronized (list) {
+			list[i] = item;
+			setChanged();
+			notifyObservers(new Action());
+		}
+	}
+
 	public void swap(int i, int j) {
 		synchronized (list) {
 			// Apply Update
@@ -42,17 +52,28 @@ public class ListModel extends DataStructureModel {
 
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
-			markers.put(markerName, index);
+			ArrayList<String> exMarkers = markers.get(index);
+			if (exMarkers != null) exMarkers.add(markerName);
+			else {
+				exMarkers = new ArrayList<>(2);
+				markers.put(index, exMarkers);
+			}
+
 			setChanged();
-			notifyObservers(new Marker(markerName, index));
+			notifyObservers(new Marker(index, markerName));
 		}
 	}
 
-	public void clearMarker(String markerName) {
+	public void highlightMarker(int index) {
+		setChanged();
+		notifyObservers(new Highlight(index));
+	}
+
+	public void clearMarker(int index) {
 		synchronized (markers) {
-			markers.remove(markerName);
+			markers.remove(index);
 			setChanged();
-			notifyObservers(new Marker(markerName));
+			notifyObservers(new Marker(index));
 		}
 	}
 
@@ -75,10 +96,19 @@ public class ListModel extends DataStructureModel {
 
 	public long[] getList() {
 		synchronized (list) {
-			if (list.length == 0)
-				return new long[0];
-			else
-				return Arrays.copyOf(list, list.length);
+			if (list.length == 0) return new long[0];
+			else return Arrays.copyOf(list, list.length);
+		}
+	}
+
+	public Map<Integer, ArrayList<String>> getMarkers() {
+		synchronized (markers) {
+			Map<Integer, ArrayList<String>> copy = new HashMap<>();
+			for (Map.Entry<Integer, ArrayList<String>> entry : markers.entrySet()) {
+				copy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+			}
+
+			return copy;
 		}
 	}
 
@@ -93,7 +123,7 @@ public class ListModel extends DataStructureModel {
 
 	/**
 	 * Defines a Swap Action
-	 * 
+	 *
 	 * @author Michael
 	 */
 	public class Swap extends Action {
@@ -107,50 +137,50 @@ public class ListModel extends DataStructureModel {
 
 	/**
 	 * Defines a Marker Action
-	 * 
+	 *
 	 * @author Michael
 	 *
 	 */
 	public class Marker extends Action {
-		public final String name;
-		public final int index;
+		public final Optional<String> name;
+		public final Optional<Integer> index;
 
 		/**
 		 * Sets a marker to an index
-		 * 
+		 *
 		 * @param name
 		 *            the marker name
 		 * @param index
 		 *            the index
 		 */
-		private Marker(final String name, final int index) {
-			this.name = name;
-			this.index = index;
+		private Marker(final int index, final String name) {
+			this.index = Optional.of(index);
+			this.name = Optional.of(name);
 		}
 
 		/**
 		 * Clears a marker
-		 * 
-		 * @param name
-		 *            the marker name
+		 *
+		 * @param index
+		 *            the index
 		 */
-		private Marker(final String name) {
-			this.name = name;
-			this.index = -1;
+		private Marker(final int index) {
+			this.index = Optional.of(index);
+			this.name = Optional.empty();
 		}
 
 		/**
 		 * Clear all markers
 		 */
 		private Marker() {
-			this.name = "";
-			this.index = -1;
+			this.name = Optional.empty();
+			this.index = Optional.empty();
 		}
 	}
 
 	/**
 	 * Defines an Emphasise Action
-	 * 
+	 *
 	 * @author Michael
 	 *
 	 */
@@ -158,6 +188,14 @@ public class ListModel extends DataStructureModel {
 		public final int index;
 
 		private Emphasise(final int index) {
+			this.index = index;
+		}
+	}
+
+	public class Highlight extends Action {
+		public final int index;
+
+		private Highlight(final int index) {
 			this.index = index;
 		}
 	}

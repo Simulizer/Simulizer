@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	li $v0, 5;
 	syscall; #in test, 7 will be entered
 	move $a0, $v0;

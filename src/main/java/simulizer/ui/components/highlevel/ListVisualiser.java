@@ -1,13 +1,18 @@
 package simulizer.ui.components.highlevel;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Queue;
+import java.util.Set;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.VPos;
@@ -20,6 +25,7 @@ import javafx.util.Duration;
 import simulizer.highlevel.models.ListModel;
 import simulizer.highlevel.models.ListModel.Action;
 import simulizer.highlevel.models.ListModel.Emphasise;
+import simulizer.highlevel.models.ListModel.Highlight;
 import simulizer.highlevel.models.ListModel.Marker;
 import simulizer.highlevel.models.ListModel.Swap;
 import simulizer.ui.windows.HighLevelVisualisation;
@@ -30,7 +36,10 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private ListModel model;
 
 	private final Queue<Action> actionQueue = new LinkedList<>();
-	private boolean animating = false;
+
+	// -- Animation parameters
+	// |-- Swaps
+	private boolean swapping = false;
 
 	private int animatedLeftIndex;
 	private String animatedLeftLabel;
@@ -44,7 +53,16 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private DoubleProperty animatedRightX = new SimpleDoubleProperty();
 	private DoubleProperty animatedRightY = new SimpleDoubleProperty();
 
-	private int FRAME_RATE = 10;
+	// |-- Emphasis
+	private boolean emphasising = false;
+	private int emphasiseIndex;
+	private DoubleProperty emphasiseProgress = new SimpleDoubleProperty();
+
+	// |-- Markers
+	private Map<Integer, String> markers = new HashMap<>();
+	private Set<Integer> highlightedMarkers = new HashSet<>();
+
+	private int FRAME_RATE = 30;
 	private AnimationTimer timer = new AnimationTimer() {
 		long lastTime = -1;
 
@@ -73,7 +91,9 @@ public class ListVisualiser extends DataStructureVisualiser {
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
+		canvas.widthProperty().addListener(e -> Platform.runLater(this::repaint));
 		canvas.heightProperty().bind(super.heightProperty());
+		canvas.heightProperty().addListener(e -> Platform.runLater(this::repaint));
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.setLineWidth(2);
@@ -88,95 +108,149 @@ public class ListVisualiser extends DataStructureVisualiser {
 	public void update(Observable o, Object obj) {
 		super.update(o, obj);
 		if (obj != null) {
-			actionQueue.add((Action) obj);
-			this.list = model.getList();
+			synchronized (actionQueue) {
+				actionQueue.add((Action) obj);
+			}
 			runAnimations();
 		}
 	}
 
+	private boolean isAnimating() {
+		return swapping || emphasising;
+	}
+
 	private void runAnimations() {
-		if (animating) return;
+		if (isAnimating()) return;
 		else {
 			Action action = actionQueue.poll();
+			Timeline timeline = null;
 
 			if (action instanceof Swap) {
 				Swap swap = (Swap) action;
 
+				swapping = true;
+
 				animatedLeftIndex = swap.a;
 				animatedRightIndex = swap.b;
 
-				// This is correct
-				animatedLeftLabel = "" + list[animatedRightIndex];
-				animatedRightLabel = "" + list[animatedLeftIndex];
+				// This is correct (I don't believe you)
+				animatedLeftLabel = "" + list[animatedLeftIndex];
+				animatedRightLabel = "" + list[animatedRightIndex];
 
 				double startXLeft = getX(animatedLeftIndex) / w;
 				double startXRight = getX(animatedRightIndex) / w;
 
 				double startY = y0 / h;
-				double upY = 0.8 * (y0 - rectLength) / h;
+				double upY = (y0 - rectLength / 2 - 10) / h;
+				double downY = (y0 + rectLength / 2 + 10) / h;
 
-			// @formatter:off
-			Timeline timeline = new Timeline(
-				new KeyFrame(Duration.seconds(0),
-					new KeyValue(animatedLeftX, startXLeft),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXRight),
-					new KeyValue(animatedRightY, startY)
-				),
-				new KeyFrame(Duration.seconds(0.5),
-					new KeyValue(animatedLeftX, startXLeft),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXRight),
-					new KeyValue(animatedRightY, upY)
-				),
-				new KeyFrame(Duration.seconds(0.8),
-					new KeyValue(animatedLeftX, startXRight),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXLeft),
-					new KeyValue(animatedRightY, upY)
-				),
-				new KeyFrame(Duration.seconds(1.3),
-					e -> {
-						// Apply Update
-						list = swap.list;
+				// @formatter:off
+				timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0),
+						new KeyValue(animatedLeftX, startXLeft),
+						new KeyValue(animatedLeftY, startY),
+						new KeyValue(animatedRightX, startXRight),
+						new KeyValue(animatedRightY, startY)
+					),
+					new KeyFrame(Duration.seconds(0.5),
+						new KeyValue(animatedLeftX, startXLeft),
+						new KeyValue(animatedLeftY, upY),
+						new KeyValue(animatedRightX, startXRight),
+						new KeyValue(animatedRightY, downY)
+					),
+					new KeyFrame(Duration.seconds(0.8),
+						new KeyValue(animatedLeftX, startXRight),
+						new KeyValue(animatedLeftY, upY),
+						new KeyValue(animatedRightX, startXLeft),
+						new KeyValue(animatedRightY, downY)
+					),
+					new KeyFrame(Duration.seconds(1.3),
+						e -> {
+							// Apply Update
+							list = swap.list;
 
-						animating = false;
-						repaint();
+							swapping = false;
+							repaint();
 
-						synchronized (actionQueue) {
-							if (actionQueue.isEmpty()) {
-								timer.stop();
-							} else runAnimations();
-						}
-					},
-					new KeyValue(animatedLeftX, startXRight),
-					new KeyValue(animatedLeftY, startY),
-					new KeyValue(animatedRightX, startXLeft),
-					new KeyValue(animatedRightY, startY)
-				)
-			);
-			// @formatter:on
+							synchronized (actionQueue) {
+								if (actionQueue.isEmpty()) {
+									timer.stop();
+								} else runAnimations();
+							}
+						},
+						new KeyValue(animatedLeftX, startXRight),
+						new KeyValue(animatedLeftY, startY),
+						new KeyValue(animatedRightX, startXLeft),
+						new KeyValue(animatedRightY, startY)
+					)
+				);
+				// @formatter:on
 
 				timeline.setCycleCount(1);
 				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
-
-				timer.start();
-				timeline.play();
-
-				animating = true;
 			} else if (action instanceof Marker) {
-				// Marker Action
 				Marker marker = (Marker) action;
-				// TODO: Marker animation
+
+				if (marker.index.isPresent()) {
+					int index = marker.index.get();
+					if (marker.name.isPresent()) {
+						// We need to add the marker
+						String name = marker.name.get();
+						String existing = markers.get(index);
+						if (existing != null) markers.put(index, existing + " " + name);
+						else markers.put(index, name);
+					} else {
+						// We need to clear the marker
+						markers.remove(index);
+						highlightedMarkers.remove(index);
+					}
+				} else {
+					markers.clear();
+					highlightedMarkers.clear();
+				}
 			} else if (action instanceof Emphasise) {
-				// Emphasise action
-				Emphasise emphasise = (Emphasise) action;
-				// TODO: Emphasise animation
+				this.emphasiseIndex = ((Emphasise) action).index;
+				emphasising = true;
+
+				// @formatter:off
+				timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0),
+						new KeyValue(emphasiseProgress, 0.0)
+					),
+					new KeyFrame(Duration.seconds(0.5),
+						new KeyValue(emphasiseProgress, 1.0)
+					),
+					new KeyFrame(Duration.seconds(1),
+						e -> {
+							emphasising = false;
+							repaint();
+
+							synchronized (actionQueue) {
+								if (actionQueue.isEmpty()) {
+									timer.stop();
+								} else runAnimations();
+							}
+						},
+						new KeyValue(emphasiseProgress, 0.0)
+					)
+				);
+				// @formatter:on
+
+				timeline.setCycleCount(1);
+				timeline.setRate(actionQueue.size() + 1); // TODO: Be more accurate
+			} else if (action instanceof Highlight) {
+				highlightedMarkers.add(((Highlight) action).index);
 			} else {
 				// List changed
 				list = action.list;
-				repaint();
 			}
+
+			if (timeline != null) {
+				timer.start();
+				timeline.play();
+			}
+
+			repaint();
 		}
 	}
 
@@ -192,17 +266,38 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 		calculateDimensions(gc);
 
+		drawMarkers(gc);
 		drawList(gc);
-		if (animating) {
+		if (swapping) {
 			drawTextBox(gc, animatedLeftX.doubleValue() * w, animatedLeftY.doubleValue() * h, animatedLeftLabel);
 			drawTextBox(gc, animatedRightX.doubleValue() * w, animatedRightY.doubleValue() * h, animatedRightLabel);
 		}
 	}
 
+	private final Font markerFont = new Font("Arial", 25);
+
+	private void drawMarkers(GraphicsContext gc) {
+		gc.setFont(markerFont);
+		gc.setTextBaseline(VPos.BOTTOM);
+
+		for (Map.Entry<Integer, String> entry : markers.entrySet()) {
+			gc.setFill(highlightedMarkers.contains(entry.getKey()) ? Color.RED : Color.BLACK);
+			double x = getX(entry.getKey());
+			gc.beginPath();
+			gc.fillText(entry.getValue(), x + rectLength / 2, y0 - 7, rectLength);
+			gc.closePath();
+		}
+	}
+
 	private void drawList(GraphicsContext gc) {
+		gc.setTextBaseline(VPos.CENTER);
+
 		for (int i = 0; i < list.length; ++i) {
-			if (animating && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
-			else drawTextBox(gc, i, list[i] + "");
+			if (swapping && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
+			else if (emphasising && i == emphasiseIndex) {
+				Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
+				drawTextBox(gc, i, list[i] + "", blend);
+			} else drawTextBox(gc, i, list[i] + "");
 		}
 	}
 
@@ -210,10 +305,20 @@ public class ListVisualiser extends DataStructureVisualiser {
 		drawTextBox(gc, getX(i), y0, text);
 	}
 
-	private void drawTextBox(GraphicsContext gc, double x, double y, String text) {
-		drawBorderedRectangle(gc, Color.SKYBLUE, x, y, rectLength, rectLength);
+	private void drawTextBox(GraphicsContext gc, int i, String text, Color bg) {
+		drawTextBox(gc, getX(i), y0, text, bg);
+	}
 
-		gc.setFont(new Font("Arial", 55));
+	private void drawTextBox(GraphicsContext gc, double x, double y, String text) {
+		drawTextBox(gc, x, y, text, Color.SKYBLUE);
+	}
+
+	private final Font itemFont = new Font("Arial", 55);
+
+	private void drawTextBox(GraphicsContext gc, double x, double y, String text, Color bg) {
+		drawBorderedRectangle(gc, bg, x, y, rectLength, rectLength);
+
+		gc.setFont(itemFont);
 		gc.setFill(Color.BLACK);
 		gc.beginPath();
 		gc.fillText(text, x + rectLength / 2, y + rectLength / 2, rectLength);
@@ -235,8 +340,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawBorderedRectangle(GraphicsContext gc, Color fill, double x, double y, double w, double h) {
-		gc.beginPath();
 		gc.setFill(fill);
+		gc.beginPath();
 		gc.fillRect(x, y, w, h);
 		gc.strokeRect(x, y, w, h);
 		gc.closePath();

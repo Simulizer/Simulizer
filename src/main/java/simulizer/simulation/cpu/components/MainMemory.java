@@ -1,15 +1,6 @@
 package simulizer.simulation.cpu.components;
 
 import java.util.Map;
-
-
-
-
-
-
-
-
-
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
 import simulizer.simulation.exceptions.HeapException;

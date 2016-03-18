@@ -421,5 +421,53 @@ public class ALUTest {
 			assertEquals(-6, executeS(Instruction.move, signedW(-6),signedW(0)));
 			assertEquals(5, executeS(Instruction.move, signedW(5),Optional.empty()));
 		}	
+		
+		{//sll
+			assertEquals(28,executeU(Instruction.sll,unsignedW(7),unsignedW(2)));
+			assertEquals(384,executeU(Instruction.sll,unsignedW(48),unsignedW(3)));
+			assertEquals(3200,executeU(Instruction.sll,unsignedW(100),unsignedW(5)));
+		}
+		
+		{//sllv
+			assertEquals(28,executeU(Instruction.sllv,unsignedW(7),unsignedW(2)));
+			assertEquals(384,executeU(Instruction.sllv,unsignedW(48),unsignedW(3)));
+			assertEquals(3200,executeU(Instruction.sllv,unsignedW(100),unsignedW(5)));
+		}
+		
+		{//srl
+			assertEquals(3,executeU(Instruction.srl,unsignedW(7),unsignedW(1)));
+			assertEquals(6,executeU(Instruction.srl,unsignedW(48),unsignedW(3)));
+			assertEquals(3,executeU(Instruction.srl,unsignedW(100),unsignedW(5)));
+		}
+		
+		{//srlv
+			assertEquals(3,executeU(Instruction.srlv,unsignedW(7),unsignedW(1)));
+			assertEquals(6,executeU(Instruction.srlv,unsignedW(48),unsignedW(3)));
+			assertEquals(3,executeU(Instruction.srlv,unsignedW(100),unsignedW(5)));
+		}
+		
+		{//sra
+			assertEquals(-14,executeS(Instruction.sra,signedW(-53),signedW(2)));
+			assertEquals(-3,executeS(Instruction.sra,signedW(-6),signedW(1)));
+			assertEquals(6,executeS(Instruction.sra,signedW(48),signedW(3)));
+		}
+		
+		{//srav
+			assertEquals(-14,executeS(Instruction.srav,signedW(-53),signedW(2)));
+			assertEquals(-3,executeS(Instruction.srav,signedW(-6),signedW(1)));
+			assertEquals(6,executeS(Instruction.srav,signedW(48),signedW(3)));
+		}
+		
+		{//rol
+			assertEquals(384,executeU(Instruction.rol,unsignedW(48),unsignedW(3)));
+			assertEquals(4261412866L,executeU(Instruction.rol,unsignedW(2130706433),unsignedW(1)));
+			assertEquals(1,executeU(Instruction.rol,unsignedW(2147483648L),unsignedW(1)));
+		}
+		
+		{//ror 
+			assertEquals(6,executeU(Instruction.ror,unsignedW(48),unsignedW(3)));
+			assertEquals(2147483648L,executeU(Instruction.ror,unsignedW(1),unsignedW(1)));
+			assertEquals(2130706433,executeU(Instruction.ror,unsignedW(4261412866L),unsignedW(1)));
+		}
 	}
 }

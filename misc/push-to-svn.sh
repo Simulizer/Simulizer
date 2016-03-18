@@ -16,8 +16,8 @@ done
 echo "Writing git log ..."
 git log -p > ${SVNREPO}/git-log.txt
 
-echo "Generating statistics document ..."
-gitinspector --format=html --timeline --weeks --responsibilities >  ${SVNREPO}/stats.html
+# echo "Generating statistics document ..."
+# gitinspector --format=html --timeline --weeks --responsibilities >  ${SVNREPO}/stats.html
 
 cd ${SVNREPO}
 svn add --force *

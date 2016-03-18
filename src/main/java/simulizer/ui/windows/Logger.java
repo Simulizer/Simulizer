@@ -141,6 +141,7 @@ public class Logger extends InternalWindow implements Observer {
 							if (!t.isSelected() && ioChanged[i])
 								t.setGraphic(notifyIcon);
 							outputs[i].setText(logs[i].toString());
+							ioChanged[i] = false;
 						}
 					}
 				});
@@ -170,6 +171,9 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public String nextMessage(IOStream stream) {
 		try {
+			synchronized (logs) {
+				ioChanged[stream.getID()] = true;
+			}
 			if (emphasise)
 				Platform.runLater(() -> {
 					// if already focused. Display a more subtle emphasis

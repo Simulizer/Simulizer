@@ -117,7 +117,7 @@ public class Decoder {
             Optional<Word> immValue = Optional.of(this.decodeIntegerOperand(op2.asIntegerOp()));
             return new LSInstruction(instruction,Optional.empty(),destinationRegister,memAddress,immValue);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.noArguments) {//syscall, nop, break
+        else if(instruction.getOperandFormat() == OperandFormat.noArguments||instruction.equals(Instruction.BREAK)) {//syscall, nop, break
             return new SpecialInstruction(instruction);
         }
         else if(instruction.getOperandFormat() == OperandFormat.label) {//branch, jal, j
@@ -169,7 +169,7 @@ public class Decoder {
             return new LSInstruction(instruction,Optional.empty(),loadInto,toRetrieve,Optional.empty());
         }
         else {
-            //invalid instruction format or BREAK
+            //invalid instruction format
             throw new DecodeException("Invalid instruction format.", op1);
         }
     }

@@ -5,7 +5,11 @@ import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Processes animations and queues them up to be run by an executor service

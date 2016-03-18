@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	li $v0, 1;
 	j NEWLABEL;
 	li $a0, 6;

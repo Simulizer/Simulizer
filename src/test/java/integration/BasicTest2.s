@@ -7,7 +7,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	bgez $zero, SUCCESS;
 	li $v0, 4;
 	la $a0, fail;

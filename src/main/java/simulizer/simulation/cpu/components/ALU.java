@@ -109,7 +109,7 @@ public class ALU {
             case ror:
             	long shiftNoRor = decodeU(secondValue) % 32;
             	long toShiftRor = decodeU(firstValue);
-            	return encodeU((toShiftRor << shiftNoRor) | (toShiftRor >> (32-shiftNoRor)));
+            	return encodeU((toShiftRor >>> shiftNoRor) | (toShiftRor << (32-shiftNoRor)));
             case sll:
             	return encodeU(decodeU(firstValue) << decodeU(secondValue));
             case sllv:
@@ -121,10 +121,10 @@ public class ALU {
             	long shiftNoRa = decodeU(secondValue) % 32;
             	return encodeS(decodeS(firstValue) >> shiftNoRa);
             case srl:
-            	return encodeU(decodeU(firstValue) >> decodeU(secondValue));
+            	return encodeU(decodeU(firstValue) >>> decodeU(secondValue));
             case srlv:
             	long shiftNoR = decodeU(secondValue) % 32;
-            	return encodeU(decodeU(firstValue) >> shiftNoR);
+            	return encodeU(decodeU(firstValue) >>> shiftNoR);
             case nor:
                 byte[] resultNor = new byte[4];
                 for(int i = 0; i < resultNor.length; i++) {

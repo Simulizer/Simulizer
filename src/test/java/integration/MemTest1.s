@@ -5,7 +5,7 @@
 .text
 .globl main
 
-main:
+main: #Author: Charlie Street
 	la $a0, teststr;
 	li $v0, 4;
 	syscall;

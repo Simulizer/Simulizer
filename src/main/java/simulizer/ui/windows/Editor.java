@@ -37,7 +37,6 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
-import simulizer.utils.DebugUtils;
 import simulizer.utils.FileUtils;
 import simulizer.utils.SafeJSObject;
 import simulizer.utils.TemporaryObserver;
@@ -119,7 +118,6 @@ public class Editor extends InternalWindow {
 
 	private Bridge bridge;
 
-
 	public Editor() {
 		WebView view = new WebView();
 		pageLoaded = false;
@@ -146,7 +144,7 @@ public class Editor extends InternalWindow {
 		notifyTask = changeNotifier.scheduleAtFixedRate(() -> {
 			if(changedSinceLastNotify) {
 				changedSinceLastNotify = false;
-				updateObservers();
+				Platform.runLater(this::updateObservers);
 			}
 
 			// a hack to make absolutely sure that the editor doesn't stay read only

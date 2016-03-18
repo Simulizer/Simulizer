@@ -48,16 +48,7 @@ public enum Instruction {
     or     (OperandFormat.destSrcSrc,  "logical OR"),
     ori    (OperandFormat.destSrcImm,  "logical OR immediate"),
     xor    (OperandFormat.destSrcSrc,  "XOR"),
-    xori   (OperandFormat.destSrcImm,  "XOR immediate"),
-
-// Instructions using lo and hi
-    //mult   (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo"),
-    //multu  (OperandFormat.destSrcSrc,  "Multiply two registers. Store high word in hi and low word in lo (unsigned)"),
-    //mfhi   (OperandFormat.destSrc,     "Move contents of hi to a register"),
-    //mflo   (OperandFormat.destSrc,     "Move contents of lo to a register"),
-    //mthi   (OperandFormat.destSrc,     "Move contents of register into hi"),
-    //mtlo   (OperandFormat.destSrc,     "Move contents of register into lo"),
-    
+    xori   (OperandFormat.destSrcImm,  "XOR immediate"),    
     
 // Shift and Rotations
     rol    (OperandFormat.destSrcSrc,  "rotate left"),
