@@ -35,7 +35,7 @@ public class PipelineHistoryModel {
 			this.isJump = isJump;
 
 			if (fetch == null || decode == null || execute == null) {
-				if (this.hazard == null) this.hazard = Optional.empty();
+				if (currentHazard == null) this.hazard = Optional.empty();
 				else this.hazard = Optional.of(currentHazard);
 			} else this.hazard = Optional.empty();
 		}
