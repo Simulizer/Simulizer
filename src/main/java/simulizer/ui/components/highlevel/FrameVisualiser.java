@@ -28,10 +28,12 @@ public class FrameVisualiser extends DataStructureVisualiser {
 	public void repaint() {
 		double windowWidth = vis.getWindowWidth(), windowHeight = vis.getWindowHeight();
 
-		image.setLayoutX(0);
-		image.setLayoutY(0);
-		image.setFitWidth(windowWidth);
-		image.setFitHeight(windowHeight);
+		synchronized (image) {
+			image.setLayoutX(0);
+			image.setLayoutY(0);
+			image.setFitWidth(windowWidth);
+			image.setFitHeight(windowHeight);
+		}
 	}
 
 	@Override
@@ -50,7 +52,9 @@ public class FrameVisualiser extends DataStructureVisualiser {
 				pw.setColor(x, y, new Color(r, r, r, 1));
 			}
 		}
-		image.setImage(frame);
+		synchronized (image) {
+			image.setImage(frame);
+		}
 	}
 
 }

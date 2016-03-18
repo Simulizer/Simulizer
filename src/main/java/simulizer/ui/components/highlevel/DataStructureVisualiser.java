@@ -27,7 +27,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private Thread updateThread;
 	private CountDownLatch updateWait;
 	private volatile boolean updatePaused = false;
-	private volatile boolean alive = true;
+	private volatile boolean alive = false;
 
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
@@ -95,21 +95,22 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	}
 
 	private void startUpdateThreads() {
+		if (alive)
+			return;
 		alive = true;
 		updateThread = new Thread(() -> {
 			while (alive) {
-				// Wait if paused
-				if (updatePaused) {
-					try {
+				try {
+					// Wait if paused
+					if (updatePaused)
 						updateWait.await();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					// Process change
+					if (alive)
+						processChange(changes.take());
+				} catch (InterruptedException e) {
 				}
-				if (alive)
-					processChange(changes.poll());
 			}
-		} , getName() + " VisUpdate");
+		} , "DataStructure " + getName() + " Updates");
 		updateThread.setDaemon(true);
 		updateThread.start();
 
@@ -128,8 +129,11 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	}
 
 	private void stopUpdateThreads() {
+		if (!alive)
+			return;
 		alive = false;
 		setUpdatePaused(false);
+		updateThread.interrupt();// In case of waiting on an empty list
 		timer.stop();
 	}
 
