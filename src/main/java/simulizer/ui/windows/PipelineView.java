@@ -92,8 +92,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	public PipelineView() {
 		setTitle("Pipeline");
 
-		setMinSize(800, 500);
-
 		// Configure the components
 		followCheckBox.setSelected(true);
 		followCheckBox.setOnAction(e -> repaint());
@@ -478,7 +476,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawAddresses(gc);
 		} else {
 			gc.setFill(Color.BLACK);
-			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, h / 2);
+			drawText(gc, "Check the CPU is running and is in pipelined mode to view this window", realW / 2, h / 2);
 		}
 	}
 
