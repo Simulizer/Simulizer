@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -89,6 +90,8 @@ public class PipelineView extends InternalWindow implements Observer {
 	public PipelineView() {
 		setTitle("Pipeline");
 
+		setMinSize(800, 500);
+
 		// Configure the components
 		followCheckBox.setSelected(true);
 		followCheckBox.setOnAction(e -> repaint());
@@ -115,6 +118,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		});
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
+			if (!isRunning || !isPipelined) return;
+
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 			if (cycleAndAddress.isPresent()) {
 				Pair<Integer, Address> ca = cycleAndAddress.get();
@@ -124,21 +129,22 @@ public class PipelineView extends InternalWindow implements Observer {
 				else selectedAddress = name;
 
 				int line = getWindowManager().getCPU().getProgram().lineNumbers.getOrDefault(ca.getValue(), -1);
-				if(line != -1) {
+				if (line != -1) {
 					Editor ed = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-					if(ed != null) {
+					if (ed != null) {
 						Platform.runLater(() -> ed.gotoLine(line));
 					}
 				}
 
 			} else selectedAddress = null;
 
-
 			repaint();
 
 			Platform.runLater(canvasPane::requestFocus);
 		});
 		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+			if (!isRunning || !isPipelined) return;
+
 			KeyCode code = e.getCode();
 
 			if (code == KeyCode.LEFT || code == KeyCode.KP_LEFT) {
@@ -157,6 +163,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 20));
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
+			if (!isRunning || !isPipelined) return;
+
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 
 			String newText;
@@ -251,12 +259,15 @@ public class PipelineView extends InternalWindow implements Observer {
 	 */
 	private void setStartCycle(final int startCycle) {
 		if (startCycle <= 0) this.startCycle = 0;
-		else if (startCycle >= model.size()) this.startCycle = model.size() - 1;
+		else if (startCycle >= model.size()) this.startCycle = Math.max(0, model.size() - 1);
 		else this.startCycle = startCycle;
 	}
 
 	private void calculateParameters() {
-		x0 = 0.1 * realW;
+		x0 = 150;
+
+		this.w = realW - x0;
+		this.h = 0.95 * realH;
 
 		rectWidth = 2. / 21 * h;
 		cycleWidth = 3. / 2 * rectWidth;
@@ -266,6 +277,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		setStartCycle(startCycle); // will reset startCycle to 0 if model has been reset
 
 		numColumnsToDraw = Math.min(model.size() - startCycle, (int) (w / cycleWidth));
+		numColumnsToDraw = Math.max(0, numColumnsToDraw);
 		assert (numColumnsToDraw >= 0);
 
 		if (snapToEnd) setStartCycle(model.size() - numColumnsToDraw);
@@ -445,17 +457,16 @@ public class PipelineView extends InternalWindow implements Observer {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.realW = canvas.getWidth();
 		this.realH = canvas.getHeight();
-		this.w = 0.9 * realW;
-		this.h = 0.95 * realH;
-
 		gc.clearRect(0, 0, realW, realH);
 
+		calculateParameters();
+
 		if (isPipelined && isRunning) {
-			calculateParameters();
 			drawDividers(gc);
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
+			gc.setFill(Color.BLACK);
 			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, h / 2);
 		}
 	}
@@ -508,45 +519,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		assert (hOpt.isPresent());
 
 		PipelineHazardMessage.Hazard h = hOpt.get();
-		String description;
-
-		// TODO format this tomorrow
-		// Descriptions from wikipedia: https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29#Read_After_Write_.28RAW.29
-		// @formatter:off
-//		switch (h) {
-//			case RAW:
-//				description =
-//								     "Where an instruction refers\n"
-//				  +"			      to a result that has not\n"
-//				  +"                  yet been calculated or retrieved.";
-//				break;
-//			case WAW:
-//				description =
-//				      				 "A write after write data hazard\n"
-//				  +"                  may occur in a concurrent\n"
-//				  +"                  execution environment.\n"
-//				  +					  "";
-//				break;
-//			case CONTROL:
-//				description =
-//					                 "Branching hazards (also known\n"
-//				  +"                  as control hazards) occur with\n"
-//				  +"                  branches.";
-//				break;
-//			default:
-//				description =
-//					"UNKNOWN\n"
-//					+ "\n"
-//					+ "";
-//		}
-//		// @formatter:on
-
-		// @formatter:off
-		return String.format(
-			  "Hazard: %s%n %n %n ", h.toString());
-//			+ "     Description: %s%n",
-//				h.toString(), description);
-		// @formatter:on
+		return String.format("Hazard: %s%n %n %n ", h.toString());
 	}
 
 	private String getAddressInfo(Address address) {
