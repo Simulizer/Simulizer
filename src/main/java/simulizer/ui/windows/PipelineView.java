@@ -163,7 +163,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 20));
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
-			if (!isRunning || !isPipelined) return;
+			if (!isRunning) return;
 
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 
@@ -370,28 +370,30 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
-		// Draw the addresses before the pipeline
-		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
-			List<Address> before = history.get(cycle).before;
+		if (isPipelined) {
+			// Draw the addresses before the pipeline
+			for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
+				List<Address> before = history.get(cycle).before;
 
-			double yTracker = rectGap / 2;
-			double yCenter = yTracker + rectWidth / 2;
+				double yTracker = rectGap / 2;
+				double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = x0 + (col + 0.5) * cycleWidth;
-			double xLeft = xCenter - rectWidth / 2;
+				double xCenter = x0 + (col + 0.5) * cycleWidth;
+				double xLeft = xCenter - rectWidth / 2;
 
-			for (Address addr : before) {
-				String name = getShortName(addr);
+				for (Address addr : before) {
+					String name = getShortName(addr);
 
-				Color bg = ColorUtils.getColor(addr);
-				gc.setFill(bg);
-				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
+					Color bg = ColorUtils.getColor(addr);
+					gc.setFill(bg);
+					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(ColorUtils.getTextColor(bg));
-				drawText(gc, name, xCenter, yCenter, rectWidth);
+					gc.setFill(ColorUtils.getTextColor(bg));
+					drawText(gc, name, xCenter, yCenter, rectWidth);
 
-				yTracker += rectGap + rectWidth;
-				yCenter += rectGap + rectWidth;
+					yTracker += rectGap + rectWidth;
+					yCenter += rectGap + rectWidth;
+				}
 			}
 		}
 
@@ -426,28 +428,30 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
 		}
 
-		// Draw the addresses after the pipeline
-		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
-			List<Address> after = history.get(cycle).after;
+		if (isPipelined) {
+			// Draw the addresses after the pipeline
+			for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
+				List<Address> after = history.get(cycle).after;
 
-			double yTracker = 2 * h / 3 + rectGap / 2;
-			double yCenter = yTracker + rectWidth / 2;
+				double yTracker = 2 * h / 3 + rectGap / 2;
+				double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = x0 + (col + 0.5) * cycleWidth;
-			double xLeft = xCenter - rectWidth / 2;
+				double xCenter = x0 + (col + 0.5) * cycleWidth;
+				double xLeft = xCenter - rectWidth / 2;
 
-			for (Address addr : after) {
-				String name = getShortName(addr);
+				for (Address addr : after) {
+					String name = getShortName(addr);
 
-				Color bg = ColorUtils.getColor(addr);
-				gc.setFill(bg);
-				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
+					Color bg = ColorUtils.getColor(addr);
+					gc.setFill(bg);
+					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(ColorUtils.getTextColor(bg));
-				drawText(gc, name, xCenter, yCenter);
+					gc.setFill(ColorUtils.getTextColor(bg));
+					drawText(gc, name, xCenter, yCenter);
 
-				yTracker += rectGap + rectWidth;
-				yCenter += rectGap + rectWidth;
+					yTracker += rectGap + rectWidth;
+					yCenter += rectGap + rectWidth;
+				}
 			}
 		}
 	}
@@ -470,13 +474,13 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		calculateParameters();
 
-		if (isPipelined && isRunning) {
+		if (isRunning) {
 			drawDividers(gc);
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
 			gc.setFill(Color.BLACK);
-			drawText(gc, "Check the CPU is running and is in pipelined mode to view this window", realW / 2, h / 2);
+			drawText(gc, "Check the CPU is running to view this window", realW / 2, h / 2);
 		}
 	}
 
@@ -528,17 +532,16 @@ public class PipelineView extends InternalWindow implements Observer {
 		assert (hOpt.isPresent());
 
 		String fortune = " ";
-		if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0)
-			fortune = fortunes.get(cycle/100);
+		if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
 
 		PipelineHazardMessage.Hazard h = hOpt.get();
 		return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
 	}
 
 	private static List<String> fortunes = new ArrayList<>();
+
 	{
-		try
-		(BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
 
 			String s;
 			while ((s = reader.readLine()) != null)
