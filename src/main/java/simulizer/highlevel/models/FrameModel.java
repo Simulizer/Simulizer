@@ -7,12 +7,21 @@ public class FrameModel extends DataStructureModel {
 	public void commit() {
 		// TODO: Write FrameModel
 		setChanged();
-		notifyObservers(image);
+		notifyObservers(new FrameAction());
 	}
 
 	@Override
 	public ModelType modelType() {
 		return ModelType.FRAME;
+	}
+
+	public class FrameAction extends ModelAction<double[][]> {
+
+		public FrameAction() {
+			super(image, true);
+			// TODO Make image a copy
+		}
+
 	}
 
 }

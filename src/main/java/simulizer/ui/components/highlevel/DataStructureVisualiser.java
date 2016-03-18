@@ -19,22 +19,15 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private boolean showing = false;
 
 	private BlockingQueue<ModelAction<?>> changes = new LinkedBlockingQueue<>();
-	private volatile boolean updating = true;
-	protected int rate = 1;
-	private int FRAME_RATE = 45;
-	private Thread updateThread;
-	private CountDownLatch updateRunning;
-	private AnimationTimer timer = new AnimationTimer() {
-		long lastTime = -1;
 
-		@Override
-		public void handle(long now) {
-			if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
-				lastTime = now;
-				repaint();
-			}
-		}
-	};
+	private int FRAME_RATE = 45;
+	private AnimationTimer timer;
+
+	protected volatile int rate = 1;
+	private Thread updateThread;
+	private CountDownLatch updateWait;
+	private volatile boolean updatePaused = false;
+	private volatile boolean alive = true;
 
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
@@ -57,18 +50,17 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	public void show() {
 		if (!showing) {
 			vis.addTab(this);
-			
-			// Start Threads
-			startUpdateThread();
+			startUpdateThreads();
+			showing = true;
 		}
-		showing = true;
 	}
 
 	public void hide() {
 		if (showing) {
 			vis.removeTab(this);
+			stopUpdateThreads();
+			showing = false;
 		}
-		showing = false;
 	}
 
 	public abstract void processChange(ModelAction<?> action);
@@ -78,6 +70,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	public abstract String getName();
 
 	public void close() {
+		System.out.println("Closed");
+		stopUpdateThreads();
 		model.deleteObserver(this);
 	}
 
@@ -96,45 +90,60 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			}
 			repaint();
 		} else if (arg instanceof ModelAction<?>) {
-			synchronized (changes) {
-				changes.add((ModelAction<?>) arg);
-			}
+			changes.add((ModelAction<?>) arg);
 		}
 	}
 
-	private void startUpdateThread() {
+	private void startUpdateThreads() {
+		alive = true;
 		updateThread = new Thread(() -> {
-			while (showing) {
-				// Wait until we are updating
-				if (!updating) {
+			while (alive) {
+				// Wait if paused
+				if (updatePaused) {
 					try {
-						updateRunning.await();
+						updateWait.await();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				ModelAction<?> action = null;
-				synchronized (changes) {
-					action = changes.poll();
-				}
-				processChange(action);
+				if (alive)
+					processChange(changes.poll());
 			}
-		} , "DataStructureUpdate");
+		} , getName() + " VisUpdate");
 		updateThread.setDaemon(true);
 		updateThread.start();
+
+		timer = new AnimationTimer() {
+			long lastTime = -1;
+
+			@Override
+			public void handle(long now) {
+				if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
+					lastTime = now;
+					repaint();
+				}
+			}
+		};
+		timer.start();
+	}
+
+	private void stopUpdateThreads() {
+		alive = false;
+		setUpdatePaused(false);
+		timer.stop();
 	}
 
 	protected boolean isUpdatePaused() {
-		return updating;
+		return updatePaused;
 	}
 
 	protected void setUpdatePaused(boolean paused) {
-		if (updating == !paused) // No Change
+		if (updatePaused == paused) // No Change
 			return;
 		else if (!paused) // Resuming
-			updateRunning.countDown();
+			updateWait.countDown();
 		else // Pausing
-			updateRunning = new CountDownLatch(1);
-		updating = paused;
+			updateWait = new CountDownLatch(1);
+		updatePaused = paused;
 	}
 }

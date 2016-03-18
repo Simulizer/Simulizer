@@ -75,7 +75,10 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	@Override
 	public void close() {
 		super.close();
-
+		
+		// Close all tabs
+		tabs.getTabs().forEach(t -> removeTab((DataStructureVisualiser) t.getContent()));
+		
 		// Stop listening to visualisation changes
 		getWindowManager().getHLVisualManager().deleteObserver(this);
 	}
@@ -101,6 +104,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	}
 
 	public void removeTab(DataStructureVisualiser vis) {
+		vis.close();
 		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
 	}
 

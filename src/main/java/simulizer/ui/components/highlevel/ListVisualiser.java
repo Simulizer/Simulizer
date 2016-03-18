@@ -82,8 +82,6 @@ public class ListVisualiser extends DataStructureVisualiser {
 		gc.setStroke(Color.BLACK);
 		gc.setTextBaseline(VPos.CENTER);
 		gc.setTextAlign(TextAlignment.CENTER);
-
-		repaint();
 	}
 
 	@Override
@@ -124,15 +122,16 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private void drawList(GraphicsContext gc) {
 		gc.setTextBaseline(VPos.CENTER);
-
-		for (int i = 0; i < list.length; ++i) {
-			if (swapping && (i == animatedLeftIndex || i == animatedRightIndex))
-				continue;
-			else if (emphasising && i == emphasiseIndex) {
-				Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
-				drawTextBox(gc, i, list[i] + "", blend);
-			} else
-				drawTextBox(gc, i, list[i] + "");
+		synchronized (list) {
+			for (int i = 0; i < list.length; ++i) {
+				if (swapping && (i == animatedLeftIndex || i == animatedRightIndex))
+					continue;
+				else if (emphasising && i == emphasiseIndex) {
+					Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
+					drawTextBox(gc, i, list[i] + "", blend);
+				} else
+					drawTextBox(gc, i, list[i] + "");
+			}
 		}
 	}
 
@@ -187,8 +186,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 		return "List";
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings("unchecked")
 	public void processChange(ModelAction<?> action) {
 		Timeline timeline = null;
 
@@ -201,9 +200,11 @@ public class ListVisualiser extends DataStructureVisualiser {
 			animatedLeftIndex = swap.a;
 			animatedRightIndex = swap.b;
 
-			// This is correct (I don't believe you)
-			animatedLeftLabel = "" + list[animatedLeftIndex];
-			animatedRightLabel = "" + list[animatedRightIndex];
+			// This is correct
+			synchronized (list) {
+				animatedLeftLabel = "" + list[animatedLeftIndex];
+				animatedRightLabel = "" + list[animatedRightIndex];
+			}
 
 			double startXLeft = getX(animatedLeftIndex) / w;
 			double startXRight = getX(animatedRightIndex) / w;
@@ -293,22 +294,23 @@ public class ListVisualiser extends DataStructureVisualiser {
 		} else if (action instanceof ListAction) {
 			// List changed
 			ListAction list = (ListAction) action;
-			this.list = list.structure;
+			synchronized (this.list) {
+				this.list = list.structure;
+			}
 		}
 
 		if (timeline != null) {
 			timeline.setCycleCount(1);
 			timeline.setRate(rate);
 			timeline.setOnFinished(e -> {
-				list = ((ModelAction<long[]>) action).structure;
-				repaint();
+				synchronized (list) {
+					list = ((ModelAction<long[]>) action).structure;
+				}
 				setUpdatePaused(false);
 			});
 			timeline.play();
 			setUpdatePaused(true);
 		}
-
-		repaint();
 	}
 
 }
