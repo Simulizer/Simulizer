@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -21,8 +22,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -44,7 +46,8 @@ public class PipelineView extends InternalWindow implements Observer {
 	private Pane canvasPane = new Pane();
 	private BorderPane borderPane = new BorderPane();
 
-	private FlowPane buttonPane = new FlowPane();
+	private HBox controlBox = new HBox();
+	private VBox buttonBox = new VBox();
 	private Button leftButton = new Button("<");
 	private Button rightButton = new Button(">");
 	private Label cycleInputLabel = new Label("Go to:");
@@ -180,12 +183,21 @@ public class PipelineView extends InternalWindow implements Observer {
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
+		controlBox.setAlignment(Pos.CENTER_LEFT);
+		buttonBox.setAlignment(Pos.CENTER_LEFT);
+
 		// Now add everything
 		canvasPane.getChildren().add(canvas);
-		buttonPane.getChildren().addAll(followCheckBox, leftButton, rightButton, cycleInputLabel, cycleInput, instructionInfoLabel);
+		HBox topBox = new HBox(), bottomBox = new HBox();
+		topBox.setAlignment(Pos.CENTER);
+		bottomBox.setAlignment(Pos.CENTER);
+		topBox.getChildren().addAll(followCheckBox, leftButton, rightButton);
+		bottomBox.getChildren().addAll(cycleInputLabel, cycleInput);
+		buttonBox.getChildren().addAll(topBox, bottomBox);
+		controlBox.getChildren().addAll(buttonBox, instructionInfoLabel);
 
 		borderPane.setCenter(canvasPane);
-		borderPane.setBottom(buttonPane);
+		borderPane.setBottom(controlBox);
 
 		getContentPane().getChildren().add(borderPane);
 
