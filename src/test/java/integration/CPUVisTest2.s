@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	beqz $zero, MYLABEL;
 	
 MYLABEL: li $v0, 10;

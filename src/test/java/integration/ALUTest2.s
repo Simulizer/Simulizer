@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	j FIRSTLABEL;
 	
 PASSLABEL: li $a0, 17;

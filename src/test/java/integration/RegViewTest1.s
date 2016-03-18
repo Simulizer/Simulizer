@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	li $v0, 5;#should all show up in the register window
 	li $a0, 7;
 	li $s0, 9;

@@ -4,7 +4,7 @@
 .text
 .globl main
 
-main:
+main: # Author: Charlie Street
 	li $a0, 4;
 	li $v0, 9;
 	syscall;
