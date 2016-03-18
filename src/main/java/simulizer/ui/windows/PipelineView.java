@@ -234,12 +234,16 @@ public class PipelineView extends InternalWindow implements Observer {
 				else yTop += rectGap + rectWidth;
 			}
 
+			yTop = rectGap/2 + 3 * (rectGap + rectWidth);
+
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
 			for (Address stage : pipeline) {
 				if (y >= yTop && y < yTop + rectWidth) {
 					return Optional.of(new Pair<>(cycle, stage));
 				} else yTop += rectGap + rectWidth;
 			}
+
+			yTop = rectGap/2 + 6 * (rectGap + rectWidth);
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
@@ -529,17 +533,17 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	private String getHazardInfo(int cycle) {
 		Optional<PipelineHazardMessage.Hazard> hOpt = model.getHistory().get(cycle).hazard;
-		assert (hOpt.isPresent());
 
-		String fortune = " ";
-		if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
+		if (hOpt.isPresent()) {
+			String fortune = " ";
+			if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
 
-		PipelineHazardMessage.Hazard h = hOpt.get();
-		return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
+			PipelineHazardMessage.Hazard h = hOpt.get();
+			return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
+		} else return String.format("Not a hazard%n %n %n ");
 	}
 
 	private static List<String> fortunes = new ArrayList<>();
-
 	{
 		try (BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
 
