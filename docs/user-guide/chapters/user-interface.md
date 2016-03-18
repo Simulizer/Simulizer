@@ -95,7 +95,9 @@ The High Level Visualisation window is where visualisations from the [annotation
 For more information about the different data structures Simulizer can visualise, see [High Level Visualisation](#high-level)
 
 ### Labels ###
-$\TODO{write section}$
+![Labels window](segments/labels-window.png){ width=60% }
+
+The labels window allows you to view a quick outline of the labels in your program. By clicking on a row in the table, it will jump to the line where the label is defined. You can move to the next/previous occurrence of the label by clicking on the `Next`/`Previous` buttons. The `Select All` button will select each occurrence of the selected label, allowing you to easily see its usage.
 
 ### Program I/O ###
 $\TODO{write section}$
@@ -107,7 +109,20 @@ $\TODO{write section}$
 $\TODO{write section}$
 
 ### Pipeline View ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+Here you can see the contents of the pipeline during each CPU cycle. To view the contents of this window, the CPU must be *running* and in *pipelined* mode. Once the simulation is running, you will see the screen start to fill up (from left to right) with instructions. The numbers at the bottom indicate which CPU cycle is shown in that column.
+
+The two horizontal lines in the center separate the pipeline instructions from the waiting and completed instructions, as indicated by the labels at the left of the window. The red circles indicate hazards.
+
+The control bar at the bottom of the window has the following features:
+
+1. `Follow` checkbox: when this is selected, the window will snap to the most recent cycle, otherwise the window will keep showing what it currently shows.
+2. Left/right arrows: clicking the left and right arrows will move backwards/forwards cycles. You can also move backwards and forwards cycles by pressing the left and right arrow keys.
+3. `Go to` field: you can enter a cycle number here, e.g. `56` and the window will snap to that cycle, showing it as the leftmost column.
+4. Information label: when hovering over an instruction or a hazard, information about that instruction/hazard will be displayed in this label.  
+
+Clicking on an instruction will highlight all of its occurrences.
 
 ### Registers ###
 $\TODO{write section}$
