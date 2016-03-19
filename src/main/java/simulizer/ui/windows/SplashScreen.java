@@ -63,6 +63,8 @@ public class SplashScreen {
 	public void show(Simulizer s, Stage primaryStage) {
 
 		Stage stage = new Stage(StageStyle.DECORATED);
+		stage.initOwner(primaryStage);
+		stage.setTitle("Simulizer Splash Screen");
 		stage.getIcons().add(Simulizer.getIcon());
 
 		Task<Boolean> startupTask = new Task<Boolean>() {

@@ -1,11 +1,9 @@
 package simulizer.ui.components.cpu.listeners;
 
-import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.*;
 import simulizer.ui.components.cpu.AnimationProcessor;
 import simulizer.ui.windows.CPUVisualisation;
-import simulizer.utils.UIUtils;
 
 /**
  * Handles communication between the CPU simulation and visualisation
