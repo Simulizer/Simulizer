@@ -6,8 +6,11 @@ import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages a thread which processes messages sent from the simulation
@@ -15,24 +18,27 @@ import java.util.concurrent.*;
  */
 public class MessageManager {
 
-	private final long allowedProcessingTime = 100; // milliseconds
+	private final long allowedProcessingTime = 200; // milliseconds
 
-	private final List<SimulationListener> listeners;
+	private final CopyOnWriteArrayList<SimulationListener> listeners;
 	private final ThreadPoolExecutor executor;
 	private final BlockingQueue<Message> messages;
+	private final AtomicBoolean noWaitingMessages; // all messages submitted
 	private final List<Future<Void>> tasks;
-	private final static int maxTasks = 8;
+	private final Future<?> dispatchTask;
+	private final static int maxTasks = 12;
 
 	private final IO io;
 
 	public MessageManager(IO io) {
-		listeners = new ArrayList<>(maxTasks);
+		listeners = new CopyOnWriteArrayList<>();
 		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks+1,
 				new ThreadUtils.NamedThreadFactory("Message-Manager"));
 
 		// one of the threads is dedicated to dispatching to the others
 		messages = new LinkedBlockingQueue<>();
-		executor.submit((Runnable) this::processMessageQueue);
+		noWaitingMessages = new AtomicBoolean(true);
+		dispatchTask = executor.submit((Runnable) this::processMessageQueue);
 
 		// if the executor runs out of threads, the calling thread to submit the tasks has to run them
 		// this essentially means the list of waiting messages can grow indefinitely, as the dispatching
@@ -44,9 +50,15 @@ public class MessageManager {
 	}
 
 	public void shutdown() {
-		waitForAllRunningTasks();
-
 		synchronized (executor) {
+			messages.clear();
+
+			dispatchTask.cancel(true);
+			synchronized (tasks) {
+				for (Future<Void> t : tasks)
+					t.cancel(true);
+			}
+
 			executor.shutdown();
 			try {
 				executor.awaitTermination(allowedProcessingTime, TimeUnit.MILLISECONDS);
@@ -61,9 +73,7 @@ public class MessageManager {
      * @param l the listener to send messages to
      */
     public void registerListener(SimulationListener l) {
-		synchronized (listeners) {
-			listeners.add(l);
-		}
+		listeners.add(l);
     }
 
     /**
@@ -71,13 +81,15 @@ public class MessageManager {
      * @param l the listener to be removed
      */
     public void unregisterListener(SimulationListener l){
-		synchronized (listeners) {
-			listeners.remove(l);
-		}
+		listeners.remove(l);
     }
 
 	public void sendMessage(Message m) {
-		messages.add(m);
+		try {
+			noWaitingMessages.set(false);
+			messages.put(m);
+		} catch (InterruptedException ignored) {
+		}
 	}
 
 	/**
@@ -88,39 +100,41 @@ public class MessageManager {
 
 			Message m;
 			try {
-				m = messages.take(); // wait until one becomes available
+				m = messages.poll(10, TimeUnit.MILLISECONDS); // wait until one becomes available
+				if(executor.isShutdown())
+					return;
+				if(m == null)
+					continue;
+				synchronized (messages) {
+					messages.notifyAll();
+				}
 			} catch (InterruptedException ignored) {
 				return;
 			}
 
-			List<Callable<Void>> jobs;
-			synchronized (listeners) {
-				jobs = new ArrayList<>(listeners.size());
-				for (SimulationListener l : listeners) {
-					jobs.add(() -> {
-						l.delegateMessage(m);
-						return null;
-					});
-				}
-			}
-			try {
-				List<Future<Void>> newTasks;
-
-				// make sure not to add any more tasks than the executor can cope with
-
+			synchronized (this) {
 				// make sure not to add tasks after shutdown
 				// to avoid java.util.concurrent.RejectedExecutionException
-				synchronized (executor) {
-					if (executor.isShutdown())
-						return;
-					newTasks = executor.invokeAll(jobs);
-				}
-
+				if (executor.isShutdown())
+					return;
 				synchronized (tasks) {
-					tasks.addAll(newTasks);
+					tasks.add(executor.submit(() -> {
+						try {
+							for (SimulationListener l : listeners) {
+								l.delegateMessage(m);
+							}
+						} catch (Throwable t) {
+							UIUtils.showExceptionDialog(t);
+						}
+						return null;
+					}));
 				}
-			} catch (InterruptedException e) {
-				UIUtils.showExceptionDialog(e);
+				if(messages.isEmpty()) {
+					synchronized (noWaitingMessages) {
+						noWaitingMessages.set(true);
+						noWaitingMessages.notifyAll();
+					}
+				}
 			}
 		}
 	}
@@ -128,6 +142,16 @@ public class MessageManager {
 	public void waitForCrucialTasks() {
 		synchronized (tasks) {
 			tasks.removeIf(Future::isDone);
+		}
+
+		try {
+			synchronized (noWaitingMessages) {
+				while (!noWaitingMessages.get()) {
+					noWaitingMessages.wait();
+				}
+			}
+		} catch (InterruptedException ignored) {
+			return;
 		}
 
 		for(SimulationListener l : listeners) {
@@ -145,7 +169,7 @@ public class MessageManager {
 				if(l.criticalProcesses.intValue() != 0) {
 					io.printString(IOStream.ERROR,
 							"A simulation message is taking too long to process.\n" +
-							"  The simulation will continue without waiting."
+							"  The simulation will continue without waiting.\n"
 					);
 				}
 
@@ -155,13 +179,25 @@ public class MessageManager {
 	}
 
 	public void waitForAllRunningTasks() {
+		waitForAllRunningTasks(allowedProcessingTime);
+	}
+	public void waitForAllRunningTasks(long timeoutTime) {
+		try {
+			synchronized (noWaitingMessages) {
+				while (!noWaitingMessages.get()) {
+					noWaitingMessages.wait(timeoutTime);
+				}
+			}
+		} catch (InterruptedException ignored) {
+			return;
+		}
+
 		synchronized (tasks) {
 			for (Future<Void> t : tasks) {
 				if (!t.isDone()) {
 					try {
-						t.get(allowedProcessingTime, TimeUnit.MILLISECONDS);
-					} catch (InterruptedException | ExecutionException | TimeoutException e) {
-						UIUtils.showExceptionDialog(e);
+						t.get(timeoutTime, TimeUnit.MILLISECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException ignored) {
 					}
 					t.cancel(true);
 				}

@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -182,7 +183,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 					ObservableList<Data> list = FXCollections.observableArrayList(items);
 					list.add(createData(m.registerChanged));
 					list.sort((a, b) -> a.id - b.id);
-					ThreadUtils.platformRunAndWait(() -> table.setItems(list));
+					Platform.runLater(() -> table.setItems(list));
 				}
 			} catch (Throwable e) {
 				UIUtils.showExceptionDialog(e);

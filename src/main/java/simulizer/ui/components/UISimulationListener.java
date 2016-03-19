@@ -34,7 +34,9 @@ public class UISimulationListener extends SimulationListener {
 	public void processSimulationMessage(SimulationMessage m) {
 		switch (m.detail) {
 			case PROGRAM_LOADED: {
+				haltSimulation();
 				wm.getAnnotationManager().onNewProgram(wm.getCPU());
+				releaseSimulation();
 
 			} break;
 			case SPEED_CHANGED: {
@@ -42,7 +44,6 @@ public class UISimulationListener extends SimulationListener {
 			} break;
 			case SIMULATION_STARTED: {
 				startTime = System.currentTimeMillis();
-
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION + " - Simulation Running"));
 

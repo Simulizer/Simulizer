@@ -56,7 +56,7 @@ public class WindowManager extends GridPane {
 	private final LoggerIO io;
 	private Thread cpuThread = null;
 	private UISimulationListener simListener = new UISimulationListener(this);
-	private AnnotationManager annotationManager;
+	private final AnnotationManager annotationManager;
 	private HLVisualManager hlvisual;
 	private final MainMenuBar menuBar;
 

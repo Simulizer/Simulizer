@@ -407,6 +407,8 @@ public class CPU {
 		clock.resetTicks();
 		cycles = 0;
 
+		messageManager.waitForAllRunningTasks(1000);
+
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
 		// started below
@@ -418,6 +420,8 @@ public class CPU {
 		clock.start();
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
+
+		messageManager.waitForAllRunningTasks(500);
 
 		while (isRunning) {
 			long cycleStart = System.currentTimeMillis();

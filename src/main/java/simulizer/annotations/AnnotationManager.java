@@ -61,7 +61,7 @@ public class AnnotationManager {
 		simulationBridge.cpu = null;
 	}
 
-	public void newExecutor() {
+	public synchronized void newExecutor() {
 		ex = new AnnotationExecutor();
 
 		ex.bindGlobal("debug", debugBridge);
@@ -84,7 +84,7 @@ public class AnnotationManager {
 		}
 	}
 
-	public void processAnnotationMessage(AnnotationMessage msg) {
+	public synchronized void processAnnotationMessage(AnnotationMessage msg) {
 		try {
 			ex.exec(msg.annotation);
 		} catch(AnnotationEarlyReturn ignored) {

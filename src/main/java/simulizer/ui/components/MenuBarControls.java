@@ -74,7 +74,7 @@ public class MenuBarControls {
 		cpu = wm.getCPU();
 		listener = new ButtonCPUListener();
 		ButtonCPUChangedListener changedListener = new ButtonCPUChangedListener();
-		wm.removeCPUChangedListener(changedListener);
+		wm.addCPUChangedListener(changedListener);
 		cpu.registerListener(listener);
 
 
