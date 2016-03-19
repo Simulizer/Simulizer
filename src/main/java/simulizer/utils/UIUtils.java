@@ -99,13 +99,7 @@ public class UIUtils {
 	 * @param e the exception to display
 	 */
 	public static void showExceptionDialog(Thread where, Throwable e) {
-		final AtomicBoolean hasBeenClosed = new AtomicBoolean(false);
 		try {
-			simultaneousExceptionDialogs.increment();
-			if(simultaneousExceptionDialogs.intValue() > 20) {
-				System.err.println("more exceptions follow but there are now too many to display");
-			}
-
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			pw.write("Thread:  " + where.getName() + "\n");
@@ -146,8 +140,14 @@ public class UIUtils {
 				}
 			}
 
+			simultaneousExceptionDialogs.increment();
+			if(simultaneousExceptionDialogs.intValue() > 5) {
+				System.err.println("more exceptions follow but there are now too many to display");
+				return;
+			}
 			Platform.runLater(() -> {
 				try {
+
 					Alert alert = new Alert(Alert.AlertType.ERROR);
 					alert.initOwner(Simulizer.getPrimaryStage());
 					alert.setTitle("Exception");
@@ -177,29 +177,16 @@ public class UIUtils {
 					alert.getDialogPane().setExpandableContent(expContent);
 					alert.getDialogPane().expandedProperty().set(true); // set expanded by default
 
+					alert.setOnCloseRequest((event) -> simultaneousExceptionDialogs.decrement());
 					alert.showAndWait();
 				} catch(Throwable t) {
 					System.err.println("Failed to show exception dialog with another exception:");
 					t.printStackTrace(System.err);
-				} finally {
-					synchronized (simultaneousExceptionDialogs) {
-						if (!hasBeenClosed.get()) {
-							simultaneousExceptionDialogs.decrement();
-							hasBeenClosed.set(true);
-						}
-					}
 				}
 			});
 		} catch(Throwable t) {
 			System.err.println("Failed to show exception dialog with another exception:");
 			t.printStackTrace(System.err);
-		} finally {
-			synchronized (simultaneousExceptionDialogs) {
-				if (!hasBeenClosed.get()) {
-					simultaneousExceptionDialogs.decrement();
-					hasBeenClosed.set(true);
-				}
-			}
 		}
 	}
 

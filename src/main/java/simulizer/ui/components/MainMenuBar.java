@@ -365,7 +365,6 @@ public class MainMenuBar extends MenuBar {
 			UIUtils.openDoubleInputDialog("Clock Speed", "Set Clock Speed:", "Cycles per second (Hz)", currentRounded, (val) -> {
 				if (val >= 0) {
 					cpu.setCycleFreq(val);
-					controls.setSliderToMatch(val);
 				} else {
 					UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
 				}
@@ -505,4 +504,7 @@ public class MainMenuBar extends MenuBar {
 		return debugMenu;
 	}
 
+	public MenuBarControls getControls() {
+		return controls;
+	}
 }

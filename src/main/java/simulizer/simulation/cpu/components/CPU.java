@@ -121,6 +121,7 @@ public class CPU {
 		// non-pipelined: 1 cycle = 3 ticks
 		// => same speed requires ticks to be 3 times faster
 		clock.setTickFrequency(freq * 3);
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.SPEED_CHANGED));
 	}
 
 	public double getCycleFreq() {

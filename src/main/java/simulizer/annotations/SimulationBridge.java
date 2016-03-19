@@ -9,6 +9,7 @@ import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
+import simulizer.utils.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.List;

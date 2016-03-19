@@ -21,11 +21,8 @@ import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
 import simulizer.simulation.instructions.SpecialInstruction;
-import simulizer.simulation.messages.AnnotationMessage;
-import simulizer.simulation.messages.PipelineHazardMessage;
+import simulizer.simulation.messages.*;
 import simulizer.simulation.messages.PipelineHazardMessage.Hazard;
-import simulizer.simulation.messages.PipelineStateMessage;
-import simulizer.simulation.messages.ProblemMessage;
 
 /**this class is an extension of the original CPU class
  * the difference is that the order of execution follows a very 
@@ -63,6 +60,7 @@ public class CPUPipeline extends CPU {
 	public void setCycleFreq(double freq) {
 		// pipelined: 1 cycle = 1 tick
 		clock.setTickFrequency(freq);
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.SPEED_CHANGED));
 	}
 
 	@Override

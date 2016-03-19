@@ -58,6 +58,7 @@ public class WindowManager extends GridPane {
 	private UISimulationListener simListener = new UISimulationListener(this);
 	private AnnotationManager annotationManager;
 	private HLVisualManager hlvisual;
+	private final MainMenuBar menuBar;
 
 	private Application app;
 
@@ -109,9 +110,9 @@ public class WindowManager extends GridPane {
 		layouts.setDefaultLayout();
 
 		// MainMenuBar
-		MainMenuBar bar = new MainMenuBar(this);
-		GridPane.setHgrow(bar, Priority.ALWAYS);
-		add(bar, 0, 0);
+		menuBar = new MainMenuBar(this);
+		GridPane.setHgrow(menuBar, Priority.ALWAYS);
+		add(menuBar, 0, 0);
 
 		// HLVisualManager
 		hlvisual = new HLVisualManager(workspace, (boolean) settings.get("hlvis.auto-open"));
@@ -184,6 +185,10 @@ public class WindowManager extends GridPane {
 	 */
 	public GridBounds getGridBounds() {
 		return grid;
+	}
+
+	public MainMenuBar getMenuBar() {
+		return menuBar;
 	}
 
 	/**

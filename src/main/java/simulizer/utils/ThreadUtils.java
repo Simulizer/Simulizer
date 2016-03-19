@@ -1,5 +1,8 @@
 package simulizer.utils;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
@@ -60,6 +63,12 @@ public class ThreadUtils {
 		}
 	}
 
+	public static void runLater(final Runnable r) {
+		Thread t = new Thread(r, "ThreadUtils.runLater-Thread");
+		t.setDaemon(true);
+		t.start();
+	}
+
 	/**
      * Given the name of the thread pool or other executor. This factory gives
      * descriptive names to the threads in that pool
@@ -82,5 +91,27 @@ public class ThreadUtils {
 			t.setDaemon(true);
 			return t;
 		}
+	}
+
+	public static class NamedTaggedThreadFactory extends NamedThreadFactory {
+		private Set<Thread> threads;
+
+		public NamedTaggedThreadFactory(String poolName) {
+			super(poolName);
+			threads = new HashSet<>();
+		}
+
+		@SuppressWarnings("NullableProblems")
+		@Override
+		public Thread newThread(Runnable runnable) {
+			Thread t = super.newThread(runnable);
+			threads.add(t);
+			return t;
+		}
+
+		public boolean runningOnThreadFromFactory() {
+			return threads.contains(Thread.currentThread());
+		}
+
 	}
 }

@@ -37,6 +37,9 @@ public class UISimulationListener extends SimulationListener {
 				wm.getAnnotationManager().onNewProgram(wm.getCPU());
 
 			} break;
+			case SPEED_CHANGED: {
+				Platform.runLater(() -> wm.getMenuBar().getControls().setSliderToMatch(wm.getCPU().getCycleFreq()));
+			} break;
 			case SIMULATION_STARTED: {
 				startTime = System.currentTimeMillis();
 

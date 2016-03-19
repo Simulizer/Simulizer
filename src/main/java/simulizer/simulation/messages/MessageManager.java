@@ -19,6 +19,7 @@ public class MessageManager {
 
 	private final List<SimulationListener> listeners;
 	private final ThreadPoolExecutor executor;
+	private final BlockingQueue<Message> messages;
 	private final List<Future<Void>> tasks;
 	private final static int maxTasks = 8;
 
@@ -26,10 +27,16 @@ public class MessageManager {
 
 	public MessageManager(IO io) {
 		listeners = new ArrayList<>(maxTasks);
-		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks,
+		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks+1,
 				new ThreadUtils.NamedThreadFactory("Message-Manager"));
 
+		// one of the threads is dedicated to dispatching to the others
+		messages = new LinkedBlockingQueue<>();
+		executor.submit((Runnable) this::processMessageQueue);
+
 		// if the executor runs out of threads, the calling thread to submit the tasks has to run them
+		// this essentially means the list of waiting messages can grow indefinitely, as the dispatching
+		// thread will have to process some of the messages itsself
 		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 
 		tasks = new ArrayList<>(maxTasks);
@@ -69,40 +76,53 @@ public class MessageManager {
 		}
     }
 
+	public void sendMessage(Message m) {
+		messages.add(m);
+	}
+
 	/**
-	 * send a message to all of the registered listeners
-	 * @param m the message to send
+	 * send messages to all of the registered listeners
 	 */
-	public synchronized void sendMessage(Message m) {
-		List<Callable<Void>> jobs = new ArrayList<>(listeners.size());
+	private void processMessageQueue() {
+		for(;;) {
 
-		synchronized (listeners) {
-			for (SimulationListener l : listeners) {
-				jobs.add(() -> {
-					l.delegateMessage(m);
-					return null;
-				});
+			Message m;
+			try {
+				m = messages.take(); // wait until one becomes available
+			} catch (InterruptedException ignored) {
+				return;
+			}
+
+			List<Callable<Void>> jobs;
+			synchronized (listeners) {
+				jobs = new ArrayList<>(listeners.size());
+				for (SimulationListener l : listeners) {
+					jobs.add(() -> {
+						l.delegateMessage(m);
+						return null;
+					});
+				}
+			}
+			try {
+				List<Future<Void>> newTasks;
+
+				// make sure not to add any more tasks than the executor can cope with
+
+				// make sure not to add tasks after shutdown
+				// to avoid java.util.concurrent.RejectedExecutionException
+				synchronized (executor) {
+					if (executor.isShutdown())
+						return;
+					newTasks = executor.invokeAll(jobs);
+				}
+
+				synchronized (tasks) {
+					tasks.addAll(newTasks);
+				}
+			} catch (InterruptedException e) {
+				UIUtils.showExceptionDialog(e);
 			}
 		}
-		try {
-			List<Future<Void>> newTasks;
-
-			// make sure not to add any more tasks than the executor can cope with
-
-			// make sure not to add tasks after shutdown
-			// to avoid java.util.concurrent.RejectedExecutionException
-			synchronized (executor) {
-				if(executor.isShutdown()) return;
-				newTasks = executor.invokeAll(jobs);
-			}
-
-			synchronized (tasks) {
-				tasks.addAll(newTasks);
-			}
-		} catch (InterruptedException e) {
-			UIUtils.showExceptionDialog(e);
-		}
-
 	}
 
 	public void waitForCrucialTasks() {

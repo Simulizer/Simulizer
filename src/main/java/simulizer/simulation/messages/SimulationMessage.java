@@ -6,6 +6,7 @@ package simulizer.simulation.messages;
 public class SimulationMessage extends Message {
 	public enum Detail {
 		PROGRAM_LOADED,
+		SPEED_CHANGED,
 
 		SIMULATION_STARTED,
 		SIMULATION_STOPPED, // only sent if stopProgram is called AND the simulation was running
