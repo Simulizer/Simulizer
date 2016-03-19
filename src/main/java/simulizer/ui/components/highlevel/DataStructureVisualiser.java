@@ -23,8 +23,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int FRAME_RATE = 45;
 	private AnimationTimer timer;
 
-	protected volatile int rate = 1;
-	private long[] updateTimes = { -1, -1, -1 }, processTimes = { -1, -1, -1 };
+	protected volatile double rate = 1;
+	private int[] updateTimes = { -1 }, processTimes = { -1 };
+	private long lastUpdate = -1;
 
 	private Thread updateThread;
 	private CountDownLatch updateWait;
@@ -82,20 +83,28 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			repaint();
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
-			for (int i = 1; i < updateTimes.length - 1; i++)
+			for (int i = 1; i < updateTimes.length; i++)
 				updateTimes[i - 1] = updateTimes[i];
-			updateTimes[updateTimes.length - 1] = System.currentTimeMillis();
+			long now = System.currentTimeMillis();
+			if (lastUpdate != -1)
+				updateTimes[updateTimes.length - 1] = (int) (now - lastUpdate);
+			lastUpdate = now;
 			rateSkips();
 		}
 	}
 
-	private long averageTime(long[] times) {
-		boolean containsNegative = false;
+	private int averageTime(int[] times) {
+		int totalTime = 0;
+		int numTimes = 0;
 
-		if (containsNegative)
-			return -1L;
+		for (int i = times.length - 1; i >= 0; i--) {
+			if (times[i] < 0)
+				return -1;
+			totalTime += times[i];
+			numTimes++;
+		}
 
-		return 0L;
+		return totalTime / numTimes;
 	}
 
 	private void startUpdateThreads() {
@@ -105,21 +114,29 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		updateThread = new Thread(() -> {
 			while (alive) {
 				try {
-					// Wait if paused
-					if (updatePaused)
-						updateWait.await();
-
 					// Process change
-					if (alive)
-						processChange(changes.take());
+					long before = -1, after = -1;
+					if (alive) {
+						ModelAction<?> change = changes.take();
+						before = System.currentTimeMillis();
+						processChange(change);
 
-					// Add process time
-					for (int i = 1; i < processTimes.length - 1; i++)
-						processTimes[i - 1] = processTimes[i];
-					processTimes[processTimes.length - 1] = System.currentTimeMillis();
+						// Wait if paused
+						if (updatePaused)
+							updateWait.await();
 
-					// Recalculate rate/skips
-					rateSkips();
+						after = System.currentTimeMillis();
+					}
+
+					if (alive && before != -1 && after != -1) {
+						// Add process time
+						for (int i = 1; i < processTimes.length; i++)
+							processTimes[i - 1] = processTimes[i];
+						processTimes[processTimes.length - 1] = (int) (after - before);
+
+						// Recalculate rate/skips
+						rateSkips();
+					}
 				} catch (InterruptedException e) {
 				}
 			}
@@ -142,26 +159,23 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	}
 
 	private synchronized void rateSkips() {
-		long avgUpdate = averageTime(updateTimes);
-		long avgProcess = averageTime(processTimes);
-		if (avgUpdate != -1 && avgProcess != -1) {
-			int newRate = rate;
-			if (avgUpdate + 3 > avgProcess && avgUpdate < avgProcess + 3) {
-				// Averages are roughly the same, do nothing
-			} else if (avgUpdate < avgProcess) {
-				// Average update is faster, increase rate
-				newRate += 0.2;
-			} else {
-				// Average update is slower, decrease rate
-				newRate -= 0.2;
-			}
+		int avgUpdate = averageTime(updateTimes);
+		int avgProcess = averageTime(processTimes);
+		if (avgUpdate > 0 && avgProcess > 0) {
+			double newRate = rate - 1;
+			// Averages are roughly the same, do nothing
+			if (avgUpdate + 50 > avgProcess && avgUpdate < avgProcess + 50)
+				return;
+
+			// Averages are too far apart, calculate a new rate
+			newRate += (avgProcess - avgUpdate) / (avgProcess * newRate);
 
 			// Limit the rate between 1 and 10
 			if (newRate > 10)
 				newRate = 10;
 			else if (newRate < 1)
 				newRate = 1;
-			rate = newRate;
+			rate = newRate + 1;
 		}
 	}
 

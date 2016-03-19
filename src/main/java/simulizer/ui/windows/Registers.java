@@ -1,6 +1,5 @@
 package simulizer.ui.windows;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -18,6 +17,7 @@ import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.messages.RegisterChangedMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -46,10 +46,16 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 * Refreshes the table data
 	 */
 	public void refreshData() {
-		ObservableList<Data> data = FXCollections.observableArrayList();
-		for (Register r : Register.values())
-			data.add(createData(r));
-		Platform.runLater(() -> table.setItems(data));
+		synchronized (table) {
+			ObservableList<Data> data = FXCollections.observableArrayList();
+			for (Register r : Register.values())
+				data.add(createData(r));
+			try {
+				ThreadUtils.platformRunAndWait(() -> table.setItems(data));
+			} catch (Throwable e) {
+				UIUtils.showExceptionDialog(e);
+			}
+		}
 	}
 
 	private Data createData(Register r) {
@@ -169,12 +175,14 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		@Override
 		public void processRegisterChangedMessage(RegisterChangedMessage m) {
 			try {
-				FilteredList<Data> items = table.getItems().filtered(d -> d.id != m.registerChanged.getID());
-				ObservableList<Data> list = FXCollections.observableArrayList(items);
-				list.add(createData(m.registerChanged));
-				list.sort((a, b) -> a.id - b.id);
-				Platform.runLater(() -> table.setItems(list));
-			} catch (Exception e) {
+				synchronized (table) {
+					FilteredList<Data> items = table.getItems().filtered(d -> d.id != m.registerChanged.getID());
+					ObservableList<Data> list = FXCollections.observableArrayList(items);
+					list.add(createData(m.registerChanged));
+					list.sort((a, b) -> a.id - b.id);
+					ThreadUtils.platformRunAndWait(() -> table.setItems(list));
+				}
+			} catch (Throwable e) {
 				UIUtils.showExceptionDialog(e);
 			}
 		}
