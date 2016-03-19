@@ -1,29 +1,39 @@
 package simulizer.highlevel.models;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
+
+import simulizer.simulation.cpu.user_interaction.IO;
 
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
 
-	public HanoiModel() {
+	public HanoiModel(IO io) {
+		super(io);
 		for (int pegCount = 0; pegCount < 3; pegCount++)
 			pegs.add(new Stack<>());
 	}
 
 	public void setNumDisks(int n) {
+		if (n < 0) {
+			printError("Can not have " + n + " discs");
+			return;
+		}
 		numDiscs = n;
-		// Clear all pegs
-		pegs.clear();
-		for (int pegCount = 0; pegCount < 3; pegCount++)
-			pegs.add(new Stack<>());
+		synchronized (pegs) {
+			// Clear all pegs
+			pegs.clear();
+			for (int pegCount = 0; pegCount < 3; pegCount++)
+				pegs.add(new Stack<>());
 
-		// Get the first peg and add all the discs
-		Stack<Integer> firstPeg = pegs.get(0);
-		for (int disc = n - 1; disc >= 0; disc--)
-			firstPeg.push(disc);
+			// Get the first peg and add all the discs
+			Stack<Integer> firstPeg = pegs.get(0);
+			for (int disc = n - 1; disc >= 0; disc--)
+				firstPeg.push(disc);
+		}
 
 		setChanged();
 		notifyObservers(new Discs(n));
@@ -31,9 +41,23 @@ public class HanoiModel extends DataStructureModel {
 
 	public void move(int startPeg, int endPeg) {
 		System.out.println("" + startPeg + "->" + endPeg);
+		if (startPeg < 0 || startPeg > 2) {
+			printError("There is no start peg " + startPeg);
+			return;
+		} else if (endPeg < 0 || endPeg > 2) {
+			printError("There is no end peg " + endPeg);
+			return;
+		}
+
 		synchronized (pegs) {
 			// Apply Update
-			int item = pegs.get(startPeg).pop();
+			int item = -1;
+			try {
+				item = pegs.get(startPeg).pop();
+			} catch (EmptyStackException ex) {
+				printError("There are no discs on: " + startPeg);
+				return;
+			}
 			pegs.get(endPeg).push(item);
 
 			// Notify Observers
