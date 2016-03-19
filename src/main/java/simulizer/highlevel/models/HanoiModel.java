@@ -40,7 +40,6 @@ public class HanoiModel extends DataStructureModel {
 	}
 
 	public void move(int startPeg, int endPeg) {
-		System.out.println("" + startPeg + "->" + endPeg);
 		if (startPeg < 0 || startPeg > 2) {
 			printError("There is no start peg " + startPeg);
 			return;
