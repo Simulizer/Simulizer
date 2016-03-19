@@ -52,6 +52,7 @@ public class Editor extends InternalWindow {
 
 	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
 	private static File currentFile = null; // persists across instances of the window
+	private static Editor editor; // only one instance
 
 	private boolean pageLoaded;
 	private final WebEngine engine;
@@ -120,6 +121,7 @@ public class Editor extends InternalWindow {
 	private Bridge bridge;
 
 	public Editor() {
+		editor = this;
 		WebView view = new WebView();
 		pageLoaded = false;
 		bridge = new Bridge(this);
@@ -436,6 +438,8 @@ public class Editor extends InternalWindow {
 		changeNotifier.shutdownNow();
 		detachObservers();
 
+		editor = null;
+
 		super.close();
 	}
 
@@ -514,22 +518,24 @@ public class Editor extends InternalWindow {
 	}
 
 
-
-	public String getText() {
-		if (jsEditor != null)
-			return (String) jsEditor.call("getValue");
-		else
-			return null;
+	public static String getText() {
+		if (editor != null && editor.jsEditor != null)
+			return (String) editor.jsEditor.call("getValue");
+		else if(currentFile != null) {
+			return FileUtils.getFileContent(currentFile);
+		} else {
+			return "";
+		}
 	}
 
 	public int getLine() {
 		return (int) jsWindow.call("getLine");
 	}
 
-	public boolean hasBackingFile() {
+	public static boolean hasBackingFile() {
 		return currentFile != null;
 	}
-	public String getBackingFilename() {
+	public static String getBackingFilename() {
 		return currentFile == null ? "Untitled" : currentFile.getName();
 	}
 

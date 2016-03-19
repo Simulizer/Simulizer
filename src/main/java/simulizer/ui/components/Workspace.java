@@ -164,6 +164,9 @@ public class Workspace extends Observable implements Themeable {
 		}
 		return null;
 	}
+	public boolean windowIsOpen(WindowEnum window) {
+		return findInternalWindow(window) != null;
+	}
 
 	/**
 	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open

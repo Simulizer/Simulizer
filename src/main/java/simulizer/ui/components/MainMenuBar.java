@@ -463,8 +463,8 @@ public class MainMenuBar extends MenuBar {
 		Menu debugMenu = new Menu("Debug");
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
-		dumpProgram.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
-			Program p = Assembler.assemble(ed.getText(), null);
+		dumpProgram.setOnAction(e -> {
+			Program p = Assembler.assemble(Editor.getText(), null);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
@@ -476,13 +476,13 @@ public class MainMenuBar extends MenuBar {
 				ProgramStringBuilder.dumpToFile(p, outputFilename);
 			}
 			System.out.println("Program dumped to: \"" + outputFilename + "\"");
-		}));
+		});
 
 		MenuItem runSpim = new MenuItem("Run in SPIM");
-		runSpim.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
-			String program = ed.getText();
+		runSpim.setOnAction(e -> {
+			String program = Editor.getText();
 			SpimRunner.runQtSpim(program);
-		}));
+		});
 
 		MenuItem jsREPL = new MenuItem("Start javascript REPL");
 		jsREPL.setOnAction(e -> {

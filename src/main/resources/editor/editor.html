@@ -271,7 +271,7 @@ function setFont(family, size) {
 
 // poor man's breakpoint
 function insertBreakpoint() {
-    doc.insertLines(getLine(), ['#>> breakpoint: @{pause()}@']);
+    doc.insertLines(getLine(), ['break 0 # <<< breakpoint']);
 }
 
 </script>

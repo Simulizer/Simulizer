@@ -28,9 +28,11 @@ import simulizer.ui.components.AssemblingDialog;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
 /**
@@ -208,22 +210,16 @@ public class WindowManager extends GridPane {
 	public void assembleAndRun() {
 		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION + " - Assembling Program");
 
-		getWorkspace().openEditorWithCallback((editor) -> {
-			final boolean CAWasEnabled = editor.isContinuousAssemblyEnabled();
+		final String programText = Editor.getText();
 
-			if (CAWasEnabled)
-				editor.disableContinuousAssembly();
-			editor.stopContinuousAssembly();
+		// avoid lots of work on the JavaFX thread
+		Thread assembleThread = new Thread(() -> {
+			StoreProblemLogger log = new StoreProblemLogger();
 
-			final String programText = editor.getText();
-
-			// avoid lots of work on the JavaFX thread
-			Thread assembleThread = new Thread(() -> {
-				StoreProblemLogger log = new StoreProblemLogger();
-
-				try {
-					final Program p = Assembler.assemble(programText, log);
-					// doing as little as possible in the FX thread
+			try {
+				final Program p = Assembler.assemble(programText, log);
+				// doing as little as possible in the FX thread
+				if(getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 					getWorkspace().openEditorWithCallback((editor2) -> {
 						// if no problems, has the effect of clearing
 						editor2.setProblems(log.getProblems());
@@ -233,20 +229,18 @@ public class WindowManager extends GridPane {
 							AssemblingDialog.closeAssemblingDialog();
 						}
 					});
-
-					if (p != null) {
-						runProgram(p); // spawns another thread
-					}
-				} finally {
-					Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
-					if (CAWasEnabled)
-						editor.enableContinuousAssembly();
 				}
 
-			} , "Assemble");
-			assembleThread.setDaemon(true);
-			assembleThread.start();
-		});
+				if (p != null) {
+					runProgram(p); // spawns another thread
+				}
+			} finally {
+				Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
+			}
+
+		} , "Assemble");
+		assembleThread.setDaemon(true);
+		assembleThread.start();
 	}
 
 	/**
