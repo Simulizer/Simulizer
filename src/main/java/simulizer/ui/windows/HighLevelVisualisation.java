@@ -11,10 +11,10 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.util.Pair;
-import simulizer.highlevel.models.Action;
 import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.FrameModel;
 import simulizer.highlevel.models.HLVisualManager;
+import simulizer.highlevel.models.HLVisualManager.Action;
 import simulizer.highlevel.models.HanoiModel;
 import simulizer.highlevel.models.ListModel;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
@@ -76,6 +76,9 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	public void close() {
 		super.close();
 
+		// Close all tabs
+		tabs.getTabs().forEach(t -> removeTab((DataStructureVisualiser) t.getContent()));
+
 		// Stop listening to visualisation changes
 		getWindowManager().getHLVisualManager().deleteObserver(this);
 	}
@@ -97,10 +100,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 			}
 		}, 0, 10);
 
+		tab.setOnClosed(e -> vis.close());
 		Platform.runLater(() -> tabs.getTabs().add(tab));
 	}
 
 	public void removeTab(DataStructureVisualiser vis) {
+		vis.close();
 		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
 	}
 

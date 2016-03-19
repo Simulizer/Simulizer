@@ -26,14 +26,14 @@ public class ListModel extends DataStructureModel {
 			this.list[i] = list.get(i);
 
 		setChanged();
-		notifyObservers(new Action());
+		notifyObservers(new ListAction());
 	}
 
 	public void set(int i, Long item) {
 		synchronized (list) {
 			list[i] = item;
 			setChanged();
-			notifyObservers(new Action());
+			notifyObservers(new ListAction());
 		}
 	}
 
@@ -46,34 +46,35 @@ public class ListModel extends DataStructureModel {
 
 			// Notify Listeners
 			setChanged();
-			notifyObservers(new Swap(i, j));
+			notifyObservers(new SwapAction(i, j));
 		}
 	}
 
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
 			ArrayList<String> exMarkers = markers.get(index);
-			if (exMarkers != null) exMarkers.add(markerName);
+			if (exMarkers != null)
+				exMarkers.add(markerName);
 			else {
 				exMarkers = new ArrayList<>(2);
 				markers.put(index, exMarkers);
 			}
 
 			setChanged();
-			notifyObservers(new Marker(index, markerName));
+			notifyObservers(new MarkerAction(index, markerName));
 		}
 	}
 
 	public void highlightMarker(int index) {
 		setChanged();
-		notifyObservers(new Highlight(index));
+		notifyObservers(new HighlightAction(index));
 	}
 
 	public void clearMarker(int index) {
 		synchronized (markers) {
 			markers.remove(index);
 			setChanged();
-			notifyObservers(new Marker(index));
+			notifyObservers(new MarkerAction(index));
 		}
 	}
 
@@ -81,13 +82,13 @@ public class ListModel extends DataStructureModel {
 		synchronized (markers) {
 			markers.clear();
 			setChanged();
-			notifyObservers(new Marker());
+			notifyObservers(new MarkerAction());
 		}
 	}
 
 	public void emphasise(int index) {
 		setChanged();
-		notifyObservers(new Emphasise(index));
+		notifyObservers(new EmphasiseAction(index));
 	}
 
 	public int size() {
@@ -96,8 +97,10 @@ public class ListModel extends DataStructureModel {
 
 	public long[] getList() {
 		synchronized (list) {
-			if (list.length == 0) return new long[0];
-			else return Arrays.copyOf(list, list.length);
+			if (list.length == 0)
+				return new long[0];
+			else
+				return Arrays.copyOf(list, list.length);
 		}
 	}
 
@@ -117,8 +120,11 @@ public class ListModel extends DataStructureModel {
 		return ModelType.LIST;
 	}
 
-	public class Action {
-		public final long[] list = getList();
+	public class ListAction extends ModelAction<long[]> {
+
+		private ListAction() {
+			super(getList(), false);
+		}
 	}
 
 	/**
@@ -126,10 +132,11 @@ public class ListModel extends DataStructureModel {
 	 *
 	 * @author Michael
 	 */
-	public class Swap extends Action {
+	public class SwapAction extends ModelAction<long[]> {
 		public final int a, b;
 
-		private Swap(final int a, final int b) {
+		private SwapAction(final int a, final int b) {
+			super(getList(), true);
 			this.a = a;
 			this.b = b;
 		}
@@ -141,7 +148,7 @@ public class ListModel extends DataStructureModel {
 	 * @author Michael
 	 *
 	 */
-	public class Marker extends Action {
+	public class MarkerAction extends ModelAction<long[]> {
 		public final Optional<String> name;
 		public final Optional<Integer> index;
 
@@ -153,7 +160,8 @@ public class ListModel extends DataStructureModel {
 		 * @param index
 		 *            the index
 		 */
-		private Marker(final int index, final String name) {
+		private MarkerAction(final int index, final String name) {
+			super(getList(), false);
 			this.index = Optional.of(index);
 			this.name = Optional.of(name);
 		}
@@ -164,7 +172,8 @@ public class ListModel extends DataStructureModel {
 		 * @param index
 		 *            the index
 		 */
-		private Marker(final int index) {
+		private MarkerAction(final int index) {
+			super(getList(), false);
 			this.index = Optional.of(index);
 			this.name = Optional.empty();
 		}
@@ -172,7 +181,8 @@ public class ListModel extends DataStructureModel {
 		/**
 		 * Clear all markers
 		 */
-		private Marker() {
+		private MarkerAction() {
+			super(getList(), false);
 			this.name = Optional.empty();
 			this.index = Optional.empty();
 		}
@@ -184,18 +194,20 @@ public class ListModel extends DataStructureModel {
 	 * @author Michael
 	 *
 	 */
-	public class Emphasise extends Action {
+	public class EmphasiseAction extends ModelAction<long[]> {
 		public final int index;
 
-		private Emphasise(final int index) {
+		private EmphasiseAction(final int index) {
+			super(getList(), false);
 			this.index = index;
 		}
 	}
 
-	public class Highlight extends Action {
+	public class HighlightAction extends ModelAction<long[]> {
 		public final int index;
 
-		private Highlight(final int index) {
+		private HighlightAction(final int index) {
+			super(getList(), false);
 			this.index = index;
 		}
 	}
