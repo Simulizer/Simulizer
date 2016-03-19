@@ -18,6 +18,7 @@ import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.messages.RegisterChangedMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.UIUtils;
 
 /**
  * Provides a visual representation of what each Register contains
@@ -174,7 +175,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 				list.sort((a, b) -> a.id - b.id);
 				Platform.runLater(() -> table.setItems(list));
 			} catch (Exception e) {
-				e.printStackTrace();
+				UIUtils.showExceptionDialog(e);
 			}
 		}
 	}

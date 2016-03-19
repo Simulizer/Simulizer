@@ -141,7 +141,8 @@ public class Workspace extends Observable implements Themeable {
 		Iterator<InternalWindow> windows = openWindows.iterator();
 		while (windows.hasNext()) {
 			InternalWindow window = windows.next();
-			window.close();
+			if (!window.isClosed())
+				window.close();
 			if (window.isClosed())
 				windows.remove();
 		}

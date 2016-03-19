@@ -26,6 +26,7 @@ import simulizer.ui.components.settings.IntegerControl;
 import simulizer.ui.components.settings.StringControl;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
+import simulizer.utils.UIUtils;
 
 /**
  * An InternalWindow to change the settings of the application
@@ -80,9 +81,7 @@ public class Options extends InternalWindow {
 	}
 
 	private void createTree(FolderItem root, ObjectSetting settings) {
-		settings.getValue().stream()
-				.filter(value -> value.getSettingType() == SettingType.OBJECT)
-				.forEach(value -> {
+		settings.getValue().stream().filter(value -> value.getSettingType() == SettingType.OBJECT).forEach(value -> {
 			FolderItem innerItem = new FolderItem((ObjectSetting) value);
 			createTree(innerItem, (ObjectSetting) value);
 			innerItem.setExpanded(true);
@@ -156,8 +155,13 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void close() {
-		super.close();
 		getWindowManager().getSettings().save();
+		if (UIUtils.confirm("Restart Required", "To apply these setting changes the application must restart. Restart application now?")) {
+			super.close();
+			getWindowManager().restart();
+		} else {
+			super.close();
+		}
 	}
 
 	@Override

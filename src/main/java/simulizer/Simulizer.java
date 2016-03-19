@@ -19,7 +19,7 @@ public class Simulizer extends Application {
 	public Settings settings;
 
 	public static Image getIcon() {
-		if(icon == null) {
+		if (icon == null) {
 			icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
 		}
 		return icon;
@@ -59,7 +59,7 @@ public class Simulizer extends Application {
 
 		// Just show the main window for now
 		try {
-			wm = new WindowManager(primaryStage, settings);
+			wm = new WindowManager(this, primaryStage, settings);
 		} catch (IOException ex) {
 			UIUtils.showErrorDialog("Failed To Launch", ex.getMessage());
 			System.exit(1);

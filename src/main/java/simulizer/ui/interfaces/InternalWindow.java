@@ -195,8 +195,8 @@ public abstract class InternalWindow extends Window {
 
 	@Override
 	public void close() {
-		super.close();
 		isClosed = true;
+		super.close();
 	}
 
 	/**

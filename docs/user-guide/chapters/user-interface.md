@@ -131,13 +131,17 @@ The control bar at the bottom of the window has the following features:
 Clicking on an instruction will highlight all of its occurrences. For more information about the pipeline visualisation, see [Pipeline Visualisation](#pipeline-view)
 
 ### Registers ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+The Registers window provides a realtime view of the current value stored in each register. This value can be interpreted in three different ways (unsigned integer, signed integer and hexadecimal). To switch between these interpretations, right click on the column heading and select the interpretation you want.
 
 ## Layouts ##
 Layouts determine the configuration that all the Internal Windows are in. They allow you to quickly switch between different arrangements to optimise your workflow.
 
 ### Loading a Layout ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+Simulizer includes many layouts for you to try. To change to one of these layout, go to the Menu Bar and click Layouts. This will bring up a list of all the layouts that you can choose. Just click one and the internal windows will rearrange themselves.
 
 ### Saving a Layout ###
 If none of the included layouts are up to your standards then why not make your own. Add/Remove and rearrangement the Internal Windows until it is in a configuration that you are happy with. You can then save the layout by clicking Layouts $\to$ Save Layout.
