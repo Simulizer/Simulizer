@@ -45,7 +45,7 @@ public class UIUtils {
 
 	// from http://stackoverflow.com/a/27983567
 	// it is OK if the icon is null, will reset to default icon
-	public static void setDialogBoxIcon(Dialog dialog) {
+	public static void setDialogBoxIcon(Dialog<?> dialog) {
 		Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
 		stage.getIcons().add(Simulizer.getIcon());
 	}

@@ -422,7 +422,6 @@ public class CPUListener extends SimulationListener {
             case Decode:
             {
                 int speed = getInstructionFraction(1);
-                System.out.println("DECODE");
                 Runnable t1 = () -> {
                     cpu.showText("INSTRUCTION DECODE - The encoded instruction present in the IR (instruction register) is interpreted by the decoder", speed);
                     cpu.ir.highlight();
