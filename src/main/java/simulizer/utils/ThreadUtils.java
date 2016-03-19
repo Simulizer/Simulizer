@@ -101,6 +101,10 @@ public class ThreadUtils {
 			threads = new HashSet<>();
 		}
 
+		public void killThreads() {
+			threads.forEach(Thread::interrupt);
+		}
+
 		@SuppressWarnings("NullableProblems")
 		@Override
 		public Thread newThread(Runnable runnable) {

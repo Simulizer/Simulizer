@@ -370,10 +370,7 @@ public class CPUListener extends SimulationListener {
     }
 
     public void startOfCycle(){
-        haltSimulation();
         cpu.animationProcessor.newCycle();
-        //TODO: ok to wait here but do it properly
-        releaseSimulation();
     }
 
     /**

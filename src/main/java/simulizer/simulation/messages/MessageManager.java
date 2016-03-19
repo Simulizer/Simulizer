@@ -6,8 +6,6 @@ import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,23 +20,24 @@ public class MessageManager {
 
 	private final CopyOnWriteArrayList<SimulationListener> listeners;
 	private final ThreadPoolExecutor executor;
+	private final ThreadUtils.NamedTaggedThreadFactory threadFactory;
 	private final BlockingQueue<Message> messages;
 	private final AtomicBoolean noWaitingMessages; // all messages submitted
-	private final List<Future<Void>> tasks;
-	private final Future<?> dispatchTask;
+	private final List<MessageTask> tasks;
 	private final static int maxTasks = 12;
 
 	private final IO io;
 
 	public MessageManager(IO io) {
 		listeners = new CopyOnWriteArrayList<>();
-		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks+1,
-				new ThreadUtils.NamedThreadFactory("Message-Manager"));
+		threadFactory = new ThreadUtils.NamedTaggedThreadFactory("Message-Manager");
+		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTasks+1, threadFactory);
+
 
 		// one of the threads is dedicated to dispatching to the others
 		messages = new LinkedBlockingQueue<>();
 		noWaitingMessages = new AtomicBoolean(true);
-		dispatchTask = executor.submit((Runnable) this::processMessageQueue);
+		executor.submit((Runnable) this::processMessageQueue);
 
 		// if the executor runs out of threads, the calling thread to submit the tasks has to run them
 		// this essentially means the list of waiting messages can grow indefinitely, as the dispatching
@@ -51,13 +50,9 @@ public class MessageManager {
 
 	public void shutdown() {
 		synchronized (executor) {
+			threadFactory.killThreads();
 			messages.clear();
-
-			dispatchTask.cancel(true);
-			synchronized (tasks) {
-				for (Future<Void> t : tasks)
-					t.cancel(true);
-			}
+			tasks.clear();
 
 			executor.shutdown();
 			try {
@@ -92,6 +87,35 @@ public class MessageManager {
 		}
 	}
 
+	private class MessageTask implements Runnable {
+		private Message m;
+		private boolean done;
+
+		public MessageTask(Message m) {
+			this.m = m;
+			done = false;
+		}
+
+		public boolean isDone() {
+			return done;
+		}
+
+		@Override
+		public void run() {
+			try {
+				for (SimulationListener l : listeners) {
+					l.delegateMessage(m);
+				}
+			} catch (Exception e) {
+				UIUtils.showExceptionDialog(e);
+			}
+			synchronized (this) {
+				done = true;
+				notifyAll();
+			}
+		}
+	}
+
 	/**
 	 * send messages to all of the registered listeners
 	 */
@@ -118,77 +142,29 @@ public class MessageManager {
 				if (executor.isShutdown())
 					return;
 				synchronized (tasks) {
-					tasks.add(executor.submit(() -> {
-						try {
-							for (SimulationListener l : listeners) {
-								l.delegateMessage(m);
-							}
-						} catch (Throwable t) {
-							UIUtils.showExceptionDialog(t);
+					MessageTask t = new MessageTask(m);
+					tasks.add(t);
+					executor.submit(t);
+
+					if(messages.isEmpty()) {
+						synchronized (noWaitingMessages) {
+							noWaitingMessages.set(true);
+							noWaitingMessages.notifyAll();
 						}
-						return null;
-					}));
-				}
-				if(messages.isEmpty()) {
-					synchronized (noWaitingMessages) {
-						noWaitingMessages.set(true);
-						noWaitingMessages.notifyAll();
+					}
+
+					if(tasks.size() > 50) {
+						tasks.removeIf(MessageTask::isDone);
 					}
 				}
 			}
 		}
 	}
 
-	public void waitForCrucialTasks() {
-		waitForAllRunningTasks(allowedProcessingTime);
-		/*
-		synchronized (tasks) {
-			tasks.removeIf(Future::isDone);
-		}
-
-		try {
-			synchronized (noWaitingMessages) {
-				while (!noWaitingMessages.get()) {
-					noWaitingMessages.wait();
-				}
-			}
-		} catch (InterruptedException ignored) {
-			return;
-		}
-
-		for(SimulationListener l : listeners) {
-			if(l.criticalProcesses.intValue() != 0) {
-
-				try {
-					synchronized (l.criticalProcesses) {
-						l.criticalProcesses.wait(allowedProcessingTime); // wait to be notified of any change
-					}
-				} catch (InterruptedException e) {
-					UIUtils.showExceptionDialog(e);
-				}
-
-
-				if(l.criticalProcesses.intValue() != 0) {
-					io.printString(IOStream.ERROR,
-							"A simulation message is taking too long to process.\n" +
-							"  The simulation will continue without waiting.\n"
-					);
-				}
-
-				l.criticalProcesses.reset();
-			}
-		}
-		*/
+	public void waitForAll() {
+		waitForAll(allowedProcessingTime);
 	}
-
-	public void waitForAllRunningTasks() {
-		waitForAllRunningTasks(allowedProcessingTime);
-	}
-	public void waitForAllRunningTasks(long timeoutTime) {
-		synchronized (tasks) {
-			tasks.removeIf(Future::isDone);
-		}
-
+	public void waitForAll(long timeoutTime) {
 		try {
 			synchronized (noWaitingMessages) {
 				while (!noWaitingMessages.get()) {
@@ -200,17 +176,19 @@ public class MessageManager {
 		}
 
 		synchronized (tasks) {
-			for (Future<Void> t : tasks) {
-				if (!t.isDone()) {
-					try {
-						t.get(timeoutTime, TimeUnit.MILLISECONDS);
-					} catch (InterruptedException | ExecutionException | TimeoutException ignored) {
-						io.printString(IOStream.ERROR,
-								"A simulation message is taking too long to process.\n" +
-								"  The simulation will continue without waiting.\n"
-						);
+			for (MessageTask t : tasks) {
+				try {
+					//noinspection SynchronizationOnLocalVariableOrMethodParameter
+					synchronized (t) {
+						if(!t.isDone()) {
+							t.wait(timeoutTime);
+						}
 					}
-					t.cancel(true);
+				} catch (InterruptedException e) {
+					io.printString(IOStream.ERROR,
+							"A simulation message is taking too long to process.\n" +
+									"  The simulation will continue without waiting.\n"
+					);
 				}
 			}
 

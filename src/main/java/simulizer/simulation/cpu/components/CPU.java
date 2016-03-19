@@ -357,7 +357,7 @@ public class CPU {
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
 
-		messageManager.waitForCrucialTasks();
+		messageManager.waitForAll(100);
 
 		fetch();
 		sendMessage(new PipelineStateMessage(thisInstruction, null, null));
@@ -407,7 +407,7 @@ public class CPU {
 		clock.resetTicks();
 		cycles = 0;
 
-		messageManager.waitForAllRunningTasks(1000);
+		messageManager.waitForAll();
 
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
@@ -421,7 +421,7 @@ public class CPU {
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
-		messageManager.waitForAllRunningTasks(500);
+		messageManager.waitForAll();
 
 		while (isRunning) {
 			long cycleStart = System.currentTimeMillis();
@@ -444,7 +444,7 @@ public class CPU {
 			clock.stop();
 		io.cancelRead();
 		// make sure the simulation stopped message is the very last message
-		messageManager.waitForAllRunningTasks();
+		messageManager.waitForAll();
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STOPPED));
 	}
 

@@ -34,9 +34,7 @@ public class UISimulationListener extends SimulationListener {
 	public void processSimulationMessage(SimulationMessage m) {
 		switch (m.detail) {
 			case PROGRAM_LOADED: {
-				haltSimulation();
 				wm.getAnnotationManager().onNewProgram(wm.getCPU());
-				releaseSimulation();
 
 			} break;
 			case SPEED_CHANGED: {
@@ -101,10 +99,8 @@ public class UISimulationListener extends SimulationListener {
 	@Override
 	public void processAnnotationMessage(AnnotationMessage m) {
 		// the annotations should all be completed before moving on to the next cycle
-		haltSimulation();
 		count++;
 		wm.getAnnotationManager().processAnnotationMessage(m);
-		releaseSimulation();
 	}
 
 	private void highlightAddresses(Address fetch, Address decode, Address execute) {

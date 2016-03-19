@@ -8,23 +8,6 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public abstract class SimulationListener {
 
-	final LongAdder criticalProcesses;
-
-	public SimulationListener() {
-		criticalProcesses = new LongAdder();
-	}
-
-	public void haltSimulation() {
-		criticalProcesses.increment();
-	}
-
-	public void releaseSimulation() {
-		synchronized (criticalProcesses) {
-			criticalProcesses.decrement();
-			criticalProcesses.notifyAll();
-		}
-	}
-
     void delegateMessage(Message m) {
         processMessage(m);
 
