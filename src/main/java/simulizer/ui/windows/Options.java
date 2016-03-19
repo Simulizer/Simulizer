@@ -156,7 +156,7 @@ public class Options extends InternalWindow {
 	@Override
 	public void close() {
 		getWindowManager().getSettings().save();
-		if (UIUtils.confirm("Restart Required", "To apply these setting changes the application must restart. Restart application now?")) {
+		if (UIUtils.confirm("Restart Required", "To apply any changes the application must restart.\nRestart now?")) {
 			super.close();
 			getWindowManager().restart();
 		} else {

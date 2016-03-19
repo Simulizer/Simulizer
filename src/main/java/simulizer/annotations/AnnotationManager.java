@@ -78,7 +78,7 @@ public class AnnotationManager {
 	private String getAnnotationLineString(AnnotationMessage msg) {
 		if(msg.boundAddress != null) {
 			int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
-			return "the annotation bound to line: " + lineNum + ".";
+			return "the annotation bound to line: " + (lineNum+1) + ".";
 		} else {
 			return "the initial annotation.";
 		}

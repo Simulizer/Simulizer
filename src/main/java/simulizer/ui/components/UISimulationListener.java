@@ -43,13 +43,19 @@ public class UISimulationListener extends SimulationListener {
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION + " - Simulation Running"));
 
-				wm.getWorkspace().openEditorWithCallback((editor) -> {
-					System.out.println("Simulation Started - running '" + editor.getBackingFilename() + "'"
-						+ (editor.hasOutstandingChanges() ? " with outstanding changes" : "")
-						+ (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+				if(wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
+					wm.getWorkspace().openEditorWithCallback((editor) -> {
+						System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'"
+								+ (editor.hasOutstandingChanges() ? " with outstanding changes" : "")
+								+ (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 
-					editor.executeMode();
-				});
+						editor.executeMode();
+					});
+				} else {
+					System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'"
+							+ " with the editor closed"
+							+ (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+				}
 
 				// Clear the pipeline model when a new simulation starts
 				PipelineView.model.clear();
@@ -98,9 +104,7 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	private void highlightAddresses(Address fetch, Address decode, Address execute) {
-		final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-
-		if (e != null) {
+		if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 			CPU cpu = wm.getCPU();
 
 			if (cpu != null) {
@@ -113,7 +117,8 @@ public class UISimulationListener extends SimulationListener {
 					int decodeL = lineNums.getOrDefault(decode, -1);
 					int executeL = lineNums.getOrDefault(execute, -1);
 
-					Platform.runLater(() -> e.highlightPipeline(fetchL, decodeL, executeL));
+					wm.getWorkspace().openEditorWithCallback((editor) ->
+							editor.highlightPipeline(fetchL, decodeL, executeL));
 				}
 			}
 		}

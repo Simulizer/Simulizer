@@ -14,6 +14,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -90,13 +91,21 @@ public class UIUtils {
 		showExceptionDialog(Thread.currentThread(), e);
 	}
 
+	private static final LongAdder simultaneousExceptionDialogs = new LongAdder();
+
 	/**
 	 * Display the stack trace of an exception.
 	 * Inspired by: http://code.makery.ch/blog/javafx-dialogs-official/
 	 * @param e the exception to display
 	 */
 	public static void showExceptionDialog(Thread where, Throwable e) {
+		final AtomicBoolean hasBeenClosed = new AtomicBoolean(false);
 		try {
+			simultaneousExceptionDialogs.increment();
+			if(simultaneousExceptionDialogs.intValue() > 20) {
+				System.err.println("more exceptions follow but there are now too many to display");
+			}
+
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			pw.write("Thread:  " + where.getName() + "\n");
@@ -172,11 +181,25 @@ public class UIUtils {
 				} catch(Throwable t) {
 					System.err.println("Failed to show exception dialog with another exception:");
 					t.printStackTrace(System.err);
+				} finally {
+					synchronized (simultaneousExceptionDialogs) {
+						if (!hasBeenClosed.get()) {
+							simultaneousExceptionDialogs.decrement();
+							hasBeenClosed.set(true);
+						}
+					}
 				}
 			});
 		} catch(Throwable t) {
 			System.err.println("Failed to show exception dialog with another exception:");
 			t.printStackTrace(System.err);
+		} finally {
+			synchronized (simultaneousExceptionDialogs) {
+				if (!hasBeenClosed.get()) {
+					simultaneousExceptionDialogs.decrement();
+					hasBeenClosed.set(true);
+				}
+			}
 		}
 	}
 
