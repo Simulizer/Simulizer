@@ -38,7 +38,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Workspace extends Observable implements Themeable {
-	private Set<InternalWindow> openWindows = new HashSet<>();
+	private final Set<InternalWindow> openWindows = new HashSet<>();
 	private final Pane pane = new Pane();
 	private WindowManager wm = null;
 
@@ -156,11 +156,11 @@ public class Workspace extends Observable implements Themeable {
 	 * @return The internal window if already open
 	 */
 	public InternalWindow findInternalWindow(WindowEnum window) {
-		Iterator<InternalWindow> windows = openWindows.iterator();
-		while (windows.hasNext()) {
-			InternalWindow w = windows.next();
-			if (window.equals(w))
-				return w;
+		synchronized (openWindows) {
+			for (InternalWindow w : openWindows) {
+				if (window.equals(w))
+					return w;
+			}
 		}
 		return null;
 	}

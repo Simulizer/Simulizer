@@ -30,6 +30,7 @@ public class HanoiModel extends DataStructureModel {
 	}
 
 	public void move(int startPeg, int endPeg) {
+		System.out.println("" + startPeg + "->" + endPeg);
 		synchronized (pegs) {
 			// Apply Update
 			int item = pegs.get(startPeg).pop();

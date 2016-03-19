@@ -140,6 +140,8 @@ public class MessageManager {
 	}
 
 	public void waitForCrucialTasks() {
+		waitForAllRunningTasks(allowedProcessingTime);
+		/*
 		synchronized (tasks) {
 			tasks.removeIf(Future::isDone);
 		}
@@ -176,12 +178,17 @@ public class MessageManager {
 				l.criticalProcesses.reset();
 			}
 		}
+		*/
 	}
 
 	public void waitForAllRunningTasks() {
 		waitForAllRunningTasks(allowedProcessingTime);
 	}
 	public void waitForAllRunningTasks(long timeoutTime) {
+		synchronized (tasks) {
+			tasks.removeIf(Future::isDone);
+		}
+
 		try {
 			synchronized (noWaitingMessages) {
 				while (!noWaitingMessages.get()) {
@@ -198,6 +205,10 @@ public class MessageManager {
 					try {
 						t.get(timeoutTime, TimeUnit.MILLISECONDS);
 					} catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+						io.printString(IOStream.ERROR,
+								"A simulation message is taking too long to process.\n" +
+								"  The simulation will continue without waiting.\n"
+						);
 					}
 					t.cancel(true);
 				}
