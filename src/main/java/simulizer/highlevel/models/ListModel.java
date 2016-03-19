@@ -11,6 +11,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
 
 public class ListModel extends DataStructureModel {
 	private long[] list;
+	private int size = 0;
 	private Map<Integer, ArrayList<String>> markers = new HashMap<>();
 
 	public ListModel(IO io, List<Long> list) {
@@ -24,17 +25,29 @@ public class ListModel extends DataStructureModel {
 	}
 
 	public void setList(List<Long> list) {
-		this.list = new long[list.size()];
+		synchronized (this.list) {
+			this.list = new long[list.size()];
+			size = list.size();
 
-		for (int i = 0; i < list.size(); i++)
-			this.list[i] = list.get(i);
-
+			for (int i = 0; i < list.size(); i++)
+				this.list[i] = list.get(i);
+		}
 		setChanged();
 		notifyObservers(new ListAction());
 	}
 
+	private boolean checkIndex(int index) {
+		if (index < 0 || index >= size) {
+			printError("There is no element " + index);
+			return true;
+		}
+		return false;
+	}
+
 	public void set(int i, Long item) {
 		synchronized (list) {
+			if (checkIndex(i)) 
+				return;
 			list[i] = item;
 			setChanged();
 			notifyObservers(new ListAction());
@@ -43,6 +56,11 @@ public class ListModel extends DataStructureModel {
 
 	public void swap(int i, int j) {
 		synchronized (list) {
+			if (checkIndex(i)) 
+				return;
+			if (checkIndex(j)) 
+				return;
+
 			// Apply Update
 			long temp = list[i];
 			list[i] = list[j];
@@ -56,6 +74,9 @@ public class ListModel extends DataStructureModel {
 
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
+			if (checkIndex(index)) 
+				return;
+			
 			ArrayList<String> exMarkers = markers.get(index);
 			if (exMarkers != null)
 				exMarkers.add(markerName);

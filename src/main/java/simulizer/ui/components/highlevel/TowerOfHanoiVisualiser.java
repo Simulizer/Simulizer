@@ -45,6 +45,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		super(model, vis);
 		this.model = model;
 		pegs = model.getPegs();
+		System.out.println("Pegs Set: " + model.getNumDiscs());
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
@@ -158,9 +159,10 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		if (action instanceof Discs) {
 			Discs discs = (Discs) action;
 			pegs = discs.structure;
-			repaint();
+			System.out.println("Discs Changed: " + discs.numDiscs);
 		} else if (action instanceof Move) {
 			Move move = (Move) action;
+			System.out.println("Move: " + move.start + ", " + move.end);
 
 			int numDiscsOnStart = pegs.get(move.start).size();
 			int numDiscsOnEnd = pegs.get(move.end).size();

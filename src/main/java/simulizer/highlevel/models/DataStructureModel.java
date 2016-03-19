@@ -32,6 +32,7 @@ public abstract class DataStructureModel extends Observable {
 	public abstract ModelType modelType();
 
 	protected void printError(String error) {
+		// TODO: Throw an actual exception so the annotation number is printed.
 		io.printString(IOStream.DEBUG, "From " + modelType() + ": " + error);
 	}
 
