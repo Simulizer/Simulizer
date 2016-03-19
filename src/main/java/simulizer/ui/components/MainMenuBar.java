@@ -5,7 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.scene.control.*;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -29,7 +33,7 @@ import simulizer.utils.UIUtils;
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 /**
  * This class holds all the Menu Items that are stored in the Bar at the top of the window.
- * 
+ *
  * @author Michael
  */
 public class MainMenuBar extends MenuBar {
@@ -40,7 +44,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * Creates a new MainMenuBar
-	 * 
+	 *
 	 * @param wm
 	 *            The WindowManager instance to attach to
 	 */
@@ -99,7 +103,7 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
 			if (!wm.getCPU().isRunning()) {
-				if (ed.hasBackingFile())
+				if (Editor.hasBackingFile())
 					ed.saveFile();
 				else
 					UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
@@ -197,7 +201,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * Generates the layouts menu
-	 * 
+	 *
 	 * @return the layouts menu
 	 */
 	private Menu layoutsMenu() {
@@ -209,7 +213,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * A separate helper function to generate the layouts menu. Used to dynamically refresh the loaded layouts
-	 * 
+	 *
 	 * @param menu
 	 *            The layout menu
 	 */
@@ -259,7 +263,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * Dynamically generates the Theme menu.
-	 * 
+	 *
 	 * @param menu
 	 *            The menu item to attach to
 	 * @return The completed menu
@@ -286,7 +290,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * The simulation menu
-	 * 
+	 *
 	 * @return the simulation menu
 	 */
 	private Menu simulationMenu() {
@@ -299,7 +303,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * Dynamically generates the simulation menu items
-	 * 
+	 *
 	 * @param runMenu
 	 *            The simulation menu to add the items to
 	 * @param allowDisabling
@@ -376,7 +380,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * The window menu
-	 * 
+	 *
 	 * @return the window menu
 	 */
 	private Menu windowsMenu() {
@@ -416,7 +420,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * The help menu
-	 * 
+	 *
 	 * @return the help menu
 	 */
 	private Menu helpMenu() {
@@ -455,7 +459,7 @@ public class MainMenuBar extends MenuBar {
 
 	/**
 	 * The debug menu
-	 * 
+	 *
 	 * @return the debug menu
 	 */
 	private Menu debugMenu() {

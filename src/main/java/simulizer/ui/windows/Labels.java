@@ -14,9 +14,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import simulizer.utils.TemporaryObserver;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
+import simulizer.utils.TemporaryObserver;
 import simulizer.utils.UIUtils;
 
 /**
@@ -89,7 +89,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 
 		refreshEditor();
 		if (editor != null) {
-			final String text = editor.getText();
+			final String text = Editor.getText();
 			if (text == null) return;
 
 			Thread labelGetting = new Thread(() -> getLabels(labels, text));
