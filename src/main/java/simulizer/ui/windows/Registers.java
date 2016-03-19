@@ -109,6 +109,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 
 	@Override
 	public void close() {
+		cpu.unregisterListener(listener);
 		getWindowManager().removeCPUChangedListener(this);
 		super.close();
 	}
