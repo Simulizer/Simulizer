@@ -8,12 +8,14 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
+import simulizer.Simulizer;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.ThreadUtils;
+import simulizer.utils.UIUtils;
 
 public class AssemblingDialog extends Alert {
 	private String contentText = "Your program is being assembled, please wait ";
@@ -34,6 +36,8 @@ public class AssemblingDialog extends Alert {
 
 	private AssemblingDialog(WindowManager wm) {
 		super(AlertType.INFORMATION);
+		initOwner(wm.getPrimaryStage());
+		UIUtils.setDialogBoxIcon(this);
 
 		this.wm = wm;
 

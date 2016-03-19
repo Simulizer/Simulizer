@@ -148,14 +148,19 @@ public class CPU {
 	}
 
 	public void pause() {
-		// isRunning remains true
+		isRunning = true;
 		clock.stop();
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_PAUSED));
+	}
+	public boolean isPaused() {
+		return isRunning && clock.isPaused();
 	}
 
 	public void resume() {
 		if(isRunning) {
 			breakAfterCycle = false;
 			clock.start();
+			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_RESUMED));
 		}
 	}
 
@@ -163,6 +168,7 @@ public class CPU {
 		breakAfterCycle = true;
 		if(!clock.isRunning()) {
 			clock.start();
+			// does not send resumed message because not fully resumed
 		}
 	}
 
@@ -400,8 +406,6 @@ public class CPU {
 		clock.resetTicks();
 		cycles = 0;
 
-		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
-
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
 		// started below
@@ -409,7 +413,10 @@ public class CPU {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
+		// 'un-pause' the simulation
 		clock.start();
+
+		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
 		while (isRunning) {
 			long cycleStart = System.currentTimeMillis();

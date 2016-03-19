@@ -100,6 +100,12 @@ function init() {
     editor._backupPointerEvents = editor.container.style.pointerEvents;
 }
 
+function cut() {
+    var s = editor.getCopyText();
+    editor.insert('');
+    return s;
+}
+
 // change by a relative amount (px)
 function changeFontSize(amount) {
     var current = parseFloat(editor.container.style.fontSize);

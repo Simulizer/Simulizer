@@ -14,6 +14,7 @@ import simulizer.utils.UIUtils;
 public class Simulizer extends Application {
 	public static final String VERSION = "0.3 (beta)";
 	private static Image icon = null;
+	private static Stage primaryStage;
 
 	public WindowManager wm;
 	public Settings settings;
@@ -23,6 +24,9 @@ public class Simulizer extends Application {
 			icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
 		}
 		return icon;
+	}
+	public static Stage getPrimaryStage() {
+		return primaryStage;
 	}
 
 	public static void main(String[] args) {
@@ -42,6 +46,7 @@ public class Simulizer extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		Simulizer.primaryStage = primaryStage;
 		primaryStage.getIcons().add(getIcon());
 
 		if ((boolean) settings.get("splash-screen.enabled")) {

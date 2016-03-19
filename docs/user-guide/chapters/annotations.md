@@ -27,6 +27,24 @@ label2: # @{ // annotation 2 }@
         # @{ // annotation 5 }@
 ```
 
+Be careful when binding annotations to branch instructions because the annotations will be executed regardless of whether the jump was made or not eg
+
+```
+    beq $s0 $s1 TAKE_BRANCH
+            # @{ log('branch not taken') }@
+    nop
+    j END
+
+TAKE_BRANCH:
+            # @{ log('branch taken') }@
+    nop
+
+END: nop
+```
+
+The *intended* behaviour is that a single message is printed when the branch is taken or not taken. This is not what happens.
+
+The above code will log **BOTH** messages if the branch is taken and just the first message if the branch is not taken. To get the intended behaviour you can instead bind the `'branch not taken'` annotation to a `nop` instruction just after the `beq`.
 
 ## Grouping ##
 Annotations bound to the same target are concatenated with newline characters placed in between, this allows more complex expressions to be written clearly such as:

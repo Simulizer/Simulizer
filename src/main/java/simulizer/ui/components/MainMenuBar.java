@@ -5,19 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -35,7 +23,6 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
-import simulizer.utils.FileUtils;
 import simulizer.utils.SpimRunner;
 import simulizer.utils.UIUtils;
 
@@ -47,26 +34,9 @@ import simulizer.utils.UIUtils;
  */
 public class MainMenuBar extends MenuBar {
 
-	private WindowManager wm;
+	private final WindowManager wm;
+	private final MenuBarControls controls;
 
-	private Menu createButton(String imagePath, boolean disable, String tooltip, EventHandler<ActionEvent> onClick) {
-		Menu menu = new Menu();
-		Button button = new Button();
-
-		button.setGraphic(new ImageView(new Image(FileUtils.getResourcePath(imagePath))));
-
-		menu.setGraphic(button);
-		menu.setStyle("-fx-padding:1px;-fx-background-color:null;");
-		button.setAlignment(Pos.CENTER);
-
-		button.setStyle("-fx-padding:0px;-fx-background-radius:5em;");
-		button.setPadding(new Insets(1, 1, 1, 1));
-		button.setDisable(disable);
-		button.setTooltip(new Tooltip(tooltip));
-		button.setOnAction(onClick);
-
-		return menu;
-	}
 
 	/**
 	 * Creates a new MainMenuBar
@@ -77,26 +47,6 @@ public class MainMenuBar extends MenuBar {
 	public MainMenuBar(WindowManager wm) {
 		this.wm = wm;
 
-		final CPU cpu = wm.getCPU();
-
-		Menu spacer = new Menu("");
-		spacer.setDisable(true);
-		spacer.setStyle("-fx-padding: 0px 0px 0px 50px");
-
-		Menu play = createButton("/img/play.png", cpu.isRunning(), "Simulation > Assemble And Run", (e) -> {
-			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(wm);
-				wm.assembleAndRun();
-			}
-		});
-
-		Menu pause = createButton("/img/pause.png", cpu.isRunning(), "Simulation > Pause / Resume", (e) -> {
-			if (!cpu.getClock().isRunning() && cpu.isRunning())
-				cpu.resume();
-			else if (cpu.getClock().isRunning() && cpu.isRunning())
-				cpu.pause();
-		});
-
 		// Standard
 		getMenus().addAll(fileMenu(), editMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
 
@@ -104,9 +54,8 @@ public class MainMenuBar extends MenuBar {
 		if ((boolean) wm.getSettings().get("debug"))
 			getMenus().add(debugMenu());
 
-		// Buttons
-		getMenus().addAll(spacer, play, pause);
-
+		// Extra controls
+		controls = new MenuBarControls(this, wm);
 	}
 
 	/**
@@ -199,10 +148,16 @@ public class MainMenuBar extends MenuBar {
 
 		Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
 
+		MenuItem cut = new MenuItem("Cut");
+		cut.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
+		cut.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
+		cut.setOnAction((a) -> passToEditor(KeyCode.X));
+
 		MenuItem copy = new MenuItem("Copy");
 		copy.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
 		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
 		copy.setOnAction((a) -> passToEditor(KeyCode.C));
+
 
 		MenuItem paste = new MenuItem("Paste");
 		paste.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
@@ -237,7 +192,7 @@ public class MainMenuBar extends MenuBar {
 		});
 
 
-		editMenu.getItems().addAll(copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
+		editMenu.getItems().addAll(cut, copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
 	}
 
 	/**
@@ -386,7 +341,7 @@ public class MainMenuBar extends MenuBar {
 		singleStep.setAccelerator(new KeyCodeCombination(KeyCode.F7));
 		singleStep.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
 		singleStep.setOnAction(e -> {
-			if (!clock.isRunning() && cpu.isRunning()) {
+			if (cpu.isPaused()) {
 				cpu.resumeForOneCycle();
 			}
 		});
@@ -406,18 +361,11 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
-			SliderInputDialog clockSpeed = new SliderInputDialog(0, 1000, cpu.getCycleFreq());
-			clockSpeed.setTitle("Clock Speed");
-			clockSpeed.setContentText("Select Clock Speed:\n(cycles per second (Hz))");
-			clockSpeed.showAndWait().ifPresent(input -> {
-				double speed = -1;
-				try {
-					speed = Double.parseDouble(input);
-				} catch (NumberFormatException ignored) {
-					/* speed == -1 */ }
-
-				if (speed >= 0) {
-					cpu.setCycleFreq(speed);
+			double currentRounded = Math.round(cpu.getCycleFreq()*10)/10.0;
+			UIUtils.openDoubleInputDialog("Clock Speed", "Set Clock Speed:", "Cycles per second (Hz)", currentRounded, (val) -> {
+				if (val >= 0) {
+					cpu.setCycleFreq(val);
+					controls.setSliderToMatch(val);
 				} else {
 					UIUtils.showErrorDialog("Value out of range", "The clock speed must be a positive value\n(can be fractional)");
 				}
