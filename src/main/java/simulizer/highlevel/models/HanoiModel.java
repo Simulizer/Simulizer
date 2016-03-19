@@ -58,11 +58,11 @@ public class HanoiModel extends DataStructureModel {
 				return;
 			}
 			pegs.get(endPeg).push(item);
-
-			// Notify Observers
-			setChanged();
-			notifyObservers(new Move(startPeg, endPeg));
 		}
+		
+		// Notify Observers
+		setChanged();
+		notifyObservers(new Move(startPeg, endPeg));
 	}
 
 	@SuppressWarnings("unchecked")
