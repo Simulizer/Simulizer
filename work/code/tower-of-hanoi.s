@@ -35,6 +35,11 @@ done:          .asciiz "\ndone."
 # must be lower case because the OS of spim looks for this symbol specifically
 main:
 
+    # prompt
+    li $v0, 4       # 4: print string
+    la $a0, prompt  # load from address into a0: argument 0
+    syscall
+
     # read input
     li $v0, 5       # 5: read int into $v0
     syscall
