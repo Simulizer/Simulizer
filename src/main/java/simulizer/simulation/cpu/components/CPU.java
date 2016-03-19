@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Instruction;
@@ -26,7 +24,16 @@ import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.ProgramException;
 import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.messages.*;
+import simulizer.simulation.messages.AnnotationMessage;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.Message;
+import simulizer.simulation.messages.MessageManager;
+import simulizer.simulation.messages.PipelineStateMessage;
+import simulizer.simulation.messages.ProblemMessage;
+import simulizer.simulation.messages.RegisterChangedMessage;
+import simulizer.simulation.messages.SimulationListener;
+import simulizer.simulation.messages.SimulationMessage;
+import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.simulation.messages.StageEnterMessage.Stage;
 
 /**

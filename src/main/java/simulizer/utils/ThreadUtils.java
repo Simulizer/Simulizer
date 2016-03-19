@@ -1,12 +1,12 @@
 package simulizer.utils;
 
-import javafx.application.Platform;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javafx.application.Platform;
 
 /**
  * Utility functions for dealing with threads

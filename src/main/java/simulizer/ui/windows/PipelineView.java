@@ -1,6 +1,12 @@
 package simulizer.ui.windows;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -9,6 +15,7 @@ import java.util.Optional;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -21,8 +28,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -44,21 +52,15 @@ public class PipelineView extends InternalWindow implements Observer {
 	private Pane canvasPane = new Pane();
 	private BorderPane borderPane = new BorderPane();
 
-	private FlowPane buttonPane = new FlowPane();
+	private HBox controlBox = new HBox();
+	private VBox buttonBox = new VBox();
 	private Button leftButton = new Button("<");
 	private Button rightButton = new Button(">");
 	private Label cycleInputLabel = new Label("Go to:");
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
 
-	private final String DEFAULT_INSTR =
-		// @formatter:off
-//		  "       Statement:\n"
-//		+ "         Address:\n"
-//		+ "Instruction type:\n"
-//		+ "     Line number:";
-		"\n\n\n\n";
-		// @formatter:on
+	private final String DEFAULT_INSTR = "\n\n\n\n";
 	private Label instructionInfoLabel = new Label(DEFAULT_INSTR);
 
 	private String selectedAddress;
@@ -116,6 +118,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		});
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
+			if (!isRunning || !isPipelined) return;
+
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 			if (cycleAndAddress.isPresent()) {
 				Pair<Integer, Address> ca = cycleAndAddress.get();
@@ -125,21 +129,22 @@ public class PipelineView extends InternalWindow implements Observer {
 				else selectedAddress = name;
 
 				int line = getWindowManager().getCPU().getProgram().lineNumbers.getOrDefault(ca.getValue(), -1);
-				if(line != -1) {
+				if (line != -1) {
 					Editor ed = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-					if(ed != null) {
+					if (ed != null) {
 						Platform.runLater(() -> ed.gotoLine(line));
 					}
 				}
 
 			} else selectedAddress = null;
 
-
 			repaint();
 
 			Platform.runLater(canvasPane::requestFocus);
 		});
 		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+			if (!isRunning || !isPipelined) return;
+
 			KeyCode code = e.getCode();
 
 			if (code == KeyCode.LEFT || code == KeyCode.KP_LEFT) {
@@ -158,6 +163,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 20));
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
+			if (!isRunning) return;
+
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 
 			String newText;
@@ -173,12 +180,21 @@ public class PipelineView extends InternalWindow implements Observer {
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
+		controlBox.setAlignment(Pos.CENTER_LEFT);
+		buttonBox.setAlignment(Pos.CENTER_LEFT);
+
 		// Now add everything
 		canvasPane.getChildren().add(canvas);
-		buttonPane.getChildren().addAll(followCheckBox, leftButton, rightButton, cycleInputLabel, cycleInput, instructionInfoLabel);
+		HBox topBox = new HBox(), bottomBox = new HBox();
+		topBox.setAlignment(Pos.CENTER);
+		bottomBox.setAlignment(Pos.CENTER);
+		topBox.getChildren().addAll(followCheckBox, leftButton, rightButton);
+		bottomBox.getChildren().addAll(cycleInputLabel, cycleInput);
+		buttonBox.getChildren().addAll(topBox, bottomBox);
+		controlBox.getChildren().addAll(buttonBox, instructionInfoLabel);
 
 		borderPane.setCenter(canvasPane);
-		borderPane.setBottom(buttonPane);
+		borderPane.setBottom(controlBox);
 
 		getContentPane().getChildren().add(borderPane);
 
@@ -218,12 +234,16 @@ public class PipelineView extends InternalWindow implements Observer {
 				else yTop += rectGap + rectWidth;
 			}
 
+			yTop = rectGap/2 + 3 * (rectGap + rectWidth);
+
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
 			for (Address stage : pipeline) {
 				if (y >= yTop && y < yTop + rectWidth) {
 					return Optional.of(new Pair<>(cycle, stage));
 				} else yTop += rectGap + rectWidth;
 			}
+
+			yTop = rectGap/2 + 6 * (rectGap + rectWidth);
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
@@ -252,12 +272,15 @@ public class PipelineView extends InternalWindow implements Observer {
 	 */
 	private void setStartCycle(final int startCycle) {
 		if (startCycle <= 0) this.startCycle = 0;
-		else if (startCycle >= model.size()) this.startCycle = model.size() - 1;
+		else if (startCycle >= model.size()) this.startCycle = Math.max(0, model.size() - 1);
 		else this.startCycle = startCycle;
 	}
 
 	private void calculateParameters() {
-		x0 = 0.1 * realW;
+		x0 = 150;
+
+		this.w = realW - x0;
+		this.h = 0.95 * realH;
 
 		rectWidth = 2. / 21 * h;
 		cycleWidth = 3. / 2 * rectWidth;
@@ -267,6 +290,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		setStartCycle(startCycle); // will reset startCycle to 0 if model has been reset
 
 		numColumnsToDraw = Math.min(model.size() - startCycle, (int) (w / cycleWidth));
+		numColumnsToDraw = Math.max(0, numColumnsToDraw);
 		assert (numColumnsToDraw >= 0);
 
 		if (snapToEnd) setStartCycle(model.size() - numColumnsToDraw);
@@ -350,28 +374,30 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
-		// Draw the addresses before the pipeline
-		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
-			List<Address> before = history.get(cycle).before;
+		if (isPipelined) {
+			// Draw the addresses before the pipeline
+			for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
+				List<Address> before = history.get(cycle).before;
 
-			double yTracker = rectGap / 2;
-			double yCenter = yTracker + rectWidth / 2;
+				double yTracker = rectGap / 2;
+				double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = x0 + (col + 0.5) * cycleWidth;
-			double xLeft = xCenter - rectWidth / 2;
+				double xCenter = x0 + (col + 0.5) * cycleWidth;
+				double xLeft = xCenter - rectWidth / 2;
 
-			for (Address addr : before) {
-				String name = getShortName(addr);
+				for (Address addr : before) {
+					String name = getShortName(addr);
 
-				Color bg = ColorUtils.getColor(addr);
-				gc.setFill(bg);
-				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
+					Color bg = ColorUtils.getColor(addr);
+					gc.setFill(bg);
+					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(ColorUtils.getTextColor(bg));
-				drawText(gc, name, xCenter, yCenter, rectWidth);
+					gc.setFill(ColorUtils.getTextColor(bg));
+					drawText(gc, name, xCenter, yCenter, rectWidth);
 
-				yTracker += rectGap + rectWidth;
-				yCenter += rectGap + rectWidth;
+					yTracker += rectGap + rectWidth;
+					yCenter += rectGap + rectWidth;
+				}
 			}
 		}
 
@@ -406,28 +432,30 @@ public class PipelineView extends InternalWindow implements Observer {
 			drawText(gc, "" + cycle, xCenter, 0.975 * realH);
 		}
 
-		// Draw the addresses after the pipeline
-		for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
-			List<Address> after = history.get(cycle).after;
+		if (isPipelined) {
+			// Draw the addresses after the pipeline
+			for (int col = 0, cycle = startCycle; col < numColumnsToDraw; ++col, ++cycle) {
+				List<Address> after = history.get(cycle).after;
 
-			double yTracker = 2 * h / 3 + rectGap / 2;
-			double yCenter = yTracker + rectWidth / 2;
+				double yTracker = 2 * h / 3 + rectGap / 2;
+				double yCenter = yTracker + rectWidth / 2;
 
-			double xCenter = x0 + (col + 0.5) * cycleWidth;
-			double xLeft = xCenter - rectWidth / 2;
+				double xCenter = x0 + (col + 0.5) * cycleWidth;
+				double xLeft = xCenter - rectWidth / 2;
 
-			for (Address addr : after) {
-				String name = getShortName(addr);
+				for (Address addr : after) {
+					String name = getShortName(addr);
 
-				Color bg = ColorUtils.getColor(addr);
-				gc.setFill(bg);
-				drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
+					Color bg = ColorUtils.getColor(addr);
+					gc.setFill(bg);
+					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
 
-				gc.setFill(ColorUtils.getTextColor(bg));
-				drawText(gc, name, xCenter, yCenter);
+					gc.setFill(ColorUtils.getTextColor(bg));
+					drawText(gc, name, xCenter, yCenter);
 
-				yTracker += rectGap + rectWidth;
-				yCenter += rectGap + rectWidth;
+					yTracker += rectGap + rectWidth;
+					yCenter += rectGap + rectWidth;
+				}
 			}
 		}
 	}
@@ -446,18 +474,17 @@ public class PipelineView extends InternalWindow implements Observer {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.realW = canvas.getWidth();
 		this.realH = canvas.getHeight();
-		this.w = 0.9 * realW;
-		this.h = 0.95 * realH;
-
 		gc.clearRect(0, 0, realW, realH);
 
-		if (isPipelined && isRunning) {
-			calculateParameters();
+		calculateParameters();
+
+		if (isRunning) {
 			drawDividers(gc);
 			drawExplainers(gc);
 			drawAddresses(gc);
 		} else {
-			drawText(gc, "Check the CPU is running in pipelined mode to view this window", realW / 2, h / 2);
+			gc.setFill(Color.BLACK);
+			drawText(gc, "Check the CPU is running to view this window", realW / 2, h / 2);
 		}
 	}
 
@@ -506,48 +533,28 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	private String getHazardInfo(int cycle) {
 		Optional<PipelineHazardMessage.Hazard> hOpt = model.getHistory().get(cycle).hazard;
-		assert (hOpt.isPresent());
 
-		PipelineHazardMessage.Hazard h = hOpt.get();
-		String description;
+		if (hOpt.isPresent()) {
+			String fortune = " ";
+			if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
 
-		// TODO format this tomorrow
-		// Descriptions from wikipedia: https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29#Read_After_Write_.28RAW.29
-		// @formatter:off
-//		switch (h) {
-//			case RAW:
-//				description =
-//								     "Where an instruction refers\n"
-//				  +"			      to a result that has not\n"
-//				  +"                  yet been calculated or retrieved.";
-//				break;
-//			case WAW:
-//				description =
-//				      				 "A write after write data hazard\n"
-//				  +"                  may occur in a concurrent\n"
-//				  +"                  execution environment.\n"
-//				  +					  "";
-//				break;
-//			case CONTROL:
-//				description =
-//					                 "Branching hazards (also known\n"
-//				  +"                  as control hazards) occur with\n"
-//				  +"                  branches.";
-//				break;
-//			default:
-//				description =
-//					"UNKNOWN\n"
-//					+ "\n"
-//					+ "";
-//		}
-//		// @formatter:on
+			PipelineHazardMessage.Hazard h = hOpt.get();
+			return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
+		} else return String.format("Not a hazard%n %n %n ");
+	}
 
-		// @formatter:off
-		return String.format(
-			  "Hazard: %s%n %n %n ", h.toString());
-//			+ "     Description: %s%n",
-//				h.toString(), description);
-		// @formatter:on
+	private static List<String> fortunes = new ArrayList<>();
+	{
+		try (BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
+
+			String s;
+			while ((s = reader.readLine()) != null)
+				if (!s.trim().isEmpty()) fortunes.add(s);
+
+			Collections.shuffle(fortunes);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String getAddressInfo(Address address) {

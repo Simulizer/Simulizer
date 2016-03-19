@@ -5,8 +5,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Cursor;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.CPUChangedListener;
@@ -15,6 +18,7 @@ import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.messages.RegisterChangedMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.UIUtils;
 
 /**
  * Provides a visual representation of what each Register contains
@@ -26,13 +30,14 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private TableView<Data> table = new TableView<Data>();
 	private CPU cpu;
 	private RegisterListener listener = new RegisterListener();
+	private ValueType valueType = ValueType.UNSIGNED;
+	private TableColumn<Data, String> valueCol;
 
 	public Registers() {
 		widthProperty().addListener((o, old, newValue) -> {
 			int numColumns = table.getColumns().size();
-			for (TableColumn<Data, ?> column : table.getColumns()) {
+			for (TableColumn<Data, ?> column : table.getColumns())
 				column.setPrefWidth(getWidth() / numColumns);
-			}
 		});
 		table.setCursor(Cursor.DEFAULT);
 	}
@@ -48,43 +53,43 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	}
 
 	private Data createData(Register r) {
-		String hex, unsigned, signed;
-		try {
-			byte[] contents = getWindowManager().getCPU().getRegisters()[r.getID()].getWord();
-			unsigned = "" + DataConverter.decodeAsUnsigned(contents);
-			signed = "" + DataConverter.decodeAsSigned(contents);
-			hex = Long.toHexString(DataConverter.decodeAsUnsigned(contents));
-			while (hex.length() < 8)
-				hex = "0" + hex;
-			hex = "0x" + hex;
-		} catch (NullPointerException e) {
-			hex = "EMPTY";
-			unsigned = "EMPTY";
-			signed = "EMPTY";
-		}
-		return new Data(r.getID(), r.getName(), hex, unsigned, signed);
+		byte[] contents = getWindowManager().getCPU().getRegisters()[r.getID()].getWord();
+		return new Data(r.getID(), r.getName(), contents);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public void ready() {
+		// Add Listeners
 		getWindowManager().addCPUChangedListener(this);
 		getWindowManager().getCPU().registerListener(listener);
 
+		// Create Register column
 		TableColumn<Data, String> register = new TableColumn<>("Register");
 		register.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		TableColumn<Data, String> hex = new TableColumn<>("Hexadecimal");
-		hex.setCellValueFactory(new PropertyValueFactory<>("hex"));
+		// Create value column
+		valueCol = new TableColumn<>(valueType.toString());
+		valueCol.setCellValueFactory(new PropertyValueFactory<>("value"));
 
-		TableColumn<Data, String> unsigned = new TableColumn<>("Unsigned");
-		unsigned.setCellValueFactory(new PropertyValueFactory<>("unsigned"));
-
-		TableColumn<Data, String> signed = new TableColumn<>("Signed");
-		signed.setCellValueFactory(new PropertyValueFactory<>("signed"));
+		// Right Click on value column menu
+		ContextMenu menu = new ContextMenu();
+		ToggleGroup toggleGroup = new ToggleGroup();
+		for (ValueType type : ValueType.values()) {
+			RadioMenuItem item = new RadioMenuItem(type.toString());
+			item.setSelected(type.equals(valueType));
+			item.setOnAction(e -> {
+				valueType = type;
+				valueCol.setText(type.toString());
+				refreshData();
+			});
+			item.setToggleGroup(toggleGroup);
+			menu.getItems().add(item);
+		}
+		valueCol.setContextMenu(menu);
 
 		refreshData();
-		table.getColumns().addAll(register, hex, unsigned, signed);
+		table.getColumns().addAll(register, valueCol);
 		table.setEditable(false);
 
 		getContentPane().getChildren().add(table);
@@ -108,16 +113,15 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 * @author Michael
 	 *
 	 */
-	public static class Data {
+	public class Data {
 		private final int id;
-		private final String name, hex, unsigned, signed;
+		private final byte[] contents;
+		private final String name;
 
-		public Data(int id, String name, String hex, String unsigned, String signed) {
+		public Data(int id, String name, byte[] contents) {
 			this.id = id;
 			this.name = name;
-			this.hex = hex;
-			this.unsigned = unsigned;
-			this.signed = signed;
+			this.contents = contents;
 		}
 
 		/**
@@ -128,28 +132,39 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		}
 
 		/**
-		 * @return hex value
+		 * @return the register value
 		 */
-		public String getHex() {
-			return hex;
-		}
+		public String getValue() {
+			String output = "EMPTY";
+			if (contents != null) {
+				switch (valueType) {
+					case HEX:
+						output = Long.toHexString(DataConverter.decodeAsUnsigned(contents));
+						while (output.length() < 8)
+							output = "0" + output;
+						output = "0x" + output;
+						break;
 
-		/**
-		 * @return unsigned value
-		 */
-		public String getUnsigned() {
-			return unsigned;
-		}
+					case SIGNED:
+						output = "" + DataConverter.decodeAsSigned(contents);
+						break;
 
-		/**
-		 * @return signed value
-		 */
-		public String getSigned() {
-			return signed;
+					case UNSIGNED:
+						output = "" + DataConverter.decodeAsUnsigned(contents);
+						break;
+				}
+			}
+			return output;
 		}
 
 	}
 
+	/**
+	 * Listens for Register Changed events
+	 * 
+	 * @author Michael
+	 *
+	 */
 	private class RegisterListener extends SimulationListener {
 		@Override
 		public void processRegisterChangedMessage(RegisterChangedMessage m) {
@@ -160,7 +175,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 				list.sort((a, b) -> a.id - b.id);
 				Platform.runLater(() -> table.setItems(list));
 			} catch (Exception e) {
-				e.printStackTrace();
+				UIUtils.showExceptionDialog(e);
 			}
 		}
 	}
@@ -172,6 +187,27 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		this.cpu = cpu;
 		if (cpu != null)
 			cpu.registerListener(listener);
+	}
+
+	/**
+	 * Enum for the different ways the data can be interpreted.
+	 * 
+	 * @author Michael
+	 *
+	 */
+	private enum ValueType {
+		UNSIGNED("Unsigned"), SIGNED("Signed"), HEX("Hexadecimal");
+
+		private final String colName;
+
+		private ValueType(String colName) {
+			this.colName = colName;
+		}
+
+		@Override
+		public String toString() {
+			return colName;
+		}
 	}
 
 }

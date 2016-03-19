@@ -2715,4 +2715,214 @@ public class ExecuteTest {
 		
 		assertEquals((long)Math.pow(2, 16),accessRegisterSigned(cpu,Register.v0));
 	}
+	
+	/**method tests the execution of the rol instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testRolExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"li $s1, 3;\n" + 
+								"rol $s2, $s0, $s1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(3,accessRegisterSigned(cpu,Register.s1));
+		assertEquals(384,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the ror instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testRorExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"li $s1, 3;\n" + 
+								"ror $s2, $s0, $s1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(3,accessRegisterSigned(cpu,Register.s1));
+		assertEquals(6,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the sll instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSllExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"sll $s2, $s0, 3;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(384,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the sllv instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSllvExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"li $s1, 3;\n" + 
+								"sllv $s2, $s0, $s1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(3,accessRegisterSigned(cpu,Register.s1));
+		assertEquals(384,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the srl instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSrlExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"srl $s2, $s0, 3;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(6,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the srlv instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSrlvExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, 48;\n" +
+								"li $s1, 3;\n" + 
+								"srlv $s2, $s0, $s1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(48,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(3,accessRegisterSigned(cpu,Register.s1));
+		assertEquals(6,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the sra instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSraExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, -53;\n" +
+								"sra $s2, $s0, 2;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(-53,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(-14,accessRegisterSigned(cpu,Register.s2));
+	}
+	
+	/**method tests the execution of the srav instruction
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testSravExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
+	{
+		String myInstructions = "li $s0, -53;\n" +
+								"li $s1, 2;\n" + 
+								"srav $s2, $s0, $s1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(-53,accessRegisterSigned(cpu,Register.s0));
+		assertEquals(2,accessRegisterSigned(cpu,Register.s1));
+		assertEquals(-14,accessRegisterSigned(cpu,Register.s2));
+	}
 }

@@ -1,7 +1,6 @@
 package simulizer.ui.windows;
 
 import javafx.animation.FadeTransition;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
@@ -23,8 +22,6 @@ import simulizer.settings.Settings;
 import simulizer.utils.FileUtils;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * A spash screen to show at startup

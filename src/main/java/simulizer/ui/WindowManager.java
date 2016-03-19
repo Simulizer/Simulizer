@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
@@ -56,7 +57,10 @@ public class WindowManager extends GridPane {
 	private AnnotationManager annotationManager;
 	private HLVisualManager hlvisual;
 
-	public WindowManager(Stage primaryStage, Settings settings) throws IOException {
+	private Application app;
+
+	public WindowManager(Application app, Stage primaryStage, Settings settings) throws IOException {
+		this.app = app;
 		this.primaryStage = primaryStage;
 		this.settings = settings;
 
@@ -77,7 +81,7 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION);
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
-		primaryStage.setOnCloseRequest(e -> {
+		primaryStage.setOnHiding(e -> {
 			e.consume();
 			shutdown();
 		});
@@ -410,13 +414,25 @@ public class WindowManager extends GridPane {
 					try {
 						Thread.sleep(10);
 					} catch (Exception e) {
-						e.printStackTrace();
+						UIUtils.showExceptionDialog(e);
 					}
 				}
 
 			}, "Motion-Blur");
 			t.setDaemon(true);
 			t.start();
+		}
+	}
+
+	/**
+	 * Quick restarts the application (not as good as a clean restart, but good enough to apply setting changes)
+	 */
+	public void restart() {
+		try {
+			primaryStage.close();
+			app.start(primaryStage);
+		} catch (Exception e) {
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 }

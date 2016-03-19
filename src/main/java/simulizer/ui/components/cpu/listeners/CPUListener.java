@@ -1,7 +1,10 @@
 package simulizer.ui.components.cpu.listeners;
 
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.messages.*;
+import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.InstructionTypeMessage;
+import simulizer.simulation.messages.SimulationListener;
+import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.ui.components.cpu.AnimationProcessor;
 import simulizer.ui.windows.CPUVisualisation;
 

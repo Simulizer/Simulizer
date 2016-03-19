@@ -4,7 +4,7 @@
 .text 
 .globl main
 
-main:
+main: # Author: Charlie Street
 	li $v0, 17;
 	li $t6, 18;
 	seq $t7, $v0, $t6;

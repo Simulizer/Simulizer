@@ -1,10 +1,8 @@
 package simulizer.assembler.representation;
 
-import simulizer.simulation.data.representation.Word;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import simulizer.simulation.data.representation.Word;
 
 /**
  * store the assembled information for a program, ready to be fed into the
