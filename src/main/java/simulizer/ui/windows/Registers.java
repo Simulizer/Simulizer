@@ -68,7 +68,8 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	public void ready() {
 		// Add Listeners
 		getWindowManager().addCPUChangedListener(this);
-		getWindowManager().getCPU().registerListener(listener);
+		cpu = getWindowManager().getCPU();
+		cpu.registerListener(listener);
 
 		// Create Register column
 		TableColumn<Data, String> register = new TableColumn<>("Register");
