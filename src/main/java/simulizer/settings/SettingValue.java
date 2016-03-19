@@ -1,8 +1,5 @@
 package simulizer.settings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A Setting Value, which can be used to generate the GUI
  * 
@@ -13,7 +10,6 @@ import java.util.List;
  */
 public abstract class SettingValue<E> {
 	private final String jsonName, humanName, description;
-	private final List<SettingChangedListener<E>> listeners = new ArrayList<SettingChangedListener<E>>();
 	private E value;
 
 	/**
@@ -73,34 +69,6 @@ public abstract class SettingValue<E> {
 		if (!isValid(value))
 			throw new IllegalArgumentException(value + " is not valid for this setting");
 		this.value = value;
-
-		// TODO: Check this doesn't need another thread
-		// TODO: Use fully qualified jsonName
-		// Notify Listeners of change
-		for (SettingChangedListener<E> listener : listeners)
-			listener.settingChanged(jsonName, value);
-	}
-
-	/**
-	 * Adds a listener to the current setting
-	 * 
-	 * @param listener
-	 *            the listener to add
-	 */
-	public void addListener(SettingChangedListener<E> listener) {
-		if (!listeners.contains(listener))
-			listeners.add(listener);
-	}
-
-	/**
-	 * Removes a listener from the current setting
-	 * 
-	 * @param listener
-	 *            the listener to remove
-	 */
-	public void removeListener(SettingChangedListener<E> listener) {
-		if (listeners.contains(listener))
-			listeners.remove(listener);
 	}
 
 	/**

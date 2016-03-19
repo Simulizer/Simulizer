@@ -61,6 +61,7 @@ public class Editor extends InternalWindow {
 
 	// handle key combos for copy and paste
 	final static KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+	final static KeyCombination C_x = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
 	final static KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
 	final static KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
 	final static KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
@@ -101,7 +102,7 @@ public class Editor extends InternalWindow {
 	 * Communication between this class and the javascript running in the webview
 	 */
 	@SuppressWarnings("unused")
-	public class Bridge {
+	public static class Bridge {
 		private Editor editor;
 		public List<Problem> problems;
 
@@ -179,14 +180,19 @@ public class Editor extends InternalWindow {
 
 	public void handleKeyEvent(KeyEvent event) {
 		if (C_c.match(event)) {
-			if(mode == Mode.EXECUTE_MODE)
+			if (mode == Mode.EXECUTE_MODE)
 				return;
 
 			copy();
 			event.consume();
 
+		} else if (C_x.match(event)) {
+			if (mode == Mode.EXECUTE_MODE)
+				return;
+
+			cut();
+			event.consume();
 		} else if (C_v.match(event)) {
-			System.out.println("is paste");
 			if(mode == Mode.EXECUTE_MODE)
 				return;
 
@@ -200,9 +206,6 @@ public class Editor extends InternalWindow {
 			insertBreakpoint();
 			event.consume();
 		} else if (C_g.match(event)) {
-			if(mode == Mode.EXECUTE_MODE)
-				return;
-
 			UIUtils.openIntInputDialog("Go To Line", "Go To Line",
 					"Enter a line number:", 1, (l) -> gotoLine(l-1));
 			event.consume();
@@ -624,6 +627,17 @@ public class Editor extends InternalWindow {
 	public void copy() {
 		if(mode == Mode.EDIT_MODE) {
 			String clip = (String) jsEditor.call("getCopyText");
+
+			Clipboard clipboard = Clipboard.getSystemClipboard();
+			ClipboardContent content = new ClipboardContent();
+
+			content.putString(clip);
+			clipboard.setContent(content);
+		}
+	}
+	public void cut() {
+		if(mode == Mode.EDIT_MODE) {
+			String clip = (String) jsWindow.call("cut");
 
 			Clipboard clipboard = Clipboard.getSystemClipboard();
 			ClipboardContent content = new ClipboardContent();

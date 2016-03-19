@@ -66,6 +66,8 @@ public class Clock {
 	}
 
 	private synchronized void setTickPeriod(long requestedPeriod) {
+		if(tickPeriod == requestedPeriod) return;
+
 		tickPeriod = Math.min(Math.max(requestedPeriod, MIN_PERIOD), MAX_PERIOD);
 		highSpeed = tickPeriod <= HIGH_SPEED_THRESHOLD;
 
@@ -82,7 +84,7 @@ public class Clock {
 		return ticks.longValue();
 	}
 
-	public void resetTicks() {
+	void resetTicks() {
 		ticks.reset();
 	}
 
@@ -104,7 +106,7 @@ public class Clock {
 		}
 	}
 
-	public synchronized void start() {
+	synchronized void start() {
 		if (executor.isShutdown()) {
 			throw new IllegalStateException();
 		}
@@ -113,7 +115,7 @@ public class Clock {
 		ticker = executor.scheduleAtFixedRate(this::incrementTicks, 0, tickPeriod, TimeUnit.MICROSECONDS);
 	}
 
-	public synchronized void stop() {
+	synchronized void stop() {
 		if (isRunning()) {
 			ticker.cancel(true); // may interrupt if running
 			ticker = null;
@@ -131,7 +133,7 @@ public class Clock {
 		}
 	}
 
-	public synchronized void shutdown() {
+	synchronized void shutdown() {
 		stop();
 		executor.shutdown();
 		try {
@@ -143,5 +145,8 @@ public class Clock {
 
 	public synchronized boolean isRunning() {
 		return !executor.isShutdown() && ticker != null && !ticker.isCancelled();
+	}
+	public synchronized boolean isPaused() {
+		return !executor.isShutdown() && (ticker == null || ticker.isCancelled());
 	}
 }

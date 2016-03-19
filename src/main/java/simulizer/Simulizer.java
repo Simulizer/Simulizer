@@ -14,15 +14,19 @@ import simulizer.utils.UIUtils;
 public class Simulizer extends Application {
 	public static final String VERSION = "0.3 (beta)";
 	private static Image icon = null;
+	private static Stage primaryStage;
 
 	public WindowManager wm;
 	public Settings settings;
 
 	public static Image getIcon() {
-		if(icon == null) {
+		if (icon == null) {
 			icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
 		}
 		return icon;
+	}
+	public static Stage getPrimaryStage() {
+		return primaryStage;
 	}
 
 	public static void main(String[] args) {
@@ -42,6 +46,7 @@ public class Simulizer extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		Simulizer.primaryStage = primaryStage;
 		primaryStage.getIcons().add(getIcon());
 
 		if ((boolean) settings.get("splash-screen.enabled")) {
@@ -59,7 +64,7 @@ public class Simulizer extends Application {
 
 		// Just show the main window for now
 		try {
-			wm = new WindowManager(primaryStage, settings);
+			wm = new WindowManager(this, primaryStage, settings);
 		} catch (IOException ex) {
 			UIUtils.showErrorDialog("Failed To Launch", ex.getMessage());
 			System.exit(1);

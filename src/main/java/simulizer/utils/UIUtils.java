@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
@@ -44,8 +45,8 @@ public class UIUtils {
 
 	// from http://stackoverflow.com/a/27983567
 	// it is OK if the icon is null, will reset to default icon
-	private static void setDialogBoxIcon(Alert alert) {
-		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+	public static void setDialogBoxIcon(Dialog<?> dialog) {
+		Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
 		stage.getIcons().add(Simulizer.getIcon());
 	}
 
@@ -58,6 +59,7 @@ public class UIUtils {
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.initOwner(Simulizer.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -75,6 +77,7 @@ public class UIUtils {
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.initOwner(Simulizer.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -137,6 +140,7 @@ public class UIUtils {
 			Platform.runLater(() -> {
 				try {
 					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.initOwner(Simulizer.getPrimaryStage());
 					alert.setTitle("Exception");
 					setDialogBoxIcon(alert);
 					alert.setHeaderText("Something went wrong with Simulizer.");
@@ -178,27 +182,46 @@ public class UIUtils {
 
 	public static void openTextInputDialog(String title, String header, String message, String defaultText, Consumer<String> callback) {
 		TextInputDialog dialog = new TextInputDialog(defaultText);
+		dialog.initOwner(Simulizer.getPrimaryStage());
+		setDialogBoxIcon(dialog);
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
 
 		dialog.showAndWait().ifPresent(callback);
 	}
-	public static void openIntInputDialog(String title, String header, String message, Integer defaultInt, Consumer<Integer> callback) {
-		TextInputDialog dialog = new TextInputDialog(""+defaultInt);
+	public static void openIntInputDialog(String title, String header, String message, int defaultVal, Consumer<Integer> callback) {
+		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
+		dialog.initOwner(Simulizer.getPrimaryStage());
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
 
 		dialog.showAndWait().ifPresent((text) -> {
-			int val = defaultInt;
+			int val = defaultVal;
 			try {
 				val = Integer.parseInt(text);
 			} catch(NumberFormatException ignored) {
 			}
 
 			callback.accept(val);
+		});
+	}
+	public static void openDoubleInputDialog(String title, String header, String message, double defaultVal, Consumer<Double> callback) {
+		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
+		dialog.initOwner(Simulizer.getPrimaryStage());
+		dialog.setTitle(title);
+		dialog.setHeaderText(header);
+		dialog.setContentText(message);
 
+		dialog.showAndWait().ifPresent((text) -> {
+			double val = defaultVal;
+			try {
+				val = Double.parseDouble(text);
+			} catch(NumberFormatException ignored) {
+			}
+
+			callback.accept(val);
 		});
 	}
 
@@ -207,6 +230,7 @@ public class UIUtils {
 	 */
 	public static boolean confirm(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.initOwner(Simulizer.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
@@ -218,6 +242,7 @@ public class UIUtils {
 
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.initOwner(Simulizer.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
@@ -266,6 +291,8 @@ public class UIUtils {
 	 * @return whether the call succeeded
 	 */
 	public static boolean openURL(String url) {
+		System.out.println("Opening URL: " + url);
+
 		if(!Desktop.isDesktopSupported() ||
 		   !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 			return false;

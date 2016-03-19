@@ -20,6 +20,8 @@ The menu bar contains a collection of useful controls organised for easy of use.
 
 - **Edit**: Contains standard controls found in most text editor.
 
+    - **Cut** (`CTRL+X`): Cuts text from the editor.
+
     - **Copy** (`CTRL+C`): Copies text from the editor.
 
     - **Paste** (`CTRL+V`): Pastes text in the editor.
@@ -78,7 +80,7 @@ Each pane inside the application is called an Internal Window. This section will
 ### CPU Visualisation ###
 CPU visualisation is for demonstrating how the MIPS processor fetches, decodes and executes assembly instructions. To use this view, you must set the clock speed to below 2Hz [(see clock speed)](#clockspeed).
 
-![CPU Visualisation executing an I-Type instruction](segments/cpu-visualisation.png){width=80%}
+![CPU Visualisation executing an I-Type instruction](segments/cpu-visualisation.png){width=60%}
 
 For more information about the CPU Visualiser other low level visualisation see [Low Level Visualisations](#low-level)
 
@@ -100,7 +102,11 @@ For more information about the different data structures Simulizer can visualise
 The labels window allows you to view a quick outline of the labels in your program. By clicking on a row in the table, it will jump to the line where the label is defined. You can move to the next/previous occurrence of the label by clicking on the `Next`/`Previous` buttons. The `Select All` button will select each occurrence of the selected label, allowing you to easily see its usage.
 
 ### Program I/O ###
-$\TODO{write section}$
+The program I/O window provides a command line interface to communicate with your SIMP programs.
+
+![Program I/O](segments/program-io.png){ width=60% }
+
+This window has a three different tabs designed to keep the different I/O streams separate. The first tab is Standard which is where SIMP programs interact. The second tab outputs runtime errors in the SIMP program. The third tab is where the annotations communicate through, and so any log annotations will write to.
 
 ### Memory View ###
 $\TODO{write section}$
@@ -122,16 +128,20 @@ The control bar at the bottom of the window has the following features:
 3. `Go to` field: you can enter a cycle number here, e.g. `56` and the window will snap to that cycle, showing it as the leftmost column.
 4. Information label: when hovering over an instruction or a hazard, information about that instruction/hazard will be displayed in this label.  
 
-Clicking on an instruction will highlight all of its occurrences.
+Clicking on an instruction will highlight all of its occurrences. For more information about the pipeline visualisation, see [Pipeline Visualisation](#pipeline-view)
 
 ### Registers ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+The Registers window provides a realtime view of the current value stored in each register. This value can be interpreted in three different ways (unsigned integer, signed integer and hexadecimal). To switch between these interpretations, right click on the column heading and select the interpretation you want.
 
 ## Layouts ##
 Layouts determine the configuration that all the Internal Windows are in. They allow you to quickly switch between different arrangements to optimise your workflow.
 
 ### Loading a Layout ###
-$\TODO{write section}$
+$\TODO{take picture}$
+
+Simulizer includes many layouts for you to try. To change to one of these layout, go to the Menu Bar and click Layouts. This will bring up a list of all the layouts that you can choose. Just click one and the internal windows will rearrange themselves.
 
 ### Saving a Layout ###
 If none of the included layouts are up to your standards then why not make your own. Add/Remove and rearrangement the Internal Windows until it is in a configuration that you are happy with. You can then save the layout by clicking Layouts $\to$ Save Layout.

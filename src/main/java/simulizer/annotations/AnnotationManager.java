@@ -8,6 +8,7 @@ import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.ui.WindowManager;
 import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.utils.UIUtils;
 
 /**
  * Holds data regarding the processing of annotations and display of visualisations
@@ -15,6 +16,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
 public class AnnotationManager {
 	private WindowManager wm;
 	private AnnotationExecutor ex;
+	private static final boolean giveDetailedInfo = true;
 
 	DebugBridge debugBridge;
 	SimulationBridge simulationBridge;
@@ -37,14 +39,11 @@ public class AnnotationManager {
 		return ex;
 	}
 
-	public void onStartProgram(CPU cpu) {
+	public void onNewProgram(CPU cpu) {
 		// refresh for each new program
 		newExecutor();
 
-		setupBridges();
-
 		simulationBridge.cpu = cpu;
-
 	}
 
 	private void setupBridges() {
@@ -98,6 +97,8 @@ public class AnnotationManager {
 			IO io = wm.getIO();
 			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage() + "\n");
 			io.printString(IOStream.ERROR, "  From " + getAnnotationLineString(msg) + "\n");
+			if(giveDetailedInfo)
+				UIUtils.showExceptionDialog(e);
 		}
 	}
 }

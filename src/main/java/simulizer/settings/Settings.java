@@ -215,7 +215,7 @@ public class Settings {
 				saveSetting(element, s);
 			gson.toJson(element, writer);
 		} catch (IOException e) {
-			e.printStackTrace();
+			UIUtils.showExceptionDialog(e);
 		}
 	}
 

@@ -33,10 +33,13 @@ public class UISimulationListener extends SimulationListener {
 	@Override
 	public void processSimulationMessage(SimulationMessage m) {
 		switch (m.detail) {
+			case PROGRAM_LOADED: {
+				wm.getAnnotationManager().onNewProgram(wm.getCPU());
+
+			} break;
 			case SIMULATION_STARTED: {
 				startTime = System.currentTimeMillis();
 
-				wm.getAnnotationManager().onStartProgram(wm.getCPU());
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION + " - Simulation Running"));
 

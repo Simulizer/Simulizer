@@ -78,7 +78,10 @@ public class Logger extends InternalWindow implements Observer {
 
 			tabPane.getTabs().add(tab);
 		}
-		tabPane.getSelectionModel().selectedItemProperty().addListener(e -> tabPane.getSelectionModel().getSelectedItem().setGraphic(null));
+		tabPane.getSelectionModel().selectedItemProperty().addListener(e -> {
+			tabPane.getSelectionModel().getSelectedItem().setGraphic(null);
+			ioChanged[tabPane.getSelectionModel().getSelectedIndex()] = false;
+		});
 		GridPane.setHgrow(tabPane, Priority.ALWAYS);
 		GridPane.setVgrow(tabPane, Priority.ALWAYS);
 		pane.add(tabPane, 0, 0, 2, 1);
@@ -116,8 +119,15 @@ public class Logger extends InternalWindow implements Observer {
 				cdl.countDown();
 			}
 		} else {
-			if (input.getText().toLowerCase().equals("i code better when i'm drunk"))
+			// @formatter:off
+			String code = input.getText().toLowerCase();
+			if (code.equals("i code better when i'm drunk")  || 
+				code.equals("i code better when im drunk")   ||
+				code.equals("i code better when i am drunk")) {
 				getWindowManager().motionBlur();
+				input.setText("");
+			}
+			// @formatter:on
 		}
 	}
 
@@ -164,6 +174,8 @@ public class Logger extends InternalWindow implements Observer {
 			log.setLength(0);
 		for (TextArea output : outputs)
 			output.setText("");
+		for (int i = 0; i < ioChanged.length; i++)
+			ioChanged[i] = false;
 	}
 
 	/**

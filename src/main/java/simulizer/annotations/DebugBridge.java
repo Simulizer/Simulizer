@@ -6,7 +6,7 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.WindowManager;
-
+import simulizer.utils.UIUtils;
 
 /**
  * A collection of methods for debugging, accessible from annotations
@@ -32,13 +32,7 @@ public class DebugBridge {
 	}
 
 	public void alert(String msg) {
-		Platform.runLater(() -> {
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle("JavaScript Alert");
-			alert.setHeaderText("JavaScript Alert");
-			alert.setContentText(msg);
-			alert.show();
-		});
+		Platform.runLater(() -> UIUtils.showInfoDialog("Javascript Alert", msg));
 	}
 
 	public CPU getCPU() {
