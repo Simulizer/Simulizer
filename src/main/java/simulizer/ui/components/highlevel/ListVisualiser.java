@@ -111,12 +111,14 @@ public class ListVisualiser extends DataStructureVisualiser {
 		gc.setFont(markerFont);
 		gc.setTextBaseline(VPos.BOTTOM);
 
-		for (Map.Entry<Integer, String> entry : markers.entrySet()) {
-			gc.setFill(highlightedMarkers.contains(entry.getKey()) ? Color.RED : Color.BLACK);
-			double x = getX(entry.getKey());
-			gc.beginPath();
-			gc.fillText(entry.getValue(), x + rectLength / 2, y0 - 7, rectLength);
-			gc.closePath();
+		synchronized (markers) {
+			for (Map.Entry<Integer, String> entry : markers.entrySet()) {
+				gc.setFill(highlightedMarkers.contains(entry.getKey()) ? Color.RED : Color.BLACK);
+				double x = getX(entry.getKey());
+				gc.beginPath();
+				gc.fillText(entry.getValue(), x + rectLength / 2, y0 - 7, rectLength);
+				gc.closePath();
+			}
 		}
 	}
 
@@ -246,25 +248,26 @@ public class ListVisualiser extends DataStructureVisualiser {
 		} else if (action instanceof MarkerAction) {
 			// Marker action
 			MarkerAction marker = (MarkerAction) action;
-
-			if (marker.index.isPresent()) {
-				int index = marker.index.get();
-				if (marker.name.isPresent()) {
-					// We need to add the marker
-					String name = marker.name.get();
-					String existing = markers.get(index);
-					if (existing != null)
-						markers.put(index, existing + " " + name);
-					else
-						markers.put(index, name);
+			synchronized (markers) {
+				if (marker.index.isPresent()) {
+					int index = marker.index.get();
+					if (marker.name.isPresent()) {
+						// We need to add the marker
+						String name = marker.name.get();
+						String existing = markers.get(index);
+						if (existing != null)
+							markers.put(index, existing + " " + name);
+						else
+							markers.put(index, name);
+					} else {
+						// We need to clear the marker
+						markers.remove(index);
+						highlightedMarkers.remove(index);
+					}
 				} else {
-					// We need to clear the marker
-					markers.remove(index);
-					highlightedMarkers.remove(index);
+					markers.clear();
+					highlightedMarkers.clear();
 				}
-			} else {
-				markers.clear();
-				highlightedMarkers.clear();
 			}
 		} else if (action instanceof EmphasiseAction) {
 			// Emphasise an element

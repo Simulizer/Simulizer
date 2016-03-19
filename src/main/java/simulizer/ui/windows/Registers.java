@@ -1,6 +1,11 @@
 package simulizer.ui.windows;
 
-import javafx.application.Platform;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -33,6 +38,9 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private RegisterListener listener = new RegisterListener();
 	private ValueType valueType = ValueType.UNSIGNED;
 	private TableColumn<Data, String> valueCol;
+	private Timer refreshTimer;
+
+	private Set<Integer> changedRegisters = new HashSet<Integer>();
 
 	public Registers() {
 		widthProperty().addListener((o, old, newValue) -> {
@@ -46,7 +54,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	/**
 	 * Refreshes the table data
 	 */
-	public void refreshData() {
+	private void refreshTable() {
 		synchronized (table) {
 			ObservableList<Data> data = FXCollections.observableArrayList();
 			for (Register r : Register.values())
@@ -59,9 +67,21 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		}
 	}
 
+	private void refreshRegisters() {
+		FilteredList<Data> changed;
+		synchronized (table) {
+			synchronized (changedRegisters) {
+				if (changedRegisters.size() == 0)
+					return;
+				changed = table.getItems().filtered(d -> changedRegisters.contains(d.id));
+				changedRegisters.clear();
+			}
+			changed.forEach(d -> d.refresh());
+		}
+	}
+
 	private Data createData(Register r) {
-		byte[] contents = getWindowManager().getCPU().getRegisters()[r.getID()].getWord();
-		return new Data(r.getID(), r.getName(), contents);
+		return new Data(r.getID(), r.getName());
 	}
 
 	@Override
@@ -89,16 +109,27 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			item.setOnAction(e -> {
 				valueType = type;
 				valueCol.setText(type.toString());
-				refreshData();
+				refreshTable();
 			});
 			item.setToggleGroup(toggleGroup);
 			menu.getItems().add(item);
 		}
 		valueCol.setContextMenu(menu);
 
-		refreshData();
+		refreshTable();
 		table.getColumns().addAll(register, valueCol);
 		table.setEditable(false);
+
+		// Refresh registers regularly
+		refreshTimer = new Timer(true);
+		refreshTimer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				refreshRegisters();
+			}
+
+		}, 0, 30);
 
 		getContentPane().getChildren().add(table);
 		super.ready();
@@ -113,6 +144,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	public void close() {
 		cpu.unregisterListener(listener);
 		getWindowManager().removeCPUChangedListener(this);
+		refreshTimer.cancel();
 		super.close();
 	}
 
@@ -124,13 +156,19 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 */
 	public class Data {
 		private final int id;
-		private final byte[] contents;
+		private byte[] contents;
 		private final String name;
+		private SimpleStringProperty value = new SimpleStringProperty();
 
-		public Data(int id, String name, byte[] contents) {
+		public Data(int id, String name) {
 			this.id = id;
 			this.name = name;
-			this.contents = contents;
+			refresh();
+		}
+
+		public void refresh() {
+			contents = cpu.getRegisters()[id].getWord();
+			value.set(getValue());
 		}
 
 		/**
@@ -166,6 +204,10 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			return output;
 		}
 
+		public SimpleStringProperty valueProperty() {
+			return value;
+		}
+
 	}
 
 	/**
@@ -178,12 +220,8 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		@Override
 		public void processRegisterChangedMessage(RegisterChangedMessage m) {
 			try {
-				synchronized (table) {
-					FilteredList<Data> items = table.getItems().filtered(d -> d.id != m.registerChanged.getID());
-					ObservableList<Data> list = FXCollections.observableArrayList(items);
-					list.add(createData(m.registerChanged));
-					list.sort((a, b) -> a.id - b.id);
-					Platform.runLater(() -> table.setItems(list));
+				synchronized (changedRegisters) {
+					changedRegisters.add(m.registerChanged.getID());
 				}
 			} catch (Throwable e) {
 				UIUtils.showExceptionDialog(e);
