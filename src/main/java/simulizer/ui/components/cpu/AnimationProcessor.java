@@ -46,7 +46,7 @@ public class AnimationProcessor {
      */
     public AnimationProcessor(CPU cpuVisualisation){
         this.cpuVisualisation = cpuVisualisation;
-		int dispatchInterval = 20;
+		int dispatchInterval = 1;
 
         cycleStartTime = -1;
         showingWarning = false;
