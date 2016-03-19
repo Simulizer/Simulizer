@@ -1,6 +1,12 @@
 package simulizer.highlevel.models;
 
+import simulizer.simulation.cpu.user_interaction.IO;
+
 public class FrameModel extends DataStructureModel {
+
+	public FrameModel(IO io) {
+		super(io);
+	}
 
 	private double[][] image = new double[240][160];
 

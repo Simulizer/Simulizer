@@ -115,7 +115,7 @@ public class WindowManager extends GridPane {
 		add(menuBar, 0, 0);
 
 		// HLVisualManager
-		hlvisual = new HLVisualManager(workspace, (boolean) settings.get("hlvis.auto-open"));
+		hlvisual = new HLVisualManager(workspace, io, (boolean) settings.get("hlvis.auto-open"));
 
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus

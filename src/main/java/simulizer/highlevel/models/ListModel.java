@@ -7,15 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import simulizer.simulation.cpu.user_interaction.IO;
+
 public class ListModel extends DataStructureModel {
 	private long[] list;
 	private Map<Integer, ArrayList<String>> markers = new HashMap<>();
 
-	public ListModel(List<Long> list) {
+	public ListModel(IO io, List<Long> list) {
+		super(io);
 		setList(list);
 	}
 
-	public ListModel() {
+	public ListModel(IO io) {
+		super(io);
 		list = new long[0];
 	}
 

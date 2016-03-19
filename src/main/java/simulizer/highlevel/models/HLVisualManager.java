@@ -7,6 +7,7 @@ import java.util.Observer;
 import java.util.Set;
 
 import javafx.util.Pair;
+import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 
@@ -15,9 +16,11 @@ public class HLVisualManager extends Observable implements Observer {
 	private final Set<DataStructureModel> models = new HashSet<>();
 	private boolean autoOpen;
 	private Workspace workspace;
+	private IO io;
 
-	public HLVisualManager(Workspace workspace, boolean autoOpen) {
+	public HLVisualManager(Workspace workspace, IO io, boolean autoOpen) {
 		this.workspace = workspace;
+		this.io = io;
 		this.autoOpen = autoOpen;
 	}
 
@@ -25,13 +28,13 @@ public class HLVisualManager extends Observable implements Observer {
 		DataStructureModel model;
 		switch (visualiser) {
 			case "tower-of-hanoi":
-				model = new HanoiModel();
+				model = new HanoiModel(io);
 				break;
 			case "list":
-				model = new ListModel();
+				model = new ListModel(io);
 				break;
 			case "frame":
-				model = new FrameModel();
+				model = new FrameModel(io);
 				break;
 			default:
 				throw new IllegalArgumentException();

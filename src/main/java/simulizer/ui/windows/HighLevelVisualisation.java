@@ -104,9 +104,17 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		Platform.runLater(() -> tabs.getTabs().add(tab));
 	}
 
+	public void removeTab(DataStructureModel model) {
+		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).forEach(t -> removeTab(t));
+	}
+
 	public void removeTab(DataStructureVisualiser vis) {
-		vis.close();
-		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
+		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> removeTab(t));
+	}
+
+	public void removeTab(Tab tab) {
+		((DataStructureVisualiser) tab.getContent()).close();
+		Platform.runLater(() -> tabs.getTabs().remove(tab));
 	}
 
 	public double getWindowWidth() {
@@ -126,11 +134,15 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void update(Observable arg0, Object obj) {
+		if (obj == null) {
+			System.out.println("HLVisualisation Window upadate was null. If you see this message then tell Michael");
+			return;
+		}
 		Pair<Action, DataStructureModel> change = (Pair<Action, DataStructureModel>) obj;
 		if (change.getKey() == Action.CREATED) {
 			addNewVisualisation(change.getValue());
 		} else if (change.getKey() == Action.DELETED) {
-			tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == change.getValue()).forEach(t -> Platform.runLater(() -> tabs.getTabs().remove(t)));
+			removeTab(change.getValue());
 		}
 	}
 
