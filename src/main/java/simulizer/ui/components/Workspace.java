@@ -138,13 +138,15 @@ public class Workspace extends Observable implements Themeable {
 	 * Closes all open Internal Windows
 	 */
 	public void closeAll() {
-		Iterator<InternalWindow> windows = openWindows.iterator();
-		while (windows.hasNext()) {
-			InternalWindow window = windows.next();
-			if (!window.isClosed())
-				window.close();
-			if (window.isClosed())
-				windows.remove();
+		synchronized (openWindows) {
+			Iterator<InternalWindow> windows = openWindows.iterator();
+			while (windows.hasNext()) {
+				InternalWindow window = windows.next();
+				if (!window.isClosed())
+					window.close();
+				if (window.isClosed())
+					windows.remove();
+			}
 		}
 	}
 
@@ -164,6 +166,7 @@ public class Workspace extends Observable implements Themeable {
 		}
 		return null;
 	}
+
 	public boolean windowIsOpen(WindowEnum window) {
 		return findInternalWindow(window) != null;
 	}
