@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Processes animations and queues them up to be run by an executor service
+ * @author Theo Styles
  */
 public class AnimationProcessor {
 
@@ -40,7 +41,6 @@ public class AnimationProcessor {
 	private boolean showingWarning;
     public CPUListener cpuListener;
     public CPU cpuVisualisation;
-
 
 	/**
 	 * Sets initial values and sets up the executor service and task
@@ -158,7 +158,7 @@ public class AnimationProcessor {
 		// Add to the list of previous instructions
 		ArrayList<Animation> animations = new ArrayList<>();
 		animationsForInstruction.forEach(item -> animations.add(item));
-		cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
+		if(!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
 	}
 
 	/**

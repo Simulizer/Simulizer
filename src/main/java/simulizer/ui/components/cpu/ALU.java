@@ -1,11 +1,14 @@
 package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Polyline;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import simulizer.ui.windows.CPUVisualisation;
 
 /**
  * Represents an ALU in the CPU visualisation
+ * @author Theo Styles
  */
 public class ALU extends ComponentStackPane {
 
@@ -18,7 +21,7 @@ public class ALU extends ComponentStackPane {
         super(vis, label);
         drawShape(new Polyline());
         setAttributes();
-        text.setTextAlignment(TextAlignment.RIGHT);
+        getComponentLabel().setTextAlignment(TextAlignment.RIGHT);
     }
 
     /**
@@ -26,27 +29,27 @@ public class ALU extends ComponentStackPane {
      * @param polyline The polyline to draw with
      */
     public void drawShape(Polyline polyline){
-        double baseX = x;
-        double baseY = y;
+        double baseX = getX();
+        double baseY = getY();
 
-        double rightHeight = height * 0.6;
-        double rightSmallHeight = (height - rightHeight) / 2;
+        double rightHeight = super.getShapeHeight() * 0.6;
+        double rightSmallHeight = (super.getShapeHeight() - rightHeight) / 2;
 
-        double gapWidth = height * 0.3;
-        double leftHeight = (height - gapWidth) / 2;
+        double gapWidth = super.getShapeHeight() * 0.3;
+        double leftHeight = (super.getShapeHeight() - gapWidth) / 2;
 
         polyline.getPoints().clear();
         polyline.getPoints().addAll(
                 baseX, baseY,
-                baseX + width, baseY + rightSmallHeight,
-                baseX + width, baseY + rightHeight + rightSmallHeight,
-                baseX, baseY + height,
+                baseX + getShapeWidth(), baseY + rightSmallHeight,
+                baseX + getShapeWidth(), baseY + rightHeight + rightSmallHeight,
+                baseX, baseY + super.getShapeHeight(),
                 baseX, baseY + gapWidth + leftHeight,
-                baseX + (width * 0.2), baseY + leftHeight + (gapWidth / 2),
+                baseX + (getShapeWidth() * 0.2), baseY + leftHeight + (gapWidth / 2),
                 baseX, baseY + leftHeight,
                 baseX, baseY);
 
-        this.shape = polyline;
+        setComponentShape(polyline);
     }
 
     /**
@@ -54,29 +57,9 @@ public class ALU extends ComponentStackPane {
      * @return The height of the shape
      */
     public double getShapeHeight(){
-        double rightHeight = height * 0.7;
-        double rightSmallHeight = (height - rightHeight) / 2;
-
-        double gapWidth = height * 0.1;
-        //double leftHeight = (height - gapWidth) / 2;
-
-        return (height + (rightHeight + rightSmallHeight)) / 2;
-    }
-
-    /**
-     * Sets the shape width
-     * @param width The shape width
-     */
-    public void setShapeWidth(double width){
-        this.width = width;
-    }
-
-    /**
-     * Sets the shape height
-     * @param height The shape height
-     */
-    public void setShapeHeight(double height){
-        this.height = height;
+        double rightHeight = super.getShapeHeight() * 0.7;
+        double rightSmallHeight = (super.getShapeHeight() - rightHeight) / 2;
+        return (super.getShapeHeight() + (rightHeight + rightSmallHeight)) / 2;
     }
 
     /**
@@ -87,6 +70,8 @@ public class ALU extends ComponentStackPane {
      * @param height The new height
      */
     public void setAttrs(double x, double y, double width, double height){
+        Shape shape = getComponentShape();
+        Text text = getComponentLabel();
         setLayoutX(x);
         shape.setLayoutX(x);
         setLayoutY(y);
@@ -98,7 +83,7 @@ public class ALU extends ComponentStackPane {
         setShapeHeight(height);
         setPrefHeight(height);
         text.setWrappingWidth(width);
-        drawShape(((Polyline) this.shape));
+        drawShape(((Polyline) shape));
     }
 
 }

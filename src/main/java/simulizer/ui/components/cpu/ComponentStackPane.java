@@ -15,16 +15,17 @@ import simulizer.ui.windows.CPUVisualisation;
 
 /**
  * Used to represents each component along with the label
+ * @author Theo Styles
  */
 public class ComponentStackPane extends StackPane {
 
-    Shape shape;
-    Text text;
-    double x;
-    double y;
-    double width;
-    double height;
-    CPUVisualisation vis;
+    private Shape shape;
+    private Text text;
+    private double x;
+    private double y;
+    private double width;
+    private double height;
+    private CPUVisualisation vis;
     //boolean focused = false;
 
     /**
@@ -49,13 +50,13 @@ public class ComponentStackPane extends StackPane {
         this.shape.getStyleClass().addAll("cpu-component", this.getClass().getSimpleName());
         this.text.getStyleClass().addAll("cpu-component-label", this.getClass().getSimpleName());
         this.getStyleClass().addAll("cpu-container");
-        getChildren().addAll(shape, text);
-        setAlignment(shape, Pos.TOP_LEFT);
+        getChildren().addAll(this.shape, text);
+        setAlignment(this.shape, Pos.TOP_LEFT);
         setCache(true);
         setCacheShape(true);
         setCacheHint(CacheHint.SPEED);
-        shape.setCache(true);
-        shape.setCacheHint(CacheHint.SPEED);
+        this.shape.setCache(true);
+        this.shape.setCacheHint(CacheHint.SPEED);
     }
 
     /**
@@ -135,6 +136,12 @@ public class ComponentStackPane extends StackPane {
     public void setLabel(String label){
         Platform.runLater(() -> text.setText(label));
     }
+
+    /**
+     * Sets the shape
+     * @param newShape The new shape to set
+     */
+    public void setComponentShape(Shape newShape){ this.shape = newShape; }
 
     /**
      * Draws a horizontal line to another component

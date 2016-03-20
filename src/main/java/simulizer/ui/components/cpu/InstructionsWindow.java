@@ -14,14 +14,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
-import simulizer.simulation.messages.Message;
 
+/**
+ * Represents the window showing the list of previous instructions
+ * @author Theo Styles
+ */
 public class InstructionsWindow extends StackPane {
 
-    ObservableList<PreviousAnimation> instructions;
-    ListView<PreviousAnimation> instructionsList;
-    AnimationProcessor animationProcessor;
+    private ObservableList<PreviousAnimation> instructions;
 
+    /**
+     * Represents a previous animation, contains the name and list of animations
+     */
     public class PreviousAnimation{
 
         public String name;
@@ -34,6 +38,9 @@ public class InstructionsWindow extends StackPane {
 
     }
 
+    /**
+     * Represents a list cell containing a button
+     */
     static class ButtonCell extends ListCell<PreviousAnimation> {
         HBox hbox = new HBox();
         Label label = new Label("(empty)");
@@ -42,6 +49,10 @@ public class InstructionsWindow extends StackPane {
         PreviousAnimation lastItem;
         AnimationProcessor animationProcessor;
 
+        /**
+         * Sets up the layout and the button action
+         * @param animationProcessor The animation processor to replay the animations on
+         */
         public ButtonCell(AnimationProcessor animationProcessor) {
             super();
             this.animationProcessor = animationProcessor;
@@ -52,17 +63,22 @@ public class InstructionsWindow extends StackPane {
             });
         }
 
+        /**
+         * Sets up the cell label and button label
+         * @param animation The animation for that cell
+         * @param empty If the cell is empty or not
+         */
         @Override
-        protected void updateItem(PreviousAnimation t, boolean empty) {
-            super.updateItem(t, empty);
+        protected void updateItem(PreviousAnimation animation, boolean empty) {
+            super.updateItem(animation, empty);
             setText(null);  // No text in label of super class
             if (empty) {
                 lastItem = null;
                 setGraphic(null);
             } else {
-                lastItem = t;
-                if (t != null) {
-                    label.setText(t.name);
+                lastItem = animation;
+                if (animation != null) {
+                    label.setText(animation.name);
                     label.setFont(new Font("Arial", 14));
                     button.setFont(new Font("Arial", 14));
                 }
@@ -72,17 +88,23 @@ public class InstructionsWindow extends StackPane {
         }
     }
 
+    /**
+     * Sets up the cell factory for the button and attaches an observable list to the list view
+     * @param animationProcessor The animation processor to use for the button
+     */
     public InstructionsWindow(AnimationProcessor animationProcessor){
         instructions = FXCollections.observableArrayList();
-        instructionsList = new ListView<PreviousAnimation>(instructions);
+        ListView<PreviousAnimation> instructionsList = new ListView<>(instructions);
         getChildren().add(instructionsList);
-        this.animationProcessor = animationProcessor;
-
         instructionsList.setCellFactory(e -> new ButtonCell(animationProcessor));
         instructionsList.setPlaceholder(new Label("No instructions to replay"));
-
     }
 
+    /**
+     * Adds an instruction to the list
+     * @param name The instruction name to use for the label
+     * @param animations The animations for the cell
+     */
     public void addInstruction(String name, ArrayList<AnimationProcessor.Animation> animations){
         Platform.runLater(() -> {
             instructions.add(0, new PreviousAnimation(name, animations));
@@ -91,9 +113,13 @@ public class InstructionsWindow extends StackPane {
         });
     }
 
-    public void removeInstruction(Message message){
+    /**
+     * Removes an instruction from the list
+     * @param animation The animation to remove
+     */
+    public void removeInstruction(PreviousAnimation animation){
         Platform.runLater(() -> {
-            instructions.remove(message);
+            instructions.remove(animation);
         });
     }
 

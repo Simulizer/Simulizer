@@ -11,12 +11,13 @@ import simulizer.ui.theme.Theme;
 
 /**
  * The cpu visualisation window
+ * @author Theo Styles
  */
 public class CPUVisualisation extends InternalWindow {
 
-    double width;
-    double height;
-    Pane pane;
+    private double width;
+	private double height;
+	private Pane pane;
 	private CPU cpu;
 	private CPUListener cpuListener;
 
@@ -123,7 +124,7 @@ public class CPUVisualisation extends InternalWindow {
 	 */
 	private void drawVisualisation() {
 
-		cpu = new CPU(this, width, height);
+		cpu = new CPU(this);
 		cpu.drawCPU();
 
 		widthProperty().addListener((observable, oldValue, newValue) -> {
@@ -141,7 +142,6 @@ public class CPUVisualisation extends InternalWindow {
 		});
 
 	}
-
 
 	/**
 	 * Gets the minimal height of the window
@@ -178,7 +178,7 @@ public class CPUVisualisation extends InternalWindow {
 	 * @param simCpu The simulated cpu
 	 */
 	public void attachCPU(simulizer.simulation.cpu.components.CPU simCpu) {
-		cpuListener = new CPUListener(cpu, simCpu, this, cpu.animationProcessor);
+		cpuListener = new CPUListener(cpu, simCpu, cpu.animationProcessor);
 		cpu.animationProcessor.setCpuListener(cpuListener);
 		simCpu.registerListener(cpuListener);
 	}

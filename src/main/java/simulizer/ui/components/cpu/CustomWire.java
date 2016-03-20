@@ -4,6 +4,7 @@ import javafx.scene.shape.Polyline;
 
 /**
  * Represents a custom wire which travels in multiple directions
+ * @author Theo Styles
  */
 public class CustomWire extends Wire {
 
@@ -18,10 +19,10 @@ public class CustomWire extends Wire {
 
         drawLine(xStart, yStart, customLines);
 
-        arrowHead.getStyleClass().add("cpu-arrowhead");
-        line.getStyleClass().add("cpu-line");
+        getArrowhead().getStyleClass().add("cpu-arrowhead");
+        getLine().getStyleClass().add("cpu-line");
 
-        getChildren().addAll(line, arrowHead);
+        getChildren().addAll(getLine(), getArrowhead());
     }
 
     /**
@@ -31,10 +32,10 @@ public class CustomWire extends Wire {
      * @param customLines The custom lines to draw
      */
     public void drawLine(double xStart, double yStart, CustomLine... customLines){
-        line.getPoints().clear();
-        arrowHead.getPoints().clear();
-        line.getPoints().add(xStart);
-        line.getPoints().add(yStart);
+        getLine().getPoints().clear();
+        getArrowhead().getPoints().clear();
+        getLine().getPoints().add(xStart);
+        getLine().getPoints().add(yStart);
 
         CustomLine.Direction finalDirection = CustomLine.Direction.UP;
 
@@ -54,36 +55,36 @@ public class CustomWire extends Wire {
                     xStart -= p.getDistance();
             }
 
-            line.getPoints().add(xStart);
-            line.getPoints().add(yStart);
+            getLine().getPoints().add(xStart);
+            getLine().getPoints().add(yStart);
 
             finalDirection = p.getDirection();
         }
 
         switch (finalDirection){
             case UP:
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart + 10,
                         xStart - 10, yStart + 10,
                         xStart, yStart);
                 break;
             case DOWN:
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart + 10, yStart - 10,
                         xStart, yStart);
                 break;
             case RIGHT:
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart, yStart,
                         xStart - 10, yStart - 10,
                         xStart - 10, yStart + 10,
                         xStart, yStart);
                 break;
             case LEFT:
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart, yStart,
                         xStart + 10, yStart - 10,
                         xStart + 10, yStart + 10,

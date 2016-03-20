@@ -2,6 +2,7 @@ package simulizer.ui.components.cpu;
 
 /**
  * Represents a direction and magnitude, used when creating custom wires
+ * @author Theo Styles
  */
 public class CustomLine {
     public enum Direction{
@@ -11,8 +12,8 @@ public class CustomLine {
         RIGHT;
     }
 
-    double distance;
-    Direction direction;
+    private double distance;
+    private Direction direction;
 
     /**
      * Sets up a new custom line

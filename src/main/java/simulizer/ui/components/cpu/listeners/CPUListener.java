@@ -3,28 +3,25 @@ package simulizer.ui.components.cpu.listeners;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.DataMovementMessage;
-import simulizer.simulation.messages.InstructionTypeMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.ui.components.cpu.AnimationProcessor;
-import simulizer.ui.windows.CPUVisualisation;
 
 /**
  * Handles communication between the CPU simulation and visualisation
+ * @author Theo Styles
  */
 public class CPUListener extends SimulationListener {
 
-    CPUVisualisation vis;
-    CPU simCpu;
-    simulizer.ui.components.CPU cpu;
-    Instruction currentInstruction;
-    public AnimationProcessor animationProcessor;
+    private CPU simCpu;
+    private simulizer.ui.components.CPU cpu;
+    private Instruction currentInstruction;
+    private AnimationProcessor animationProcessor;
 
     /**
-     * Sets the visualisation, cpu simulation and the visualisation
+     * Sets the visualisation, cpu simulation and the animation processor
      */
-    public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, CPUVisualisation vis, AnimationProcessor animationProcessor){
-        this.vis = vis;
+    public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, AnimationProcessor animationProcessor){
         this.cpu = cpu;
         this.simCpu = simCpu;
         this.animationProcessor = animationProcessor;
@@ -125,8 +122,8 @@ public class CPUListener extends SimulationListener {
                         cpu.muxToPC.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5, t6);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5, t6);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case sw:
             {
@@ -154,8 +151,8 @@ public class CPUListener extends SimulationListener {
                         cpu.aluToMemory.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case j:
             {
@@ -187,8 +184,8 @@ public class CPUListener extends SimulationListener {
                         cpu.muxToPC.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case jal:
             {
@@ -227,8 +224,8 @@ public class CPUListener extends SimulationListener {
                         cpu.irToRegister3.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case jr:
             {
@@ -243,7 +240,7 @@ public class CPUListener extends SimulationListener {
                 Runnable t2 = () -> {
                         cpu.showText("JR INSTRUCTION - Step 2 - Register value is passed to mux", speed);
                         cpu.register.highlight();
-                        cpu.registertoMux.animateData(speed);
+                        cpu.registerToMux.animateData(speed);
                 };
 
                 Runnable t3 = () -> {
@@ -252,8 +249,8 @@ public class CPUListener extends SimulationListener {
                         cpu.muxToPC.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case li:
             case la:
@@ -266,8 +263,8 @@ public class CPUListener extends SimulationListener {
                         cpu.irToRegister3.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.scheduleRegularAnimations(speed, t1);
+                animationProcessor.addToPreviousList(instructionName);
             }   break;
             case add:
             case addu:
@@ -287,7 +284,7 @@ public class CPUListener extends SimulationListener {
             case subu:
             {
                 processRType(instructionName);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.addToPreviousList(instructionName);
                 break;
             }
             case addi:
@@ -304,7 +301,7 @@ public class CPUListener extends SimulationListener {
             case lw:
             {
                 processIType(instructionName);
-                cpu.animationProcessor.addToPreviousList(instructionName);
+                animationProcessor.addToPreviousList(instructionName);
                 break;
             }
 
@@ -345,7 +342,7 @@ public class CPUListener extends SimulationListener {
 			cpu.dataMemoryToRegisters.animateData(speed);
         };
 
-        cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4);
+        animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4);
     }
 
     /**
@@ -375,12 +372,12 @@ public class CPUListener extends SimulationListener {
             cpu.aluToRegisters.animateData(speed);
         };
 
-        cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
+        animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3);
 
     }
 
     public void startOfCycle(){
-        cpu.animationProcessor.newCycle();
+        animationProcessor.newCycle();
     }
 
     /**
@@ -422,7 +419,7 @@ public class CPUListener extends SimulationListener {
                     cpu.muxToPC.animateData(speed);
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5);
+                animationProcessor.scheduleRegularAnimations(speed, t1, t2, t3, t4, t5);
 
                 break;
             }
@@ -434,7 +431,7 @@ public class CPUListener extends SimulationListener {
                     cpu.ir.highlight();
                 };
 
-                cpu.animationProcessor.scheduleRegularAnimations(speed, t1);
+                animationProcessor.scheduleRegularAnimations(speed, t1);
                 break;
             }
             case Execute:

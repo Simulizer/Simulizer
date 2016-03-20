@@ -1,10 +1,12 @@
 package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import simulizer.ui.windows.CPUVisualisation;
 
 /**
  * Represents a general rectangular component
+ * @author Theo Styles
  */
 public class GeneralComponent extends ComponentStackPane {
 
@@ -15,7 +17,7 @@ public class GeneralComponent extends ComponentStackPane {
      */
     public GeneralComponent(CPUVisualisation vis, String label){
         super(vis, label);
-        this.shape = new Rectangle(x, y, width, height);
+        setComponentShape(new Rectangle(getX(), getY(), getShapeWidth(), getShapeHeight()));
         setAttributes();
     }
 
@@ -24,8 +26,8 @@ public class GeneralComponent extends ComponentStackPane {
      * @param width The new shape width
      */
     public void setShapeWidthAndDraw(double width){
-        ((Rectangle) shape).setWidth(width);
-        text.setWrappingWidth(width * 0.9);
+        ((Rectangle) getComponentShape()).setWidth(width);
+        getComponentLabel().setWrappingWidth(width * 0.9);
         super.setShapeWidth(width);
     }
 
@@ -34,7 +36,7 @@ public class GeneralComponent extends ComponentStackPane {
      * @param height The new shape height
      */
     public void setShapeHeightAndDraw(double height){
-        ((Rectangle) shape).setHeight(height);
+        ((Rectangle) getComponentShape()).setHeight(height);
         super.setShapeHeight(height);
     }
 
@@ -47,13 +49,13 @@ public class GeneralComponent extends ComponentStackPane {
      */
     public void setAttrs(double x, double y, double width, double height){
         setLayoutX(x);
-        shape.setLayoutX(x);
-        shape.layoutXProperty().set(x);
+        getComponentShape().setLayoutX(x);
+        getComponentShape().layoutXProperty().set(x);
         setLayoutY(y);
         setX(x);
         setY(y);
-        shape.setLayoutY(y);
-        shape.layoutYProperty().set(y);
+        getComponentShape().setLayoutY(y);
+        getComponentShape().layoutYProperty().set(y);
         setShapeWidthAndDraw(width);
         setPrefWidth(width);
         setShapeHeightAndDraw(height);

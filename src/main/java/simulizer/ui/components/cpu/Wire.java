@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Represents a wire in the cpu visualisation
+ * @author Theo Styles
  */
 public class Wire extends Group {
 
@@ -23,15 +24,15 @@ public class Wire extends Group {
 		HORIZONTAL, VERTICAL, CUSTOM
 	}
 
-	Polyline line;
-	Polyline arrowHead;
-	Type type;
-	Path path;
-	double time;
-	Double progressed = 0.0;
-	boolean animating;
-	boolean reverse;
-	List<PathTransition> transitions;
+	private Polyline line;
+	private Polyline arrowHead;
+	private Type type;
+	private Path path;
+	private double time;
+	private Double progressed = 0.0;
+	private boolean animating;
+	private boolean reverse;
+	private List<PathTransition> transitions;
 
 	/**
 	 * Sets up a new wire
@@ -49,6 +50,22 @@ public class Wire extends Group {
 		this.path = new Path();
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
+	}
+
+	public Polyline getLine(){
+		return line;
+	}
+
+	public Polyline getArrowhead(){
+		return arrowHead;
+	}
+
+	public Type getType(){
+		return type;
+	}
+
+	public void setReverse(boolean reverseNew){
+		this.reverse = reverseNew;
 	}
 
 	/**
@@ -124,6 +141,8 @@ public class Wire extends Group {
 			pathTransition.setAutoReverse(false);
 
 			data.setCache(true);
+
+			toFront();
 
 			getChildren().add(data);
 			pathTransition.play();

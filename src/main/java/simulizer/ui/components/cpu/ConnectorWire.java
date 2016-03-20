@@ -5,15 +5,16 @@ import javafx.scene.shape.Polyline;
 
 /**
  * Represents a horizontal or vertical wire
+ * @author Theo Styles
  */
 public class ConnectorWire extends Wire {
 
-    ComponentStackPane from;
-    ComponentStackPane to;
-    double offset;
-    boolean arrowStart;
-    boolean rightOrBottom;
-    Type type;
+    private ComponentStackPane from;
+    private ComponentStackPane to;
+    private double offset;
+    private boolean arrowStart;
+    private boolean rightOrBottom;
+    private Type type;
 
     /**
      * Sets up the connector wire
@@ -31,7 +32,7 @@ public class ConnectorWire extends Wire {
         this.arrowStart = arrowStart;
         this.type = type;
         this.rightOrBottom = rightOrBottom;
-        this.reverse = (rightOrBottom && arrowStart);
+        setReverse(rightOrBottom && arrowStart);
 
         this.offset = offset;
         if(type == Type.HORIZONTAL){
@@ -40,10 +41,10 @@ public class ConnectorWire extends Wire {
             drawVerticalLine();
         }
 
-        arrowHead.getStyleClass().add("cpu-arrowhead");
-        line.getStyleClass().add("cpu-line");
+        getArrowhead().getStyleClass().add("cpu-arrowhead");
+        getLine().getStyleClass().add("cpu-line");
 
-        this.getChildren().addAll(line, arrowHead);
+        this.getChildren().addAll(getLine(), getArrowhead());
 
     }
 
@@ -63,8 +64,8 @@ public class ConnectorWire extends Wire {
      * Draws a horizontal wire connecting the two shapes
      */
     public void drawHorizontalWire(){
-        line.getPoints().clear();
-        arrowHead.getPoints().clear();
+        getLine().getPoints().clear();
+        getArrowhead().getPoints().clear();
 
         DoubleBinding xStart = from.layoutXProperty().add(from.getShapeWidth());
         DoubleBinding yStart = from.layoutYProperty().add(from.getShapeHeight() / 2).add(from.getShapeHeight() * offset);
@@ -76,13 +77,13 @@ public class ConnectorWire extends Wire {
             xEnd = to.layoutXProperty().add(to.getShapeWidth());
 
             if(arrowStart) {
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(5).getValue(), yStart.add(-5).getValue(),
                         xStart.add(5).getValue(), yStart.add(5).getValue(),
                         xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(10).getValue(), yEnd.add(10).getValue(),
@@ -91,13 +92,13 @@ public class ConnectorWire extends Wire {
         } else {
 
             if(arrowStart){
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(10).getValue(), yStart.add(-10).getValue(),
                         xStart.add(10).getValue(), yStart.add(10).getValue(),
                         xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
@@ -106,7 +107,7 @@ public class ConnectorWire extends Wire {
 
         }
 
-        line.getPoints().addAll(
+        getLine().getPoints().addAll(
                 xStart.getValue(), yStart.getValue(),
                 xEnd.getValue(), yEnd.getValue());
     }
@@ -115,8 +116,8 @@ public class ConnectorWire extends Wire {
      * Draws a vertical wire connecting the two shapes
      */
     public void drawVerticalLine(){
-        line.getPoints().clear();
-        arrowHead.getPoints().clear();
+        getLine().getPoints().clear();
+        getArrowhead().getPoints().clear();
         DoubleBinding xStart = from.layoutXProperty().add(from.getShapeWidth() / 2).add(from.getShapeWidth() * offset);
         DoubleBinding yStart = from.layoutYProperty().add(from.getShapeHeight());
         DoubleBinding xEnd = from.layoutXProperty().add(from.getShapeWidth() / 2).add(from.getShapeWidth() * offset);
@@ -129,19 +130,19 @@ public class ConnectorWire extends Wire {
             yEnd = to.layoutYProperty().add(to.getShapeHeight());
         }
 
-        line.getPoints().addAll(
+        getLine().getPoints().addAll(
                 xStart.getValue(), yStart.getValue(),
                 xEnd.getValue(), yEnd.getValue());
 
         if(arrowStart){
             if(rightOrBottom){
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(10).getValue(), yStart.add(10).getValue(),
                         xStart.add(-10).getValue(), yStart.add(10).getValue(),
                         xStart.getValue(), yStart.getValue());
             } else {
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xStart.getValue(), yStart.getValue(),
                         xStart.add(-10).getValue(), yStart.add(-10).getValue(),
                         xStart.add(10).getValue(), yStart.add(-10).getValue(),
@@ -151,13 +152,13 @@ public class ConnectorWire extends Wire {
         } else {
 
             if(rightOrBottom){
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.add(10).getValue(), yEnd.add(-10).getValue(),
                         xEnd.getValue(), yEnd.getValue());
             } else {
-                arrowHead.getPoints().addAll(
+                getArrowhead().getPoints().addAll(
                         xEnd.getValue(), yEnd.getValue(),
                         xEnd.add(10).getValue(), yEnd.add(10).getValue(),
                         xEnd.add(-10).getValue(), yEnd.add(10).getValue(),
