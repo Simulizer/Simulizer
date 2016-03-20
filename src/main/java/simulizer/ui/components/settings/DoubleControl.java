@@ -2,8 +2,7 @@ package simulizer.ui.components.settings;
 
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -25,19 +24,27 @@ public class DoubleControl extends GridPane {
 		add(title, 0, 0);
 
 		// Option Value
-		DoubleSpinnerValueFactory factory = new DoubleSpinnerValueFactory(setting.getLowBound(), setting.getHighBound(), setting.getValue());
-		Spinner<Double> value = new Spinner<Double>(factory);
+		TextField value = new TextField();
 		value.setEditable(true);
+		value.setText("" + setting.getValue());
 		GridPane.setRowSpan(value, 2);
 		GridPane.setVgrow(value, Priority.SOMETIMES);
 		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.valueProperty().addListener((e) -> {
+		value.textProperty().addListener(e -> {
+			boolean valid = false;
+			double newValue = Double.NaN;
 			try {
-				setting.setValue(value.getValue());
-			} catch (IllegalArgumentException ex) {
-				// TODO: Notify user of invalid setting
+				newValue = Double.parseDouble(value.getText());
+				valid = setting.isValid(newValue);
+			} catch (NumberFormatException ex) {
+				valid = false;
 			}
+
+			if (valid)
+				setting.setValue(newValue);
+			else
+				value.setText("" + setting.getValue());
 		});
 		add(value, 1, 0);
 
