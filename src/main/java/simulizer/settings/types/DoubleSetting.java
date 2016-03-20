@@ -28,7 +28,7 @@ public class DoubleSetting extends SettingValue<Double> {
 
 	@Override
 	public boolean isValid(Double value) {
-		if (lowBound == Double.NaN || highBound == Double.NaN)
+		if (Double.isNaN(lowBound) || Double.isNaN(highBound))
 			return true;
 		else
 			return lowBound <= value && value <= highBound;

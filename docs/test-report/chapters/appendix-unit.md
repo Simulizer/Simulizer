@@ -1,19 +1,4 @@
-Unit testing
-============
-Througout the development of Simulizer, it was made sure that any of the back-end components that could be tested via JUnit would be.  These tests were carried out in the following areas:
-
-**Data Converter**: Testing that the conversions between long and byte[] were working as intended
-**ALU**: The tests within this class were used to check that any calculation computed by the ALU was as intended.
-**Decode**: The methods in this class went about testing that the decode part of the Instruction Execute cycle was being carried out correctly. Each possible operand format was tested for correctness.
-**Dynamic Data Segment**: This simulated area of memory was tested to ensure that the read/write operations, as well as the allocation method of the heap segment was working properly.
-**Execute**: These tests tested every single instruction to ensure that they were executing correctly, in compliance with the SPIM documentation.
-**Memory**: These tests ensured that data is being stored/read correctly from within the simulated memory of the CPU.
-**Stack**: These tests are very similar to the heap tests and check that read/write operations are working correctly as intended.
-**Parser**: Multiple sets of tests have been used to ensure that the parser is parsing the entered program text correctly, so it could be given to a simulation.
-
-All of these tests are available to view in svn via the src/test/java directory.
-
-
+## Unit Tests ##
 
 **Name of Component/Class**: `ALU`
 
@@ -117,24 +102,15 @@ All of these tests are available to view in svn via the src/test/java directory.
 | DDS15   | size                                                               | n/a             | n/a     | 8                               | 8                               | y          | 17/12/16    |
 | DDS16   | size                                                               | n/a             | n/a     | 0                               | 0                               | y          | 17/12/16    |
 | DDS17   | sbrk                                                               | -4              | n/a     | Exception                       | Exception                       | y          | 17/12/16    |
-| DDS18   | getBytes (after `sbrk(8)`) <br/><br/> and set 0x11 at 5)           | 5               | 1       | 0x11                            | 0x11                            | y          | 17/12/16    |
+| DDS18   | getBytes <br> (after `sbrk(8)`)<br/> and set 0x11 <br> at 5)       | 5               | 1       | 0x11                            | 0x11                            | y          | 17/12/16    |
 | DDS19   | getBytes (after `sbrk(8)`) <br/> and setting 5 bytes starting at 2 | 2               | 4       | 0x11                            | 0x11                            | y          | 17/12/16    |
 | DDS20   | getBytes                                                           | 2               | 4       | 0x10                            | 0x10                            | y          | 17/12/16    |
 | DDS21   | getBytes                                                           | 2               | 4       | 0x78                            | 0x78                            | y          | 17/12/16    |
 | DDS22   | getBytes                                                           | 2               | 4       | 0x65                            | 0x65                            | y          | 17/12/16    |
 | DDS23   | getBytes                                                           | 0               | 5       | Exception                       | Exception                       | y          | 17/12/16    |
-| DDS24   | setBytes (test by retrieval at position)                           | 4 element array | 2       | result[0] = 0x11                | result[0] = 0x11                | y          | 17/12/16    |
+| DDS24   | setBytes <br> (test by retrieval<br> at position)                  | 4 element array | 2       | result[0] = 0x11                | result[0] = 0x11                | y          | 17/12/16    |
 | DDS25   | setBytes                                                           | 4 element array | 2       | result[1] = 0x10                | result[1] = 0x10                | y          | 17/12/16    |
 | DDS26   | setBytes                                                           | 4 element array | 2       | result[2] = 0x78                | result[2] = 0x78                | y          | 17/12/16    |
 | DDS27   | setBytes                                                           | 4 element array | 2       | result[3] = 0x65                | result[3] = 0x65                | y          | 17/12/16    |
 | DDS28   | setBytes                                                           | empty array     | 2       | result[0] = 0x11                | result[0] = 0x11                | y          | 17/12/16    |
 | DDS29   | setBytes                                                           | 5 element array | 4       | Exception <br/> (out of bounds) | Exception <br/> (out of bounds) | y          | 17/12/16    |
-
-
-
-
-
-
-
-
-#
