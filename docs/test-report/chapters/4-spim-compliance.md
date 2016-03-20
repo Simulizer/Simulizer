@@ -1,4 +1,3 @@
-Compliance with Spim
-====================
+# Compliance with Spim #
 
 Considering this project is based around the visualisation and general improvement of an existing piece of software, it is worth creating series' of tests that allow us to check whether our software can meet the requirements set by Spim and through other means, we can provide other evidence of surpassing it. The following tests are used to compare the behaviour of our simulated CPU/assembler with the one provided by Spimulator. At a high level these tests run both our simulated CPU as well as the one used in Spim. In the most basic sense, tests compare whether the output of certain tests is the same in both pieces of software. If they are the same, the test passes. These tests are best automated and so, they can also be found alongside the unit tests, in the src/test folder in svn.

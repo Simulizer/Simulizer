@@ -1,5 +1,4 @@
-Integration Testing
-===================
+# Integration Testing #
 
 For the testing of Simulizer, a bottom up test approach has been used. That is, firstly all of the unit tests were created for each of the components used and the correctness was checked. After this, tests were created to check the combining of different components. Specific tests were created for the linking of certain components, but as well as this, regression tests were carried out to check that all of the unit tests were still passing when a new component was linked (due to the low coupling of the system, there weren't many cases where the unit tests would even be affected).
 

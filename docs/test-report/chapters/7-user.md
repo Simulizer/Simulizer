@@ -1,5 +1,4 @@
-User testing
-============
+# User testing #
 
 As well as providing very objective sets of tests for proving the correctness of our software and also that the functionality outlined in the specification is present in the software, there are also a base of users, from whom the software has to be accepted. In order to do this, once the stage was met where significant amounts of the intended functionality had been written, the software was released to our user base (via a website which was linked to the module Facebook page; this gave an easy way of communicating with users). Along with the software, a brief guide on using Simulizer was given, alongisde a list of tasks suggested to carry out in order to test the system. However, there were no restrictions on this and the users were given free reign over the system. They were then asked to complete a questionnaire on how they found their experience with Simulizer. As well as the students, Ian Batten was also asked to test the system. The reponses of the user testing questionnaire are as follows:
 

@@ -1,5 +1,5 @@
-Unit testing
-============
+# Unit testing #
+
 Througout the development of Simulizer, it was made sure that any of the back-end components that could be tested via JUnit would be.  These tests were carried out in the following areas:
 
 - **Data Converter**: Testing that the conversions between long and byte[] were working as intended
