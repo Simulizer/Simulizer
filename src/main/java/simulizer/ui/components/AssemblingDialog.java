@@ -41,7 +41,7 @@ public class AssemblingDialog extends Alert {
 
 		this.wm = wm;
 
-		setTitle("Information Dialog");
+		setTitle("Assembling");
 		setHeaderText("Assembling");
 
 		setContentText(contentText);

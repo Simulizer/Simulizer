@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageManager {
 
-	private final long allowedProcessingTime = 200; // milliseconds
+	private final long allowedProcessingTime = 1000; // milliseconds
 
 	private final CopyOnWriteArrayList<SimulationListener> listeners;
 	private final ThreadPoolExecutor executor;
@@ -88,17 +88,13 @@ public class MessageManager {
 	}
 
 	private class MessageTask implements Runnable {
-		private Message m;
-		private boolean done;
+		public Message m;
+		public Future<?> future;
 
 		public MessageTask(Message m) {
 			this.m = m;
-			done = false;
 		}
 
-		public boolean isDone() {
-			return done;
-		}
 
 		@Override
 		public void run() {
@@ -108,10 +104,6 @@ public class MessageManager {
 				}
 			} catch (Exception e) {
 				UIUtils.showExceptionDialog(e);
-			}
-			synchronized (this) {
-				done = true;
-				notifyAll();
 			}
 		}
 	}
@@ -143,8 +135,8 @@ public class MessageManager {
 					return;
 				synchronized (tasks) {
 					MessageTask t = new MessageTask(m);
+					t.future = executor.submit(t);
 					tasks.add(t);
-					executor.submit(t);
 
 					if(messages.isEmpty()) {
 						synchronized (noWaitingMessages) {
@@ -154,7 +146,7 @@ public class MessageManager {
 					}
 
 					if(tasks.size() > 50) {
-						tasks.removeIf(MessageTask::isDone);
+						tasks.removeIf((task) -> task.future.isDone());
 					}
 				}
 			}
@@ -178,16 +170,16 @@ public class MessageManager {
 		synchronized (tasks) {
 			for (MessageTask t : tasks) {
 				try {
-					//noinspection SynchronizationOnLocalVariableOrMethodParameter
-					synchronized (t) {
-						if(!t.isDone()) {
-							t.wait(timeoutTime);
-						}
+					if(!t.future.isDone()) {
+						t.future.get(timeoutTime, TimeUnit.MILLISECONDS);
 					}
 				} catch (InterruptedException e) {
-					io.printString(IOStream.ERROR,
+					return;
+				} catch (ExecutionException | TimeoutException e) {
+					io.printString(IOStream.ERROR, "" +
 							"A simulation message is taking too long to process.\n" +
-									"  The simulation will continue without waiting.\n"
+							"  The simulation will continue without waiting.\n" +
+							"  Detail: " + t.m + "\n"
 					);
 				}
 			}

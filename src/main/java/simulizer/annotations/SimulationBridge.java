@@ -36,6 +36,8 @@ public class SimulationBridge {
 	}
 
 	public Word[] getRegisters() {
+		if(cpu == null)
+			throw new IllegalStateException();
 		return cpu.getRegisters();
 	}
 

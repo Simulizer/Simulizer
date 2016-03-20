@@ -67,6 +67,8 @@ public class CPUListener extends SimulationListener {
      * @param instruction The current instruction
      */
     public void processInstruction(Instruction instruction) {
+        if(instruction == null)
+            return;
         String instructionName = instruction.toString();
         switch(instruction) {
             case beq:

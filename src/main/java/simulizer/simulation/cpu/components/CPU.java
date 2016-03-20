@@ -357,7 +357,7 @@ public class CPU {
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
 
-		messageManager.waitForAll(100);
+		messageManager.waitForAll();
 
 		fetch();
 		sendMessage(new PipelineStateMessage(thisInstruction, null, null));

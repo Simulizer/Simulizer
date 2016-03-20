@@ -39,14 +39,14 @@ public class AnnotationManager {
 		return ex;
 	}
 
-	public void onNewProgram(CPU cpu) {
+	public synchronized void onNewProgram(CPU cpu) {
 		// refresh for each new program
 		newExecutor();
 
 		simulationBridge.cpu = cpu;
 	}
 
-	private void setupBridges() {
+	private synchronized void setupBridges() {
 		// set up access between the bridges and the components they talk to on the Java side
 		debugBridge.wm = wm;
 		debugBridge.io = wm.getIO();
