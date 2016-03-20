@@ -145,6 +145,86 @@ Test ID: TC-E2Ex
   * The right-hand column should show the value of the register in the selected form.
 - **Actual**: As expected (see below).
 
+## Labels window ##
+
+Test ID: TC-E2Ex
+
+- **Description**: The `Labels` window should show all labels present in the code, and only those present in the code.
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Labels` window.
+  3. Open `count.s`.
+- **Expected**:
+  * The `Labels` window should show the labels:
+    - END: 20
+    - LOOP: 12
+    - main: 8
+    - mystr: 5
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: The `Labels` window should update labels as the user types.
+- **Input**: `count.s`.
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Labels` window.
+  3. Open `count.s`.
+  4. Change the label on line 12 from `LOOP` to `LOOPER`.
+  5. Delete line 20.
+  6. Undo the deletion, e.g. `Ctrl + z`.
+- **Expected**:
+  * `LOOP` should change to `LOOPER` in the `Registers` window.
+  * The row with `END` should be removed from the table after deleting line 20.
+  * The row with `END: 20` should be added after undoing the deletion of line 20.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: The buttons in the `Labels` window should work appropriately.
+- **Input**: `binary-search.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Labels` window.
+  3. Open `binary-search.s`.
+  4. Click on the row with the label `binary_search`.
+  5. Click on the `Next` button three times.
+  6. Click the `Previous` button three times.
+  7. Click the `Select All` button.
+- **Expected**:
+  * The editor should jump to line 170 after clicking the `binary_search` row.
+  * The editor should jump to line 215, then line 221, and then line 137, highlighting the occurrence of the `binary_search` label each time.
+  * All occurrences of the label `binary_search` should be highlighted after clicking `Select All`.
+- **Actual**: As expected (see below).
+
+## Layouts ##
+
+Test ID: TC-E2Ex
+
+- **Description**: Test each bundled layout.
+- **Action**:
+  1. Click each layout in the `Layouts` menu option.
+- **Expected**:
+  * The window should update to show the windows in the corresponding layout.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Try saving a custom layout.
+- **Action**:
+  1. Open the following windows: `Editor`, `CPU Visualisation`, and `Program I/O`.
+  2. Resize the windows so that the `Editor` is in the bottom left-quarter, the `CPU Visualisation` is in the top-left quarter, and the `Program I/O` takes up the right half.
+  3. `Layouts` $\to$ `Save Current Layout`.
+  4. Save the layout as `layout-save-test.json`.
+  5. `Layouts` $\to$ `Default`.
+  6. `Layouts` $\to$ `layout-save-test`.
+- **Expected**:
+  * A dialog should be shown to allow the user to save the layout in the `layouts` folder.
+  * The layout should change back to the default layout when `Default` is clicked.
+  * `layout-save-test` should be available in the `Layouts` menu.
+  * The layout should switch back to the layout that was specified after clicking `layout-save-test`.
+- **Actual**: As expected (see below).
 
 <!--
 Test ID: TC-E2Ex
