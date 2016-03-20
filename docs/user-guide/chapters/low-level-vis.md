@@ -1,6 +1,7 @@
 # Low-level Visualisations #
 
 ## CPU Visualisation ##
+$\TODO{Theo could you write some stuff here?}$
 $\TODO{take picture}$
 <!-- TODO take a nice picture of the CPU visualisation
 ![](segments/cpu-vis.png)
