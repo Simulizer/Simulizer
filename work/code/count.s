@@ -1,4 +1,3 @@
-# @{ setSpeed(1) }@
 
 # print the numbers from 1 to 100
 .data
@@ -7,7 +6,7 @@
 .text
 main:
 	li $s0 0
-	li $t0 100
+	li $t0 10
 
 LOOP:   addi $s0 $s0 1
 

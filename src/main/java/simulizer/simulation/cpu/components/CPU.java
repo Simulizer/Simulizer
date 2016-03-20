@@ -16,13 +16,7 @@ import simulizer.assembler.representation.operand.Operand;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
-import simulizer.simulation.exceptions.DecodeException;
-import simulizer.simulation.exceptions.ExecuteException;
-import simulizer.simulation.exceptions.HeapException;
-import simulizer.simulation.exceptions.InstructionException;
-import simulizer.simulation.exceptions.MemoryException;
-import simulizer.simulation.exceptions.ProgramException;
-import simulizer.simulation.exceptions.StackException;
+import simulizer.simulation.exceptions.*;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.simulation.messages.DataMovementMessage;
@@ -173,11 +167,14 @@ public class CPU {
 		}
 	}
 
-	protected void waitForNextTick() {
+	protected void waitForNextTick() throws EndedException {
 		try {
 			if (isRunning) {
 				// if the clock is stopped then it advances by 1 tick to unlock this thread
 				clock.waitForNextTick();
+				if(!isRunning) {
+					throw new EndedException();
+				}
 				messageManager.waitForAll();
 			}
 		} catch (InterruptedException e) {
@@ -352,7 +349,8 @@ public class CPU {
 	 * @throws StackException
 	 *
 	 */
-	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+	protected void runSingleCycle() throws MemoryException, DecodeException,
+			InstructionException, ExecuteException, HeapException, StackException, EndedException {
 
 		// PC holds next instruction and is advanced by fetch,
 		// messages should be sent about this instruction instead
@@ -427,6 +425,7 @@ public class CPU {
 
 			try {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
+			} catch(EndedException ignored) {
 			} catch (MemoryException | DecodeException | InstructionException
 					| ExecuteException | HeapException | StackException e) {
 				sendMessage(new ProblemMessage(e));

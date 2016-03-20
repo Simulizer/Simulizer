@@ -34,11 +34,13 @@ public class AnimationProcessor {
     private final ScheduledExecutorService executorService;
     private final ScheduledFuture<?> executorTask;
     private final PriorityBlockingQueue<Animation> animationTasks;
+	private ArrayList<Animation> animationsForInstruction;
 	private long cycleStartTime; // in ms
 	private int cycleDelay; // in ms
+	private boolean showingWarning;
     public CPUListener cpuListener;
     public CPU cpuVisualisation;
-    public boolean showingWarning;
+
 
 	/**
 	 * Sets initial values and sets up the executor service and task
@@ -51,6 +53,7 @@ public class AnimationProcessor {
         cycleStartTime = -1;
         showingWarning = false;
 
+		animationsForInstruction = new ArrayList<>();
 		animationTasks = new PriorityBlockingQueue<>(10, (a1, a2) -> Integer.compare(a1.delayFromCycleStart, a2.delayFromCycleStart));
         executorService = Executors.newSingleThreadScheduledExecutor(
                 new ThreadUtils.NamedThreadFactory("CPU-Visualisation-Job-Dispatch"));
@@ -65,6 +68,7 @@ public class AnimationProcessor {
 	public synchronized void newCycle() {
 		cycleDelay = 0;
 		cycleStartTime = System.currentTimeMillis();
+		animationsForInstruction.clear();
 		if(!animationTasks.isEmpty()) {
 			try {
 				Thread.sleep(50);
@@ -130,27 +134,12 @@ public class AnimationProcessor {
     }
 
 	/**
-	 * Schedules animations without adding to the instruction list
+	 * Schedule several animation tasks with a fixed delay in between, and add to the previous instruction list
 	 * @param delay The speed of each animation
 	 * @param jobs The animations to run
-     */
-	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
-		// Set thisDelay to 0 for each separate instruction
-		int thisDelay = 0;
-		for(Runnable r : jobs) {
-			animationTasks.add(new Animation(cycleDelay, thisDelay, r));
-			// Add to the overall cycleDelay (only reset on each cycle) and thisDelay (reset each instruction)
-			cycleDelay += delay;
-			thisDelay += delay;
-		}
-	}
-
-	/**
-	 * Schedule several animation tasks with a fixed delay in between, and add to the previous instruction list
 	 */
-	public void scheduleRegularAnimations(String instructionName, int delay, Runnable... jobs) {
+	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
 		int thisDelay = 0;
-		ArrayList<Animation> animationsForInstruction = new ArrayList<>();
 		for(Runnable r : jobs) {
 			Animation animation = new Animation(cycleDelay, thisDelay, r);
 			animationTasks.add(animation);
@@ -159,9 +148,17 @@ public class AnimationProcessor {
 			cycleDelay += delay;
 			thisDelay += delay;
 		}
+	}
 
+	/**
+	 * Adds to the previous list of instructions
+	 * @param instructionName The name of the instruction
+	 */
+	public void addToPreviousList(String instructionName){
 		// Add to the list of previous instructions
-		cpuVisualisation.previousInstructions.addInstruction(instructionName, animationsForInstruction);
+		ArrayList<Animation> animations = new ArrayList<>();
+		animationsForInstruction.forEach(item -> animations.add(item));
+		cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
 	}
 
 	/**
@@ -171,12 +168,6 @@ public class AnimationProcessor {
 	public void replayAnimations(ArrayList<Animation> animations){
 		// Start a new cycle to get the timings right
 		newCycle();
-		for (Animation a : animations){
-			// Set the delayFromCycleStart time to the old delayFromInstructionStart time, this needs to be done as the
-			// fetch will add some time so for example the delayFromCycleStart could be 5000 meaning there would be a
-			// 5 second delay before the animation runs, which is not wanted on a replay.
-			a.delayFromCycleStart = a.delayFromInstructionStart;
-		}
 		animationTasks.addAll(animations);
 	}
 }

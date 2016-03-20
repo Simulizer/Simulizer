@@ -14,7 +14,7 @@
     -fx-background-color: #303030;
     -fx-padding: 2px;
     -fx-font-size: 16px;
-    -fx-font-family: monospace;
+    -fx-font-family: "Lucida Console", Monaco, monospace;
     -fx-stroke-width: 0.2;
     -fx-border-width: 1;
     -fx-border-radius: 0;

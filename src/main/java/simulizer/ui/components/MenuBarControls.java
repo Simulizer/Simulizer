@@ -2,7 +2,6 @@ package simulizer.ui.components;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -64,8 +63,9 @@ public class MenuBarControls {
 	private final ImageView stopHover;
 
 	private final Slider clockSpeedSlider;
-	private final int sliderMax = 200; // start from 0
-	private final double lgClockSpeedMin = Math.log(0.2);
+	private final ChangeListener<Number> sliderListener;
+	private final int sliderMax = 500; // start from 0
+	private final double lgClockSpeedMin = Math.log(0.05);
 	private final double lgClockSpeedMax = Math.log(2000);
 	private long lastClockSpeedSetTime;
 	private final Label clockSpeedLabel;
@@ -128,13 +128,14 @@ public class MenuBarControls {
 		clockSpeedSlider.setMin(0);
 		clockSpeedSlider.setMax(sliderMax);
 		clockSpeedSlider.setPrefWidth(250);
-		clockSpeedSlider.valueProperty().addListener((a, b, c) -> updateClockSpeed(false));
+		sliderListener = (a, b, c) -> updateClockSpeed(false);
+		clockSpeedSlider.valueProperty().addListener(sliderListener);
 		clockSpeedSlider.valueChangingProperty().addListener((a, b, c) -> updateClockSpeed(true));
 		// one notch per scroll, regardless of user scroll acceleration or other settings
 		clockSpeedSlider.setOnScroll((e) ->
 				clockSpeedSlider.setValue(clockSpeedSlider.getValue()+Math.signum(e.getDeltaY())));
-		setSliderToMatch(cpu.getCycleFreq());
 		clockSpeedSliderMenu.setGraphic(clockSpeedSlider);
+		setSliderToMatch(cpu.getCycleFreq());
 		clockSpeedSliderMenu.setStyle("-fx-padding:4px 5px 0px 0px;-fx-background-color:null;");
 
 		menu.getMenus().addAll(spacer, pausePlayMenu, resumeSingleMenu, stopMenu, clockSpeedSliderMenu, clockSpeedLabelMenu);
@@ -244,7 +245,6 @@ public class MenuBarControls {
 			double val = clockSpeedSlider.getValue();
 			double scale = (lgClockSpeedMax-lgClockSpeedMin) / sliderMax;
 			val = Math.exp(lgClockSpeedMin + scale * val);
-			clockSpeedLabel.setText("" + Math.round((val*10))/10.0 + " Hz");
 			cpu.setCycleFreq(val);
 			lastClockSpeedSetTime = currentTime;
 		}
@@ -252,7 +252,9 @@ public class MenuBarControls {
 	public void setSliderToMatch(double cyclesPerSecond) {
 		double scale = (lgClockSpeedMax-lgClockSpeedMin) / sliderMax;
 		double sliderVal = (Math.log(cyclesPerSecond) - lgClockSpeedMin) / scale;
+		clockSpeedSlider.valueProperty().removeListener(sliderListener);
 		clockSpeedSlider.setValue(sliderVal);
-		clockSpeedLabel.setText("" + Math.round(cyclesPerSecond*10)/10.0 + " Hz");
+		clockSpeedSlider.valueProperty().addListener(sliderListener);
+		clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
 	}
 }
