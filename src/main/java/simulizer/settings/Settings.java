@@ -94,6 +94,7 @@ public class Settings {
 					);	
 		settings.add(new ObjectSetting("logger", "Logger")
 				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
+				.add(new IntegerSetting("font-size", "Font Size", "Font size for the Program I/O", 15))
 				);
 		settings.add(new ObjectSetting("hlvis", "High Level Visualiser")
 				.add(new BooleanSetting("auto-open", "Automatically Open High Level Visualiser", "Automatically Open High Level Visualiser when a new visualisation is shown", true))

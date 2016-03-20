@@ -45,7 +45,8 @@
     "height": 235
   },
   "logger": {
-  	"emphasise": true
+  	"emphasise": true,
+    "font-size": 15
   },
   "hlviz": {
   	"auto-open": true

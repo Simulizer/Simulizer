@@ -20,6 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
@@ -143,7 +144,8 @@ public class Logger extends InternalWindow implements Observer {
 	public void ready() {
 		getWindowManager().getIO().addObserver(this);
 		emphasise = (boolean) getWindowManager().getSettings().get("logger.emphasise");
-
+		int fontSize = (int) getWindowManager().getSettings().get("logger.font-size");
+		
 		flush.scheduleAtFixedRate(() -> {
 			if (callUpdate) {
 				Platform.runLater(() -> {
@@ -154,6 +156,7 @@ public class Logger extends InternalWindow implements Observer {
 							if (!t.isSelected() && ioChanged[i])
 								t.setGraphic(notifyIcon);
 							outputs[i].setText(logs[i].toString());
+							outputs[i].setFont(new Font(fontSize));
 							ioChanged[i] = false;
 						}
 					}

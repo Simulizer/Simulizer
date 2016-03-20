@@ -15,8 +15,6 @@ LOOP:   addi $s0 $s0 1
 	li $v0 1
 	syscall # print int
 
-	# @{ setSpeed($s0.get()) }@
-
 	beq $s0 $t0 END
 	j LOOP
 END:	nop

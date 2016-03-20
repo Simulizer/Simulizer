@@ -26,11 +26,13 @@ public class ListModel extends DataStructureModel {
 
 	public void setList(List<Long> list) {
 		synchronized (this.list) {
-			this.list = new long[list.size()];
-			size = list.size();
+			synchronized (markers) {
+				this.list = new long[list.size()];
+				size = list.size();
 
-			for (int i = 0; i < list.size(); i++)
-				this.list[i] = list.get(i);
+				for (int i = 0; i < list.size(); i++)
+					this.list[i] = list.get(i);
+			}
 		}
 		setChanged();
 		notifyObservers(new ListAction());
@@ -46,7 +48,7 @@ public class ListModel extends DataStructureModel {
 
 	public void set(int i, Long item) {
 		synchronized (list) {
-			if (checkIndex(i)) 
+			if (checkIndex(i))
 				return;
 			list[i] = item;
 			setChanged();
@@ -56,9 +58,9 @@ public class ListModel extends DataStructureModel {
 
 	public void swap(int i, int j) {
 		synchronized (list) {
-			if (checkIndex(i)) 
+			if (checkIndex(i))
 				return;
-			if (checkIndex(j)) 
+			if (checkIndex(j))
 				return;
 
 			// Apply Update
@@ -74,9 +76,9 @@ public class ListModel extends DataStructureModel {
 
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
-			if (checkIndex(index)) 
+			if (checkIndex(index))
 				return;
-			
+
 			ArrayList<String> exMarkers = markers.get(index);
 			if (exMarkers != null)
 				exMarkers.add(markerName);
