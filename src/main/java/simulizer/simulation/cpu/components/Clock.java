@@ -34,8 +34,8 @@ public class Clock {
 	 */
 	private static final long MIN_PERIOD = 100;
 
-	// 5 seconds
-	private static final long MAX_PERIOD = 1000 * 1000 * 5;
+	// 10 seconds
+	private static final long MAX_PERIOD = 1000 * 1000 * 10;
 
 	/**
 	 * a delay <= this value is considered to be 'high speed'

@@ -365,7 +365,7 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
-			double currentRounded = Math.round(cpu.getCycleFreq()*10)/10.0;
+			double currentRounded = Double.parseDouble(String.format("%.5f", cpu.getCycleFreq()));
 			UIUtils.openDoubleInputDialog("Clock Speed", "Set Clock Speed:", "Cycles per second (Hz)", currentRounded, (val) -> {
 				if (val >= 0) {
 					cpu.setCycleFreq(val);
