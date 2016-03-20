@@ -29,7 +29,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 	private Thread updateThread;
 	private CountDownLatch updateWait;
-	private volatile boolean updatePaused = false;
+	private Boolean updatePaused = false;
 	private volatile boolean alive = false;
 
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
@@ -120,7 +120,11 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 						processChange(change);
 
 						// Wait if paused
-						if (updatePaused)
+						boolean hold = false;
+						synchronized (updatePaused) {
+							hold = updatePaused;
+						}
+						if (hold)
 							updateWait.await();
 
 						after = System.currentTimeMillis();
@@ -191,12 +195,14 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	}
 
 	protected void setUpdatePaused(boolean paused) {
-		if (updatePaused == paused) // No Change
-			return;
-		else if (!paused) // Resuming
-			updateWait.countDown();
-		else // Pausing
-			updateWait = new CountDownLatch(1);
-		updatePaused = paused;
+		synchronized (updatePaused) {
+			if (updatePaused == paused) // No Change
+				return;
+			else if (!paused) // Resuming
+				updateWait.countDown();
+			else // Pausing
+				updateWait = new CountDownLatch(1);
+			updatePaused = paused;
+		}
 	}
 }
