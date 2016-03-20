@@ -158,18 +158,12 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	@Override
 	public synchronized void processChange(ModelAction<?> action) {
 		synchronized (pegs) {
-			System.out.println("Pegs: " + pegs.get(0).size() + ", " + pegs.get(1).size() + ", " + pegs.get(2).size());
 			if (action instanceof Discs) {
 				Discs discs = (Discs) action;
 				pegs = discs.structure;
 				numDiscs = discs.numDiscs;
-				System.out.println("Discs " + discs.numDiscs + ": " + discs.structure.get(0).size() + ", " + discs.structure.get(1).size() + ", " + discs.structure.get(2).size() + "\n");
 			} else if (action instanceof Move) {
 				Move move = (Move) action;
-
-				if (move.structure.get(move.start).size() != pegs.get(move.start).size() - 1 || move.structure.get(move.end).size() != pegs.get(move.end).size() + 1)
-					System.out.println("INVALID MOVE");
-				System.out.println("Move " + move.start + "->" + move.end + ": " + move.structure.get(0).size() + ", " + move.structure.get(1).size() + ", " + move.structure.get(2).size());
 
 				int numDiscsOnStart = pegs.get(move.start).size();
 				int numDiscsOnEnd = pegs.get(move.end).size();
@@ -218,7 +212,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 					// Apply Update
 					synchronized (pegs) {
 						pegs = move.structure;
-						System.out.println("Pegs updated move\n");
 					}
 					setUpdatePaused(false);
 				});

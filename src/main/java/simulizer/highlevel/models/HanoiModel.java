@@ -47,8 +47,6 @@ public class HanoiModel extends DataStructureModel {
 			printError("There is no end peg " + endPeg);
 			return;
 		}
-		printError((startPeg + 1) + "->" + (endPeg + 1));
-
 		synchronized (pegs) {
 			// Apply Update
 			int item = -1;
