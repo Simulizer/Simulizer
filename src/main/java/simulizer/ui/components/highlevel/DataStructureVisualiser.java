@@ -80,7 +80,6 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 				else
 					hide();
 			}
-			repaint();
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
 			for (int i = 1; i < updateTimes.length; i++)
@@ -89,7 +88,6 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			if (lastUpdate != -1)
 				updateTimes[updateTimes.length - 1] = (int) (now - lastUpdate);
 			lastUpdate = now;
-			rateSkips();
 		}
 	}
 

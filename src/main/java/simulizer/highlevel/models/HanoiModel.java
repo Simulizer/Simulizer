@@ -13,8 +13,7 @@ public class HanoiModel extends DataStructureModel {
 
 	public HanoiModel(IO io) {
 		super(io);
-		for (int pegCount = 0; pegCount < 3; pegCount++)
-			pegs.add(new Stack<>());
+		setNumDisks(0);
 	}
 
 	public void setNumDisks(int n) {
@@ -22,8 +21,9 @@ public class HanoiModel extends DataStructureModel {
 			printError("Can not have " + n + " discs");
 			return;
 		}
-		numDiscs = n;
 		synchronized (pegs) {
+			numDiscs = n;
+
 			// Clear all pegs
 			pegs.clear();
 			for (int pegCount = 0; pegCount < 3; pegCount++)
@@ -47,6 +47,7 @@ public class HanoiModel extends DataStructureModel {
 			printError("There is no end peg " + endPeg);
 			return;
 		}
+		printError((startPeg + 1) + "->" + (endPeg + 1));
 
 		synchronized (pegs) {
 			// Apply Update
@@ -54,12 +55,12 @@ public class HanoiModel extends DataStructureModel {
 			try {
 				item = pegs.get(startPeg).pop();
 			} catch (EmptyStackException ex) {
-				printError("There are no discs on: " + startPeg);
+				printError("There are no discs on: " + (startPeg + 1));
 				return;
 			}
 			pegs.get(endPeg).push(item);
 		}
-		
+
 		// Notify Observers
 		setChanged();
 		notifyObservers(new Move(startPeg, endPeg));
