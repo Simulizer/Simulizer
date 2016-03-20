@@ -1,12 +1,14 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{mystyle}
-%\usepackage[backend=biber, 
-%  style=authoryear, 
-%  sorting=nyt, 
+%\usepackage[backend=biber,
+%  style=authoryear,
+%  sorting=nyt,
 %  urldate=long,
 %  maxcitenames=2]{biblatex}
 %\addbibresource{main.bib}
+
+\newcommand{\TODO}[1]{\textbf{{\color{red}TODO: }#1}}
 
 \title{
   \includegraphics[width=\textwidth]{segments/SimulizerLogo.png}
@@ -27,15 +29,24 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 % Section files
 \input{chapters/1-introduction.tex}
+\input{chapters/2-unit.tex}
+\input{chapters/3-integration.tex}
+\input{chapters/4-spim-compliance.tex}
+\input{chapters/5-functional.tex}
+\input{chapters/6-end-to-end.tex}
+\input{chapters/7-user.tex}
 
+\section{Appendix}
 \begin{landscape}
-\input{chapters/2-unit-testing.tex}
+  \input{chapters/appendix-unit.tex}
+  \input{chapters/appendix-integration.tex}
 \end{landscape}
 
-\input{chapters/functional-testing.tex}
+\input{chapters/appendix-functional.tex}
 
 % These don't work on my machine at the moment,
 % but they should work fine on a properly configured

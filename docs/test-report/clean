@@ -4,7 +4,7 @@
 
 REPORT_HOME=./
 DIRS=( "segments" "chapters" )
-DEL=( "aux" "log" "out" )
+DEL=( "aux" "log" "out" "toc" )
 
 cd ${REPORT_HOME}
 for t in "${DEL[@]}"

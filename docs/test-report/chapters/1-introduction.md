@@ -21,7 +21,7 @@ Due to the fact that our aim in this project is to make a better, more usable al
 To ensure that our system has the functionality that we intended to implement, we will go through each of the functional requirements defined in the software requirements specification and ensure that the system has met the requirement and that the feature is appropriate for our intended audience.
 
 ### End-to-end testing
-Since the system is intended to be used by a large number of users, we need to check its ease of use, consistency and reliability. To do this, we will devise various 'user experience paths', which will consist of a number of steps that a potential user would perform, and we will test whether the system operates as expected.
+We intend for this to be a usable system that could be used as a teaching/learning resource, therefore we feel it is important to perform end-to-end-tests, which will test the program flow of the system from starting to closing the application. To do this, we will devise various user scenarios/use cases, which will consist of a number of steps that a potential user would perform, and we will test whether the system operates as expected.
 
 ### User testing/evaluation
 The final area of our testing is user testing/evaluation. We are very fortunate to have a well defined set of users for this project and hence we intend to utilise this by getting opinions on our software and feedback from both a set of students taking the Computer Systems &amp; Architecture module, as well as the module lecturer, Ian Batten. Due to the agile nature of this project, we will able to do this continuously throughout the project, to give the best possible end product to our users.
