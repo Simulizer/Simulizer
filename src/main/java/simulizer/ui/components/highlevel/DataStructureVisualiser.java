@@ -168,9 +168,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			// Averages are too far apart, calculate a new rate
 			newRate += (avgProcess - avgUpdate) / (avgProcess * newRate);
 
-			// Limit the rate between 1 and 10
-			if (newRate > 10)
-				newRate = 10;
+			// Limit the rate between 1 and 20
+			if (newRate > 20)
+				newRate = 20;
 			else if (newRate < 1)
 				newRate = 1;
 			rate = newRate + 1;

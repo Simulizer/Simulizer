@@ -88,27 +88,29 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawStaticDiscs(GraphicsContext gc) {
-		for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
-			Stack<Integer> peg = pegs.get(pegIndex);
+		synchronized (pegs) {
+			for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
+				Stack<Integer> peg = pegs.get(pegIndex);
 
-			for (int i = 0; i < peg.size(); ++i) {
-				// n will go from the disc at the bottom to the top
-				// 0 means it's the smallest disc
-				int n = peg.get(i);
+				for (int i = 0; i < peg.size(); ++i) {
+					// n will go from the disc at the bottom to the top
+					// 0 means it's the smallest disc
+					int n = peg.get(i);
 
-				// Don't draw the animated disc
-				if (isUpdatePaused() && n == animatedDiscIndex)
-					continue;
+					// Don't draw the animated disc
+					if (isUpdatePaused() && n == animatedDiscIndex)
+						continue;
 
-				double discWidth = getDiscWidth(n, numDiscs);
-				double discY = getDiscY(i);
-				double discX = getPegX(pegIndex) - discWidth / 2;
+					double discWidth = getDiscWidth(n, numDiscs);
+					double discY = getDiscY(i);
+					double discX = getPegX(pegIndex) - discWidth / 2;
 
-				drawBorderedRectangle(gc, colorGradient[n % colorGradient.length], discX, discY, discWidth, discHeight);
+					drawBorderedRectangle(gc, colorGradient[n % colorGradient.length], discX, discY, discWidth, discHeight);
 
-				gc.setFill(colorGradient[n % colorGradient.length]);
-				gc.fillRect(discX, discY, discWidth, discHeight);
-				gc.strokeRect(discX, discY, discWidth, discHeight);
+					gc.setFill(colorGradient[n % colorGradient.length]);
+					gc.fillRect(discX, discY, discWidth, discHeight);
+					gc.strokeRect(discX, discY, discWidth, discHeight);
+				}
 			}
 		}
 	}
@@ -155,71 +157,76 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public synchronized void processChange(ModelAction<?> action) {
-		System.out.println("Pegs: " + pegs.get(0).size() + ", " + pegs.get(1).size() + ", " + pegs.get(2).size());
-		if (action instanceof Discs) {
-			Discs discs = (Discs) action;
-			pegs = discs.structure;
-			numDiscs = discs.numDiscs;
-			System.out.println("Discs " + discs.numDiscs + ": " + discs.structure.get(0).size() + ", " + discs.structure.get(1).size() + ", " + discs.structure.get(2).size() + "\n");
-		} else if (action instanceof Move) {
-			Move move = (Move) action;
-			
-			if (move.structure.get(move.start).size() != pegs.get(move.start).size() - 1 || move.structure.get(move.end).size() != pegs.get(move.end).size() + 1)
-				System.out.println("INVALID MOVE");
-			System.out.println("Move " + move.start + "->" + move.end + ": " + move.structure.get(0).size() + ", " + move.structure.get(1).size() + ", " + move.structure.get(2).size()  + "\n");
+		synchronized (pegs) {
+			System.out.println("Pegs: " + pegs.get(0).size() + ", " + pegs.get(1).size() + ", " + pegs.get(2).size());
+			if (action instanceof Discs) {
+				Discs discs = (Discs) action;
+				pegs = discs.structure;
+				numDiscs = discs.numDiscs;
+				System.out.println("Discs " + discs.numDiscs + ": " + discs.structure.get(0).size() + ", " + discs.structure.get(1).size() + ", " + discs.structure.get(2).size() + "\n");
+			} else if (action instanceof Move) {
+				Move move = (Move) action;
 
-			int numDiscsOnStart = pegs.get(move.start).size();
-			int numDiscsOnEnd = pegs.get(move.end).size();
+				if (move.structure.get(move.start).size() != pegs.get(move.start).size() - 1 || move.structure.get(move.end).size() != pegs.get(move.end).size() + 1)
+					System.out.println("INVALID MOVE");
+				System.out.println("Move " + move.start + "->" + move.end + ": " + move.structure.get(0).size() + ", " + move.structure.get(1).size() + ", " + move.structure.get(2).size());
 
-			animatedDiscIndex = pegs.get(move.start).peek();
-			this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, model.getNumDiscs());
+				int numDiscsOnStart = pegs.get(move.start).size();
+				int numDiscsOnEnd = pegs.get(move.end).size();
 
-			double startX = getPegX(move.start) - animatedDiscWidth / 2;
-			double startY = getDiscY(numDiscsOnStart);
+				animatedDiscIndex = pegs.get(move.start).peek();
+				this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, model.getNumDiscs());
 
-			double upX = startX;
-			double upY = pegY0 - canvas.getHeight() / 10;
+				double startX = getPegX(move.start) - animatedDiscWidth / 2;
+				double startY = getDiscY(numDiscsOnStart);
 
-			double shiftX = getPegX(move.end) - animatedDiscWidth / 2;
-			double shiftY = upY;
+				double upX = startX;
+				double upY = pegY0 - canvas.getHeight() / 10;
 
-			double endX = shiftX;
-			double endY = getDiscY(numDiscsOnEnd);
+				double shiftX = getPegX(move.end) - animatedDiscWidth / 2;
+				double shiftY = upY;
 
-			animatedDiscX.set(startX);
-			animatedDiscY.set(startY);
+				double endX = shiftX;
+				double endY = getDiscY(numDiscsOnEnd);
 
-			// @formatter:off
-			Timeline timeline = new Timeline(
-				new KeyFrame(Duration.seconds(0),
-					new KeyValue(animatedDiscX, startX),
-					new KeyValue(animatedDiscY, startY)
-				),
-				new KeyFrame(Duration.seconds(0.5),
-					new KeyValue(animatedDiscX, upX),
-					new KeyValue(animatedDiscY, upY)
-				),
-				new KeyFrame(Duration.seconds(0.8),
-					new KeyValue(animatedDiscX, shiftX),
-					new KeyValue(animatedDiscY, shiftY)
-				),
-				new KeyFrame(Duration.seconds(1.3),
-					e -> {
-						// Apply Update
+				animatedDiscX.set(startX);
+				animatedDiscY.set(startY);
+
+				// @formatter:off
+				Timeline timeline = new Timeline(
+					new KeyFrame(Duration.seconds(0),
+						new KeyValue(animatedDiscX, startX),
+						new KeyValue(animatedDiscY, startY)
+					),
+					new KeyFrame(Duration.seconds(0.5),
+						new KeyValue(animatedDiscX, upX),
+						new KeyValue(animatedDiscY, upY)
+					),
+					new KeyFrame(Duration.seconds(0.8),
+						new KeyValue(animatedDiscX, shiftX),
+						new KeyValue(animatedDiscY, shiftY)
+					),
+					new KeyFrame(Duration.seconds(1.3),
+						new KeyValue(animatedDiscX, endX),
+						new KeyValue(animatedDiscY, endY)
+					)
+				);
+				// @formatter:on
+				timeline.setCycleCount(1);
+				timeline.setRate(rate);
+				timeline.setOnFinished(e -> {
+					// Apply Update
+					synchronized (pegs) {
 						pegs = move.structure;
-						setUpdatePaused(false);
-					},
-					new KeyValue(animatedDiscX, endX),
-					new KeyValue(animatedDiscY, endY)
-				)
-			);
-			// @formatter:on
-			timeline.setCycleCount(1);
-			timeline.setRate(rate);
+						System.out.println("Pegs updated move\n");
+					}
+					setUpdatePaused(false);
+				});
 
-			timeline.play();
+				timeline.play();
 
-			setUpdatePaused(true);
+				setUpdatePaused(true);
+			}
 		}
 	}
 
