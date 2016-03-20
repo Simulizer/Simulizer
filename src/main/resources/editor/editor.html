@@ -137,13 +137,13 @@ function centerLine(line) {
     editor.scrollToLine(line, true, false, function() {});
 }
 
-function find(pattern, backwards) {
+function find(pattern, backwards, regex) {
 	var s = new Search();
 
 	s.needle = pattern;
 	s.wrap = true;
 	s.caseSensitive = true;
-	s.wholeWord = true;
+	s.regExp = regex;
 
 	if (backwards)
 		editor.findPrevious(s, false);
@@ -152,9 +152,9 @@ function find(pattern, backwards) {
 
     centerLine(getLine());
 }
-function findAll(pattern) {
+function findAll(pattern, regex) {
 	var s = new Search();
-	s.wholeWord = true;
+	s.regExp = regex;
 
 	editor.findAll(pattern, s, false);
 }
@@ -227,6 +227,7 @@ function clearPipelineHighlights() {
     session.removeGutterDecoration(pipelineHighlights[0], 'fetch');
     session.removeGutterDecoration(pipelineHighlights[1], 'decode');
     session.removeGutterDecoration(pipelineHighlights[2], 'execute');
+    session.clearAnnotations();
 }
 
 function highlightPipeline(fetchLine, decodeLine, executeLine) {

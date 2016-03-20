@@ -668,21 +668,21 @@ public class Editor extends InternalWindow {
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void findNext(String pattern) {
-		jsWindow.call("find", pattern, false);
+		jsWindow.call("find", pattern, false, false);
 	}
 
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void findPrevious(String pattern) {
-		jsWindow.call("find", pattern, true);
+		jsWindow.call("find", pattern, true, false);
 	}
 
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void findAll(String pattern) {
-		jsWindow.call("findAll", pattern);
+		jsWindow.call("findAll", pattern, false);
 	}
 
 	/**

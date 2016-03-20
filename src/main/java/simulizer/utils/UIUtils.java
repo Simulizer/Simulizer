@@ -60,11 +60,12 @@ public class UIUtils {
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setResizable(true);
 			alert.initOwner(Simulizer.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
-			alert.setContentText(StringUtils.wrapToWidth(message, 45));
+			alert.setContentText(message);
 			alert.show();
 		});
 	}
@@ -78,11 +79,12 @@ public class UIUtils {
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setResizable(true);
 			alert.initOwner(Simulizer.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
-			alert.setContentText(StringUtils.wrapToWidth(message, 45));
+			alert.setContentText(message);
 			alert.show();
 		});
 	}
@@ -149,6 +151,7 @@ public class UIUtils {
 				try {
 
 					Alert alert = new Alert(Alert.AlertType.ERROR);
+					alert.setResizable(true);
 					alert.initOwner(Simulizer.getPrimaryStage());
 					alert.setTitle("Exception");
 					setDialogBoxIcon(alert);
@@ -240,6 +243,7 @@ public class UIUtils {
 	 */
 	public static boolean confirm(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setResizable(true);
 		alert.initOwner(Simulizer.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
@@ -252,6 +256,7 @@ public class UIUtils {
 
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setResizable(true);
 		alert.initOwner(Simulizer.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
