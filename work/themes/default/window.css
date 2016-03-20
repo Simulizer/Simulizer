@@ -2,7 +2,7 @@
 
 .window {
     -fx-background-color: linear-gradient(to bottom, #dddddd 0%,#aaaabb 100%);
-    -fx-opacity: 0.95;
+    -fx-opacity: 0.98;
 }
 
 .window:hover {
@@ -11,8 +11,23 @@
 
 .window-titlebar {
     -fx-opacity: 1;
+    -fx-background-color: #303030;
+    -fx-padding: 2px;
+    -fx-font-size: 16px;
+    -fx-font-family: monospace;
+    -fx-stroke-width: 0.2;
+    -fx-border-width: 1;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
 }
 
+.custom-close-icon {
+    -fx-skin: "jfxtras.internal.scene.control.skin.window.DefaultWindowIconSkin";
+    -fx-shape: null;
+}
+
+
+/* emphasis */
 .window.highlighting .window-titlebar{
     -fx-background-color: #ED5F5F;
 }

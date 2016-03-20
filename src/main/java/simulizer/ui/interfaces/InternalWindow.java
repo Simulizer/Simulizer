@@ -11,7 +11,6 @@ import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
-import jfxtras.scene.control.window.CloseIcon;
 import jfxtras.scene.control.window.Window;
 import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
@@ -40,9 +39,8 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
-		// Adds close icon
-		CloseIcon close = new CloseIcon(this);
-		getRightIcons().add(close);
+		// Add close icon
+		getRightIcons().add(new CustomCloseIcon(this));
 
 		// Bring to front when clicked
 		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
