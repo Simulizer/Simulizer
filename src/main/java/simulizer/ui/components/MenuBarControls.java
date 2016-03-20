@@ -97,7 +97,7 @@ public class MenuBarControls {
 
 		Menu spacer = new Menu();
 		spacer.setDisable(true);
-		spacer.setStyle("-fx-padding: 0px 0px 0px 50px");
+		spacer.setStyle("-fx-padding: 0px 0px 0px 25px");
 
 		playPauseButton = new Button();
 		playPauseButton.setOnAction((e) -> playClicked());

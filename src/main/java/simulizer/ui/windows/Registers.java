@@ -33,14 +33,14 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Registers extends InternalWindow implements CPUChangedListener {
-	private TableView<Data> table = new TableView<Data>();
+	private TableView<Data> table = new TableView<>();
 	private CPU cpu;
 	private RegisterListener listener = new RegisterListener();
 	private ValueType valueType = ValueType.UNSIGNED;
 	private TableColumn<Data, String> valueCol;
 	private Timer refreshTimer;
 
-	private Set<Integer> changedRegisters = new HashSet<Integer>();
+	private Set<Integer> changedRegisters = new HashSet<>();
 
 	public Registers() {
 		widthProperty().addListener((o, old, newValue) -> {
@@ -76,7 +76,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 				changed = table.getItems().filtered(d -> changedRegisters.contains(d.id));
 				changedRegisters.clear();
 			}
-			changed.forEach(d -> d.refresh());
+			changed.forEach(Data::refresh);
 		}
 	}
 

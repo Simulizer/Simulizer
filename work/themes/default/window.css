@@ -2,7 +2,7 @@
 
 .window {
     -fx-background-color: linear-gradient(to bottom, #dddddd 0%,#aaaabb 100%);
-    -fx-opacity: 0.98;
+    -fx-opacity: 0.95;
 }
 
 .window:hover {
@@ -58,5 +58,19 @@
 .tab:selected .tab-label
 {
     -fx-text-fill: black;
+}
+
+
+
+/* custom styles */
+.logger-input {
+    -fx-font-size: 11pt;
+}
+.logger-submit {
+    -fx-font-size: 11pt;
+}
+
+.table-view {
+    -fx-font-size: 11pt;
 }
 
