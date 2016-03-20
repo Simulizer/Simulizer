@@ -21,6 +21,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
 
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private List<Stack<Integer>> pegs;
+	private volatile int numDiscs = 0;
 
 	private Canvas canvas = new Canvas();
 	private HanoiModel model;
@@ -45,6 +46,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		super(model, vis);
 		this.model = model;
 		pegs = model.getPegs();
+		numDiscs = model.getNumDiscs();
 		getChildren().add(canvas);
 
 		canvas.widthProperty().bind(super.widthProperty());
@@ -58,7 +60,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void repaint() {
+	public synchronized void repaint() {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		final double width = canvas.getWidth();
 		final double height = canvas.getHeight();
@@ -86,8 +88,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	private void drawStaticDiscs(GraphicsContext gc) {
-		int numDiscs = model.getNumDiscs();
-
 		for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
 			Stack<Integer> peg = pegs.get(pegIndex);
 
@@ -143,9 +143,9 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		this.pegHeight = height / 2;
 		this.pegWidth = width / 40;
 
-		this.discHeight = Math.min(height / 14, pegHeight / model.getNumDiscs());
+		this.discHeight = Math.min(height / 14, pegHeight / numDiscs);
 		this.maxDiscWidth = platformWidth / 3 - width / 120;
-		this.discWidthDelta = Math.min(width / 30, (maxDiscWidth - pegWidth - width / 120) / (model.getNumDiscs() - 1));
+		this.discWidthDelta = Math.min(width / 30, (maxDiscWidth - pegWidth - width / 120) / (numDiscs - 1));
 	}
 
 	@Override
@@ -154,12 +154,19 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	}
 
 	@Override
-	public void processChange(ModelAction<?> action) {
+	public synchronized void processChange(ModelAction<?> action) {
+		System.out.println("Pegs: " + pegs.get(0).size() + ", " + pegs.get(1).size() + ", " + pegs.get(2).size());
 		if (action instanceof Discs) {
 			Discs discs = (Discs) action;
 			pegs = discs.structure;
+			numDiscs = discs.numDiscs;
+			System.out.println("Discs " + discs.numDiscs + ": " + discs.structure.get(0).size() + ", " + discs.structure.get(1).size() + ", " + discs.structure.get(2).size() + "\n");
 		} else if (action instanceof Move) {
 			Move move = (Move) action;
+			
+			if (move.structure.get(move.start).size() != pegs.get(move.start).size() - 1 || move.structure.get(move.end).size() != pegs.get(move.end).size() + 1)
+				System.out.println("INVALID MOVE");
+			System.out.println("Move " + move.start + "->" + move.end + ": " + move.structure.get(0).size() + ", " + move.structure.get(1).size() + ", " + move.structure.get(2).size()  + "\n");
 
 			int numDiscsOnStart = pegs.get(move.start).size();
 			int numDiscsOnEnd = pegs.get(move.end).size();
@@ -200,8 +207,6 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 					e -> {
 						// Apply Update
 						pegs = move.structure;
-
-						repaint();
 						setUpdatePaused(false);
 					},
 					new KeyValue(animatedDiscX, endX),
