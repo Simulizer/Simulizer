@@ -1,23 +1,13 @@
 ##Michael Oultram##
 
-I came into team project thinking that I'd prefer to code alone, but leave wondering how I'll ever manage to code without a team. From the beginning this project seemed rather ambitious and definitely something that I could not complete alone.
+I came into team project thinking that I'd prefer to code alone, but leave wondering how I'll ever manage to code without a team. From the beginning this project seemed rather ambitious and definitely something that I could not complete alone. My role within the project is to act as the 'glue' between the simulation and the visualisation. While this did mean that I got to work on many different sections of the project, a lot of these sections were a collaboration.
 
-I see my role in the project as the 'glue' between the simulation and the visualisation.
+In the first week, Matt and Kelsey created a prototype of the modular UI. I expanded this prototype into the fully featured modular UI we have today. The underlying code structure of the Internal Windows was changed for greater control like automatically resizing the Internal Window and to make it easier for other parts of the application access these Internal Windows. I used this new code structure to create some of the more basic Internal Windows like the Registers, Program I/O and Help Windows.
 
-- I made sure that the parts of the system have the information they need.
+One of the features I added that the original UI prototype did not have is Layouts. Layouts took me multiple weeks to get working correctly but fortunately I could work on this feature in a different branch. This stopped everyone having to work with my broken code whilst I'm trying to develop it. Putting each feature in a branch allowed for me to easily switch between different parts of the application, and to priorities what features/bugs fixes were most important at the time.
 
-- Layouts and themes
-
-- Menu Bar
+- Themes
 
 - Settings
 
-- Behind the scenes code to control Internal Windows and when they show.
-
-- Some of the basic Internal Windows (Registers, Program I/O, Help Windows).
-
-- Separating the annotation models from the High Level Visualisation. Created the models.
-
-- Helped out team wherever I could (i.e. Performance threads).
-
-- Team members are great testers.
+I found working in a team quite beneficial in some circumstances. For example, I've had some code that I've written refactored to use the new double colon notation (something I wouldn't have known about otherwise). Team members are also a great way to test my code works, as I'm quickly notified if I've broken anything or if I could write something in a better way. I'd like to think I have returned to favour as I helped Kelsey convert the High Level Visualisations to use an MVC pattern and I helped out with thread synchronization in places.
