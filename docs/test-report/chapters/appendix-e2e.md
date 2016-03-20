@@ -46,7 +46,7 @@ Each of these tests will start with all windows closed.
   11. `Ctrl + g` then `55`.
   12. `Ctrl + f` then `text`.
   13. Select `read_input` on line 14 then `Ctrl + x`. Then move the cursor onto line 15 and press `Ctrl + v`. Select `read_input` again and press `Ctrl + c`, then move the cursor to the end of line 14 and press `Ctrl + v`.
-  14. `Edit -> Toggle Word Wrap`.
+  14. `Edit -> Toggle Word rap`.
 - **Expected**:
   * Open dialog shown.
   * Text from `bubblesort.s` is loaded into the editor.
@@ -60,7 +60,7 @@ Each of these tests will start with all windows closed.
 
 ![](segments/end-to-end/editor-open-dialog.png)
 
-![](segments/end-to-end/editor-fold.png)
+![](segments/end-to-end/editor-fold.png
 
 ![](segments/end-to-end/editor-edit.png)
 
@@ -97,9 +97,58 @@ Each of these tests will start with all windows closed.
   * After modifying each line, the editor should update to indicate that the line no longer contains an error.
 - **Actual**: As expected (see below).
 
+## Registers window ##
+
+Test ID: TC-E2Ex
+
+- **Description**: Check that the information in the `Registers` window updates as the simulation runs.
+- **Input**: `.text; main:; li $a0 55`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Registers` window.
+  3. Press `Ctrl + n` in the editor.
+  4. Type the input text into the editor.
+  5. Run the simulation.
+- **Expected**:
+  * The value of `a0` in the `Registers` window should change from 0 to 55.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Columns in `Registers` window should allow sorting.
+- **Input**: `add.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Registers` window.
+  3. Open `add.s`.
+  4. Run the simulation.
+  5. Click the `Register` heading in the `Registers` window, then click it again.
+  6. Click the `Unsigned` heading in the `Registers` window, then click it again.
+- **Expected**:
+  * The data in the table is sorted based on the `Register` column in the `Registers` window, either alphabetically a-z or z-a, then after clicking it again it should sort in the opposite alphabetical order.
+  * Same as above but for the `Unsigned` column: it should sort alphabetically/numerically and then sort in the opposite order after the second click.
+- **Actual**: $\TODO{Get a correct result}. As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Registers window should allow the user to view the values of the registers as unsigned, signed, or in hexadecimal.
+- **Input**: `add.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Registers` window.
+  3. Open `add.s`.
+  4. Run the simulation.
+  5. Right click on the right-hand column and click `Signed`.
+  6. Right click on the right-hand column and click `Hexadecimal`.
+  7. Right click on the right-hand column and click `Unsigned`.
+- **Expected**:
+  * The right-hand column should show the value of the register in the selected form.
+- **Actual**: As expected (see below).
 
 
 <!--
+Test ID: TC-E2Ex
+
 - **Description**:
 - **Input**:
 - **Action**:
