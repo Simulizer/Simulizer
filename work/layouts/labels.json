@@ -1,5 +1,5 @@
 {
-  "name": "Default",
+  "name": "Labels",
   "windows": [
     {
       "id": "REGISTERS",
@@ -9,18 +9,25 @@
       "height": 0.4
     },
     {
-      "id": "LOGGER",
-      "x": 0.65,
-      "y": 0.4,
-      "width": 0.35,
-      "height": 0.6
-    },
-    {
       "id": "EDITOR",
       "x": 0.0,
       "y": 0.0,
       "width": 0.65,
       "height": 1.0
+    },
+    {
+      "id": "LABELS",
+      "x": 0.65,
+      "y": 0.4,
+      "width": 0.35,
+      "height": 0.35
+    },
+    {
+      "id": "LOGGER",
+      "x": 0.65,
+      "y": 0.75,
+      "width": 0.35,
+      "height": 0.25
     }
   ]
 }

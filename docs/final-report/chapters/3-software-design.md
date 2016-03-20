@@ -7,6 +7,7 @@ In order to test this design, implementation began on the design to see if, at a
 After revising the design further, a design was created which can be viewed below in the first UML class diagram. This design still aimed for a faithful implementation of the processor but, in some cases, smaller components, such as the program counter are not in their own class, rather they are a field in the main CPU class. This design still kept more complex components separate, but gave a central class to work around. This also allowed the easy sending of messages through this central class and also made the components much more easy to unit test, since each major component could be tested in isolation. One could see these revisions as a refactoring for testability. Other features of this design include a much simpler method for changing the operation of the CPU through inheritance and a significantly reduced thread usage, which reduces the complexity of the simulation significantly. The following is the UML class diagram for the simulation design:
 
 <!-- UML Class Diagram here -->
+![UML simulation design](segments/uml-simulation.png){width=80%}
 
 In this design, the CPU class is the most important class, providing the central ‘hub’ for all of the other classes in the simulation. With respect to the actual CPU, this class abstractly represents the Control Unit, the Program Counter and the Instruction Register as well as the 32 general purpose registers. At a high level, this class also deals with the Instruction Execution Cycle. The fetch, decode and execute methods carry out each of the three main stages of the cycle respectively and the `runSingleCycle` and `runProgram` methods will go about running the program given to it, in accordance to the clock.
 
@@ -27,6 +28,8 @@ In addition to the classes used by the simulation as shown above, there are also
 The second group of classes are used for representing instruction formats, such as load instructions, instructions to read/write from registers, jumping instructions, instructions using a base/offset for addressing, and special instructions such as `syscall`. These all have a common base class and are used primarily by the decoder and executer to determine what should be done with a given instruction.
 
 The second important section of the design is that of the User Interface structure, the part of the system that will eventually be linked to the simulation. Fairly on, it was unanimously decided that the interface for the system would take a highly modular approach, with windows that can be switched/modified/resized at the user’s own wish. As well as providing a high level of usability (the user can personalise the system to whatever suits their needs best), it also allows a more straightforward design at the class level. The following is the class diagram for the UI structure:
+
+![UML diagram of user interface](segments/uml-ui.png){width=80%}
 
 The structure of the UI (due to the decision made on modularity) makes this design very hierarchical. The `WindowManager` class manages the separate window that may or may not be open at any given time, as well as dealing with the CPU object currently being used (in the respect that if the user changes the CPU execution type, a new object will have to be created, additionally it may register components to listen to the CPU).
 

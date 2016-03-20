@@ -203,7 +203,7 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.setLineWidth(2);
 		gc.setTextAlign(TextAlignment.CENTER);
 		gc.setTextBaseline(VPos.CENTER);
-		gc.setFont(new Font("Monospace", 15));
+		gc.setFont(new Font("Monospace", 12));
 
 		// The canvas controls its own width, but it needs to know
 		// the height of the scroll pane
@@ -536,7 +536,8 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		if (hOpt.isPresent()) {
 			String fortune = " ";
-			if (cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
+      String shouldShow = System.getProperty("easter-fortune");
+			if (shouldShow != null && shouldShow.equals("true") && cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
 
 			PipelineHazardMessage.Hazard h = hOpt.get();
 			return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);

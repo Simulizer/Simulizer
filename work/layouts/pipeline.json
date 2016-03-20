@@ -1,0 +1,26 @@
+{
+  "name": "Pipeline",
+  "windows": [
+    {
+      "id": "PIPELINE_VIEW",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1.0,
+      "height": 0.6
+    },
+    {
+      "id": "EDITOR",
+      "x": 0.0,
+      "y": 0.6,
+      "width": 0.6,
+      "height": 0.4
+    },
+    {
+      "id": "LOGGER",
+      "x": 0.6,
+      "y": 0.6,
+      "width": 0.4,
+      "height": 0.4
+    }
+  ]
+}
