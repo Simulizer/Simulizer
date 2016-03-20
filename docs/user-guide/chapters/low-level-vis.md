@@ -1,7 +1,18 @@
 # Low-level Visualisations #
 
 ## CPU Visualisation ##
-$\TODO{Theo could you write some stuff here?}$
+The CPU visualisation window allows you to view the processes involved when fetching, decoding and executing different types of MIPS instructions as the program is being executed. The window shows a block diagram containing different components of the CPU, for example the ALU along with others such as the main memory and program counter. When instructions are being executed, text will show at the top of the window, containing useful information about different stages of execution, for example that the values of two registers are being compared using the ALU.
+
+To use the CPU visualisation, make sure you set a low clock speed. Animations will only be shown at a clock speed of less than 2Hz. Although to effectively make use of the information, it's recommended to set a very low clock speed, such as 0.05Hz or lower. Alternatively, the single step feature is very useful when combined with the CPU visualisation and can be used to see how each instruction is executed one by one.
+
+When viewing the CPU visualisation, you will notice several things:
+
+- Components highlighting: This shows when different components are performing operations or are about to send data/signals to other components.
+- Data moving: These small circles show when data/signals are moving between components of the CPU, for example sending data to the ALU for comparison.
+- Replay window: This window contains the previous 10 instructions that have been executed, the "Replay" button can be used to replay the instruction if you missed anything.
+
+You can also view more information about each component by hovering over it with your mouse, a tooltip will show with a detailed description about the role of the component. This can be used to further your knowledge about how each component of the CPU works.
+
 $\TODO{take picture}$
 <!-- TODO take a nice picture of the CPU visualisation
 ![](segments/cpu-vis.png)
