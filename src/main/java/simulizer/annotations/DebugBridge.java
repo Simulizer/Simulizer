@@ -20,9 +20,9 @@ public class DebugBridge {
 
 	public void log(String string) {
 		if(io != null) {
-			io.printString(IOStream.DEBUG, "js: " + string + "\n");
+			io.printString(IOStream.DEBUG, "(js) " + string + "\n");
 		} else {
-			System.out.println("js: " + string);
+			System.out.println("(js) " + string);
 		}
 	}
 

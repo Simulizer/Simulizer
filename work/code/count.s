@@ -1,4 +1,3 @@
-# @{ setSpeed(1) }@
 
 # print the numbers from 1 to 100
 .data
