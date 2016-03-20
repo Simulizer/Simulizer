@@ -298,7 +298,10 @@ public class ListVisualiser extends DataStructureVisualiser {
 			// List changed
 			ListAction list = (ListAction) action;
 			synchronized (this.list) {
-				this.list = list.structure;
+				synchronized (markers) {
+					this.list = list.structure;
+					markers.clear();
+				}
 			}
 		}
 

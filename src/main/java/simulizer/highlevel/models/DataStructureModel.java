@@ -5,6 +5,12 @@ import java.util.Observable;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 
+/**
+ * Represents a data structure which can be manipulated via annotations
+ * 
+ * @author Michael
+ *
+ */
 public abstract class DataStructureModel extends Observable {
 	private IO io;
 	private boolean visible = false;
