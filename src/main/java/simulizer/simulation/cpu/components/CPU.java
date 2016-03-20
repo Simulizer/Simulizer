@@ -178,6 +178,7 @@ public class CPU {
 			if (isRunning) {
 				// if the clock is stopped then it advances by 1 tick to unlock this thread
 				clock.waitForNextTick();
+				messageManager.waitForAll();
 			}
 		} catch (InterruptedException e) {
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
@@ -356,8 +357,6 @@ public class CPU {
 		// PC holds next instruction and is advanced by fetch,
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
-
-		messageManager.waitForAll();
 
 		fetch();
 		sendMessage(new PipelineStateMessage(thisInstruction, null, null));
