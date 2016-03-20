@@ -1,3 +1,5 @@
+/* note: top, right, bottom, left */
+
 .window {
     -fx-background-color: linear-gradient(to bottom, #dddddd 0%,#aaaabb 100%);
     -fx-opacity: 0.95;
@@ -14,3 +16,32 @@
 .window.highlighting .window-titlebar{
     -fx-background-color: #ED5F5F;
 }
+
+
+/* tab styles */
+.tab-header-area {
+    -fx-padding: 0px; /* no gap between tab and top of header area */
+}
+.tab-pane
+{
+    -fx-tab-min-width: 5em;   /* so that all the tabs are roughly the same width */
+    /* locks the tab height */
+    -fx-tab-min-height: 25px;
+    -fx-tab-max-height: 25px;
+}
+.tab:selected {
+    /* prevent the ugly blue borders for the selected tab */
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: grey;
+    -fx-font-size: 14px;
+}
+.tab:selected .tab-label
+{
+    -fx-text-fill: black;
+}
+

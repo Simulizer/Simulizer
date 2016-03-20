@@ -47,6 +47,8 @@ public class MenuBarControls {
 	private final ButtonCPUListener listener;
 	private final WindowManager wm;
 
+	private final ImageView invisible;
+
 	private final Button playPauseButton;
 	private final ImageView playResting;
 	private final ImageView playHover;
@@ -77,6 +79,7 @@ public class MenuBarControls {
 		wm.addCPUChangedListener(changedListener);
 		cpu.registerListener(listener);
 
+		invisible = new ImageView(new Image(FileUtils.getResourcePath("/img/invisible.png")));
 
 		playResting = new ImageView(new Image(FileUtils.getResourcePath("/img/play.png")));
 		playHover = new ImageView(new Image(FileUtils.getResourcePath("/img/play-hover.png")));
@@ -179,7 +182,7 @@ public class MenuBarControls {
 				resumeSingleButton.setOnMouseEntered((e) -> resumeSingleButton.setGraphic(resumeSingleHover));
 				resumeSingleButton.setOnMouseExited((e) -> resumeSingleButton.setGraphic(resumeSingleResting));
 			} else {
-				resumeSingleButton.setGraphic(null);
+				resumeSingleButton.setGraphic(invisible);
 				resumeSingleButton.setTooltip(null);
 				resumeSingleButton.setOnMouseEntered(null);
 				resumeSingleButton.setOnMouseExited(null);
@@ -195,7 +198,7 @@ public class MenuBarControls {
 				stopButton.setOnMouseEntered((e) -> stopButton.setGraphic(stopHover));
 				stopButton.setOnMouseExited((e) -> stopButton.setGraphic(stopResting));
 			} else {
-				stopButton.setGraphic(null);
+				stopButton.setGraphic(invisible);
 				stopButton.setTooltip(null);
 				stopButton.setOnMouseEntered(null);
 				stopButton.setOnMouseExited(null);
