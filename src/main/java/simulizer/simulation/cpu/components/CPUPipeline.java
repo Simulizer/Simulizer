@@ -11,12 +11,7 @@ import simulizer.assembler.representation.operand.OperandFormat;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
-import simulizer.simulation.exceptions.DecodeException;
-import simulizer.simulation.exceptions.ExecuteException;
-import simulizer.simulation.exceptions.HeapException;
-import simulizer.simulation.exceptions.InstructionException;
-import simulizer.simulation.exceptions.MemoryException;
-import simulizer.simulation.exceptions.StackException;
+import simulizer.simulation.exceptions.*;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.instructions.JTypeInstruction;
@@ -190,7 +185,8 @@ public class CPUPipeline extends CPU {
 	 * this method will mimic a primitive pipeline instead of a sequential execution
 	 */
 	@Override
-	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException,
+			ExecuteException, HeapException, StackException, EndedException {
 
 		Address thisInstruction = programCounter;
 		if(this.canFetch&&this.isFinished==0){
