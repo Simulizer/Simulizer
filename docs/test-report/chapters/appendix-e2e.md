@@ -28,14 +28,29 @@ Each of these tests will start with all windows closed.
 
 ![](segments/end-to-end/editor-new-file-save-vim.png)
 
-**Test ID**: TC-E2Ex
+**Test ID**: TC-E2Ex  
 
-**Description**: Test general usability, e.g. open an existing file, scroll around the code, fold a section, etc.
+- **Description**: Test general usability, e.g. open an existing file, scroll around the code, fold a section, etc.
+- **Input**: `bubblesort.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. `Ctrl + o`.
+  3. Select `bubblesort.s`.
+  4. Scroll down to line 108.
+  5. Click the fold arrow next to the `108` line number.
+  6. Enter `potato` on line 104.
+  7. Edit the text on line 100 to say `# my new comment`.
+- **Expected**:
+  * Open dialog shown.
+  * Text from `bubblesort.s` is loaded into the editor.
+  * After clicking the fold button, lines 108-134 should be collapsed and the line numbers should show 108 then 135.
+  * A red box should appear around `potato`.
+- **Actual**: As expected (see below).
 
-**Input**: `bubblesort.s`
+![](segments/end-to-end/editor-open-dialog.png)
 
-**Action**:
+![](segments/end-to-end/editor-fold.png)
 
-**Expected**:
+![](segments/end-to-end/editor-error.png)
 
-**Actual**:
+![](segments/end-to-end/editor-edit.png)
