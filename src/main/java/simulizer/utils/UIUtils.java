@@ -143,7 +143,7 @@ public class UIUtils {
 			simultaneousExceptionDialogs.increment();
 			if(simultaneousExceptionDialogs.intValue() > 5) {
 				System.err.println("more exceptions follow but there are now too many to display");
-				return;
+				System.exit(1);
 			}
 			Platform.runLater(() -> {
 				try {

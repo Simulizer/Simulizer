@@ -27,6 +27,7 @@ label2: # @{ // annotation 2 }@
         # @{ // annotation 5 }@
 ```
 
+## Gotcha ##
 Be careful when binding annotations to branch instructions because the annotations will be executed regardless of whether the jump was made or not eg
 
 ```
@@ -56,6 +57,15 @@ Annotations bound to the same target are concatenated with newline characters pl
 # @{     else          }@
 # @{         return 0; }@
 # @{ }                 }@
+```
+
+### Gotcha ###
+this has the effect that if an exception is thrown in an annotation, none of the annotations below it that are bound to the same instruction are executed.
+
+```
+nop # @{ throw 'my exception'; }@
+
+    # @{ log('never executed') }@
 ```
 
 ## Scope ##
@@ -144,3 +154,6 @@ setSpeed = simulation.setSpeed
 ret() // behaves like a return statement, stops execution of the current annotation
 ```
 
+
+## Some Notes ##
+- the annotation end sequence: `}@` takes precedence over any javascript grammar rule. This means that in order to obtain the string `'}@'` you must use `'}'+'@'`
