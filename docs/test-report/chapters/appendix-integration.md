@@ -1,4 +1,4 @@
-## Integration Tests ##
+## Integration tests ##
 
 | TestID  | Components Integrated  | Program input  | Expected                   | Actual                     | Passed (Y/N) | Date passed |
 |:--------|:-----------------------|:---------------|:---------------------------|:---------------------------|:-------------|:------------|
