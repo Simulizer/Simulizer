@@ -54,6 +54,8 @@ public abstract class InternalWindow extends Window {
 		// For open animation
 		setScaleX(0);
 		setScaleY(0);
+		setMinWidth(0);
+		setMinHeight(0);
 	}
 
 	public void setToDefaultDimensions() {
