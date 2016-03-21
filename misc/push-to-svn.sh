@@ -6,6 +6,7 @@ SVNREPO=../A4
 # Delete everything (other than hidden files) from the svn repo
 cd ${SVNREPO}
 rm -rf final
+mkdir final
 cd -
 
 echo "Copying files to ${SVNREPO}/final ..."
