@@ -1,0 +1,71 @@
+/* note: top, right, bottom, left */
+.root {
+    -fx-font-family: OpenDyslexicMono;
+}
+
+.window {
+    -fx-background-color: white;
+    -fx-opacity: 0.95;
+    -fx-font-family: OpenDyslexicMono;
+}
+
+.window:hover {
+    -fx-opacity: 1;
+}
+
+.window-titlebar {
+    -fx-opacity: 1;
+    -fx-background-color: white;
+    -fx-padding: 3px;
+    -fx-font-size: 18px;
+    -fx-font-family: OpenDyslexicMono, "Lucida Console", Monaco, monospace;
+    -fx-fill: black;
+    -fx-stroke-width: 0.2;
+    -fx-border-width: 3;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+.custom-close-icon {
+    -fx-skin: "jfxtras.internal.scene.control.skin.window.DefaultWindowIconSkin";
+    -fx-border-color: black;
+    -fx-border-width: 3;
+}
+
+
+/* emphasis */
+.window.highlighting .window-titlebar{
+    -fx-background-color: #ED5F5F;
+}
+
+
+/* tab styles */
+.tab-header-area {
+    -fx-padding: 0px; /* no gap between tab and top of header area */
+}
+.tab-pane
+{
+    -fx-tab-min-width: 5em;   /* so that all the tabs are roughly the same width */
+    /* locks the tab height */
+    -fx-tab-min-height: 25px;
+    -fx-tab-max-height: 25px;
+}
+.tab:selected {
+    /* prevent the ugly blue borders for the selected tab */
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: grey;
+    -fx-font-size: 16px;
+}
+.tab:selected .tab-label
+{
+    -fx-text-fill: black;
+}
+
+
+
+
