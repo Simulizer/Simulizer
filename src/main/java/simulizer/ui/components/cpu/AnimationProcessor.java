@@ -68,14 +68,18 @@ public class AnimationProcessor {
 	public synchronized void newCycle() {
 		cycleDelay = 0;
 		cycleStartTime = System.currentTimeMillis();
-		animationsForInstruction.clear();
-		if(!animationTasks.isEmpty()) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				UIUtils.showExceptionDialog(e);
+		synchronized (animationsForInstruction) {
+			animationsForInstruction.clear();
+		}
+		synchronized (animationTasks) {
+			if (!animationTasks.isEmpty()) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					UIUtils.showExceptionDialog(e);
+				}
+				animationTasks.clear();
 			}
-			animationTasks.clear();
 		}
 	}
 
@@ -156,9 +160,11 @@ public class AnimationProcessor {
 	 */
 	public void addToPreviousList(String instructionName){
 		// Add to the list of previous instructions
-		ArrayList<Animation> animations = new ArrayList<>();
-		animationsForInstruction.forEach(item -> animations.add(item));
-		if(!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
+		synchronized (animationsForInstruction) {
+			ArrayList<Animation> animations = new ArrayList<>();
+			animationsForInstruction.forEach(item -> animations.add(item));
+			if(!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
+		}
 	}
 
 	/**
