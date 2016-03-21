@@ -1,0 +1,54 @@
+{
+  "debug": false,
+  "window": {
+    "width": 1024,
+    "height": 768
+  },
+  "workspace": {
+    "theme": "accessible",
+    "layout": "default.json",
+    "scale-ui": {
+      "enabled": true,
+      "delay": 10
+    },
+    "grid": {
+      "enabled": false,
+      "horizontal": 6,
+      "vertical": 3,
+      "sensitivity": 30.0,
+      "delay": 200
+    },
+    "lock-to-window": false
+  },
+  "simulation": {
+    "default-CPU-frequency": 4.0,
+    "zero-memory": true,
+    "pipelined": false
+  },
+  "editor": {
+    "font-family": "OpenDyslexicMono, monospace",
+    "font-size": 15,
+    "initial-file": "code/tower-of-hanoi.s",
+    "scroll-speed": 0.1,
+    "soft-tabs": true,
+    "theme": "ace/theme/high-viz",
+    "user-control-during-execution": false,
+    "vim-mode": false,
+    "wrap": false,
+    "continuous-assembly": true,
+    "continuous-assembly-refresh-period": 1500
+  },
+  "splash-screen": {
+    "enabled": true,
+    "delay": 750,
+    "width": 676,
+    "height": 235
+  },
+  "logger": {
+    "emphasise": true,
+    "font-size": 20
+  },
+  "hlvis": {
+    "auto-open": true
+  }
+}

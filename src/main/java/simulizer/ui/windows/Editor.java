@@ -1,10 +1,7 @@
 package simulizer.ui.windows;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
@@ -312,12 +309,29 @@ public class Editor extends InternalWindow {
 		jsWindow = new SafeJSObject((JSObject) engine.executeScript("window"));
 		jsWindow.setMember("bridge", bridge);
 
+
 		engine.executeScript(FileUtils.getResourceContent("/external/ace.js"));
+
 		engine.executeScript(FileUtils.getResourceContent("/external/mode-javascript.js"));
-		engine.executeScript(FileUtils.getResourceContent("/external/theme-ambiance.js"));
-		engine.executeScript(FileUtils.getResourceContent("/external/theme-chaos.js"));
-		engine.executeScript(FileUtils.getResourceContent("/external/theme-monokai.js"));
-		engine.executeScript(FileUtils.getResourceContent("/external/theme-tomorrow_night_eighties.js"));
+
+		// only load the javascript for the theme that the user selected
+		// this is fine since the settings can't change at runtime (the app must be closed)
+		String userTheme = (String) settings.get("editor.theme");
+		userTheme = userTheme.substring(userTheme.lastIndexOf("/")+1); // eg "/ace/theme/THEME" --> "THEME"
+		List<String> availableThemes = Arrays.asList(
+			"/editor/theme-high-viz.js",
+			"/external/theme-ambiance.js",
+			"/external/theme-chaos.js",
+			"/external/theme-monokai.js",
+			"/external/theme-tomorrow_night_eighties.js"
+		);
+		for(String theme : availableThemes) {
+			// eg "/external/theme-monokai.js" contains the substring "monokai"
+			if(theme.contains(userTheme)) {
+				engine.executeScript(FileUtils.getResourceContent(theme));
+			}
+		}
+
 		initSyntaxHighlighter();
 
 		jsWindow.call("init");

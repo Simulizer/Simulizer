@@ -15,6 +15,7 @@ public class Simulizer extends Application {
 	public static final String VERSION = "0.3 (beta)";
 	private static Image icon = null;
 	private static Stage primaryStage;
+	private static File settingsFile = new File("settings.json");
 
 	public WindowManager wm;
 	public Settings settings;
@@ -31,15 +32,31 @@ public class Simulizer extends Application {
 
 	public static void main(String[] args) {
 		Thread.setDefaultUncaughtExceptionHandler(UIUtils::showExceptionDialog);
+
+		boolean nextIsSettingsFilename = false;
+		for(int i = 0; i < args.length; i++) {
+			if(nextIsSettingsFilename) {
+				settingsFile = new File(args[i]);
+				nextIsSettingsFilename = false;
+			}
+
+			if(args[i].equals("-settings"))
+				nextIsSettingsFilename = true;
+		}
+		// arguments not provided
+		if(nextIsSettingsFilename)
+			throw new IllegalArgumentException("invalid command line arguments");
+
 		launch(args);
 	}
 
 	@Override
 	public void init() throws Exception {
 		try {
-			settings = Settings.loadSettings(new File("settings.json"));
+			settings = Settings.loadSettings(settingsFile);
 		} catch (IOException ex) {
-			UIUtils.showErrorDialog("Failed To Launch", "Failed to launch: settings.json was missing");
+			UIUtils.showErrorDialog("Failed To Launch", "Failed to launch: settings file: '" +
+					settingsFile.getPath() + "' was missing");
 			System.exit(1);
 		}
 	}

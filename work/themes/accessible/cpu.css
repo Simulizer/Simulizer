@@ -1,0 +1,34 @@
+.cpu-component{
+    -fx-stroke: "#1e3c72";
+    -fx-effect: dropshadow(gaussian , rgba(0,0,0,0.4) , 6,0,1,1 );
+    -fx-fill: #1e3c72;
+}
+
+.cpu-data{
+    -fx-fill: darkred;
+    -fx-stroke: darkred;
+}
+
+.cpu-arrowhead{
+    -fx-fill: "#1e3c72";
+    -fx-stroke: "#1e3c72";
+}
+
+.cpu-line{
+    -fx-stroke: "#1e3c72";
+}
+
+.cpu-component-label{
+    -fx-fill: "#fff";
+    -fx-text-alignment: center;
+    -fx-font: 16px "Arial, sans-serif";
+}
+
+.cpu-info-label-outer{
+    -fx-stroke: #1e3c72;
+    -fx-fill: #fff;
+}
+
+.cpu-info-label-text{
+    -fx-fill: "#000";
+}
