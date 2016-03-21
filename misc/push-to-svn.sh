@@ -5,8 +5,9 @@ SVNREPO=../A4
 
 # Delete everything (other than hidden files) from the svn repo
 cd ${SVNREPO}
-rm -rf final
-mkdir final
+ls | xargs rm -rf # delete all visible files
+rm -rf .gitignore # delete hidden files
+mkdir final       # recreate the final folder
 cd -
 
 echo "Copying files to ${SVNREPO}/final ..."
