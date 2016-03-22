@@ -75,6 +75,15 @@ public class CPUListener extends SimulationListener {
             case bne:
             case blez:
             case bltz:
+            case ble:
+            case bleu:
+            case b:
+            case bge:
+            case bgeu:
+            case bgt:
+            case bgtu:
+            case blt:
+            case bltu:
             {
                 int speed = getInstructionFraction(6);
 
