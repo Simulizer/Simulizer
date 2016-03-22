@@ -33,3 +33,11 @@ In order for the system to work correctly, there should be a `settings.json` fil
   |-- settings.json
   ...
   ```
+
+### Running from the jar ###
+
+If the Gradle script doesn't work, Simulizer is pre-packaged in the `simulizer.zip` folder. Simply extract this folder and then run the jar file, e.g.
+
+```
+java -jar Simulizer-x.yz.jar
+```
