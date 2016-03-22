@@ -2,13 +2,15 @@
 \usepackage{mystyle}
 \usepackage{customHighlighting}
 
-% Overwrite \begin{figure}[htbp] with \begin{figure}[H]
-\let\origfigure=\figure
-\let\endorigfigure=\endfigure
-\renewenvironment{figure}[1][]{%
-  \origfigure[H]
-}{%
-  \endorigfigure
+% Surround \includegraphic with \begin{figure}[htbp] with \begin{figure}[H]
+\AtBeginDocument{%
+  \let\incgraphic\includegraphic
+  \renewcommand{\includegraphic}{
+    \begin{figure}[H]
+      \centering
+      \incgraphic
+    \end{figure}
+  }
 }
 
 % To stop `code` from flowing off the page

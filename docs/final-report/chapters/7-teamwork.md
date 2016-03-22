@@ -15,7 +15,7 @@ We realised immediately that we would need some form of instant messaging for ou
 <img src="segments/slack.png" alt="slack" style="width:40%">
 -->
 
-![Slack](segments/slack.png) { width=80% }
+![Slack](segments/slack.png){width=80%}
 
 Occasionally we would use Skype if we needed to talk about something in more depth that we didn't get enough time to discuss during our meetings.
 
@@ -23,7 +23,7 @@ Early in the project, we invested some time into investigating tools that would 
 
 As a more general plan project management tool, we used [Wrike](https://www.wrike.com) as an idealistic model of how our project would develop. By being able to view the entire span of the project in a single place, it meant we could more selectively choose tasks for our sprints to ensure that we would meet these goals. For example, for the prototype presentation, we knew we had to focus more on visualisation so that we would have something to show for our work, even though a lot had been done in the backend.
 
-![Wrike](segments/wrike.png) { width=80% }
+![Wrike](segments/wrike.png){width=80%}
 
 Our approach of democratically making decisions was consciously chosen shortly after our team's formation. We agreed that if there were any minor disputes about a feature of the system then the team member 'in charge' of that feature would have a larger say in the final decision.
 
