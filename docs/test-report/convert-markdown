@@ -11,7 +11,7 @@ do
   cd "${REPORT_HOME}/${d}"
   for f in $( find . -name "*.md" ) 
   do
-    pandoc -f markdown -t latex ${f} > "$(basename ${f} .md).tex"
+    pandoc -f markdown_github+tex_math_dollars+inline_code_attributes+link_attributes -t latex ${f} > "$(basename ${f} .md).tex"
   done
   cd -
 done
