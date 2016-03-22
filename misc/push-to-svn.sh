@@ -14,6 +14,13 @@ echo "Copying files to ${SVNREPO}/final ..."
 for f in $(git ls-tree -r master --name-only); do
   cp --parents ${f} ${SVNREPO}/final
 done
+
+echo "Copying ace to ${SVNREPO}/final/build ..."
+mkdir ${SVNREPO}/final/build
+cp -r build/ace ${SVNREPO}/final/build
+
+echo "Copying custom build.gradle ..."
+cp misc/svn-build.gradle ${SVNREPO}/final/build.gradle
  
 echo "Writing git history ..."
 git log -p > ${SVNREPO}/final/git-history.txt
