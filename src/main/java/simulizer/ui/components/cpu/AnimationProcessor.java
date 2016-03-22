@@ -68,44 +68,39 @@ public class AnimationProcessor {
 	public synchronized void newCycle() {
 		cycleDelay = 0;
 		cycleStartTime = System.currentTimeMillis();
-		synchronized (animationsForInstruction) {
-			animationsForInstruction.clear();
-		}
-		synchronized (animationTasks) {
-			if (!animationTasks.isEmpty()) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					UIUtils.showExceptionDialog(e);
-				}
-				animationTasks.clear();
+		animationsForInstruction.clear();
+		if (!animationTasks.isEmpty()) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				UIUtils.showExceptionDialog(e);
 			}
+			animationTasks.clear();
 		}
 	}
 
 	/**
 	 * Processes animations jobs
 	 */
-	private void dispatchAnimationJobs() {
-		if(!animationTasks.isEmpty()) {
-			// Are there animation jobs?
-
-			// Is the clock speed too fast? If so show the warning label
-			if(cpuListener.getSimCpu().getCycleFreq() > 2) {
-				animationTasks.clear();
-				if(!showingWarning) {
-					cpuVisualisation.showText("Please lower the clock speed to less than 2Hz to see animations", 1000, false);
-					showingWarning = true;
+	private synchronized void dispatchAnimationJobs() {
+			if (!animationTasks.isEmpty()) {
+				// Are there animation jobs?
+				// Is the clock speed too fast? If so show the warning label
+				if (cpuListener.getSimCpu().getCycleFreq() > 2) {
+					animationTasks.clear();
+					if (!showingWarning) {
+						cpuVisualisation.showText("Please lower the clock speed to less than 2Hz to see animations", 1000, false);
+						showingWarning = true;
+					}
+					return;
 				}
-				return;
-			}
 
-			showingWarning = false;
-			synchronized (animationTasks) {
-				if (animationTasks.size() > 10) {
+				showingWarning = false;
+
+				if (animationTasks.size() > 15) {
 					// Too many animations, remove the lower priority ones
-					ArrayList<Animation> tmp = new ArrayList<>(10);
-					animationTasks.drainTo(tmp, 10);
+					ArrayList<Animation> tmp = new ArrayList<>(15);
+					animationTasks.drainTo(tmp, 15);
 					animationTasks.clear();
 					animationTasks.addAll(tmp);
 				}
@@ -118,7 +113,6 @@ public class AnimationProcessor {
 					animationTasks.poll().job.run();
 				}
 			}
-		}
 	}
 
 	/**
@@ -142,7 +136,7 @@ public class AnimationProcessor {
 	 * @param delay The speed of each animation
 	 * @param jobs The animations to run
 	 */
-	public void scheduleRegularAnimations(int delay, Runnable... jobs) {
+	public synchronized void scheduleRegularAnimations(int delay, Runnable... jobs) {
 		int thisDelay = 0;
 		for(Runnable r : jobs) {
 			Animation animation = new Animation(cycleDelay, thisDelay, r);
@@ -158,20 +152,18 @@ public class AnimationProcessor {
 	 * Adds to the previous list of instructions
 	 * @param instructionName The name of the instruction
 	 */
-	public void addToPreviousList(String instructionName){
+	public synchronized void addToPreviousList(String instructionName){
 		// Add to the list of previous instructions
-		synchronized (animationsForInstruction) {
-			ArrayList<Animation> animations = new ArrayList<>();
-			animationsForInstruction.forEach(item -> animations.add(item));
-			if(!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
-		}
+		ArrayList<Animation> animations = new ArrayList<>();
+		animationsForInstruction.forEach(item -> animations.add(item));
+		if (!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
 	}
 
 	/**
 	 * Replays animations
 	 * @param animations The animations to replay
      */
-	public void replayAnimations(ArrayList<Animation> animations){
+	public synchronized void replayAnimations(ArrayList<Animation> animations){
 		// Start a new cycle to get the timings right
 		newCycle();
 		animationTasks.addAll(animations);
