@@ -15,7 +15,7 @@ The integration tests will concern us integrating the different components of ou
 ### Comparison testing
 *Comparing our software's execution with that of existing software*
 
-Due to the fact that our aim in this project is to make a better, more usable alternative to existing software, we feel it is also a sensible idea to concern various outputs from our software with that of the existing software (Spim simulator in this case). This will tell us whether we have at least reached the same level of quality/accuracy as the current software and, hopefully, tell us where we have made an improvement of some sort. Since 
+Due to the fact that our aim in this project is to make a better, more usable alternative to existing software, we feel it is also a sensible idea to concern various outputs from our software with that of the existing software (Spim simulator in this case). This will tell us whether we have at least reached the same level of quality/accuracy as the current software and, hopefully, tell us where we have made an improvement of some sort. Since
 
 ### Functional testing
 To ensure that our system has the functionality that we intended to implement, we will go through each of the functional requirements defined in the software requirements specification and ensure that the system has met the requirement and that the feature is appropriate for our intended audience.

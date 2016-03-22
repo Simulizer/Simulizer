@@ -88,7 +88,7 @@
 
 **Description**: The user will only be able to open and save files with the “.s” extension - the extension for MIPS programs.
 
-**How it will be tested**: Click the `File->Open` menu item and check that only `.s` files are shown and only `.s` can be opened.
+**How it will be tested**: Click the `File` $\to$ `Open` menu item and check that only `.s` files are shown and only `.s` can be opened.
 
 ***Requirement 4.3.3.b***
 

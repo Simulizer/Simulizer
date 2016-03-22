@@ -46,7 +46,7 @@ Each of these tests will start with all windows closed.
   11. `Ctrl + g` then `55`.
   12. `Ctrl + f` then `text`.
   13. Select `read_input` on line 14 then `Ctrl + x`. Then move the cursor onto line 15 and press `Ctrl + v`. Select `read_input` again and press `Ctrl + c`, then move the cursor to the end of line 14 and press `Ctrl + v`.
-  14. `Edit -> Toggle Word rap`.
+  14. `Edit` $\to$ `Toggle Word wrap`.
 - **Expected**:
   * Open dialog shown.
   * Text from `bubblesort.s` is loaded into the editor.
@@ -97,7 +97,7 @@ Each of these tests will start with all windows closed.
   * After modifying each line, the editor should update to indicate that the line no longer contains an error.
 - **Actual**: As expected (see below).
 
-## Registers window ##
+### Registers window ###
 
 Test ID: TC-E2Ex
 
@@ -145,7 +145,7 @@ Test ID: TC-E2Ex
   * The right-hand column should show the value of the register in the selected form.
 - **Actual**: As expected (see below).
 
-## Labels window ##
+### Labels window ###
 
 Test ID: TC-E2Ex
 
@@ -198,7 +198,7 @@ Test ID: TC-E2Ex
   * All occurrences of the label `binary_search` should be highlighted after clicking `Select All`.
 - **Actual**: As expected (see below).
 
-## Layouts ##
+### Layouts ###
 
 Test ID: TC-E2Ex
 
@@ -225,6 +225,104 @@ Test ID: TC-E2Ex
   * `layout-save-test` should be available in the `Layouts` menu.
   * The layout should switch back to the layout that was specified after clicking `layout-save-test`.
 - **Actual**: As expected (see below).
+
+### General window functionality ###
+Test ID: TC-E2Ex
+
+- **Description**: Windows should resize correctly and reposition when dragged.
+- **Action**:
+  1. Open the `Editor` window.
+  2. Resize the window vertically from the top of the window.
+  3. Resize the window vertically from the bottom of the window.
+  4. Resize the window horizontally from the left of the window.
+  5. Resize the window horizontally from the right of the window.
+  6. Move the window around the screen.
+  7. Repeat from step 1 for all windows.
+- **Expected**:
+  * The window should resize and any appropriate contents should also resize.
+  * The content should be repositioned in the main window relative to its container window.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Internal windows should resize according to the size of the main window.
+- **Action**:
+  1. Open the default layout.
+  2. Resize the main window vertically from the top of the window.
+  3. Resize the main window vertically from the bottom of the window.
+  4. Resize the main window horizontally from the left of the window.
+  5. Resize the main window horizontally from the right of the
+  6. Repeat from step 1 for each layout.
+- **Expected**:
+  * Each internal window should resize according to its original size and the size of the main window.
+- **Actual**: As expected (see below).
+
+### Configuration/Options ###
+Test ID: TC-E2Ex
+
+- **Description**: Test that items in the options window change the program accordingly.
+- **Action**:
+  1. `File -> Options`.
+  2. Toggle on the `Debug Menu`.
+  3. Close the window.
+  4. Choose to restart the program.
+  5. Repeat from step 1 and test each possible item.
+- **Expected**:
+  * The program should update accordingly, e.g. after restarting the `Debug Menu` should appear in the menu bar.
+- **Actual**: As expected (see below).
+
+### Pipeline View ###
+
+Test ID: TC-E2Ex
+
+- **Description**: Pipeline view should only show one instruction at a time when CPU is non-pipelined.
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open `count.s`
+  3. Open the `Pipeline View` window.
+  4. `Simulation -> Toggle CPU Pipelining` (off).
+  5. Run the simulation.
+- **Expected**:
+  * The pipeline view should show an instruction in the fetch stage, then red circles for the decode and fetch stages. Then the same instruction should be shown in the decode stage and then the fetch stage, with the other stages being red circles each time.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**:
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open `count.s`
+  3. Open the `Pipeline View` window.
+  4. `Simulation -> Toggle CPU Pipelining` (on).
+  5. Run the simulation.
+  6. After 30 cycles have elapsed, uncheck the `Follow` option.
+  7. A few seconds later, check the `Follow` option again.
+  8. After 60 cycles have elapsed, pause the simulation.
+  9. Use the left and right keys to scroll around.
+  10. Enter 9999 in the `Go to` field.
+- **Expected**:
+  * The pipeline view shows the instructions before, in, and after the pipeline.
+  * After unchecking the `Follow` option, the window should stop snapping to the most recent stage in the pipeline and should be stationary.
+  * After re-checking the `Follow` option, it should continually snap to the most recent stage in the pipeline.
+  * After pausing the simulation, the pipeline view should be stationary.
+  * The correct instructions and pipeline stages should be shown when scrolling left and right.
+  * After entering 9999 in the `Go to` field, the view should snap to either cycle 9999 or the most recent cycle, and then the view should continue filling up with pipeline stages from left to right.
+- **Actual**: As expected (see below).
+
+### Program IO window ###
+
+
+### CPU visualisation window ###
+
+
+### High level visualisation window ###
+
+
+### Memory window ###
+
+### Error dialogs ###
 
 <!--
 Test ID: TC-E2Ex
