@@ -52,13 +52,16 @@
 \date{\today}
 
 \begin{document}
+\pagenumbering{gobble}
 \maketitle
 
 % Section files
 \input{chapters/1-introduction.tex}
-\newpage
+\clearpage
 \tableofcontents
-\newpage
+\clearpage
+
+\pagenumbering{arabic}
 
 \input{chapters/user-interface.tex}
 \newpage
