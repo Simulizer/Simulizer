@@ -45,6 +45,7 @@ external/
 .gradle/
 .gradletasknamecache
 gradle-app.setting
+misc/svn-build.gradle
 
 ## make sure to include this since jars are normally ignored
 !gradle-wrapper.jar
