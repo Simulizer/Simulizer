@@ -11,7 +11,11 @@ In order to keep track of the tasks for each sprint, and any issues in the proje
 
 We realised immediately that we would need some form of instant messaging for our communication outside meetings, so we wanted to find something that would be well suited to teamwork activities. We decided on [Slack](https://slack.com), which has many features particularly useful for software development. By using Slack, different team members could communicate in different channels about different issues. We were also able to integrate Taiga and our GitHub repository with Taiga. This notified us when a commit was made and when a task was changed on Taiga. It was easy to communicate with everyone on Slack, both because the software was useful, but also because everyone would keep Slack open at home, and messages wouldn't go unread or unanswered.
 
-![Slack](segments/slack.png){width=80%}
+<!-- This renders fine in if converting to HTML
+<img src="segments/slack.png" alt="slack" style="width:40%">
+-->
+
+![Slack](segments/slack.png) { width=80% }
 
 Occasionally we would use Skype if we needed to talk about something in more depth that we didn't get enough time to discuss during our meetings.
 
@@ -19,9 +23,9 @@ Early in the project, we invested some time into investigating tools that would 
 
 As a more general plan project management tool, we used [Wrike](https://www.wrike.com) as an idealistic model of how our project would develop. By being able to view the entire span of the project in a single place, it meant we could more selectively choose tasks for our sprints to ensure that we would meet these goals. For example, for the prototype presentation, we knew we had to focus more on visualisation so that we would have something to show for our work, even though a lot had been done in the backend.
 
-![Wrike](segments/wrike.png){width=80%}
+![Wrike](segments/wrike.png) { width=80% }
 
-We have been lucky to have very few conflicts in the team, and thankfully the conflicts that *did* happen where based around the design framework rather than personal issues. As mentioned, our team was very dedicated to the project, and so the conflicts were usually out of passion for a particular idea, and the discussions about these ideas allowed even better ideas and designs to come about. Moreover, each conflict was resolved before we moved; there wasn't an instance where a member just decided to do it 'their way' without prior agreement.
+We have been lucky <!--maybe don't say 'lucky'--> to have very few conflicts in the team, and thankfully the conflicts that *did* happen where based around the design framework rather than personal issues. As mentioned, our team was very dedicated to the project, and so the conflicts were usually out of passion for a particular idea, and the discussions about these ideas allowed even better ideas and designs to come about. Moreover, each conflict was resolved before we moved; there wasn't an instance where a member just decided to do it 'their way' without prior agreement.
 
 Our approach of democratically making decisions was consciously chosen shortly after our team's formation. We agreed that if there were any minor disputes about a feature of the system then the team member 'in charge' of that feature would have a larger say in the final decision.
 

@@ -50,7 +50,7 @@ The above code will log **BOTH** messages if the branch is taken and just the fi
 ## Grouping ##
 Annotations bound to the same target are concatenated with newline characters placed in between, this allows more complex expressions to be written clearly such as:
 
-```
+```javascript
 # @{ function f(x) {   }@
 # @{     if(x)         }@
 # @{         return 1; }@
@@ -134,7 +134,7 @@ Other variables
 ## Global Functions ##
 To increase brevity, certain commonly used methods from the bridges are assigned to global functions which can be called without qualification:
 
-```
+```javascript
 // Debug Bridge
 log    = debug.log
 print  = debug.log
