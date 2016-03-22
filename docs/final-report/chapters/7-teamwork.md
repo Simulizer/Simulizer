@@ -25,9 +25,9 @@ As a more general plan project management tool, we used [Wrike](https://www.wrik
 
 ![Wrike](segments/wrike.png) { width=80% }
 
-We have been lucky <!--maybe don't say 'lucky'--> to have very few conflicts in the team, and thankfully the conflicts that *did* happen where based around the design framework rather than personal issues. As mentioned, our team was very dedicated to the project, and so the conflicts were usually out of passion for a particular idea, and the discussions about these ideas allowed even better ideas and designs to come about. Moreover, each conflict was resolved before we moved; there wasn't an instance where a member just decided to do it 'their way' without prior agreement.
-
 Our approach of democratically making decisions was consciously chosen shortly after our team's formation. We agreed that if there were any minor disputes about a feature of the system then the team member 'in charge' of that feature would have a larger say in the final decision.
+
+Our democratic decision-making allowed us to avoid conflicts within the team. For example, if team members were passionate about an idea but with a differing opinion, each member was able to present their point of view, and then we could decide on a plan of action as a whole. As mentioned, our team is very dedicated to the project, and these discussions helped to manifest even better ideas and designs. Moreover, each discussion was settled before we moved on; there wasn't an instance where a team member decided to do it 'their way' without prior agreement, which meant everyone was aware of project decisions.
 
 Our meetings were always very lively with lots of ideas and discussions, which meant we never came away from a meeting wondering what we were going to do for our sprint. We made sure to assign tasks to each member before the meeting was over to ensure that everyone was able to contribute in order to achieve our team's full potential.
 
@@ -36,3 +36,5 @@ A feature of our teamwork and communication which has been integral to our devel
 We chose git as our version control system for various reasons. All of us were very familiar with git, meaning that we saved time by not relearning everything in svn. In addition, our branching model was achieved quite painlessly by using git. Merges were much easier than they would have been in svn, which allowed us to save valuable time during development. A small amount of research into the comparison of svn and git also helped us make this decision.
 
 Throughout the development of our system we needed a repository for files such as design documents, presentation slides, images, etc. We decided to use a shared Google Drive folder for this rather than our GitHub repository because we wanted to upload binary files and visual-based documents, which otherwise would have been more awkward to view and modify.
+
+By following a collaborative and efficient workflow throughout the project, we were able to stay motivated and focused in order to accomplish our goals.
