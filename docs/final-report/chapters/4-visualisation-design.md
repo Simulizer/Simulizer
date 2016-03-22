@@ -1,11 +1,7 @@
 #Visualisation Design#
-$\TODO{write section}$
+From a usability standpoint, there are certain unwritten HCI rules that makes software feels familiar to a new user. We wanted the UI to be very flexible, and so we had a look at how this could be achieved. One piece of software that has a very flexible UI is the desktop environment, and users of Simulizer should be very familiar with how that works. We decided to mimic a "desktop like" feel by putting each component of the system in it's own "Internal Window". Like a desktop environment, these Internal Windows can be moved, resized and closed based of the users preference. When the Main Simulizer window resized, all of the Internal windows resize to the new dimensions. This is so that if the resolution of the screen changes (maybe a project is connected), then all the Internal Windows resize to match the changes, and keep the Window layout consentient.
 
-##General##
-
-    - Windows resize automatically
-
-    - Themes/Accessibility
+Like a desktop environment, we wanted Simulizer to be customisable. There are many use cases on why customisability is a requirement. On example would be a colourbind user. They would prefer a more high contrast theme, and so by adding this functionality we have increased the accessibility of the project.
 
 ##CPU Visualisation##
 The CPU Visualisation is one of the most visual parts of the system, and allows to user to learn a great deal about how the CPU is working on instructions at a low level. For this reason it was crucial that a great of detail and thought was put into the design to allow ease of use for the user.
@@ -32,32 +28,21 @@ As the program is running, the pipeline view will start to populate and move alo
 Overall the pipeline view provides great detail and visual aspects to allow the user to quickly and easily learn more about pipelining, which is extremely difficult with existing resources. The user can easily see different stages of the pipeline such as fetch, decode and execute as well as see how instructions are moving through the different stages, as well as the pipeline hazards that occur.
 
 ##Editor##
+Because our user base of computer science students and lectures will be familiar with an IDE (integrated development environment), we thought that we should follow some of those conventions. One of the first features that people notice when they open an IDE is syntax highlighting. Syntax highlighting provides a link between what the code does and colour. This creates makes code more readable as it provides the user with instant recognition.
 
-    - Syntax highlighting
+The second feature that people notice about IDE's is error checking. Simulizer notifies the user of a mistake in their code by putting a red box around the mistake. Simulizer also puts a red X in the gutter (where all the line numbers are). When the user hovers over the X, they are presented with more information about the error. We felt it was important to not display the error all the time as the User might want to work on another part of the program before fixing the error.
 
-    - Gutter colours for different lines to show the different stages of the CPU cycle
+When a program is running, the current line that is being fetched/decoded/executed is highlighted in the gutter. We used colour s on  the red to green scale to indicate the process that each line needs to go through to be finally executed. These colours can be hovered over to describe to the user which stage each colour represents (more of as a reminder than as something that they will need to see all of the time).
 
-    - Errors have a red box around them, with a cross on the line. More information about the error on hover of cross
+##Program I/O##
 
-##Program IO##
+The Program I/O had a few design choices to improve it's usability. When we first added the Program I/O, it was very basic. It had a log of all the stuff the simulation outputted, and a way for the user to input data into the simulation. While this was functional, it was not up to our standards. For example, we found that we didn't notice when the simulation was waiting for an input. We fixed this issue by emphasising the Program I/O when input is required. This increased it's usability drastically, but we felt more could be done.
 
-    - Notifies user with a red dot when something is posted.
-
-    - Emphasise when the program is expecting an input.
+We had a look at the information that was being input/output to the logs, and realised that both MIPS and annotation outputs were being sent to the same place. We decided that we should split these different "streams" of information in the Program I/O to make it clear to the user where each message came from. Since it is only possible to see one of these streams at once, we notify the user with a red dot next to the tab when something is posted to that stream.
 
 ##High Level##
+We felt that the high level visualisations needed to be very colourful, and describe what is going on through animation. During the project we managed to write two different high level visualisations, one for visualising towers of hanoi and the other is for list visualisation. Both of these visualisations allow for swapping of elements/discs. These swaps are animated so that the user can see where the item started off, and trace it through to where it ends up.
 
-    - If the High Level Visualisation window is opened midway through a simulation, it can render the visuals for the current execution.
+For the Hanoi visualisation, each disc has a different colour (as well as a different size) to easily distinguish between them. This is a lot more visual and usable than having all of the discs look the same and putting a number in each disc.
 
-    - Hanoi
-        - Animations between swaps.
-
-        - Discs are different colours/sizes to make it more obvious than disc 1 - n
-
-
-    - Lists
-        - Swaps animations
-
-        - Emphasise list item being analysed
-
-        - Markers on list
+The list visualisation is a more general visualisation and therefore has a few more HCI components. There are emphasis and markers. Emphasise is a way to attract the users attention to a particular element of the list. It does this by flashing that element red. Red is a very prominent colour that can be easily seen in frontal vision. The reason we flashing the colour is to produces a sense of movement which can attract the users attention when the element is in the users peripheral vision.
