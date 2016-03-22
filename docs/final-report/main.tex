@@ -2,15 +2,13 @@
 \usepackage{mystyle}
 \usepackage{customHighlighting}
 
-% Surround \includegraphic with \begin{figure}[htbp] with \begin{figure}[H]
-\AtBeginDocument{%
-  \let\incgraphic\includegraphic
-  \renewcommand{\includegraphic}{
-    \begin{figure}[H]
-      \centering
-      \incgraphic
-    \end{figure}
-  }
+% Center graphics
+\LetLtxMacro\latexincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+  \begin{figure}[H]
+    \centering
+    \latexincludegraphics[#1]{#2}
+  \end{figure}
 }
 
 % To stop `code` from flowing off the page
