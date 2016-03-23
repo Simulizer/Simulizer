@@ -1,7 +1,10 @@
 package simulizer.ui.windows;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
@@ -685,6 +688,11 @@ public class Editor extends InternalWindow {
 		jsWindow.call("find", pattern, false, false);
 	}
 
+	public void findNextRegex(String regex) {
+		System.out.println(regex);
+		jsWindow.call("find", regex, false, true);
+	}
+
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
@@ -692,11 +700,19 @@ public class Editor extends InternalWindow {
 		jsWindow.call("find", pattern, true, false);
 	}
 
+	public void findPreviousRegex(String regex) {
+		jsWindow.call("find", regex, true, true);
+	}
+
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	public void findAll(String pattern) {
 		jsWindow.call("findAll", pattern, false);
+	}
+
+	public void findAllRegex(String regex) {
+		jsWindow.call("findAll", regex, true);
 	}
 
 	/**
