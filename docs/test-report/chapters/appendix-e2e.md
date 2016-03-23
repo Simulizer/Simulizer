@@ -312,17 +312,72 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Program IO window ###
+Test ID: TC-E2Ex
 
+- **Description**: Test that messages from the current program are sent to the Program IO window, i.e. check the output of the window.
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Program IO` window.
+  3. Open `count.s`.
+  4. Run the simulation.
+- **Expected**:
+  * The window should start showing the number 1, 2, 3 and so on.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Test that text entered by the user is passed to the system, i.e. check the input of the window.
+- **Input**: `add2.s`, `4`, `5`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Program IO` window.
+  3. Open `add2.s`
+  4. Run the simulation and follow any instructions.
+- **Expected**:
+  * The Program IO window should print `Enter A: `.
+  * After entering a number, it should then print `Enter B: `.
+  * Finally it should print the (correct) sum of A and B.
+- **Actual**: As expected (see below).
 
 ### CPU visualisation window ###
+Test ID: TC-E2Ex
 
+- **Description**: The CPU visualisation should update as the program runs.
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `CPU Visualisation` window.
+  3. Open `count.s`.
+  4. Set the clock speed to the minimum value.
+  4. Run the simulation.
+- **Expected**:
+  * Messages should appear in the CPU visualisation explaining what is currently happening.
+  * There should be animations along the bus lines to indicate the movement of data.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: The replay buttons should replay the correct instruction.
+- **Input**: `count.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `CPU Visualisation` window.
+  3. Open `count.s`.
+  4. Set the clock speed to the minimum value.
+  4. Run the simulation.
+  5. After several instructions have been executed, stop the simulation.
+  6. Click the replay button for one of the recorded instructions.
+  7. Click on each of the other replay buttons.
+- **Expected**:
+  * After pressing the replay button for a certain instruction, it should replay the animation as it was played when the simulation was running.
+- **Actual**: As expected (see below).
 
 ### High level visualisation window ###
 
 
-### Memory window ###
-
 ### Error dialogs ###
+
 
 <!--
 Test ID: TC-E2Ex

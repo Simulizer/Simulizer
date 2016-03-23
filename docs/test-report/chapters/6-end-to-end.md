@@ -11,7 +11,6 @@ The main components of the system that will be tested are:
 - High level visualisation window
 - Labels window <!---->
 - Pipeline window<!---->
-- Memory window
 - Registers window <!---->
 - General window functionality <!---->
 - Layouts <!---->
