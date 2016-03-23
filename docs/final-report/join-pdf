@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pdflatex join.tex 
+mv join.pdf A4Report.pdf
