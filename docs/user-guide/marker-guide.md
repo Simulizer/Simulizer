@@ -41,3 +41,6 @@ If the Gradle script doesn't work, Simulizer is pre-packaged in the `simulizer.z
 ```
 java -jar Simulizer-x.yz.jar
 ```
+
+### Version of Java ###
+You will need the most recent version of Java to run the system. It is for this reason that the lab machines in the School of Computer Science do not allow Simulizer to run.
