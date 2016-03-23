@@ -554,7 +554,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			Collections.shuffle(fortunes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			// Fail silently
 		}
 	}
 

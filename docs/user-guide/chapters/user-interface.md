@@ -97,7 +97,7 @@ The High Level Visualisation window is where visualisations from the [annotation
 For more information about the different data structures Simulizer can visualise, see [High Level Visualisation](#high-level)
 
 ### Labels ###
-![Labels window](segments/labels-window.png){ width=60% }
+![Labels window](segments/labels-window.png){ width=40% }
 
 The labels window allows you to view a quick outline of the labels in your program. By clicking on a row in the table, it will jump to the line where the label is defined. You can move to the next/previous occurrence of the label by clicking on the `Next`/`Previous` buttons. The `Select All` button will select each occurrence of the selected label, allowing you to easily see its usage.
 
@@ -111,6 +111,7 @@ This window has a three different tabs designed to keep the different I/O stream
 ### Memory View ###
 ![Memory View](segments/memView.png){ width=60% }
 This section is currently still in development.
+
 
 ### Options ###
 $\TODO{write section}$

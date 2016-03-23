@@ -2,6 +2,7 @@
 
 cd ..
 SVNREPO=../A4
+GUIDE=${SVNREPO}/final/docs/user-guide/marker-guide.md
 
 # Delete everything (other than hidden files) from the svn repo
 cd ${SVNREPO}
@@ -29,6 +30,9 @@ git log > ${SVNREPO}/final/git-log.txt
 
 # echo "Generating statistics document ..."
 # gitinspector --format=html --timeline --weeks --responsibilities >  ${SVNREPO}/stats.html
+
+echo "Copying marker guide to top level README.md ..."
+cp ${GUIDE} ${SVNREPO}/final/README.md
 
 cd ${SVNREPO}
 svn add --force *

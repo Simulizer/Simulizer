@@ -36,6 +36,7 @@ You can highlight all occurrences of a particular instruction by clicking on it.
 
 A maximum of 10,000 pipeline stages can currently be displayed (this is to mitigate problems with infinite loops etc.)
 
+
 ## Memory View ##
 ![Memory View](segments/memView.png)
 This component is still under development and so does not bear any functionality at this time.
