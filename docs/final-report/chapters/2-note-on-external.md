@@ -4,14 +4,14 @@ Throughout the development of Simulizer, in order to aid in the production of a 
 <!-- Ace Editor -->
 **Ace Editor** - a highly customisable text editor:
 
-- **Where it is used:** The Ace editor is the basis for the editor component used in Simulizer. It provides us with many more options for extensibility than the alternatives we considered. Beyond simply rendering coloured characters of the source code and the line numbers, all of the logic was created by us on top of the framework that Ace offers us. This logic includes rules for syntax highlighting (including the nesting of pre-packaged javascript highlighting rules inside SIMP comments), code folding, problem analysis & feedback and interactivity with line highlighting during the simulation. (Note: the colour schemes and javascript highlighting rules are not our own and are also BSD licensed)
+- **Where it is used:** The Ace editor is the basis for the editor component used in Simulizer. It provides us with many more options for extensibility than the alternatives we considered. Beyond simply rendering coloured characters of the source code and the line numbers, all of the logic was created by us on top of the framework that Ace offers us. This logic includes rules for syntax highlighting (including the nesting of pre-packaged javascript highlighting rules inside SIMP comments), code folding, problem analysis & feedback and interactivity with line highlighting during the simulation. (Note: the colour schemes and javascript highlighting rules are not our own and are also BSD licensed).
 - **License:** The Ace Editor is released under the BSD license.
 - **Link:** [https://ace.c9.io](https://ace.c9.io)
 
 <!-- ANTLR -->
 **ANTLR** - a parser generator for structured text:
 
-- **Where it is used:** ANTLR is used in the back-end of the system, providing structured input into the assembler. Using a parser-generator along with a grammar for our language (written by us) allows the assembler to traverse the parse tree and perform much better analysis and error checking of the user's programs than would be possible if we wrote our own parser. The parser is also fast enough to continuously parse and feed to our error checking code which provides real-time feedback for problems as the user types.
+- **Where it is used:** ANTLR is used in the back-end of the system, providing structured input into the assembler. After defining our own grammar, ANTLR then generated a parser which could analyse a user's code and produce a parse tree. The assembler can traverse the parse tree and perform analysis and error checking of the user's program. Using ANTLR allowed us to achieve more useful analysis and error checking than would have been possible due to the limited time for the project. The parser is also fast enough to continuously parse and feed to our error checking code which provides real-time feedback for problems as the user types.
 - **License:** ANTLR is released under the BSD license.
 - **Link:** [http://www.antlr.org/index.html](http://www.antlr.org/index.html)
 
