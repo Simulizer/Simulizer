@@ -8,7 +8,7 @@ import simulizer.simulation.messages.StageEnterMessage;
 import simulizer.ui.components.cpu.AnimationProcessor;
 
 /**
- * Handles communication between the CPU simulation and visualisation
+ * Handles communication between the CPU simulation and animation processor
  * @author Theo Styles
  */
 public class CPUListener extends SimulationListener {
@@ -19,7 +19,7 @@ public class CPUListener extends SimulationListener {
     private AnimationProcessor animationProcessor;
 
     /**
-     * Sets the visualisation, cpu simulation and the animation processor
+     * Sets the visualisation cpu, cpu simulation and the animation processor
      */
     public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, AnimationProcessor animationProcessor){
         this.cpu = cpu;
@@ -32,7 +32,7 @@ public class CPUListener extends SimulationListener {
     }
 
     /**
-     * get the duration of 1/n th of a single CPU cycle (fetch+decode+execute)
+     * Get the duration of 1/n th of a single CPU cycle (fetch+decode+execute)
      * @param oneOverFraction eg 3 => 1/3 of a cycle
      * @return the duration in ms
      */
@@ -52,20 +52,19 @@ public class CPUListener extends SimulationListener {
 
     /**
      * Processes a data movement message and updates the current instruction
-     * @param m The data message message
+     * @param message The data message message
      */
-    public void processDataMovementMessage(DataMovementMessage m) {
-        if(m.getInstruction().isPresent()){
-            currentInstruction = m.getInstruction().get().getInstruction();
+    public void processDataMovementMessage(DataMovementMessage message) {
+        if(message.getInstruction().isPresent()){
+            currentInstruction = message.getInstruction().get().getInstruction();
         }
     }
     /**
-     * Processes the current instruction
+     * Creates animations for the instructions and passes them to the animation processor
      * @param instruction The current instruction
      */
     public void processInstruction(Instruction instruction) {
-        if(instruction == null)
-            return;
+        if(instruction == null) return;
         String instructionName = instruction.toString();
         switch(instruction) {
             case beq:
@@ -281,16 +280,38 @@ public class CPUListener extends SimulationListener {
             case div:
             case divu:
             case mul:
+            case mulo:
+            case mulou:
             case nor:
             case xor:
             case or:
-            case slt:
-            case sltu:
-            case sll:
-            case srl:
-            case sra:
             case sub:
             case subu:
+            case rol:
+            case ror:
+            case rem:
+            case remu:
+            case slt:
+            case sltu:
+            case sllv:
+            case sle:
+            case sleu:
+            case seq:
+            case sge:
+            case sgeu:
+            case sgt:
+            case sgtu:
+            case sne:
+            case srav:
+            case srlv:
+            case sll:   // I-TYPE but R-TYPE data path
+            case srl:   // I-TYPE but R-TYPE data path
+            case sra:   // I-TYPE but R-TYPE data path
+            case abs:   // pseudo instruction
+            case neg:   // pseudo instruction
+            case negu:  // pseudo instruction
+            case not:   // pseudo instruction
+            case move:  // pseudo instruction
             {
                 processRType(instructionName);
                 animationProcessor.addToPreviousList(instructionName);
@@ -298,6 +319,8 @@ public class CPUListener extends SimulationListener {
             }
             case addi:
             case addiu:
+            case subi:
+            case subiu:
             case andi:
             case lbu:
             case lhu:
@@ -308,6 +331,9 @@ public class CPUListener extends SimulationListener {
             case slti:
             case sltiu:
             case lw:
+            case lh:
+            case lb:
+            case xori:
             {
                 processIType(instructionName);
                 animationProcessor.addToPreviousList(instructionName);
