@@ -1,7 +1,16 @@
 \documentclass[12pt, a4paper]{article}
-\usepackage[utf8]{inputenc}
+%\usepackage[utf8]{inputenc}
 \usepackage{mystyle}
 \usepackage{customHighlighting}
+
+% Center graphics
+\LetLtxMacro\latexincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+  \begin{figure}[H]
+    \centering
+    \latexincludegraphics[#1]{#2}
+  \end{figure}
+}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -33,7 +42,7 @@
 \date{\today}
 
 \begin{document}
-\pagenumbering{gobble} 
+\pagenumbering{gobble}
 \maketitle
 \tableofcontents
 \clearpage
@@ -47,6 +56,8 @@
 \input{chapters/5-functional.tex}
 \input{chapters/6-end-to-end.tex}
 \input{chapters/7-user.tex}
+
+\newpage
 
 \section{Appendix}
 \begin{landscape}

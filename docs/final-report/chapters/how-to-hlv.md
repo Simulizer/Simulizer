@@ -96,7 +96,7 @@ switch (visualiser) {
 Now the visualisation can be called via annotations in the user's code! To load the graph visualisation, use
 
 ```javascript
-# @{ # @{ var g = vis.load('graph') }@
+# @{ var g = vis.load('graph') }@
 ```
 
 More details on how to use visualisations can be found in the user guide.
