@@ -2,7 +2,6 @@
 Simulizer's visualisations can be easily extended because of the underlying design. The existing visualisations, e.g. tower of hanoi, are completely independent of the simulation and any other visualisations. In this section, we will describe how a new visualisation can easily be added to Simulizer.
 
 In the steps below, we will describe how a potential graph visualisation could be added. The following classes should be written by the developer:
-
 - `GraphModel`
 - `GraphVisualiser`
 
@@ -53,18 +52,9 @@ getChildren().add(canvas);
 
 to the constructor and then use the canvas in visualisations.
 
-Since `GraphVisualiser` is an `Observer`, we need an `update` method. The most important thing to do in the `update` method is to extract the new data to be visualised and then repaint/refresh the window. An example `update` for our `GraphVisualiser` would be:
+The `DataStructureVisualiser` class handles the animation timer, receiving messages, etc. We need to implement the `processChange` and  `repaint` methods. The `processChange` method should contain any logic, if any, for updating parameters for the view. For example, if animations are required, an animation timeline could be instantiated. You should call `setUpdatePaused(true)` at the end of the `processChange` method, and `setUpdatePaused(false)` should be called after any animations finish. The `repaint` method should repaint/resize the components in the window.
 
-```java
-@Override
-public void update(Observable o, Object obj) {
-  super.update(o, obj);
-  this.graph = model.getGraph();
-  repaint(); // uses this.graph to draw the graph
-}
-```
-
-To give your visualisation a name, override the `getName` method, e.g.
+By implementing the `getName` method you can give your visualisation a name, e.g.
 
 ```java
 @Override
@@ -82,7 +72,6 @@ public enum ModelType {
   HANOI, LIST, FRAME, GRAPH;
 }
 ```
-
 2. `HighLevelVisualisation`: we need to add our `GRAPH` enum as a case in the switch statement in the `addNewVisualisation` method:
 ```java
 switch (model.modelType()) {
@@ -98,10 +87,16 @@ switch (model.modelType()) {
 switch (visualiser) {
     ...
     case "graph":
-      model = new GraphModel();
+      model = new GraphModel(io);
       break;
 }
 ```
 
 ### Usage ###
-Now the visualisation can be called via annotations in the user's code! More details on how to use visualisations can be found in the user guide.
+Now the visualisation can be called via annotations in the user's code! To load the graph visualisation, use
+
+```javascript
+# @{ # @{ var g = vis.load('graph') }@
+```
+
+More details on how to use visualisations can be found in the user guide.
