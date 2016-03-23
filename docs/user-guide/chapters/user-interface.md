@@ -104,18 +104,20 @@ The labels window allows you to view a quick outline of the labels in your progr
 ### Program I/O ###
 The program I/O window provides a command line interface to communicate with your SIMP programs.
 
-![Program I/O](segments/program-io.png){ width=60% }
+![Program I/O](segments/program-io.png){ width=45% }
 
 This window has a three different tabs designed to keep the different I/O streams separate. The first tab is Standard which is where SIMP programs interact. The second tab outputs runtime errors in the SIMP program. The third tab is where the annotations communicate through, and so any log annotations will write to.
 
-<!--### Memory View ###
-$\TODO{write section}$-->
+### Memory View ###
+![Memory View](segments/memView.png){ width=60% }
+This section is currently still in development.
+
 
 ### Options ###
 $\TODO{write section}$
 
 ### Pipeline View ###
-$\TODO{take picture}$
+![Pipeline View](segments/pipeline.png){ width=60% }
 
 Here you can see the contents of the pipeline during each CPU cycle. To view the contents of this window, the CPU must be *running* and in *pipelined* mode. Once the simulation is running, you will see the screen start to fill up (from left to right) with instructions. The numbers at the bottom indicate which CPU cycle is shown in that column.
 
@@ -131,7 +133,7 @@ The control bar at the bottom of the window has the following features:
 Clicking on an instruction will highlight all of its occurrences. For more information about the pipeline visualisation, see [Pipeline Visualisation](#pipeline-view)
 
 ### Registers ###
-$\TODO{take picture}$
+![Register View](segments/registers.png){ width=60% }
 
 The Registers window provides a realtime view of the current value stored in each register. This value can be interpreted in three different ways (unsigned integer, signed integer and hexadecimal). To switch between these interpretations, right click on the column heading and select the interpretation you want.
 
@@ -139,7 +141,7 @@ The Registers window provides a realtime view of the current value stored in eac
 Layouts determine the configuration that all the Internal Windows are in. They allow you to quickly switch between different arrangements to optimise your workflow.
 
 ### Loading a Layout ###
-$\TODO{take picture}$
+![Loading a Layout](segments/layout.png){ width=60% }
 
 Simulizer includes many layouts for you to try. To change to one of these layout, go to the Menu Bar and click Layouts. This will bring up a list of all the layouts that you can choose. Just click one and the internal windows will rearrange themselves.
 

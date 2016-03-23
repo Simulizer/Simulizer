@@ -1,6 +1,8 @@
 package simulizer.ui.windows;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -43,8 +45,10 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 			if (label != null) {
 				refreshEditor();
 				if (editor != null) {
-					editor.gotoLine(label.getLine() - 1);
-					editor.findNext(label.label); // Now highlight the label
+					Platform.runLater(() -> {
+						editor.gotoLine(label.getLine() - 1);
+						editor.findNext(label.label); // Now highlight the label
+					});
 				}
 			}
 		});
@@ -63,7 +67,6 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 			if (editor != null) editor.addObserver(this);
 		}
 	}
-
 
 	@Override
 	public void setToDefaultDimensions() {
@@ -107,30 +110,35 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	/**
 	 * Populates the given list of labels with the list of labes in the given text
 	 *
-	 * @param text the text to analyse
+	 * @param text
+	 *            the text to analyse
 	 */
 	private static void getLabels(ObservableList<Label> answer, String text) {
-		Scanner reader = new Scanner(text);
+		Pattern r = Pattern.compile("\\s*\\b[a-zA-Z0-9_]*\\s*[:]");
 
-		for (int line = 1; reader.hasNext(); ++line) {
-			String s = reader.nextLine().trim();
-			int indexOfColon = s.indexOf(":");
+		// For finding other occurrences of labels: [^#]*\bLABEL\b
 
-			if (indexOfColon >= 1) {
-				boolean isLabel = true;
-				for (int i = 0; i < indexOfColon; ++i) {
-					String c = "" + s.charAt(i);
-					if (" #".contains(c)) {
-						isLabel = false;
-						break;
-					}
+		try (Scanner reader = new Scanner(text)) {
+			for (int lineNum = 1; reader.hasNext(); ++lineNum) {
+				String line = reader.nextLine();
+
+				while (!line.isEmpty()) {
+					int indexOfComment = line.indexOf("#");
+					Matcher matcher = r.matcher(line);
+
+					if (matcher.find()) {
+						String label = matcher.group(0);
+						assert (label != null);
+						label = label.trim().substring(0, label.trim().length() - 1); // cut off the colon
+
+						if (indexOfComment < 0 || matcher.start() < indexOfComment)
+							answer.add(new Label(label, lineNum));
+
+						line = line.substring(matcher.end());
+					} else break;
 				}
-
-				if (isLabel) answer.add(new Label(s.substring(0, indexOfColon), line));
 			}
 		}
-
-		reader.close();
 	}
 
 	@Override
@@ -151,9 +159,9 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		pane.setCenter(table);
 		pane.setCursor(Cursor.DEFAULT);
 
-		Button btnNext = new ActionButton("Next", Editor::findNext);
-		Button btnPrevious = new ActionButton("Previous", Editor::findPrevious);
-		Button btnAll = new ActionButton("Select All", Editor::findAll);
+		Button btnNext = new ActionButton("Next", Editor::findNextRegex);
+		Button btnPrevious = new ActionButton("Previous", Editor::findPreviousRegex);
+		Button btnAll = new ActionButton("Select All", Editor::findAllRegex);
 
 		HBox buttonContainer = new HBox();
 		buttonContainer.getChildren().addAll(btnPrevious, btnNext, btnAll);
@@ -174,7 +182,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 
 				if (editor != null) {
 					Label selectedLabel = table.getSelectionModel().getSelectedItem();
-					if (selectedLabel != null) action.run(editor, selectedLabel.getLabel());
+					if (selectedLabel != null) action.run(editor, "[^#]*\\b" + selectedLabel.getLabel() + "\\b");
 				}
 			});
 		}

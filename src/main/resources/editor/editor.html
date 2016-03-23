@@ -156,7 +156,7 @@ function findAll(pattern, regex) {
 	var s = new Search();
 	s.regExp = regex;
 
-	editor.findAll(pattern, s, false);
+	editor.findAll(pattern, s, regex);
 }
 
 function refreshProblems() {

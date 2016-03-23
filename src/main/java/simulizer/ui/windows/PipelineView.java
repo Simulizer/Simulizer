@@ -165,18 +165,24 @@ public class PipelineView extends InternalWindow implements Observer {
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
 			if (!isRunning) return;
 
-			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
-
 			String newText;
 
-			if (cycleAndAddress.isPresent()) {
-				Pair<Integer, Address> ca = cycleAndAddress.get();
-				int cycle = ca.getKey();
-				Address addr = ca.getValue();
+			double x = e.getX(), y = e.getY();
+			// Don't show information above and below the pipeline if non-pipelined
+			if (!isPipelined && (y < rectGap / 2 + 3 * (rectGap + rectWidth) || y > rectGap / 2 + 6 * (rectGap + rectWidth))) {
+				newText = DEFAULT_INSTR;
+			} else {
+				Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(x, y);
 
-				newText = addr == null ? getHazardInfo(cycle) : getAddressInfo(addr);
-			} else newText = DEFAULT_INSTR;
 
+				if (cycleAndAddress.isPresent()) {
+					Pair<Integer, Address> ca = cycleAndAddress.get();
+					int cycle = ca.getKey();
+					Address addr = ca.getValue();
+
+					newText = addr == null ? getHazardInfo(cycle) : getAddressInfo(addr);
+				} else newText = DEFAULT_INSTR;
+			}
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
@@ -234,7 +240,7 @@ public class PipelineView extends InternalWindow implements Observer {
 				else yTop += rectGap + rectWidth;
 			}
 
-			yTop = rectGap/2 + 3 * (rectGap + rectWidth);
+			yTop = rectGap / 2 + 3 * (rectGap + rectWidth);
 
 			List<Address> pipeline = Arrays.asList(state.fetched, state.decoded, state.executed);
 			for (Address stage : pipeline) {
@@ -243,7 +249,7 @@ public class PipelineView extends InternalWindow implements Observer {
 				} else yTop += rectGap + rectWidth;
 			}
 
-			yTop = rectGap/2 + 6 * (rectGap + rectWidth);
+			yTop = rectGap / 2 + 6 * (rectGap + rectWidth);
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
@@ -536,8 +542,9 @@ public class PipelineView extends InternalWindow implements Observer {
 
 		if (hOpt.isPresent()) {
 			String fortune = " ";
-      String shouldShow = System.getProperty("easter-fortune");
-			if (shouldShow != null && shouldShow.equals("true") && cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0) fortune = fortunes.get(cycle / 100);
+			String shouldShow = System.getProperty("easter-fortune");
+			if (shouldShow != null && shouldShow.equals("true") && cycle > 0 && cycle % 100 == 0 && fortunes.size() > 0)
+				fortune = fortunes.get(cycle / 100);
 
 			PipelineHazardMessage.Hazard h = hOpt.get();
 			return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
@@ -545,6 +552,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	}
 
 	private static List<String> fortunes = new ArrayList<>();
+
 	{
 		try (BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
 
@@ -554,7 +562,7 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			Collections.shuffle(fortunes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			// Fail silently
 		}
 	}
 
