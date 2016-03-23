@@ -2,6 +2,7 @@ package simulizer;
 
 import java.io.File;
 import java.io.IOException;
+
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -13,6 +14,7 @@ import simulizer.utils.UIUtils;
 
 public class Simulizer extends Application {
 	public static final String VERSION = "0.3 (beta)";
+	public static final String REPO = "https://github.com/ToastNumber/Simulizer";
 	private static Image icon = null;
 	private static Stage primaryStage;
 	private static File settingsFile = new File("settings.json");

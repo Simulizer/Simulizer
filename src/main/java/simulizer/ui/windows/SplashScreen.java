@@ -24,8 +24,13 @@ import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
- * A spash screen to show at startup
- * Thanks to: https://gist.github.com/jewelsea/2305098
+ * A splash screen component to be displayed before the main application opens.
+ * It displays the names of the authors, the current version, and the
+ * remote repository for the project.
+ *
+ * @author Kelsey McKenna
+ *         with thanks from https://gist.github.com/jewelsea/2305098
+ *
  */
 public class SplashScreen {
 	private int width, height;
@@ -43,7 +48,8 @@ public class SplashScreen {
 		image = FileUtils.getResourcePath("/img/SimulizerLogo.png");
 		splash = new ImageView(new Image(image, width, height, true, true));
 
-		Label progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n" + "Version: " + Simulizer.VERSION + "\n" + "https://github.com/ToastNumber/Simulizer");
+		Label progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n"
+			+ "Version: " + Simulizer.VERSION + "\n" + Simulizer.REPO);
 
 		layout = new VBox();
 		layout.getChildren().addAll(splash, progressText);
@@ -56,7 +62,14 @@ public class SplashScreen {
 		delay = (int) settings.get("splash-screen.delay");
 	}
 
-
+	/**
+	 * Shows the splash screen
+	 *
+	 * @param s
+	 *            the main entry class for the system
+	 * @param primaryStage
+	 *            the stage used to for the main application
+	 */
 	public void show(Simulizer s, Stage primaryStage) {
 
 		Stage stage = new Stage(StageStyle.DECORATED);
@@ -71,17 +84,14 @@ public class SplashScreen {
 					ThreadUtils.platformRunAndWait(() -> s.launchWindowManager(primaryStage));
 					updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 					long offset = delay - (System.currentTimeMillis() - startTime);
-					if (offset > 0)
-						Thread.sleep(offset);
+					if (offset > 0) Thread.sleep(offset);
 					return true;
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					UIUtils.showExceptionDialog(e);
 					return false;
 				}
 			}
 		};
-
-
 
 		startupTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 			if (newState == Worker.State.SUCCEEDED) {

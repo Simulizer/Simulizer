@@ -19,6 +19,17 @@ import simulizer.highlevel.models.HanoiModel.Move;
 import simulizer.highlevel.models.ModelAction;
 import simulizer.ui.windows.HighLevelVisualisation;
 
+/**
+ * Performs the computations in order to visualise the Towers of Hanoi game.
+ * It visualises the three pegs, the base platform, and an arbitrary number of discs.
+ *
+ * When a disc moves from one peg to another it is animated by moving up the peg, horizontally
+ * across over the destination peg, and then downwards along the destination peg until it reaches
+ * the lowest possible point.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	private List<Stack<Integer>> pegs;
 	private volatile int numDiscs = 0;
@@ -72,10 +83,17 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		drawBase(gc);
 		drawStaticDiscs(gc);
 		if (isUpdatePaused()) {
-			drawBorderedRectangle(gc, colorGradient[animatedDiscIndex % colorGradient.length], animatedDiscX.doubleValue(), animatedDiscY.doubleValue(), animatedDiscWidth, discHeight);
+			drawBorderedRectangle(gc, colorGradient[animatedDiscIndex % colorGradient.length], animatedDiscX.doubleValue(),
+				animatedDiscY.doubleValue(), animatedDiscWidth, discHeight);
 		}
 	}
 
+	/**
+	 * Draws the base platform and the pegs of the game
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawBase(GraphicsContext gc) {
 		gc.setFill(Color.BLACK);
 
@@ -87,6 +105,12 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 			gc.fillRect(getPegX(i) - pegWidth / 2, pegY0, pegWidth, pegHeight + 2); // + 2 to avoid gap between peg and platform
 	}
 
+	/**
+	 * Draws the discs that are not being animated.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawStaticDiscs(GraphicsContext gc) {
 		synchronized (pegs) {
 			for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
@@ -98,8 +122,7 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 					int n = peg.get(i);
 
 					// Don't draw the animated disc
-					if (isUpdatePaused() && n == animatedDiscIndex)
-						continue;
+					if (isUpdatePaused() && n == animatedDiscIndex) continue;
 
 					double discWidth = getDiscWidth(n, numDiscs);
 					double discY = getDiscY(i);
@@ -115,6 +138,22 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		}
 	}
 
+	/**
+	 * Helper method for drawing a rectangle with a border.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param fill
+	 *            the main color for the rectangle
+	 * @param x
+	 *            the x coordinate of the top-left of the rectangle
+	 * @param y
+	 *            the y coordinate of the top-left of the rectangle
+	 * @param w
+	 *            the width of the rectangle
+	 * @param h
+	 *            the height of the rectangle
+	 */
 	private void drawBorderedRectangle(GraphicsContext gc, Color fill, double x, double y, double w, double h) {
 		gc.setFill(fill);
 		gc.fillRect(x, y, w, h);
@@ -130,14 +169,38 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		return (int) (xOffset + (pegIndex + 0.5) * platformWidth / 3);
 	}
 
+	/**
+	 * @param discIndex
+	 *            the index of the disc
+	 * @param numDiscs
+	 *            the number of discs in the game
+	 * @return the width of the specified disc to be drawn
+	 */
 	private double getDiscWidth(int discIndex, int numDiscs) {
 		return maxDiscWidth - discWidthDelta * (numDiscs - 1 - discIndex);
 	}
 
+	/**
+	 *
+	 * @param fromBottom
+	 *            how many places the disc is from the bottom, i.e. the base platform
+	 * @return the y-coordinate of the top-left of the disc if placed fromBottom from the bottom.
+	 */
 	private double getDiscY(int fromBottom) {
 		return pegY0 + pegHeight - discHeight * (fromBottom + 1);
 	}
 
+	/**
+	 * Calculates the dimensions required for further calculations based on the width and height
+	 * of the viewport.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param width
+	 *            the width of the viewport
+	 * @param height
+	 *            the height of the viewport
+	 */
 	private void calculateDimensions(GraphicsContext gc, double width, double height) {
 		this.platformWidth = (4 * width) / 5;
 		this.xOffset = (width - platformWidth) / 2;

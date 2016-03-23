@@ -691,7 +691,6 @@ public class Editor extends InternalWindow {
 	}
 
 	public void findNextRegex(String regex) {
-		System.out.println(regex);
 		jsWindow.call("find", regex, false, true);
 	}
 

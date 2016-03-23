@@ -22,7 +22,7 @@ import simulizer.utils.TemporaryObserver;
 import simulizer.utils.UIUtils;
 
 /**
- * Shows the current labels in the code editor.
+ * Shows the current labels in the code editor along with their corresponding line numbers.
  *
  * @author Kelsey McKenna
  *
@@ -131,8 +131,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 						assert (label != null);
 						label = label.trim().substring(0, label.trim().length() - 1); // cut off the colon
 
-						if (indexOfComment < 0 || matcher.start() < indexOfComment)
-							answer.add(new Label(label, lineNum));
+						if (indexOfComment < 0 || matcher.start() < indexOfComment) answer.add(new Label(label, lineNum));
 
 						line = line.substring(matcher.end());
 					} else break;
@@ -170,6 +169,12 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		super.ready();
 	}
 
+	/**
+	 * Represents a generic action button for triggering searches for other occurrences of labels.
+	 *
+	 * @author Kelsey McKenna
+	 *
+	 */
 	private class ActionButton extends Button {
 		public ActionButton(String text, Action action) {
 			super(text);
@@ -192,6 +197,12 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		void run(Editor editor, String s);
 	}
 
+	/**
+	 * Represents a label in the code. It records the label name and its line number.
+	 *
+	 * @author Kelsey McKenna
+	 *
+	 */
 	public static class Label {
 		private String label;
 		private int line;

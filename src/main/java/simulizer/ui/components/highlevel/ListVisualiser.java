@@ -27,6 +27,19 @@ import simulizer.highlevel.models.ListModel.SwapAction;
 import simulizer.highlevel.models.ModelAction;
 import simulizer.ui.windows.HighLevelVisualisation;
 
+/**
+ * Performs the computations in order to visualise a list with
+ * an arbitrary number of (long) elements. The list is displayed
+ * starting with the first element on the left and the last element
+ * on the right.
+ *
+ * There are a number of animation methods available, such as swapping
+ * and emphasis/highlighting, which can be useful for search and sorting
+ * algorithms.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class ListVisualiser extends DataStructureVisualiser {
 	private Canvas canvas = new Canvas();
 	private long[] list;
@@ -86,8 +99,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void repaint() {
-		if (model.size() == 0)
-			return;
+		if (model.size() == 0) return;
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.w = canvas.getWidth();
@@ -107,6 +119,12 @@ public class ListVisualiser extends DataStructureVisualiser {
 
 	private final Font markerFont = new Font("Arial", 25);
 
+	/**
+	 * Draws the any existing markers over the corresponding elements in the list
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawMarkers(GraphicsContext gc) {
 		gc.setFont(markerFont);
 		gc.setTextBaseline(VPos.BOTTOM);
@@ -122,35 +140,88 @@ public class ListVisualiser extends DataStructureVisualiser {
 		}
 	}
 
+	/**
+	 * Draws the elements of the list in squares horizontally, with the first element
+	 * on the left and the last element on the right.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawList(GraphicsContext gc) {
 		gc.setTextBaseline(VPos.CENTER);
 		synchronized (list) {
 			for (int i = 0; i < list.length; ++i) {
-				if (swapping && (i == animatedLeftIndex || i == animatedRightIndex))
-					continue;
+				if (swapping && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
 				else if (emphasising && i == emphasiseIndex) {
 					Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
 					drawTextBox(gc, i, list[i] + "", blend);
-				} else
-					drawTextBox(gc, i, list[i] + "");
+				} else drawTextBox(gc, i, list[i] + "");
 			}
 		}
 	}
 
+	/**
+	 * Helper method for drawing a text box.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param i
+	 *            the index of the item in the list which is being drawn
+	 * @param text
+	 *            the text to put inside the text box
+	 */
 	private void drawTextBox(GraphicsContext gc, int i, String text) {
 		drawTextBox(gc, getX(i), y0, text);
 	}
 
+	/**
+	 * Helper method for drawing a text box.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param i
+	 *            the index of the item in the list which is being drawn
+	 * @param text
+	 *            the text to put inside the text box
+	 * @param bg
+	 *            the background colour for the text box
+	 */
 	private void drawTextBox(GraphicsContext gc, int i, String text, Color bg) {
 		drawTextBox(gc, getX(i), y0, text, bg);
 	}
 
+	/**
+	 * Helper method for drawing a text box
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param x
+	 *            the x coordinate of the top-left of the text box
+	 * @param y
+	 *            the y coordinate of the top-left of the text box
+	 * @param text
+	 *            the text to put inside the text box
+	 */
 	private void drawTextBox(GraphicsContext gc, double x, double y, String text) {
 		drawTextBox(gc, x, y, text, Color.SKYBLUE);
 	}
 
 	private final Font itemFont = new Font("Arial", 55);
 
+	/**
+	 * Helper method for drawing a text box
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param x
+	 *            the x coordinate of the top-left of the text box
+	 * @param y
+	 *            the y coordinate of the top-left of the text box
+	 * @param text
+	 *            the text to put inside the text box
+	 * @param bg
+	 *            the background colour for the text box
+	 */
 	private void drawTextBox(GraphicsContext gc, double x, double y, String text, Color bg) {
 		drawBorderedRectangle(gc, bg, x, y, rectLength, rectLength);
 
@@ -161,10 +232,24 @@ public class ListVisualiser extends DataStructureVisualiser {
 		gc.closePath();
 	}
 
+	/**
+	 * Calculates the x coordinate of the top-left of the rectIndex-th list item to draw.
+	 *
+	 * @param rectIndex
+	 *            the index of the list item to draw
+	 * @return the x coordinate of the top-left of the rectIndex-th list item to draw.
+	 */
 	private double getX(int rectIndex) {
 		return x0 + rectIndex * rectLength;
 	}
 
+	/**
+	 * Calculates the dimensions required for further calculations based on the width and height
+	 * of the viewport.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void calculateDimensions(GraphicsContext gc) {
 		double rectCalc = w - 2 * XPAD;
 
@@ -175,6 +260,22 @@ public class ListVisualiser extends DataStructureVisualiser {
 		this.y0 = h / 2 - rectLength / 2;
 	}
 
+	/**
+	 * Helper method for drawing a bordered rectangle
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param fill
+	 *            the main color for the rectangle
+	 * @param x
+	 *            the x coordinate of the top-left of the rectangle
+	 * @param y
+	 *            the y coordinate of the top-left of the rectangle
+	 * @param w
+	 *            the width of the rectangle
+	 * @param h
+	 *            the height of the rectangle
+	 */
 	private void drawBorderedRectangle(GraphicsContext gc, Color fill, double x, double y, double w, double h) {
 		gc.setFill(fill);
 		gc.beginPath();
@@ -255,10 +356,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 						// We need to add the marker
 						String name = marker.name.get();
 						String existing = markers.get(index);
-						if (existing != null)
-							markers.put(index, existing + " " + name);
-						else
-							markers.put(index, name);
+						if (existing != null) markers.put(index, existing + " " + name);
+						else markers.put(index, name);
 					} else {
 						// We need to clear the marker
 						markers.remove(index);

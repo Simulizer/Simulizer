@@ -24,6 +24,14 @@ import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
+/**
+ * This internal window allows several high-level visualisations to be
+ * displayed in separate tabs.
+ *
+ * @author Kelsey McKenna
+ * @author Michael Oultram
+ *
+ */
 public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private double width = 400;
 	private double height = 300;
@@ -94,8 +102,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 			@Override
 			public void run() {
-				if (runs++ == 10)
-					t.cancel();
+				if (runs++ == 10) t.cancel();
 				Platform.runLater(vis::repaint);
 			}
 		}, 0, 10);
@@ -159,8 +166,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 				vis = new ListVisualiser((ListModel) model, this);
 				break;
 		}
-		if (vis != null && model.isVisible())
-			vis.show();
+		if (vis != null && model.isVisible()) vis.show();
 	}
 
 }
