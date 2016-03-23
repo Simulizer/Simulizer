@@ -22,12 +22,10 @@ public class AnimationProcessor {
 	 */
     class Animation{
         public int delayFromCycleStart;
-		public int delayFromInstructionStart;
         public Runnable job;
 
-        public Animation(int delayFromCycleStart, int delayFromInstructionStart, Runnable job){
+        public Animation(int delayFromCycleStart, Runnable job){
             this.delayFromCycleStart = delayFromCycleStart;
-			this.delayFromInstructionStart = delayFromInstructionStart;
             this.job = job;
         }
     }
@@ -137,14 +135,12 @@ public class AnimationProcessor {
 	 * @param jobs The animations to run
 	 */
 	public synchronized void scheduleRegularAnimations(int delay, Runnable... jobs) {
-		int thisDelay = 0;
 		for(Runnable r : jobs) {
-			Animation animation = new Animation(cycleDelay, thisDelay, r);
+			Animation animation = new Animation(cycleDelay, r);
 			animationTasks.add(animation);
 			animationsForInstruction.add(animation);
-			// Add to the overall cycleDelay (reset on each cycle) and thisDelay (reset each instruction)
+			// Add to the overall cycleDelay (reset on each cycle)
 			cycleDelay += delay;
-			thisDelay += delay;
 		}
 	}
 
