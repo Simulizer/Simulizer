@@ -217,8 +217,6 @@ task copyAceFiles(dependsOn: downloadAce, type: Copy) {
     include 'theme-ambiance.js'
     include 'theme-chaos.js'
     include 'theme-tomorrow_night_eighties.js'
-    include 'theme-predawn.js'
-    include 'theme-flatland.js'
     include 'keybinding-vim.js'
     include 'mode-javascript.js'
 }
