@@ -1,5 +1,5 @@
 #Summary#
-After discussing Simulizer in depth throughout the contents of this report, it is worth now summarizing, looking back as to what Simulizer is, what it's aims are, how the creation of the software has been achieved, and the success of the project as a whole.
+After discussing Simulizer in depth throughout the contents of this report, it is worth now summarising, looking back as to what Simulizer is, what it's aims are, how the creation of the software has been achieved, and the success of the project as a whole.
 
 At its finished state, Simulizer is a large piece of software that, in the most basic sense, simulates and visualises the operations of a MIPS R3000 processor. Simulizer provides multiple levels of visualisation: lower level visualisations such as the CPU and pipeline visualisations give an insight into the running of the processor (information about registers, memory etc. only complement this); high level visualisations take a look from a different perspective, examining how the algorithms written in assembly code are running.
 
