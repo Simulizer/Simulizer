@@ -5,6 +5,11 @@ package simulizer.ui.components.cpu;
  * @author Theo Styles
  */
 public class CustomLine {
+
+    /**
+     * Represents a direction of the current wire
+     * @author Theo Styles
+     */
     public enum Direction{
         UP,
         DOWN,

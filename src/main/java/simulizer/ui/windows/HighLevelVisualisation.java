@@ -25,9 +25,11 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
 /**
- * High Level Visualisation Window
- * 
- * @author Michael
+ *
+ * Allows several high-level visualisations to be
+ * displayed in separate tabs.
+ *
+ * @author Michael Oultram
  *
  */
 public class HighLevelVisualisation extends InternalWindow implements Observer {
@@ -91,7 +93,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 	/**
 	 * Adds a visualisation to the tabs
-	 * 
+	 *
 	 * @param vis
 	 *            the visualisation to add
 	 */
@@ -106,8 +108,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 			@Override
 			public void run() {
-				if (runs++ == 10)
-					t.cancel();
+				if (runs++ == 10) t.cancel();
 				Platform.runLater(vis::repaint);
 			}
 		}, 0, 10);
@@ -118,7 +119,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 	/**
 	 * Removes a model from the tabs
-	 * 
+	 *
 	 * @param model
 	 *            the model to remove
 	 */
@@ -128,7 +129,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 	/**
 	 * Removes a visualisation from the tabs
-	 * 
+	 *
 	 * @param vis
 	 *            the visualisation to remove
 	 */
@@ -138,7 +139,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 	/**
 	 * Removes a tab from the tabs
-	 * 
+	 *
 	 * @param tab
 	 *            the tab to remove
 	 */
@@ -184,7 +185,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 	/**
 	 * Adds a new visualisation
-	 * 
+	 *
 	 * @param model
 	 *            the model to create the visualisation for
 	 */
@@ -201,8 +202,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 				vis = new ListVisualiser((ListModel) model, this);
 				break;
 		}
-		if (vis != null && model.isVisible())
-			vis.show();
+		if (vis != null && model.isVisible()) vis.show();
 	}
 
 }

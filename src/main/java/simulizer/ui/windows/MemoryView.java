@@ -27,6 +27,17 @@ import javafx.util.Pair;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
 
+/**
+ * Contains several components which visualise the underlying memory of the system.
+ * The stack, heap, and static panes shows the memory for their respective components.
+ * The bytes in each pane are drawn dynamically and can be resized.
+ *
+ * This class is not ready for use, as the visualisations have not yet been linked
+ * with the underlying system.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class MemoryView extends InternalWindow {
 	@FXML
 	private Label lblScale;
@@ -68,21 +79,21 @@ public class MemoryView extends InternalWindow {
 	}
 
 	private void initSlider() {
-		byteRectangle.setHeight(Math.max((100-sldrByteSize.getValue()) / 100. * sldrByteSize.getHeight(), 50));
+		byteRectangle.setHeight(Math.max((100 - sldrByteSize.getValue()) / 100. * sldrByteSize.getHeight(), 50));
 
-//		sldrByteSize.heightProperty().addListener((o, old, n) -> {
-//			recalculateByteHeight(n.doubleValue());
-//			Platform.runLater(() -> drawTest());
-//		});
+		// sldrByteSize.heightProperty().addListener((o, old, n) -> {
+		// recalculateByteHeight(n.doubleValue());
+		// Platform.runLater(this::drawTest);
+		// });
 
 		sldrByteSize.valueProperty().addListener((o, old, n) -> {
 			recalculateByteHeight(n.doubleValue());
-			Platform.runLater(() -> drawTest());
+			Platform.runLater(this::drawTest);
 		});
 	}
 
 	private void recalculateByteHeight(double v) {
-		double h = (100-v) / 100. * sldrByteSize.getHeight();
+		double h = (100 - v) / 100. * sldrByteSize.getHeight();
 		byteRectangle.setHeight(h);
 	}
 
@@ -152,6 +163,9 @@ public class MemoryView extends InternalWindow {
 		gc.fillText(LOW, width / 2, yTracker);
 	}
 
+	/**
+	 * Called when the load range button is clicked. Displays a dialog asking the user for input.
+	 */
 	@FXML
 	public void loadRange() {
 		// Thanks to http://code.makery.ch/blog/javafx-dialogs-official/

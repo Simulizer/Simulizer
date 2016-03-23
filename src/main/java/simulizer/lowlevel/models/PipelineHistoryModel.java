@@ -11,12 +11,29 @@ import simulizer.assembler.representation.Address;
 import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.simulation.messages.PipelineStateMessage;
 
+/**
+ * Represents the model for the history of the pipeline, including the waiting and
+ * completed instructions at each stage.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class PipelineHistoryModel {
 	private static final int MAX_SIZE = 10_000;
 	private List<PipelineState> history = new ArrayList<>();
 	private Set<Observer> observers = new HashSet<>();
 	private PipelineHazardMessage.Hazard currentHazard;
 
+	/**
+	 * Represents a single state in the pipeline. This has public fields
+	 * for accessing the fetch, decode, and execute addresses, as well as
+	 * lists of the addresses before (waiting) and after (complete) the
+	 * pipeline. There is also information about whether or not the stage
+	 * represents a jump instruction, and whether it has a hazard.
+	 *
+	 * @author Kelsey McKenna
+	 *
+	 */
 	public class PipelineState {
 		public final List<Address> before;
 		public final Address fetched;
@@ -57,6 +74,12 @@ public class PipelineHistoryModel {
 		observers.remove(observer);
 	}
 
+	/**
+	 * Processes the pipeline state message and adds it to the history
+	 *
+	 * @param m
+	 *            the pipeline state message
+	 */
 	public void processPipelineStateMessage(final PipelineStateMessage m) {
 		if (size() >= MAX_SIZE) return;
 
@@ -107,6 +130,12 @@ public class PipelineHistoryModel {
 		notifyObservers(nextState);
 	}
 
+	/**
+	 * Processes the given hazard message and attaches it to the next pipeline state message
+	 *
+	 * @param m
+	 *            the pipeline hazard message
+	 */
 	public void processHazardStateMessage(PipelineHazardMessage m) {
 		this.currentHazard = m.getHazard();
 	}
@@ -116,6 +145,12 @@ public class PipelineHistoryModel {
 		notifyObservers(null);
 	}
 
+	/**
+	 * Notifies the observers about the most recent pipeline state
+	 *
+	 * @param nextState
+	 *            the pipeline state to send to the observers
+	 */
 	private void notifyObservers(PipelineState nextState) {
 		observers.forEach(t -> t.update(null, nextState));
 	}

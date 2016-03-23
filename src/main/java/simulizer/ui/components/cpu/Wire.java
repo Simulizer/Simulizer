@@ -20,6 +20,10 @@ import java.util.List;
  */
 public class Wire extends Group {
 
+	/**
+	 * The type of wire e.g horizontal or vertical
+	 * @author Theo Styles
+	 */
 	public enum Type {
 		HORIZONTAL, VERTICAL, CUSTOM
 	}
@@ -52,18 +56,34 @@ public class Wire extends Group {
 		setCacheHint(CacheHint.SPEED);
 	}
 
+	/**
+	 * Gets the line
+	 * @return The main line
+     */
 	public Polyline getLine(){
 		return line;
 	}
 
+	/**
+	 * Gets the arrowhead
+	 * @return The arrowhead
+     */
 	public Polyline getArrowhead(){
 		return arrowHead;
 	}
 
+	/**
+	 * Gets the type of wire
+	 * @return The type of wire
+     */
 	public Type getType(){
 		return type;
 	}
 
+	/**
+	 * Sets the wire reversed
+	 * @param reverseNew The new reverse value
+     */
 	public void setReverse(boolean reverseNew){
 		this.reverse = reverseNew;
 	}

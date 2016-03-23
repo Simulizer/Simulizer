@@ -19,6 +19,7 @@ public class AnimationProcessor {
 
 	/**
 	 * Represents an animation to be run
+	 * @author Theo Styles
 	 */
     class Animation{
         public int delayFromCycleStart;

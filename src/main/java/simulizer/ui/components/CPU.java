@@ -74,13 +74,17 @@ public class CPU {
 	/**
 	 * Sets up the CPU
 	 * @param vis The visualisation to use
-
 	 */
 	public CPU(CPUVisualisation vis) {
 		this.vis = vis;
 		this.animationProcessor = new AnimationProcessor(this);
 	}
 
+	/**
+	 * Show a caption for a specified time
+	 * @param text The text to show
+	 * @param time How long the caption should be displayed
+     */
 	public void showText(String text, double time) {
 		showText(text, time, true);
 	}
@@ -89,6 +93,7 @@ public class CPU {
 	 * Shows a caption for a specified time
 	 * @param text The text to show
 	 * @param time How long the caption should be displayed
+	 * @param fadeOut If the text should fade out or not
 	 */
 	public void showText(String text, double time, boolean fadeOut) {
 		if (time < 250)

@@ -4,25 +4,47 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import simulizer.assembler.representation.Address;
 
+/**
+ * Contains a number of static helper methods for colouring activities.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class ColorUtils {
-	// Reading: http://krazydad.com/tutorials/makecolors.php
+	/**
+	 * @param address
+	 *            the address for which a color is to be returned
+	 * @return a color for the given address.
+	 */
 	public static Color getColor(Address address) {
 		if (address == null) return Color.RED.brighter();
 		else return getColor(address.getValue() % 128);
 	}
 
-	public static Color getColor(int i) {
+	/**
+	 * @param seed
+	 *            the seed for generating the color
+	 * @return a color using the seed
+	 */
+	public static Color getColor(int seed) {
 		// @formatter:off
-		int red   = (int) (Math.sin(.3 * i + 0) * 127) + 128;
-		int green = (int) (Math.sin(.3 * i + 2) * 127) + 128;
-		int blue  = (int) (Math.sin(.3 * i + 4) * 127) + 128;
+		int red   = (int) (Math.sin(.3 * seed + 0) * 127) + 128;
+		int green = (int) (Math.sin(.3 * seed + 2) * 127) + 128;
+		int blue  = (int) (Math.sin(.3 * seed + 4) * 127) + 128;
 		// @formatter:on
 
 		return Color.rgb(red, green, blue);
 	}
 
-	// Thanks to http://stackoverflow.com/a/3943023
+	/**
+	 * Calculates an appropriate text colour based on the background colour.
+	 *
+	 * @param backgroundColor
+	 *            the background colour for the text
+	 * @return black if the background colour is sufficiently bright; white otherwise
+	 */
 	public static Paint getTextColor(Color backgroundColor) {
+		// Thanks to http://stackoverflow.com/a/3943023
 		double r = backgroundColor.getRed() * 255;
 		double g = backgroundColor.getGreen() * 255;
 		double b = backgroundColor.getBlue() * 255;

@@ -46,6 +46,20 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
 
+/**
+ * Visualises the instructions during each stage of the pipeline (fetch, decode, execute).
+ * If the CPU is pipelined, the waiting instructions will be drawn above the instructions
+ * in the pipeline and the completed instructions will be drawn below. Different
+ * instructions are drawn in different colours, but an instruction will remain the same
+ * colour throughout the visualisation.
+ *
+ * By clicking on an instruction, all occurrences of the instruction will be highlighted.
+ * By hovering over an instruction or hazard, more detailed information about that
+ * instruction or hazard will be displayed as text.
+ *
+ * @author Kelsey McKenna
+ *
+ */
 public class PipelineView extends InternalWindow implements Observer {
 	// Graphical things
 	private Canvas canvas = new Canvas();
@@ -174,7 +188,6 @@ public class PipelineView extends InternalWindow implements Observer {
 			} else {
 				Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(x, y);
 
-
 				if (cycleAndAddress.isPresent()) {
 					Pair<Integer, Address> ca = cycleAndAddress.get();
 					int cycle = ca.getKey();
@@ -221,6 +234,15 @@ public class PipelineView extends InternalWindow implements Observer {
 		model.addObserver(this);
 	}
 
+	/**
+	 * Returns the cycle & address currently being visualised at the given position on the screen.
+	 *
+	 * @param x
+	 *            the x coordinate of the position
+	 * @param y
+	 *            the y coordinate of the position
+	 * @return the cycle number & address at the specified position.
+	 */
 	private Optional<Pair<Integer, Address>> getAddressAtPoint(double x, double y) {
 		List<PipelineHistoryModel.PipelineState> history = model.getHistory();
 
@@ -282,6 +304,10 @@ public class PipelineView extends InternalWindow implements Observer {
 		else this.startCycle = startCycle;
 	}
 
+	/**
+	 * Calculates the parameters for drawing the components on the window based
+	 * on the width and height of the window.
+	 */
 	private void calculateParameters() {
 		x0 = 150;
 
@@ -330,6 +356,12 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.closePath();
 	}
 
+	/**
+	 * Draw messages explaining what each horizontal section represents, e.g. waiting instructions etc.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawExplainers(GraphicsContext gc) {
 		gc.setTextAlign(TextAlignment.RIGHT);
 
@@ -371,6 +403,13 @@ public class PipelineView extends InternalWindow implements Observer {
 		this.snapToEnd = false;
 	}
 
+	/**
+	 * Draw the addresses/instructions on the window. Only draw the instructions
+	 * above and below the pipeline if in pipelined mode.
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 */
 	private void drawAddresses(GraphicsContext gc) {
 		// First need to draw the rectangles in the column
 		// We know the length of the rectangles and the gaps
@@ -422,7 +461,7 @@ public class PipelineView extends InternalWindow implements Observer {
 			for (int a = 0; a < 3; ++a) {
 				Color bg = ColorUtils.getColor(parts[a]);
 				gc.setFill(bg);
-				if (parts[a] == null) drawBorderedCircle(gc, xLeft, yTracker, rectWidth, rectWidth);
+				if (parts[a] == null) drawBorderedOval(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					String name = getShortName(parts[a]);
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
@@ -496,6 +535,22 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	// ***Utilities***
 
+	/**
+	 * Helper function to draw a bordered rectangle
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param x
+	 *            the x coordinate of the top-left of the rectangle
+	 * @param y
+	 *            the y coordinate of the top-left of the rectangle
+	 * @param w
+	 *            the width of the rectangle
+	 * @param h
+	 *            the height of the rectangle
+	 * @param highlight
+	 *            indicates whether the rectangle should be highlighted, e.g. denoting that it has been selected.
+	 */
 	private void drawBorderedRectangle(GraphicsContext gc, double x, double y, double w, double h, boolean highlight) {
 		gc.beginPath();
 
@@ -513,30 +568,80 @@ public class PipelineView extends InternalWindow implements Observer {
 		gc.setLineWidth(2);
 	}
 
-	private void drawBorderedCircle(GraphicsContext gc, double x, double y, double w, double h) {
+	/**
+	 * Helper method for drawing a bordered oval
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param x
+	 *            the x coordinate of the upper left bound of the oval
+	 * @param y
+	 *            the y coordinate of the upper right bound of the oval
+	 * @param w
+	 *            the width of the oval
+	 * @param h
+	 *            the height of the oval
+	 */
+	private void drawBorderedOval(GraphicsContext gc, double x, double y, double w, double h) {
 		gc.beginPath();
 		gc.fillOval(x, y, w, h);
 		gc.strokeOval(x, y, w, h);
 		gc.closePath();
 	}
 
+	/**
+	 * Helper method for drawing text
+	 *
+	 * @param gc
+	 *            the graphics context for the canvas being drawn onto
+	 * @param text
+	 *            the text to be drawn
+	 * @param x
+	 *            position on the x axis
+	 * @param y
+	 *            position on the y axis
+	 * @param maxWidth
+	 *            the maximum width for the string
+	 */
 	private void drawText(GraphicsContext gc, String text, double x, double y, double maxWidth) {
 		gc.beginPath();
 		gc.fillText(text, x, y, maxWidth);
 		gc.closePath();
 	}
 
+	/**
+	 * Helper method for drawing text
+	 *
+	 * @param text
+	 *            the text to be drawn
+	 * @param x
+	 *            position on the x axis
+	 * @param y
+	 *            position on the y axis
+	 */
 	private void drawText(GraphicsContext gc, String text, double x, double y) {
 		gc.beginPath();
 		gc.fillText(text, x, y);
 		gc.closePath();
 	}
 
+	/**
+	 * @param address
+	 *            the address to be shortened
+	 * @return a short string representing the given address, e.g. 000 instead of 0x000...
+	 */
 	private static String getShortName(Address address) {
 		String hex = address.toString();
 		return hex.substring(Math.max(0, hex.length() - 3));
 	}
 
+	/**
+	 * Calculates information about the hazard at the given cycle.
+	 *
+	 * @param cycle
+	 *            the index of the cycle to be inspected
+	 * @return a name describing the hazard, or "Not a hazard" if there is no hazard at this cycle.
+	 */
 	private String getHazardInfo(int cycle) {
 		Optional<PipelineHazardMessage.Hazard> hOpt = model.getHistory().get(cycle).hazard;
 
@@ -566,6 +671,11 @@ public class PipelineView extends InternalWindow implements Observer {
 		}
 	}
 
+	/**
+	 * @param address
+	 *            the address whose information is to be found
+	 * @return information about the given address in the context of the running program.
+	 */
 	private String getAddressInfo(Address address) {
 		CPU cpu = getWindowManager().getCPU();
 		Map<Address, Statement> textSegment = cpu.getProgram().textSegment;
