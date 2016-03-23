@@ -13,17 +13,13 @@ When viewing the CPU visualisation, you will notice several things:
 
 You can also view more information about each component by hovering over it with your mouse, a tooltip will show with a detailed description about the role of the component. This can be used to further your knowledge about how each component of the CPU works.
 
-$\TODO{take picture}$
-<!-- TODO take a nice picture of the CPU visualisation
-![](segments/cpu-vis.png)
--->
+
+![CPU Visualisation](segments/cpu-visualisation.png)
 
 
 ## Pipeline Visualisation ##
-$\TODO{take picture}$
-<!-- TODO take a nice picture of the pipeline window
-![](segments/pipeline.png)
--->
+![Pipeline View](segments/pipeline.png)
+
 The pipeline visualisation window allows you to view the contents of the pipeline, as well as the waiting and completed instructions, as the CPU is running. The middle third of the window shows the fetch, decode, and execute portions of the pipeline at each state, including hazards where appropriate (represented as red circles).
 
 Firstly, to use the pipeline view, the CPU must be running and in pipelined mode (to turn on pipelining, go to the `Simulation` menu and make sure `Toggle CPU Pipelining` is selected). Once running, the window will start to fill up from left to right with instructions being processed.
@@ -41,7 +37,6 @@ You can highlight all occurrences of a particular instruction by clicking on it.
 A maximum of 10,000 pipeline stages can currently be displayed (this is to mitigate problems with infinite loops etc.)
 
 ## Memory View ##
-$\TODO{take picture}$
-<!-- TODO take a nice picture of the memory view window
-![](segments/memory-view.png)
--->
+![Memory View](segments/memView.png)
+This component is still under development and so does not bear any functionality at this time.
+
