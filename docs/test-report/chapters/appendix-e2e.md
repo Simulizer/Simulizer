@@ -22,11 +22,11 @@ Each of these tests will start with all windows closed.
   * The text should be saved in a file called `NewFileSaveTest.s` in the code folder on the user's computer.
 - **Actual**: As expected (see below).
 
-![](segments/end-to-end/editor-new-file-save-test.png)
+![](segments/end-to-end/editor-new-file-save-test.png){ width=40% }
 
-![](segments/end-to-end/editor-new-file-save-test-dialog.png)
+![](segments/end-to-end/editor-new-file-save-test-dialog.png){ width=40% }
 
-![](segments/end-to-end/editor-new-file-save-vim.png)
+![](segments/end-to-end/editor-new-file-save-vim.png){ width=40% }
 
 **Test ID**: TC-E2E2
 
@@ -58,11 +58,11 @@ Each of these tests will start with all windows closed.
   * The editor should wrap long lines appropriately with line wrap mode on.
 - **Actual**: As expected (see below).
 
-![](segments/end-to-end/editor-open-dialog.png)
+![](segments/end-to-end/editor-open-dialog.png){ width=40% }
 
-![](segments/end-to-end/editor-fold.png
+![](segments/end-to-end/editor-fold.png){ width=40% }
 
-![](segments/end-to-end/editor-edit.png)
+![](segments/end-to-end/editor-edit.png){ width=40% }
 
 **Test ID**: TC-E2E3
 
@@ -74,10 +74,11 @@ Each of these tests will start with all windows closed.
   3. Press `F5`.
   4. Hover over the highlighted line number.
 - **Expected**:
-  * A dialog appears informing the user that their program is being assembled.
   * Editor becomes read-only and the line number of the current line is highlighted.
   * Hovering over the highlighted line number should show the current stage of execution, e.g. `decoding`.
 - **Actual**: As expected (see below).
+
+![](segments/end-to-end/editor-line-hover.png){ width=40% }
 
 **Test ID**: TC-E2E4
 
@@ -97,6 +98,12 @@ Each of these tests will start with all windows closed.
   * After modifying each line, the editor should update to indicate that the line no longer contains an error.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/editor-line-18-error.png){ width=40% }
+
+![](segments/end-to-end/editor-line-23-error.png){ width=40% }
+
+![](segments/end-to-end/editor-errors-fixed.png){ width=40% }
+
 ### Registers window ###
 
 Test ID: TC-E2E5
@@ -113,6 +120,8 @@ Test ID: TC-E2E5
   * The value of `a0` in the `Registers` window should change from 0 to 55.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/registers-a0.png){ width=40% }
+
 Test ID: TC-E2E6
 
 - **Description**: Columns in `Registers` window should allow sorting.
@@ -127,7 +136,15 @@ Test ID: TC-E2E6
 - **Expected**:
   * The data in the table is sorted based on the `Register` column in the `Registers` window, either alphabetically a-z or z-a, then after clicking it again it should sort in the opposite alphabetical order.
   * Same as above but for the `Unsigned` column: it should sort alphabetically/numerically and then sort in the opposite order after the second click.
-- **Actual**: $\TODO{Get a correct result}. As expected (see below).
+- **Actual**: The values are sorted correctly, but the values in the value column are sorted in lexicographical order rather than numerical order, see below.
+
+![](segments/end-to-end/registers-sort-left-down.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-left.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-right-down.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-right-up.png){ width=40% }
 
 Test ID: TC-E2E7
 
@@ -144,6 +161,10 @@ Test ID: TC-E2E7
 - **Expected**:
   * The right-hand column should show the value of the register in the selected form.
 - **Actual**: As expected (see below).
+
+![](segments/end-to-end/registers-signed.png){ width=40% }
+
+![](segments/end-to-end/registers-hex.png){ width=40% }
 
 ### Labels window ###
 
@@ -163,6 +184,8 @@ Test ID: TC-E2E8
     - mystr: 5
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/labels-correct.png){ width=40% }
+
 Test ID: TC-E2E9
 
 - **Description**: The `Labels` window should update labels as the user types.
@@ -178,7 +201,7 @@ Test ID: TC-E2E9
   * `LOOP` should change to `LOOPER` in the `Registers` window.
   * The row with `END` should be removed from the table after deleting line 20.
   * The row with `END: 20` should be added after undoing the deletion of line 20.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 Test ID: TC-E2E10
 
@@ -198,6 +221,8 @@ Test ID: TC-E2E10
   * All occurrences of the label `binary_search` should be highlighted after clicking `Select All`.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/labels-jump-170.png){ width=40% }
+
 ### Layouts ###
 
 Test ID: TC-E2E11
@@ -207,7 +232,7 @@ Test ID: TC-E2E11
   1. Click each layout in the `Layouts` menu option.
 - **Expected**:
   * The window should update to show the windows in the corresponding layout.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 Test ID: TC-E2E12
 
@@ -224,7 +249,7 @@ Test ID: TC-E2E12
   * The layout should change back to the default layout when `Default` is clicked.
   * `layout-save-test` should be available in the `Layouts` menu.
   * The layout should switch back to the layout that was specified after clicking `layout-save-test`.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ### General window functionality ###
 Test ID: TC-E2E13
@@ -241,7 +266,7 @@ Test ID: TC-E2E13
 - **Expected**:
   * The window should resize and any appropriate contents should also resize.
   * The content should be repositioned in the main window relative to its container window.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 Test ID: TC-E2E14
 
@@ -257,19 +282,26 @@ Test ID: TC-E2E14
   * Each internal window should resize according to its original size and the size of the main window.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/default-layout.png){ width=40% }
+![](segments/end-to-end/resize-main-window.png){ width=40% }
+
 ### Configuration/Options ###
 Test ID: TC-E2E15
 
 - **Description**: Test that items in the options window change the program accordingly.
 - **Action**:
-  1. `File -> Options`.
-  2. Toggle on the `Debug Menu`.
+  1. `File`$\to$`Options`$\to$`Settings`$\to$`Editor`.
+  2. Toggle on `Vim mode`.
   3. Close the window.
   4. Choose to restart the program.
-  5. Repeat from step 1 and test each possible item.
+  5. Repeat from step 1 and test each possible option.
 - **Expected**:
-  * The program should update accordingly, e.g. after restarting the `Debug Menu` should appear in the menu bar.
+  * The program should update accordingly, e.g. after restarting the editor should be in Vim mode.
 - **Actual**: As expected (see below).
+
+![](segments/end-to-end/options-vim-restart.png){ width=40% }
+
+![](segments/end-to-end/options-vim-mode.png){ width=40% }
 
 ### Pipeline View ###
 
