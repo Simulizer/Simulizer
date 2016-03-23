@@ -8,7 +8,7 @@ import simulizer.simulation.data.representation.Word;
 
 /**this class is used to encapsulate the information required for a jtype instruction
  * i.e this is for jump instructions mainly
- * @author charlie street
+ * @author Charlie Street
  *
  */
 public class JTypeInstruction extends InstructionFormat {

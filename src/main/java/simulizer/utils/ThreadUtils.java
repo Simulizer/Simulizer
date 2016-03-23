@@ -1,6 +1,5 @@
 package simulizer.utils;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +12,8 @@ import javafx.application.Platform;
 
 /**
  * Utility functions for dealing with threads
+ *
+ * @author mbway
  */
 public class ThreadUtils {
 

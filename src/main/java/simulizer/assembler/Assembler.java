@@ -22,7 +22,11 @@ import simulizer.parser.SimpParser;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 
-
+/**
+ * Assemble SIMP source code into a form that is consumable be the simulation.
+ * Also provide information about
+ * @author mbway
+ */
 public class Assembler {
     /**
      * Performs the first stage of assembling a program. But stops once it

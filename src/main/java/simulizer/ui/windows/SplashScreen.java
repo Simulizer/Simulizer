@@ -24,8 +24,11 @@ import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
- * A spash screen to show at startup
+ * A splash screen to show at startup
  * Thanks to: https://gist.github.com/jewelsea/2305098
+ *
+ * @author mbway
+ * @author Kelsey McKenna
  */
 public class SplashScreen {
 	private int width, height;

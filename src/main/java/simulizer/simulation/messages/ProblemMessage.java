@@ -2,7 +2,7 @@ package simulizer.simulation.messages;
 
 /**
  * A message detailing a problem with the simulation
- * @author charlie street
+ * @author Charlie Street
  */
 public class ProblemMessage extends Message {
     public Exception e;

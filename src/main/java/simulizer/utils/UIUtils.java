@@ -31,6 +31,8 @@ import simulizer.Simulizer;
 
 /**
  * Utilities for UI related utilities
+ *
+ * @author mbway
  */
 public class UIUtils {
 

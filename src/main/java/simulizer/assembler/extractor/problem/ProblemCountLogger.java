@@ -3,6 +3,8 @@ package simulizer.assembler.extractor.problem;
 /**
  * Count the number of problems being logged and pass the messages onto another
  * logger
+ *
+ * @author mbway
  */
 public class ProblemCountLogger extends ProblemLogger {
     /**

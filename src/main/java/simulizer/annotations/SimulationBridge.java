@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * A collection of methods for accessing information about the simulation from annotations
+ *
+ * @author mbway
  */
 @SuppressWarnings("unused")
 public class SimulationBridge {

@@ -2,6 +2,8 @@ package simulizer.annotations;
 
 /**
  * An exception thrown when ret() is called from an annotation
+ *
+ * @author mbway
  */
 @SuppressWarnings("unused")
 public class AnnotationEarlyReturn extends RuntimeException {
