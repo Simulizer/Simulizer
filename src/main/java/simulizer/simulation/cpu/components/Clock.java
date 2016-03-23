@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * thread for the clock keeping time of the IE cycle
  * 
- * @author Charlie Street
+ * @author mbway
  *
  */
 public class Clock {

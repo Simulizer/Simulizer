@@ -51,6 +51,7 @@ public class DecodeTest {
 	@Before
 	public void setupCPU() {
 		cpu = new CPU(new ConsoleIO());
+		cpu.setCycleFreq(9999);
 	}
 
 	@After

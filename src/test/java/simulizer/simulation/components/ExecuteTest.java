@@ -27,7 +27,7 @@ import simulizer.simulation.exceptions.StackException;
 /**class will aim to test the execute functionality of the cpu
  * since it is so dependent on large amounts of the cpu
  * it will be tested as follows: small programs will be made to isolate
- * each intruction which can be executed, since decode is successfully tested
+ * each instruction which can be executed, since decode is successfully tested
  * and the fetch is trivial, then this will test only the execute
  * it will then verify the results by looking at points of interest in the cpu
  * and checking registers/memory have been set correctly in accordance with the operation executed
@@ -115,6 +115,7 @@ public class ExecuteTest {
 	private CPU createCPU(String myInstructions) throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
 	{
 		CPU cpu = new CPU(io);
+		cpu.setCycleFreq(9999);
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
 		cpu.runProgram();//execute the program
 		cpu.shutdown();
@@ -123,7 +124,7 @@ public class ExecuteTest {
 	
 	/**method retrieves the program counter for examination
 	 * 
-	 * @param cpu the cpu oibject to retrieve from
+	 * @param cpu the cpu object to retrieve from
 	 * @return the program counter of that cpu object
 	 * @throws NoSuchFieldException all related to me accessing private methods for testing
 	 * @throws SecurityException
