@@ -7,6 +7,12 @@ import java.util.Stack;
 
 import simulizer.simulation.cpu.user_interaction.IO;
 
+/**
+ * Model for Towers of Hanoi
+ * 
+ * @author Michael
+ *
+ */
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
@@ -16,6 +22,12 @@ public class HanoiModel extends DataStructureModel {
 		setNumDisks(0);
 	}
 
+	/**
+	 * Sets the number of discs to use for Towers of Hanoi
+	 * 
+	 * @param n
+	 *            the number of discs to use
+	 */
 	public void setNumDisks(int n) {
 		if (n < 0) {
 			printError("Can not have " + n + " discs");
@@ -39,6 +51,14 @@ public class HanoiModel extends DataStructureModel {
 		notifyObservers(new Discs(n));
 	}
 
+	/**
+	 * Moves the top disc of startPeg onto endPeg
+	 * 
+	 * @param startPeg
+	 *            the peg to get the disc from
+	 * @param endPeg
+	 *            the peg to put the disc on
+	 */
 	public void move(int startPeg, int endPeg) {
 		if (startPeg < 0 || startPeg > 2) {
 			printError("There is no start peg " + startPeg);
@@ -77,6 +97,9 @@ public class HanoiModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * @return the number of discs being used
+	 */
 	public int getNumDiscs() {
 		return numDiscs;
 	}

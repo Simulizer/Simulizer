@@ -1,5 +1,11 @@
 package simulizer.ui.windows.help;
 
+/**
+ * Syscall Reference
+ * 
+ * @author Michael
+ *
+ */
 public class SyscallReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public SyscallReference() {

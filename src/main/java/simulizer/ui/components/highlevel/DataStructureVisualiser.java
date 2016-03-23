@@ -12,6 +12,12 @@ import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.ModelAction;
 import simulizer.ui.windows.HighLevelVisualisation;
 
+/**
+ * A high level visualisation
+ * 
+ * @author Michael
+ *
+ */
 public abstract class DataStructureVisualiser extends Pane implements Observer {
 	protected HighLevelVisualisation vis;
 	private DataStructureModel model;
@@ -32,6 +38,12 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private Boolean updatePaused = false;
 	private volatile boolean alive = false;
 
+	/**
+	 * @param model
+	 *            the model to visualise
+	 * @param vis
+	 *            the high level visualisation window
+	 */
 	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
 		this.vis = vis;
@@ -40,6 +52,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		widthProperty().addListener(e -> repaint());
 	}
 
+	/**
+	 * Shows the visualisation
+	 */
 	public void show() {
 		if (!showing) {
 			vis.addTab(this);
@@ -48,6 +63,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		}
 	}
 
+	/**
+	 * Hides the visualisation
+	 */
 	public void hide() {
 		if (showing) {
 			vis.removeTab(this);
@@ -56,17 +74,35 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		}
 	}
 
+	/**
+	 * Processes a change.
+	 * 
+	 * @param action
+	 *            the change to process
+	 */
 	public abstract void processChange(ModelAction<?> action);
 
+	/**
+	 * Repaints the visualisation
+	 */
 	public abstract void repaint();
 
+	/**
+	 * @return the name of the visualisation
+	 */
 	public abstract String getName();
 
+	/**
+	 * Closes the visualisation
+	 */
 	public void close() {
 		stopUpdateThreads();
 		model.deleteObserver(this);
 	}
 
+	/**
+	 * @return the model to visualise
+	 */
 	public DataStructureModel getModel() {
 		return model;
 	}
@@ -91,6 +127,13 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		}
 	}
 
+	/**
+	 * Calculates the average time from a list
+	 * 
+	 * @param times
+	 *            the times to average
+	 * @return the average time
+	 */
 	private int averageTime(int[] times) {
 		int totalTime = 0;
 		int numTimes = 0;
@@ -105,6 +148,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		return totalTime / numTimes;
 	}
 
+	/**
+	 * Starts all update threads
+	 */
 	private void startUpdateThreads() {
 		if (alive)
 			return;
@@ -160,6 +206,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		timer.start();
 	}
 
+	/**
+	 * Calculate the rate at which animations should be animating at to stay in sync. Skips some changes if it gets too far behind
+	 */
 	private synchronized void rateSkips() {
 		int avgUpdate = averageTime(updateTimes);
 		int avgProcess = averageTime(processTimes);
@@ -181,6 +230,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		}
 	}
 
+	/**
+	 * Stops all update threads
+	 */
 	private void stopUpdateThreads() {
 		if (!alive)
 			return;
@@ -190,10 +242,19 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		timer.stop();
 	}
 
+	/**
+	 * @return whether the updates are paused
+	 */
 	protected boolean isUpdatePaused() {
 		return updatePaused;
 	}
 
+	/**
+	 * Sets whether to pause the update threads. Used for when animating a change.
+	 * 
+	 * @param paused
+	 *            whether updates should be paused
+	 */
 	protected void setUpdatePaused(boolean paused) {
 		synchronized (updatePaused) {
 			if (updatePaused == paused) // No Change

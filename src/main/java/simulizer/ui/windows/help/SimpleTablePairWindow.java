@@ -8,6 +8,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.ui.interfaces.InternalWindow;
 
+/**
+ * Creates a simple help window. This window contains a table with two columns
+ * 
+ * @author Michael
+ *
+ */
 public class SimpleTablePairWindow extends InternalWindow {
 
 	private TableView<Data> table = new TableView<Data>();
@@ -25,8 +31,12 @@ public class SimpleTablePairWindow extends InternalWindow {
 		table.setCursor(Cursor.DEFAULT);
 		getContentPane().getChildren().add(table);
 	}
-	
-	public void setData(String[][] data){
+
+	/**
+	 * @param data
+	 *            the data for the table
+	 */
+	public void setData(String[][] data) {
 		ObservableList<Data> tableData = FXCollections.observableArrayList();
 		for (int i = 0; i < data.length; i++) {
 			String[] row = data[i];

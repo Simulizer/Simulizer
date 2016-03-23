@@ -7,6 +7,12 @@ import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Logger;
 
+/**
+ * Implementation of the IO interface for use in the Logger window
+ * 
+ * @author Michael
+ *
+ */
 public class LoggerIO extends Observable implements IO {
 	private final Workspace workspace;
 
@@ -62,11 +68,21 @@ public class LoggerIO extends Observable implements IO {
 		notifyObservers(new Pair<>(stream, "" + letter));
 	}
 
+	/**
+	 * Requests an input message (will wait until input is given)
+	 * 
+	 * @param stream
+	 *            the stream to request on
+	 * @return the input message
+	 */
 	private String requestInput(IOStream stream) {
 		Logger logger = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
 		return logger.nextMessage(stream);
 	}
 
+	/**
+	 * Clears all the logs
+	 */
 	public void clear() {
 		Logger logger = (Logger) workspace.findInternalWindow(WindowEnum.LOGGER);
 		if (logger != null)

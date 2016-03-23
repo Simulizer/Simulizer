@@ -24,6 +24,12 @@ import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.theme.Theme;
 
+/**
+ * High Level Visualisation Window
+ * 
+ * @author Michael
+ *
+ */
 public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private double width = 400;
 	private double height = 300;
@@ -83,6 +89,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		getWindowManager().getHLVisualManager().deleteObserver(this);
 	}
 
+	/**
+	 * Adds a visualisation to the tabs
+	 * 
+	 * @param vis
+	 *            the visualisation to add
+	 */
 	public void addTab(DataStructureVisualiser vis) {
 		Tab tab = new Tab(vis.getName());
 		tab.setContent(vis);
@@ -104,23 +116,47 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		Platform.runLater(() -> tabs.getTabs().add(tab));
 	}
 
+	/**
+	 * Removes a model from the tabs
+	 * 
+	 * @param model
+	 *            the model to remove
+	 */
 	public void removeTab(DataStructureModel model) {
 		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).forEach(t -> removeTab(t));
 	}
 
+	/**
+	 * Removes a visualisation from the tabs
+	 * 
+	 * @param vis
+	 *            the visualisation to remove
+	 */
 	public void removeTab(DataStructureVisualiser vis) {
 		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> removeTab(t));
 	}
 
+	/**
+	 * Removes a tab from the tabs
+	 * 
+	 * @param tab
+	 *            the tab to remove
+	 */
 	public void removeTab(Tab tab) {
 		((DataStructureVisualiser) tab.getContent()).close();
 		Platform.runLater(() -> tabs.getTabs().remove(tab));
 	}
 
+	/**
+	 * @return the window width
+	 */
 	public double getWindowWidth() {
 		return width;
 	}
 
+	/**
+	 * @return the window height
+	 */
 	public double getWindowHeight() {
 		return height;
 	}
@@ -146,6 +182,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		}
 	}
 
+	/**
+	 * Adds a new visualisation
+	 * 
+	 * @param model
+	 *            the model to create the visualisation for
+	 */
 	private void addNewVisualisation(DataStructureModel model) {
 		DataStructureVisualiser vis = null;
 		switch (model.modelType()) {

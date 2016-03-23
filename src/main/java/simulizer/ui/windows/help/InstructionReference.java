@@ -2,6 +2,12 @@ package simulizer.ui.windows.help;
 
 import simulizer.assembler.representation.Instruction;
 
+/**
+ * Instruction Reference
+ * 
+ * @author Michael
+ *
+ */
 public class InstructionReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public InstructionReference() {

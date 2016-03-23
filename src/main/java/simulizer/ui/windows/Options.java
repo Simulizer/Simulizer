@@ -80,6 +80,14 @@ public class Options extends InternalWindow {
 		super.ready();
 	}
 
+	/**
+	 * Creates the options tree
+	 * 
+	 * @param root
+	 *            the options folder root
+	 * @param settings
+	 *            the object setting
+	 */
 	private void createTree(FolderItem root, ObjectSetting settings) {
 		settings.getValue().stream().filter(value -> value.getSettingType() == SettingType.OBJECT).forEach(value -> {
 			FolderItem innerItem = new FolderItem((ObjectSetting) value);
@@ -90,6 +98,12 @@ public class Options extends InternalWindow {
 		root.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 
+	/**
+	 * Shows the inner elements of the ObjectSetting
+	 * 
+	 * @param settings
+	 *            the ObjectSettings to generate the inner elements for
+	 */
 	private void showComponents(ObjectSetting settings) {
 		// Remove all existing components
 		values.getChildren().removeAll(values.getChildren());
@@ -171,6 +185,7 @@ public class Options extends InternalWindow {
 		this.theme = theme.getStyleSheet("options.css");
 		updateChildrenThemes(pane, this.theme);
 	}
+
 
 	private void updateChildrenThemes(Control pane, String stylesheet) {
 		if (pane != null) {

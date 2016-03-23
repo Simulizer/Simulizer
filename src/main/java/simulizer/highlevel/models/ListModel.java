@@ -9,6 +9,12 @@ import java.util.Optional;
 
 import simulizer.simulation.cpu.user_interaction.IO;
 
+/**
+ * Model for visualising a list
+ * 
+ * @author Michael
+ *
+ */
 public class ListModel extends DataStructureModel {
 	private long[] list;
 	private int size = 0;
@@ -24,6 +30,12 @@ public class ListModel extends DataStructureModel {
 		list = new long[0];
 	}
 
+	/**
+	 * Sets the list
+	 * 
+	 * @param list
+	 *            the list to set
+	 */
 	public void setList(List<Long> list) {
 		synchronized (this.list) {
 			synchronized (markers) {
@@ -38,6 +50,13 @@ public class ListModel extends DataStructureModel {
 		notifyObservers(new ListAction());
 	}
 
+	/**
+	 * Checks whether an index exists. Will print error if invalid.
+	 * 
+	 * @param index
+	 *            the index to check
+	 * @return whether it exists or not.
+	 */
 	private boolean checkIndex(int index) {
 		if (index < 0 || index >= size) {
 			printError("There is no element " + index);
@@ -46,6 +65,14 @@ public class ListModel extends DataStructureModel {
 		return false;
 	}
 
+	/**
+	 * Sets an item in a list
+	 * 
+	 * @param i
+	 *            the index to replace
+	 * @param item
+	 *            the item to replace with
+	 */
 	public void set(int i, Long item) {
 		synchronized (list) {
 			if (checkIndex(i))
@@ -56,6 +83,14 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * Swaps two elements in the list
+	 * 
+	 * @param i
+	 *            the first index
+	 * @param j
+	 *            the second index
+	 */
 	public void swap(int i, int j) {
 		synchronized (list) {
 			if (checkIndex(i))
@@ -74,6 +109,14 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * Puts a marker on an index
+	 * 
+	 * @param markerName
+	 *            the marker name to add
+	 * @param index
+	 *            the index to add the marker to
+	 */
 	public void setMarkers(String markerName, int index) {
 		synchronized (markers) {
 			if (checkIndex(index))
@@ -92,11 +135,23 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * Highlights a marker
+	 * 
+	 * @param index
+	 *            the index to highlight markers for
+	 */
 	public void highlightMarker(int index) {
 		setChanged();
 		notifyObservers(new HighlightAction(index));
 	}
 
+	/**
+	 * Clears a marker
+	 * 
+	 * @param index
+	 *            the index to clear markers for
+	 */
 	public void clearMarker(int index) {
 		synchronized (markers) {
 			markers.remove(index);
@@ -105,6 +160,9 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * Clears all markers
+	 */
 	public void clearMarkers() {
 		synchronized (markers) {
 			markers.clear();
@@ -113,15 +171,27 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * Emphasises a particular element
+	 * 
+	 * @param index
+	 *            the index of the element to emphasise
+	 */
 	public void emphasise(int index) {
 		setChanged();
 		notifyObservers(new EmphasiseAction(index));
 	}
 
+	/**
+	 * @return the size of the list
+	 */
 	public int size() {
 		return list.length;
 	}
 
+	/**
+	 * @return a copy of the list in it's current state
+	 */
 	public long[] getList() {
 		synchronized (list) {
 			if (list.length == 0)
@@ -131,6 +201,9 @@ public class ListModel extends DataStructureModel {
 		}
 	}
 
+	/**
+	 * @return a copy of the markers in it's current state
+	 */
 	public Map<Integer, ArrayList<String>> getMarkers() {
 		synchronized (markers) {
 			Map<Integer, ArrayList<String>> copy = new HashMap<>();
@@ -147,6 +220,12 @@ public class ListModel extends DataStructureModel {
 		return ModelType.LIST;
 	}
 
+	/**
+	 * List changed action
+	 * 
+	 * @author Michael
+	 *
+	 */
 	public class ListAction extends ModelAction<long[]> {
 
 		private ListAction() {
