@@ -1,4 +1,0 @@
-# Editor #
-
-$\TODO{write section}$
-

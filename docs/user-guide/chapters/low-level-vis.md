@@ -40,8 +40,8 @@ You can highlight all occurrences of a particular instruction by clicking on it.
 
 A maximum of 10,000 pipeline stages can currently be displayed (this is to mitigate problems with infinite loops etc.)
 
-## Memory View ##
-$\TODO{take picture}$
+<!--## Memory View ##
+$\TODO{take picture}$-->
 <!-- TODO take a nice picture of the memory view window
 ![](segments/memory-view.png)
 -->
