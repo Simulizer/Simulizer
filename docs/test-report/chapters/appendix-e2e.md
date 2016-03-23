@@ -283,6 +283,7 @@ Test ID: TC-E2E14
 - **Actual**: As expected (see below).
 
 ![](segments/end-to-end/default-layout.png){ width=40% }
+
 ![](segments/end-to-end/resize-main-window.png){ width=40% }
 
 ### Configuration/Options ###
@@ -343,7 +344,7 @@ Test ID: TC-E2E17
   * After pausing the simulation, the pipeline view should be stationary.
   * The correct instructions and pipeline stages should be shown when scrolling left and right.
   * After entering 9999 in the `Go to` field, the view should snap to either cycle 9999 or the most recent cycle, and then the view should continue filling up with pipeline stages from left to right.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ### Program IO window ###
 Test ID: TC-E2E18
@@ -358,6 +359,8 @@ Test ID: TC-E2E18
 - **Expected**:
   * The window should start showing the number 1, 2, 3 and so on.
 - **Actual**: As expected (see below).
+
+![](segments/end-to-end/logger-count.png){ width=40% }
 
 Test ID: TC-E2E19
 
@@ -374,6 +377,8 @@ Test ID: TC-E2E19
   * Finally it should print the (correct) sum of A and B.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/logger-add.png){ width=40% }
+
 ### CPU visualisation window ###
 Test ID: TC-E2E20
 
@@ -388,7 +393,7 @@ Test ID: TC-E2E20
 - **Expected**:
   * Messages should appear in the CPU visualisation explaining what is currently happening.
   * There should be animations along the bus lines to indicate the movement of data.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 Test ID: TC-E2E21
 
@@ -405,7 +410,7 @@ Test ID: TC-E2E21
   7. Click on each of the other replay buttons.
 - **Expected**:
   * After pressing the replay button for a certain instruction, it should replay the animation as it was played when the simulation was running.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ### High level visualisation window ###
 
@@ -424,7 +429,7 @@ Test ID: TC-E2E22
   * The discs should move from peg to peg using animations.
   * The animations should faithfully reflect the algorithm, i.e. it follows the restrictions of the game.
   * The puzzle should end in a solved state.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 Test ID: TC-E2E23
 
@@ -441,7 +446,7 @@ Test ID: TC-E2E23
   * The items in the list should swap using animations.
   * The animations should faithfully reflect the bubble sort algorithm.
   * The list should end sorted in ascending order.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 - **Description**: Test that the list visualisation (searching) can be controlled from annotations within the code.
 - **Input**: `binary-search.s`
@@ -455,7 +460,7 @@ Test ID: TC-E2E23
   * The high-level visualisation should open when the `l.show()` command is reached, showing the five list elements: 1, 3, 5, 7, 9.
   * A label should appear over the leftmost item of the current search section, and similarly for the rightmost item.
   * The current item being inspected should be emphasised, e.g. highlighted in red.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ### Error dialogs ###
 Test ID: TC-E2E24
@@ -470,6 +475,7 @@ Test ID: TC-E2E24
   * An error dialog should appear informing the user that there are two errors in the program.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/error-dialog.png){ width=40% }
 
 <!--
 Test ID: TC-E2Ex
