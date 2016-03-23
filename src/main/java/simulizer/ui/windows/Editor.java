@@ -323,7 +323,9 @@ public class Editor extends InternalWindow {
 			"/external/theme-ambiance.js",
 			"/external/theme-chaos.js",
 			"/external/theme-monokai.js",
-			"/external/theme-tomorrow_night_eighties.js"
+			"/external/theme-tomorrow_night_eighties.js",
+			"/external/theme-predawn.js",
+			"/external/theme-flatland.js"
 		);
 		for(String theme : availableThemes) {
 			// eg "/external/theme-monokai.js" contains the substring "monokai"
