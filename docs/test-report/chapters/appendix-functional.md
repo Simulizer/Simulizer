@@ -1,5 +1,7 @@
 ## Functional tests ##
 
+### High-Level Visualisation ###
+
 ***Requirement 4.1.3.a***
 
 **Description**: The system will read annotations from the source file, giving it a precise description of the points of interest in memory/registers.
@@ -82,9 +84,11 @@ li $v0 10; syscall
   * The high level visualisation should open when `h.show()` is executed. The user should be able to close the window and keep it closed. They should then be able to re-open the window and see the visualisation its current state.
 - **Actual**: As expected.
 
+### CPU Visualisation &amp; Simulation ###
+
 ***Requirement 4.2.3.a***
 
-**Description**: The visualisation will display and simulate the following components of our abstract CPU: Program counter, Arithmetic and Logic Unit, Instruction register, Load/store unit, General purpose registers, Simplified buses, Simplified memory
+**Description**: The visualisation will display and simulate the following components of our abstract CPU: Program counter, Arithmetic and Logic Unit, Instruction register, Load/store unit, General purpose registers, Simplified buses, Simplified memory.
 
 **How it will be tested**: Checking that the CPU visualisation window always shows these components even after resizing, closing then re-opening, etc.
 
@@ -162,6 +166,8 @@ Test ID: TC-FNC5
 
 *See TC-E2E17*.
 
+### Code Editor ###
+
 ***Requirement 4.3.3.a***
 
 **Description**: The user will only be able to open and save files with the “.s” extension - the extension for MIPS programs.
@@ -227,6 +233,8 @@ Test ID: TC-FNC5
 
 *See below*:
 ![](segments/functional/editor-unsaved.png){width=80%}
+
+### Interface ###
 
 ***Requirement 4.4.3.a***
 
