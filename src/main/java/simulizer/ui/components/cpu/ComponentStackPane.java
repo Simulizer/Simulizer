@@ -26,7 +26,6 @@ public class ComponentStackPane extends StackPane {
     private double width;
     private double height;
     private CPUVisualisation vis;
-    //boolean focused = false;
 
     /**
      * Sets the visualisation and sets up the label
