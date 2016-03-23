@@ -3,10 +3,12 @@ package simulizer.ui.windows;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import simulizer.ui.WindowManager;
 import simulizer.ui.components.CPU;
 import simulizer.ui.components.cpu.listeners.CPUChangedListener;
 import simulizer.ui.components.cpu.listeners.CPUListener;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
 
 /**
@@ -160,6 +162,15 @@ public class CPUVisualisation extends InternalWindow {
 		CPUChangedListener cpuChangedListener = new CPUChangedListener(this);
 		getWindowManager().addCPUChangedListener(cpuChangedListener);
 		super.ready();
+	}
+
+	/**
+	 * Opens a required internal window
+	 * @param window The window to open
+	 * @return The internal window
+	 */
+	public InternalWindow openWindow(WindowEnum window){
+		return getWindowManager().getWorkspace().openInternalWindow(window);
 	}
 
 	/**

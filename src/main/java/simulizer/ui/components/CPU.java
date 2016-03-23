@@ -15,6 +15,7 @@ import simulizer.ui.components.cpu.CustomLine;
 import simulizer.ui.components.cpu.CustomWire;
 import simulizer.ui.components.cpu.GeneralComponent;
 import simulizer.ui.components.cpu.InstructionsWindow;
+import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.CPUVisualisation;
 
 /**
@@ -137,6 +138,11 @@ public class CPU {
 		programCounter = new GeneralComponent(vis, "PC");
 		instructionMemory = new GeneralComponent(vis, "Code Memory");
 		register = new GeneralComponent(vis, "Registers");
+
+		register.setOnMouseClicked((e) -> {
+			vis.openWindow(WindowEnum.REGISTERS).emphasise();
+		});
+
 		alu = new ALU(vis, "ALU");
 		mainMemory = new GeneralComponent(vis, "Data Memory");
 		ir = new GeneralComponent(vis, "IR");
