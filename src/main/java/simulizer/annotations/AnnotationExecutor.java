@@ -48,6 +48,9 @@ public class AnnotationExecutor {
 		}
 	}
 
+	/**
+	 * create a new executor
+	 */
 	public AnnotationExecutor() {
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
 		AnnotationClassFilter filter = new AnnotationClassFilter();
@@ -118,6 +121,15 @@ public class AnnotationExecutor {
 		return tClass.cast(globals.get(name));
 	}
 
+	/**
+	 * Execute the javascript code found inside the annotation
+	 * @param annotation the annotation to execute
+	 * @return the result of evaulating the script (ie the script `var x = 14; x;` returns `Integer(14)`)
+	 * @throws ScriptException
+	 * @throws SecurityException
+	 * @throws AnnotationEarlyReturn
+	 * @throws AssertionError
+	 */
 	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn, AssertionError {
 		@SuppressWarnings("UnusedAssignment") // this is actually necessary
 		Object res = null;
@@ -151,6 +163,12 @@ public class AnnotationExecutor {
 		return res;
 	}
 
+	/**
+	 * Execute some javascript code
+	 * @param script the script to execute
+	 * @throws ScriptException
+	 * @throws SecurityException
+	 */
 	private void exec(String script) throws ScriptException, SecurityException {
 		engine.eval(script);
 		promoteToGlobal();

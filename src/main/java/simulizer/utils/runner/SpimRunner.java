@@ -36,6 +36,13 @@ public class SpimRunner implements Runner {
 		return run(program, sendStdin, null);
 	}
 
+	/**
+	 * Run the given program in SPIM with the given input and return the captured output
+	 * @param program the program source code
+	 * @param sendStdin the input to the program
+	 * @param extraArgs any command line arguments to pass to spim
+	 * @return the captured output
+	 */
 	public String run(String program, String sendStdin, List<String> extraArgs) {
 		this.program = program;
 		this.input = sendStdin;
