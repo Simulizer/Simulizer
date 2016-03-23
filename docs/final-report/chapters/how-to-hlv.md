@@ -52,7 +52,7 @@ getChildren().add(canvas);
 
 to the constructor and then use the canvas in visualisations.
 
-The `DataStructureVisualiser` class handles the animation timer, receiving messages, etc. We need to implement the `processChange` and  `repaint` methods. The `processChange` method should contain any logic, if any, for updating parameters for the view. For example, if animations are required, an animation timeline could be instantiated. You should call `setUpdatePaused(true)` at the end of the `processChange` method, and `setUpdatePaused(false)` should be called after any animations finish. The `repaint` method should repaint/resize the components in the window.
+The `DataStructureVisualiser` class handles the animation timer, receiving messages, etc. We need to implement the `processChange` and  `repaint` methods. The `processChange` method should contain any logic, if any, for updating parameters for the view. For example, if animations are required, an animation time-line could be instantiated. You should call `setUpdatePaused(true)` at the end of the `processChange` method, and `setUpdatePaused(false)` should be called after any animations finish. The `repaint` method should repaint/resize the components in the window.
 
 By implementing the `getName` method you can give your visualisation a name, e.g.
 

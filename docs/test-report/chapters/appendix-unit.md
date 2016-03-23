@@ -1,5 +1,7 @@
 ## Unit Tests ##
 
+The following is a sample of some of the unit tests carried out on the system.
+
 **Name of Component/Class**: `ALU`
 
 | Test ID | Method  | Instruction | Word 1     | Word 2     | Expected    | Actual      | Pass (y/n) | Test Date |
