@@ -4,7 +4,7 @@ package simulizer.assembler.spim_compliance;
 import category.SpimTests;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import simulizer.utils.SpimRunner;
+import simulizer.utils.runner.SpimRunner;
 
 import java.math.BigInteger;
 
@@ -39,7 +39,7 @@ public class SpimBehaviour {
             "  li $v0, 1; " + loadInstruction + " $a0, myint; syscall\n" + // print int
             "  li $v0, 10; syscall\n"; // exit
         SpimRunner spim = new SpimRunner();
-        return spim.runSpim(p, "");
+        return spim.run(p, "");
     }
 
     /**
@@ -56,6 +56,8 @@ public class SpimBehaviour {
     @Test
     public void testIntegerLiterals() {
         String output;
+
+        //TODO: use MARS and its autocomplete to gain insight on the different encoding schemes (eg li can use either a 16 bit sign extended value or a full 32 bit value)
 
         output = printAnInteger("byte", "lb", "10");
         assertEquals(10, Integer.parseInt(output));
@@ -94,7 +96,7 @@ public class SpimBehaviour {
                 "syscall\n" +
                 "li $v0, 10; syscall";
             SpimRunner spim = new SpimRunner();
-            String output = spim.runSpim(p, "");
+            String output = spim.run(p, "");
             assertEquals(, Integer.parseInt(output));
             */
         }
@@ -114,7 +116,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                assertTrue(spim.runSpim(p, "").contains("Bad character in \\ooo construct"));
+                assertTrue(spim.run(p, "").contains("Bad character in \\ooo construct"));
             }
             // sometimes it fails silently (literally prints the characters: '\' '4' '3')
             {
@@ -125,7 +127,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("\\43", spim.runSpim(p, ""));
+                expectCorrectParse("\\43", spim.run(p, ""));
             }
             // small numbers handled correctly
             {
@@ -136,7 +138,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("\43", spim.runSpim(p, ""));
+                expectCorrectParse("\43", spim.run(p, ""));
             }
             // larger numbers not handled correctly (interprets \101 as \011)
             {
@@ -147,7 +149,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("\011", spim.runSpim(p, ""));
+                expectCorrectParse("\011", spim.run(p, ""));
             }
             // a bug: parses `"abc\"` as `abc"` (backticks not included)
             {
@@ -158,7 +160,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("abc\"", spim.runSpim(p, ""));
+                expectCorrectParse("abc\"", spim.run(p, ""));
             }
         }
     }
@@ -175,7 +177,7 @@ public class SpimBehaviour {
                 "  li $v0, 1; lw $a0, myint; syscall\n" + // print int
                 "  li $v0, 10; syscall\n"; // exit
             SpimRunner spim = new SpimRunner();
-            expectSyntaxError(spim.runSpim(p, ""), 2);
+            expectSyntaxError(spim.run(p, ""), 2);
         }
         // spaces between labels and ':' are allowed
         {
@@ -187,7 +189,7 @@ public class SpimBehaviour {
                 "  li $v0, 1; lw $a0, myint; syscall\n" + // print int
                 "  li $v0, 10; syscall\n"; // exit
             SpimRunner spim = new SpimRunner();
-            expectCorrectParse("15", spim.runSpim(p, ""));
+            expectCorrectParse("15", spim.run(p, ""));
         }
 
         // semicolon or newline required after .data or .text directives
@@ -200,7 +202,7 @@ public class SpimBehaviour {
                     "  li $v0, 1; lw $a0, myint; syscall\n" + // print int
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("15", spim.runSpim(p, ""));
+                expectCorrectParse("15", spim.run(p, ""));
             }
             { // .data\n allowed
 
@@ -212,7 +214,7 @@ public class SpimBehaviour {
                     "  li $v0, 1; lw $a0, myint; syscall\n" + // print int
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("15", spim.runSpim(p, ""));
+                expectCorrectParse("15", spim.run(p, ""));
             }
             { // neither: not allowed
                 String p = "" +
@@ -222,7 +224,7 @@ public class SpimBehaviour {
                     "  li $v0, 1; lw $a0, myint; syscall\n" + // print int
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectSyntaxError(spim.runSpim(p, ""), 1);
+                expectSyntaxError(spim.run(p, ""), 1);
             }
         }
 
@@ -235,7 +237,7 @@ public class SpimBehaviour {
                 "  ;;li $v0, 1; lw $a0, myint; syscall;;;\n" + // print int
                 "  ;;li $v0, 10; syscall;;;\n"; // exit
             SpimRunner spim = new SpimRunner();
-            expectCorrectParse("15", spim.runSpim(p, ""));
+            expectCorrectParse("15", spim.run(p, ""));
         }
 
         // trailing commas and more than one comma in between parameters
@@ -247,7 +249,7 @@ public class SpimBehaviour {
                 "  li $v0, 1; lw $a0, myint,; syscall\n" + // print int
                 "  li $v0,, 10,; syscall\n"; // exit
             SpimRunner spim = new SpimRunner();
-            expectCorrectParse("15", spim.runSpim(p, ""));
+            expectCorrectParse("15", spim.run(p, ""));
         }
 
 

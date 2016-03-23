@@ -27,7 +27,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
-import simulizer.utils.SpimRunner;
+import simulizer.utils.runner.SpimRunner;
 import simulizer.utils.UIUtils;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm

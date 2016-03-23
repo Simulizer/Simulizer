@@ -6,7 +6,7 @@ public enum IOStream {
 	private int id;
 	private String name;
 
-	private IOStream(int id, String name) {
+	IOStream(int id, String name) {
 		this.id = id;
 		this.name = name;
 	}
