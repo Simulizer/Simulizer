@@ -24,7 +24,7 @@ import simulizer.assembler.representation.operand.IntegerOperand;
 import simulizer.assembler.representation.operand.Operand;
 import simulizer.assembler.representation.operand.RegisterOperand;
 import simulizer.simulation.cpu.components.CPU;
-import simulizer.simulation.cpu.user_interaction.IOConsole;
+import simulizer.simulation.cpu.user_interaction.ConsoleIO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.exceptions.DecodeException;
 import simulizer.simulation.instructions.AddressMode;
@@ -50,7 +50,7 @@ public class DecodeTest {
 
 	@Before
 	public void setupCPU() {
-		cpu = new CPU(new IOConsole());
+		cpu = new CPU(new ConsoleIO());
 	}
 
 	@After

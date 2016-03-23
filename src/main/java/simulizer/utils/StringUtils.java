@@ -1,6 +1,7 @@
 package simulizer.utils;
 
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Utilities for common string operations
@@ -36,5 +37,13 @@ public class StringUtils {
 			lastIndex = index;
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * read exactly one character from the scanner
+	 * from: http://stackoverflow.com/a/13942707/1066911
+	 */
+	public static char nextChar(Scanner s) {
+		return s.findInLine(".").charAt(0);
 	}
 }

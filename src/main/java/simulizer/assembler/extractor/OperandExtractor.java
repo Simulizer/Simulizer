@@ -146,6 +146,7 @@ public class OperandExtractor {
      */
     public int extractInteger(SimpParser.IntegerContext ctx) {
         int abs = 0;
+        int val = 0;
 
         if(!goodMatch(ctx)) {
             log.logParseError("integer", ctx);
@@ -161,16 +162,27 @@ public class OperandExtractor {
             } else {
                 log.logParseError("integer", ctx);
             }
+
+
+			if(ctx.SIGN() == null || ctx.SIGN().getText().equals("+")) { // positive
+				val = abs;
+			} else { // negative
+				val = -abs;
+			}
+
+            //TODO: use long or handle the fact that large integer values may be negative. Then do proper tests for overflow
+            /*
+            if(DataConverter.hasOverflow(abs)) {
+                throw new NumberFormatException();
+            }
+            */
+
         } catch(NumberFormatException e) {
             log.logProblem("NumberFormatException while extracting an integer: \"" +
-                ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx);
+                    ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx);
         }
 
-        if(ctx.SIGN() == null || ctx.SIGN().getText().equals("+")) { // positive
-            return abs;
-        } else { // negative
-            return -abs;
-        }
+        return val;
     }
 
     /**
@@ -197,6 +209,13 @@ public class OperandExtractor {
             } else {
                 log.logParseError("unsigned integer", ctx);
             }
+
+            //TODO: use long or handle the fact that large integer values may be negative. Then do proper tests for overflow
+            /*
+            if(DataConverter.hasOverflow(abs)) {
+                throw new NumberFormatException();
+            }
+            */
         } catch(NumberFormatException e) {
             log.logProblem("NumberFormatException while extracting an unsigned integer: \"" +
                 ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx);

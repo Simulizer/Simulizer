@@ -18,12 +18,12 @@ Throughout the development of Simulizer, in order to aid in the production of a 
 <!-- JavaFX -->
 **JavaFX** - a set of graphics and media packages for Java:
 
-- **Where it is used:** JavaFX provides a GUI framework along with several utilities. It is a modern alternative to the old standard GUI libraries: Swing, with more of a focus on web technologies (including themability using css). Because of the better default look and feel along with the potential for interesting extensions (see JFExtras) we decided to use JavaFX over other considered libraries such as Swing or Qt. This choice paid off when we decided to use the Ace editor, as it is a web based component rendered inside a JavaFX web view, which is one of the main selling points of JavaFX.
+- **Where it is used:** JavaFX provides a GUI framework along with several utilities. It is a modern alternative to the old standard GUI libraries: Swing, with more of a focus on web technologies (including themability using css). Because of the better default look and feel along with the potential for interesting extensions (see JFXtras) we decided to use JavaFX over other considered libraries such as Swing or Qt. This choice paid off when we decided to use the Ace editor, as it is a web based component rendered inside a JavaFX web view, which is one of the main selling points of JavaFX.
 - **License:** JavaFX is released under the GPL v2 license
 - **Link:** [http://docs.oracle.com/javase/8/javase-clienttechnologies.htm](http://docs.oracle.com/javase/8/javase-clienttechnologies.htm)
 
-<!-- JFxtras -->
-**JFxtras** - a set of high quality controls and add-ons for JavaFX:
+<!-- JFXtras -->
+**JFXtras** - a set of high quality controls and add-ons for JavaFX:
 
 - **Where it is used:** Built on top of JavaFX, This library provides (among other things) the capability for drawing 'internal windows' which our application uses extensively to provide maximum UI flexibility.
 - **License:** JFXtras is released under the New BSD License
