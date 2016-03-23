@@ -39,7 +39,7 @@ build/
 
 # ignore generated and external files
 generated/
-external/*
+src/main/resources/external/*
 !external/theme-flatland.js
 !external/theme-predawn.js
 

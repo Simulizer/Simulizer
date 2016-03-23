@@ -319,6 +319,8 @@ Test ID: TC-E2E16
   * The pipeline view should show an instruction in the fetch stage, then red circles for the decode and fetch stages. Then the same instruction should be shown in the decode stage and then the fetch stage, with the other stages being red circles each time.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/pipeline-non-pipelined.png){ width=40% }
+
 Test ID: TC-E2E17
 
 - **Description**: Pipeline view should show instructions in the pipeline, as well as the waiting and completed instructions, and display any hazards.
