@@ -40,6 +40,8 @@ build/
 # ignore generated and external files
 generated/
 external/
+!external/theme-flatland.js
+!external/theme-predawn.js
 
 # ignore gradle files
 .gradle/
