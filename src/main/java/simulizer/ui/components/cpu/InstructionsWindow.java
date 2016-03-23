@@ -25,6 +25,7 @@ public class InstructionsWindow extends StackPane {
 
     /**
      * Represents a previous animation, contains the name and list of animations
+     * @author Theo Styles
      */
     public class PreviousAnimation{
 
@@ -40,6 +41,7 @@ public class InstructionsWindow extends StackPane {
 
     /**
      * Represents a list cell containing a button
+     * @author Theo Styles
      */
     static class ButtonCell extends ListCell<PreviousAnimation> {
         HBox hbox = new HBox();

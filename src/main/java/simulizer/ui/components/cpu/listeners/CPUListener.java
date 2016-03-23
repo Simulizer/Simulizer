@@ -20,6 +20,9 @@ public class CPUListener extends SimulationListener {
 
     /**
      * Sets the visualisation cpu, cpu simulation and the animation processor
+     * @param cpu The visualised CPU
+     * @param simCpu The simulated CPU
+     * @param animationProcessor The animation processor
      */
     public CPUListener(simulizer.ui.components.CPU cpu, CPU simCpu, AnimationProcessor animationProcessor){
         this.cpu = cpu;
@@ -27,6 +30,10 @@ public class CPUListener extends SimulationListener {
         this.animationProcessor = animationProcessor;
     }
 
+    /**
+     * Gets the simulation CPU
+     * @return The simulation CPU
+     */
     public CPU getSimCpu(){
         return simCpu;
     }
@@ -345,6 +352,7 @@ public class CPUListener extends SimulationListener {
 
     /**
      * Processes an I-TYPE instruction
+     * @param instruction The name of the instruction
      */
     public void processIType(String instruction){
         int speed = getInstructionFraction(4);
@@ -382,6 +390,7 @@ public class CPUListener extends SimulationListener {
 
     /**
      * Processes an R-TYPE instruction
+     * @param instruction The name of the instruction
      */
     public void processRType(String instruction){
         int speed = getInstructionFraction(3);
@@ -411,6 +420,9 @@ public class CPUListener extends SimulationListener {
 
     }
 
+    /**
+     * When a new cycle starts
+     */
     public void startOfCycle(){
         animationProcessor.newCycle();
     }
