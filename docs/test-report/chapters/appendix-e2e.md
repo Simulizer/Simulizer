@@ -4,7 +4,7 @@ Each of these tests will start with all windows closed.
 
 ### Editor ###
 
-**Test ID**: TC-E2Ex  
+**Test ID**: TC-E2E1  
 
 - **Description**: User opens a new file in the code editor, writes some valid code, and then saves their code to file.
 - **Input**: `.text; main:; li $v0 10; syscall`
@@ -28,7 +28,7 @@ Each of these tests will start with all windows closed.
 
 ![](segments/end-to-end/editor-new-file-save-vim.png)
 
-**Test ID**: TC-E2Ex  
+**Test ID**: TC-E2E2
 
 - **Description**: Test general usability, e.g. open an existing file, scroll around the code, fold a section, etc.
 - **Input**: `bubblesort.s`
@@ -64,7 +64,7 @@ Each of these tests will start with all windows closed.
 
 ![](segments/end-to-end/editor-edit.png)
 
-**Test ID**: TC-E2Ex
+**Test ID**: TC-E2E3
 
 - **Description**: Line number tracking while simulation is running.
 - **Input**: `count.s`
@@ -79,7 +79,7 @@ Each of these tests will start with all windows closed.
   * Hovering over the highlighted line number should show the current stage of execution, e.g. `decoding`.
 - **Actual**: As expected (see below).
 
-**Test ID**: TC-E2Ex
+**Test ID**: TC-E2E4
 
 - **Description**: Open an invalid program, view errors, then fix them.
 - **Input**: `count-annotated.s`
@@ -99,7 +99,7 @@ Each of these tests will start with all windows closed.
 
 ### Registers window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E5
 
 - **Description**: Check that the information in the `Registers` window updates as the simulation runs.
 - **Input**: `.text; main:; li $a0 55`
@@ -113,7 +113,7 @@ Test ID: TC-E2Ex
   * The value of `a0` in the `Registers` window should change from 0 to 55.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E6
 
 - **Description**: Columns in `Registers` window should allow sorting.
 - **Input**: `add.s`
@@ -129,7 +129,7 @@ Test ID: TC-E2Ex
   * Same as above but for the `Unsigned` column: it should sort alphabetically/numerically and then sort in the opposite order after the second click.
 - **Actual**: $\TODO{Get a correct result}. As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E7
 
 - **Description**: Registers window should allow the user to view the values of the registers as unsigned, signed, or in hexadecimal.
 - **Input**: `add.s`
@@ -147,7 +147,7 @@ Test ID: TC-E2Ex
 
 ### Labels window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E8
 
 - **Description**: The `Labels` window should show all labels present in the code, and only those present in the code.
 - **Input**: `count.s`
@@ -163,7 +163,7 @@ Test ID: TC-E2Ex
     - mystr: 5
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E9
 
 - **Description**: The `Labels` window should update labels as the user types.
 - **Input**: `count.s`.
@@ -180,7 +180,7 @@ Test ID: TC-E2Ex
   * The row with `END: 20` should be added after undoing the deletion of line 20.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E10
 
 - **Description**: The buttons in the `Labels` window should work appropriately.
 - **Input**: `binary-search.s`
@@ -200,7 +200,7 @@ Test ID: TC-E2Ex
 
 ### Layouts ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E11
 
 - **Description**: Test each bundled layout.
 - **Action**:
@@ -209,7 +209,7 @@ Test ID: TC-E2Ex
   * The window should update to show the windows in the corresponding layout.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E12
 
 - **Description**: Try saving a custom layout.
 - **Action**:
@@ -227,7 +227,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### General window functionality ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E13
 
 - **Description**: Windows should resize correctly and reposition when dragged.
 - **Action**:
@@ -243,7 +243,7 @@ Test ID: TC-E2Ex
   * The content should be repositioned in the main window relative to its container window.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E14
 
 - **Description**: Internal windows should resize according to the size of the main window.
 - **Action**:
@@ -258,7 +258,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Configuration/Options ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E15
 
 - **Description**: Test that items in the options window change the program accordingly.
 - **Action**:
@@ -273,7 +273,7 @@ Test ID: TC-E2Ex
 
 ### Pipeline View ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E16
 
 - **Description**: Pipeline view should only show one instruction at a time when CPU is non-pipelined.
 - **Input**: `count.s`
@@ -287,9 +287,9 @@ Test ID: TC-E2Ex
   * The pipeline view should show an instruction in the fetch stage, then red circles for the decode and fetch stages. Then the same instruction should be shown in the decode stage and then the fetch stage, with the other stages being red circles each time.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E17
 
-- **Description**:
+- **Description**: Pipeline view should show instructions in the pipeline, as well as the waiting and completed instructions, and display any hazards.
 - **Input**: `count.s`
 - **Action**:
   1. Open the `Editor` window.
@@ -312,7 +312,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Program IO window ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E18
 
 - **Description**: Test that messages from the current program are sent to the Program IO window, i.e. check the output of the window.
 - **Input**: `count.s`
@@ -325,7 +325,7 @@ Test ID: TC-E2Ex
   * The window should start showing the number 1, 2, 3 and so on.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E19
 
 - **Description**: Test that text entered by the user is passed to the system, i.e. check the input of the window.
 - **Input**: `add2.s`, `4`, `5`
@@ -341,7 +341,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### CPU visualisation window ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E20
 
 - **Description**: The CPU visualisation should update as the program runs.
 - **Input**: `count.s`
@@ -356,7 +356,7 @@ Test ID: TC-E2Ex
   * There should be animations along the bus lines to indicate the movement of data.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E21
 
 - **Description**: The replay buttons should replay the correct instruction.
 - **Input**: `count.s`
@@ -375,7 +375,7 @@ Test ID: TC-E2Ex
 
 ### High level visualisation window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E22
 
 - **Description**: Test that the Tower of Hanoi visualisation can be controlled from annotations within the code.
 - **Input**: `tower-of-hanoi.s`, `4`.
@@ -392,7 +392,7 @@ Test ID: TC-E2Ex
   * The puzzle should end in a solved state.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E23
 
 - **Description**: Test that the list visualisation (sorting) can be controlled from annotations within the code.
 - **Input**: `bubblesort.s`, `5, 3, 6, 7, 2`
@@ -424,7 +424,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Error dialogs ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E24
 
 - **Description**: Test that an error message is shown when trying to run an invalid program.
 - **Input**: `bad-add.s`
