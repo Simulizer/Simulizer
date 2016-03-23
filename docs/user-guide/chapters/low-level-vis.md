@@ -14,11 +14,11 @@ When viewing the CPU visualisation, you will notice several things:
 You can also view more information about each component by hovering over it with your mouse, a tooltip will show with a detailed description about the role of the component. This can be used to further your knowledge about how each component of the CPU works.
 
 
-![CPU Visualisation](segments/cpu-visualisation.png)
+![CPU Visualisation](segments/cpu-visualisation.png){ width=80% }
 
 
 ## Pipeline Visualisation ##
-![Pipeline View](segments/pipeline.png)
+![Pipeline View](segments/pipeline.png){ width=100% }
 
 The pipeline visualisation window allows you to view the contents of the pipeline, as well as the waiting and completed instructions, as the CPU is running. The middle third of the window shows the fetch, decode, and execute portions of the pipeline at each state, including hazards where appropriate (represented as red circles).
 
@@ -38,6 +38,5 @@ A maximum of 10,000 pipeline stages can currently be displayed (this is to mitig
 
 
 ## Memory View ##
-![Memory View](segments/memView.png)
+![Memory View](segments/memView.png){ width=80% }
 This component is still under development and so does not bear any functionality at this time.
-

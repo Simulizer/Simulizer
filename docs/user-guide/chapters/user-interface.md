@@ -104,7 +104,7 @@ The labels window allows you to view a quick outline of the labels in your progr
 ### Program I/O ###
 The program I/O window provides a command line interface to communicate with your SIMP programs.
 
-![Program I/O](segments/program-io.png){ width=60% }
+![Program I/O](segments/program-io.png){ width=45% }
 
 This window has a three different tabs designed to keep the different I/O streams separate. The first tab is Standard which is where SIMP programs interact. The second tab outputs runtime errors in the SIMP program. The third tab is where the annotations communicate through, and so any log annotations will write to.
 
