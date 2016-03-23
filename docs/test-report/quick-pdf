@@ -3,4 +3,5 @@
 ./convert-markdown 
 ./generate-pdf
 ./generate-pdf
+./join-pdf
 ./clean
