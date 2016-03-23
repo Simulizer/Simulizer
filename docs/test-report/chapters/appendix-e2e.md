@@ -375,8 +375,66 @@ Test ID: TC-E2Ex
 
 ### High level visualisation window ###
 
+Test ID: TC-E2Ex
+
+- **Description**: Test that the Tower of Hanoi visualisation can be controlled from annotations within the code.
+- **Input**: `tower-of-hanoi.s`, `4`.
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Program IO` window.
+  3. Open `tower-of-hanoi.s`.
+  4. Run the simulation.
+  5. When prompted to enter the number of discs, enter `4`.
+- **Expected**:
+  * The high-level visualisation should open when the `h.show()` command is reached, showing 4 discs on the leftmost peg.
+  * The discs should move from peg to peg using animations.
+  * The animations should faithfully reflect the algorithm, i.e. it follows the restrictions of the game.
+  * The puzzle should end in a solved state.
+- **Actual**: As expected (see below).
+
+Test ID: TC-E2Ex
+
+- **Description**: Test that the list visualisation (sorting) can be controlled from annotations within the code.
+- **Input**: `bubblesort.s`, `5, 3, 6, 7, 2`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Program IO` window.
+  3. Open `bubblesort.s`.
+  3. Run the simulation.
+  4. When prompted to enter the list, enter the list: 5, 3, 6, 7, 2.
+- **Expected**:
+  * The high-level visualisation should open when the `l.show()` command is reached, showing five list elements: 5, 3, 6, 7, 2.
+  * The items in the list should swap using animations.
+  * The animations should faithfully reflect the bubble sort algorithm.
+  * The list should end sorted in ascending order.
+- **Actual**: As expected (see below).
+
+- **Description**: Test that the list visualisation (searching) can be controlled from annotations within the code.
+- **Input**: `binary-search.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open the `Program IO` window.
+  3. Open `binary-search.s`.
+  3. Run the simulation.
+  4. When prompted to enter the list, enter the list: 1, 3, 5, 7, 9.
+- **Expected**:
+  * The high-level visualisation should open when the `l.show()` command is reached, showing the five list elements: 1, 3, 5, 7, 9.
+  * A label should appear over the leftmost item of the current search section, and similarly for the rightmost item.
+  * The current item being inspected should be emphasised, e.g. highlighted in red.
+- **Actual**: As expected (see below).
 
 ### Error dialogs ###
+Test ID: TC-E2Ex
+
+- **Description**: Test that an error message is shown when trying to run an invalid program.
+- **Input**: `bad-add.s`
+- **Action**:
+  1. Open the `Editor` window.
+  2. Open `bad-add.s`.
+  3. Run the simulation.
+- **Expected**:
+  * An error dialog should appear informing the user that there are two errors in the program.
+- **Actual**: As expected (see below).
 
 
 <!--
