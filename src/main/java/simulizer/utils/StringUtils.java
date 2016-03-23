@@ -5,6 +5,8 @@ import java.util.Scanner;
 
 /**
  * Utilities for common string operations
+ *
+ * @author mbway
  */
 public class StringUtils {
 	/**

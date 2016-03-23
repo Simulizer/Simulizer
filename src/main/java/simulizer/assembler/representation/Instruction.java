@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 /**
  * supported instructions
  * @author mbway
+ * @author Charlie Street
  */
 public enum Instruction {
 

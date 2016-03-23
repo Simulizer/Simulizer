@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 
 /**
  * debugging tool to dump a string to a file
+ *
+ * @author mbway
  */
 public class DebugUtils {
 

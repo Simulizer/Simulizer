@@ -12,6 +12,8 @@ import simulizer.utils.UIUtils;
 
 /**
  * Holds data regarding the processing of annotations and display of visualisations
+ *
+ * @author mbway
  */
 public class AnnotationManager {
 	private WindowManager wm;

@@ -10,6 +10,8 @@ import simulizer.utils.UIUtils;
 
 /**
  * A collection of methods for debugging, accessible from annotations
+ *
+ * @author mbway
  */
 @SuppressWarnings("unused")
 public class DebugBridge {
