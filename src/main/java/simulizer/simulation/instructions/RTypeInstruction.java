@@ -9,7 +9,7 @@ import simulizer.simulation.data.representation.Word;
 
 /**this class represents the encapsulation of the information required for r type instructions
  * these are generally arithmetic/logical instructions
- * @author charlie street
+ * @author Charlie Street
  *
  */
 public class RTypeInstruction extends InstructionFormat {
