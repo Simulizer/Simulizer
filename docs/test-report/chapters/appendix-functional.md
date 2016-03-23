@@ -65,6 +65,7 @@ $\TODO{Write a test somehow}$
 
 Test ID: TC-FNC3
 - **Input**:
+
 ```
 # @{ var h = vis.loadHidden('tower-of-hanoi') }@
 
@@ -76,6 +77,7 @@ li $v0 4 # @{ h.setNumDisks($v0.get()) }@
 
 li $v0 10; syscall
 ```
+
 - **Expected**:
   * The high level visualisation should open when `h.show()` is executed. The user should be able to close the window and keep it closed. They should then be able to re-open the window and see the visualisation its current state.
 - **Actual**: As expected (see below).
