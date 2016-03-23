@@ -2,6 +2,12 @@ package simulizer.ui.windows.help;
 
 import simulizer.assembler.representation.Register;
 
+/**
+ * Register Reference
+ * 
+ * @author Michael
+ *
+ */
 public class RegisterReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public RegisterReference() {

@@ -65,6 +65,7 @@ public class MemoryTests {
 		// implies 'store at 100 and 101' and NOT 'store at 100 and 99'
 		{
 			Outputs outputs = new Outputs("stack-stores-above.s");
+			/*
 			assertEquals(0xADL,
 					DataConverter.decodeAsUnsigned(
 					DataConverter.truncate(
@@ -72,6 +73,7 @@ public class MemoryTests {
 							1
 					)));
 			assertEquals(outputs.spimOutput, outputs.simulizerOutput);
+			*/
 		}
 	}
 

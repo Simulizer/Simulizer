@@ -1,6 +1,5 @@
 package simulizer.utils;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +12,8 @@ import javafx.application.Platform;
 
 /**
  * Utility functions for dealing with threads
+ *
+ * @author mbway
  */
 public class ThreadUtils {
 
@@ -84,7 +85,7 @@ public class ThreadUtils {
 
 		@SuppressWarnings("NullableProblems")
 		@Override
-		public Thread newThread(Runnable runnable) {
+		public synchronized Thread newThread(Runnable runnable) {
 			if(runnable == null) runnable = () -> {};
 
 			Thread t = new Thread(runnable, "Executor(" + poolName + "): Thread(" + (threadID++) + ")");
@@ -101,13 +102,13 @@ public class ThreadUtils {
 			threads = new HashSet<>();
 		}
 
-		public void killThreads() {
+		public synchronized void killThreads() {
 			threads.forEach(Thread::interrupt);
 		}
 
 		@SuppressWarnings("NullableProblems")
 		@Override
-		public Thread newThread(Runnable runnable) {
+		public synchronized Thread newThread(Runnable runnable) {
 			Thread t = super.newThread(runnable);
 			threads.add(t);
 			return t;

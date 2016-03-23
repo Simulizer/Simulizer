@@ -8,7 +8,7 @@ import simulizer.simulation.exceptions.StackException;
 
 /**represents the stack of our main memory
  * 
- * @author CharlieStreet
+ * @author Charlie Street
  *
  */
 public class StackSegment {

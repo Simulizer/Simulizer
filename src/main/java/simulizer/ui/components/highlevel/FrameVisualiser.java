@@ -10,11 +10,25 @@ import simulizer.highlevel.models.FrameModel;
 import simulizer.highlevel.models.ModelAction;
 import simulizer.ui.windows.HighLevelVisualisation;
 
+/**
+ * Visualises a frame
+ * 
+ * @author Michael
+ *
+ */
 public class FrameVisualiser extends DataStructureVisualiser {
 
 	private ImageView image;
 	private int width = 240, height = 160;
 
+	/**
+	 * Creates a new frame visualisation
+	 * 
+	 * @param model
+	 *            the model to visualise
+	 * @param vis
+	 *            the high level visualisation window
+	 */
 	public FrameVisualiser(FrameModel model, HighLevelVisualisation vis) {
 		super(model, vis);
 

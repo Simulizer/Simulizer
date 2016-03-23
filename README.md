@@ -29,7 +29,7 @@ The current data structures/graphics that can be visualised are:
 
 Meet the Team
 -------------
-[](https://github.com/charlie1329) | [![Kelsey McKenna](https://avatars1.githubusercontent.com/u/3618330?v=3&s=150)](https://github.com/ToastNumber) | [![Matthew Broadway](https://avatars3.githubusercontent.com/u/4923501?v=3&s=150)](https://github.com/mbway) | [![Michael Oultram](https://avatars0.githubusercontent.com/u/9907700?v=3&s=150)](https://github.com/MichaelOultram) | [![Theo Styles](https://avatars2.githubusercontent.com/u/2779884?v=3&s=150)](https://github.com/ThusStyles)
+[![Charlie Street](https://avatars3.githubusercontent.com/u/11256801?v=3&s=150)](https://github.com/charlie1329) | [![Kelsey McKenna](https://avatars1.githubusercontent.com/u/3618330?v=3&s=150)](https://github.com/ToastNumber) | [![Matthew Broadway](https://avatars3.githubusercontent.com/u/4923501?v=3&s=150)](https://github.com/mbway) | [![Michael Oultram](https://avatars0.githubusercontent.com/u/9907700?v=3&s=150)](https://github.com/MichaelOultram) | [![Theo Styles](https://avatars2.githubusercontent.com/u/2779884?v=3&s=150)](https://github.com/ThusStyles)
 ---|---|---|---|---|
 [Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
 

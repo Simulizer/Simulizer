@@ -28,6 +28,7 @@ import simulizer.utils.UIUtils;
  * It displays the names of the authors, the current version, and the
  * remote repository for the project.
  *
+ * @author mbway
  * @author Kelsey McKenna
  *         with thanks from https://gist.github.com/jewelsea/2305098
  *

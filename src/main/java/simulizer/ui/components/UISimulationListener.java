@@ -21,6 +21,8 @@ import simulizer.ui.windows.PipelineView;
 
 /**
  * Listen to messages from the simulation which concern the UI
+ *
+ * @author mbway
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;

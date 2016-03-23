@@ -7,6 +7,8 @@ import simulizer.ui.interfaces.WindowEnum;
 
 /**
  * A collection of methods for controlling high level visualisations from annotations
+ *
+ * @author mbway
  */
 @SuppressWarnings("unused")
 public class VisualisationBridge {

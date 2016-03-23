@@ -4,7 +4,7 @@ import simulizer.simulation.instructions.AddressMode;
 
 /**this class is for messages specifying instruction types being executed
  * it will hence help specify the datapath being used
- * @author charlie street
+ * @author Charlie Street
  *
  */
 public class InstructionTypeMessage extends Message{

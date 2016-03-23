@@ -145,7 +145,7 @@ public class Logger extends InternalWindow implements Observer {
 		getWindowManager().getIO().addObserver(this);
 		emphasise = (boolean) getWindowManager().getSettings().get("logger.emphasise");
 		int fontSize = (int) getWindowManager().getSettings().get("logger.font-size");
-		
+
 		flush.scheduleAtFixedRate(() -> {
 			if (callUpdate) {
 				Platform.runLater(() -> {
@@ -174,6 +174,9 @@ public class Logger extends InternalWindow implements Observer {
 		flush.shutdown();
 	}
 
+	/**
+	 * Clears all the logs
+	 */
 	public void clear() {
 		lastInput = "";
 		for (StringBuilder log : logs)
@@ -224,6 +227,9 @@ public class Logger extends InternalWindow implements Observer {
 		}
 	}
 
+	/**
+	 * Cancels the request for a message
+	 */
 	public synchronized void cancelNextMessage() {
 		lastInputCancelled = true;
 		cdl.countDown();

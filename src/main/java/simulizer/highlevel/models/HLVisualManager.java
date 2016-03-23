@@ -11,6 +11,12 @@ import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 
+/**
+ * Creates and deletes High Level Visualisation models
+ * 
+ * @author Michael
+ *
+ */
 public class HLVisualManager extends Observable implements Observer {
 
 	private final Set<DataStructureModel> models = new HashSet<>();
@@ -24,6 +30,13 @@ public class HLVisualManager extends Observable implements Observer {
 		this.autoOpen = autoOpen;
 	}
 
+	/**
+	 * Creates a new DataStructureModel
+	 * 
+	 * @param visualiser
+	 *            the visualisation to create
+	 * @return the new DataStructureModel
+	 */
 	public DataStructureModel create(String visualiser) {
 		DataStructureModel model;
 		switch (visualiser) {
@@ -46,6 +59,12 @@ public class HLVisualManager extends Observable implements Observer {
 		return model;
 	}
 
+	/**
+	 * Deletes a High Level Visualisations
+	 * 
+	 * @param model
+	 *            the model to remove
+	 */
 	public void remove(DataStructureModel model) {
 		model.deleteObserver(this);
 		models.remove(model);
@@ -53,6 +72,9 @@ public class HLVisualManager extends Observable implements Observer {
 		notifyObservers(new Pair<>(Action.DELETED, model));
 	}
 
+	/**
+	 * Closes all models
+	 */
 	public void removeAll() {
 		Iterator<DataStructureModel> iterator = models.iterator();
 		while (iterator.hasNext()) {
@@ -63,6 +85,9 @@ public class HLVisualManager extends Observable implements Observer {
 		}
 	}
 
+	/**
+	 * @return a set of all loaded visualisation models
+	 */
 	public Set<DataStructureModel> getModels() {
 		return models;
 	}
@@ -76,6 +101,12 @@ public class HLVisualManager extends Observable implements Observer {
 		}
 	}
 
+	/**
+	 * Determines whether the model has been created or deleted
+	 * 
+	 * @author Michael
+	 *
+	 */
 	public enum Action {
 		CREATED, DELETED;
 	}
