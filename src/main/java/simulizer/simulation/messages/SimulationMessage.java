@@ -2,6 +2,7 @@ package simulizer.simulation.messages;
 
 /**
  * A message regarding the simulation state
+ * @author mbway
  */
 public class SimulationMessage extends Message {
 	public enum Detail {

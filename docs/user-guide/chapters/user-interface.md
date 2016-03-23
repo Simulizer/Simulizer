@@ -112,7 +112,6 @@ This window has a three different tabs designed to keep the different I/O stream
 ![Memory View](segments/memView.png){ width=60% }
 This section is currently still in development.
 
-
 ### Options ###
 The options window allows you to configure different aspects of Simulizer. These settings are laid out in a tree like fashion to make finding each setting easier.
 
@@ -236,12 +235,7 @@ Layouts determine the configuration that all the Internal Windows are in. They a
 Simulizer includes many layouts for you to try. To change to one of these layout, go to the Menu Bar and click Layouts. This will bring up a list of all the layouts that you can choose. Just click one and the internal windows will rearrange themselves.
 
 ### Saving a Layout ###
-If none of the included layouts are up to your standards then why not make your own. Add/Remove and rearrangement the Internal Windows until it is in a configuration that you are happy with. You can then save the layout by clicking Layouts $\to$ Save Layout.
-
-![Saving a Layout](segments/save-layout.png){width=60%}
-
-Enter a name for this new layout. In this case we called the layout `XXX`. Now click the save button and that new layout should show up on the Layouts drop down menu.
+If none of the included layouts are up to your standards then why not make your own. Add/Remove and rearrangement the Internal Windows until it is in a configuration that you are happy with. You can then save the layout by clicking Layouts $\to$ Save Layout. Enter a name for this new layout and click the save button. That new layout should show up on the Layouts drop down menu.
 
 ## Themes ##
-
-$\TODO{write section}$
+Themes provide a way to change the visual appearance of the software.  This feature is currently in beta (and therefore requires the debug menu). A theme is just a folder in the `themes` folder. It contains some CSS files to define the theme, as well as a `theme.json` file which contains some meta data about the theme (like theme name, author, version, etc.). To switch between themes, navigate to Debug $\to$ Themes and click on your preferred theme.
