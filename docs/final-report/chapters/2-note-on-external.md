@@ -4,7 +4,7 @@ Throughout the development of Simulizer, in order to aid in the production of a 
 <!-- Ace Editor -->
 **Ace Editor** - a highly customisable text editor:
 
-- **Where it is used:** The Ace editor is the basis for the editor component used in Simulizer. It provides us with many more options for extensibility than the alternatives we considered. Beyond simply rendering coloured characters of the source code and the line numbers, all of the logic was created by us on top of the framework that Ace offers us. This logic includes rules for syntax highlighting (including the nesting of pre-packaged javascript highlighting rules inside SIMP comments), code folding, problem analysis & feedback and interactivity with line highlighting during the simulation. (Note: the colour schemes and javascript highlighting rules are not our own and are also BSD licensed)
+- **Where it is used:** The Ace editor is the basis for the editor component used in Simulizer. It provides us with many more options for extensibility than the alternatives we considered. Beyond simply rendering coloured characters of the source code and the line numbers, all of the logic was created by us on top of the framework that Ace offers us. This logic includes rules for syntax highlighting (including the nesting of pre-packaged JavaScript highlighting rules inside SIMP comments), code folding, problem analysis & feedback and interactivity with line highlighting during the simulation. (Note: the colour schemes and JavaScript highlighting rules are not our own and are also BSD licensed)
 - **License:** The Ace Editor is released under the BSD license.
 - **Link:** [https://ace.c9.io](https://ace.c9.io)
 
