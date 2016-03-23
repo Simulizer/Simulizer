@@ -4,7 +4,7 @@ Each of these tests will start with all windows closed.
 
 ### Editor ###
 
-**Test ID**: TC-E2Ex  
+**Test ID**: TC-E2E1  
 
 - **Description**: User opens a new file in the code editor, writes some valid code, and then saves their code to file.
 - **Input**: `.text; main:; li $v0 10; syscall`
@@ -22,13 +22,13 @@ Each of these tests will start with all windows closed.
   * The text should be saved in a file called `NewFileSaveTest.s` in the code folder on the user's computer.
 - **Actual**: As expected (see below).
 
-![](segments/end-to-end/editor-new-file-save-test.png)
+![](segments/end-to-end/editor-new-file-save-test.png){ width=40% }
 
-![](segments/end-to-end/editor-new-file-save-test-dialog.png)
+![](segments/end-to-end/editor-new-file-save-test-dialog.png){ width=40% }
 
-![](segments/end-to-end/editor-new-file-save-vim.png)
+![](segments/end-to-end/editor-new-file-save-vim.png){ width=40% }
 
-**Test ID**: TC-E2Ex  
+**Test ID**: TC-E2E2
 
 - **Description**: Test general usability, e.g. open an existing file, scroll around the code, fold a section, etc.
 - **Input**: `bubblesort.s`
@@ -58,13 +58,13 @@ Each of these tests will start with all windows closed.
   * The editor should wrap long lines appropriately with line wrap mode on.
 - **Actual**: As expected (see below).
 
-![](segments/end-to-end/editor-open-dialog.png)
+![](segments/end-to-end/editor-open-dialog.png){ width=40% }
 
-![](segments/end-to-end/editor-fold.png
+![](segments/end-to-end/editor-fold.png){ width=40% }
 
-![](segments/end-to-end/editor-edit.png)
+![](segments/end-to-end/editor-edit.png){ width=40% }
 
-**Test ID**: TC-E2Ex
+**Test ID**: TC-E2E3
 
 - **Description**: Line number tracking while simulation is running.
 - **Input**: `count.s`
@@ -74,12 +74,13 @@ Each of these tests will start with all windows closed.
   3. Press `F5`.
   4. Hover over the highlighted line number.
 - **Expected**:
-  * A dialog appears informing the user that their program is being assembled.
   * Editor becomes read-only and the line number of the current line is highlighted.
   * Hovering over the highlighted line number should show the current stage of execution, e.g. `decoding`.
 - **Actual**: As expected (see below).
 
-**Test ID**: TC-E2Ex
+![](segments/end-to-end/editor-line-hover.png){ width=40% }
+
+**Test ID**: TC-E2E4
 
 - **Description**: Open an invalid program, view errors, then fix them.
 - **Input**: `count-annotated.s`
@@ -97,9 +98,15 @@ Each of these tests will start with all windows closed.
   * After modifying each line, the editor should update to indicate that the line no longer contains an error.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/editor-line-18-error.png){ width=40% }
+
+![](segments/end-to-end/editor-line-23-error.png){ width=40% }
+
+![](segments/end-to-end/editor-errors-fixed.png){ width=40% }
+
 ### Registers window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E5
 
 - **Description**: Check that the information in the `Registers` window updates as the simulation runs.
 - **Input**: `.text; main:; li $a0 55`
@@ -113,7 +120,9 @@ Test ID: TC-E2Ex
   * The value of `a0` in the `Registers` window should change from 0 to 55.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+![](segments/end-to-end/registers-a0.png){ width=40% }
+
+Test ID: TC-E2E6
 
 - **Description**: Columns in `Registers` window should allow sorting.
 - **Input**: `add.s`
@@ -127,9 +136,17 @@ Test ID: TC-E2Ex
 - **Expected**:
   * The data in the table is sorted based on the `Register` column in the `Registers` window, either alphabetically a-z or z-a, then after clicking it again it should sort in the opposite alphabetical order.
   * Same as above but for the `Unsigned` column: it should sort alphabetically/numerically and then sort in the opposite order after the second click.
-- **Actual**: $\TODO{Get a correct result}. As expected (see below).
+- **Actual**: The values are sorted correctly, but the values in the value column are sorted in lexicographical order rather than numerical order, see below.
 
-Test ID: TC-E2Ex
+![](segments/end-to-end/registers-sort-left-down.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-left.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-right-down.png){ width=40% }
+
+![](segments/end-to-end/registers-sort-right-up.png){ width=40% }
+
+Test ID: TC-E2E7
 
 - **Description**: Registers window should allow the user to view the values of the registers as unsigned, signed, or in hexadecimal.
 - **Input**: `add.s`
@@ -145,9 +162,13 @@ Test ID: TC-E2Ex
   * The right-hand column should show the value of the register in the selected form.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/registers-signed.png){ width=40% }
+
+![](segments/end-to-end/registers-hex.png){ width=40% }
+
 ### Labels window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E8
 
 - **Description**: The `Labels` window should show all labels present in the code, and only those present in the code.
 - **Input**: `count.s`
@@ -163,7 +184,9 @@ Test ID: TC-E2Ex
     - mystr: 5
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+![](segments/end-to-end/labels-correct.png){ width=40% }
+
+Test ID: TC-E2E9
 
 - **Description**: The `Labels` window should update labels as the user types.
 - **Input**: `count.s`.
@@ -178,9 +201,9 @@ Test ID: TC-E2Ex
   * `LOOP` should change to `LOOPER` in the `Registers` window.
   * The row with `END` should be removed from the table after deleting line 20.
   * The row with `END: 20` should be added after undoing the deletion of line 20.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E10
 
 - **Description**: The buttons in the `Labels` window should work appropriately.
 - **Input**: `binary-search.s`
@@ -198,18 +221,20 @@ Test ID: TC-E2Ex
   * All occurrences of the label `binary_search` should be highlighted after clicking `Select All`.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/labels-jump-170.png){ width=40% }
+
 ### Layouts ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E11
 
 - **Description**: Test each bundled layout.
 - **Action**:
   1. Click each layout in the `Layouts` menu option.
 - **Expected**:
   * The window should update to show the windows in the corresponding layout.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E12
 
 - **Description**: Try saving a custom layout.
 - **Action**:
@@ -224,10 +249,10 @@ Test ID: TC-E2Ex
   * The layout should change back to the default layout when `Default` is clicked.
   * `layout-save-test` should be available in the `Layouts` menu.
   * The layout should switch back to the layout that was specified after clicking `layout-save-test`.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ### General window functionality ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E13
 
 - **Description**: Windows should resize correctly and reposition when dragged.
 - **Action**:
@@ -241,9 +266,9 @@ Test ID: TC-E2Ex
 - **Expected**:
   * The window should resize and any appropriate contents should also resize.
   * The content should be repositioned in the main window relative to its container window.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E14
 
 - **Description**: Internal windows should resize according to the size of the main window.
 - **Action**:
@@ -257,23 +282,30 @@ Test ID: TC-E2Ex
   * Each internal window should resize according to its original size and the size of the main window.
 - **Actual**: As expected (see below).
 
+![](segments/end-to-end/default-layout.png){ width=40% }
+![](segments/end-to-end/resize-main-window.png){ width=40% }
+
 ### Configuration/Options ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E15
 
 - **Description**: Test that items in the options window change the program accordingly.
 - **Action**:
-  1. `File -> Options`.
-  2. Toggle on the `Debug Menu`.
+  1. `File`$\to$`Options`$\to$`Settings`$\to$`Editor`.
+  2. Toggle on `Vim mode`.
   3. Close the window.
   4. Choose to restart the program.
-  5. Repeat from step 1 and test each possible item.
+  5. Repeat from step 1 and test each possible option.
 - **Expected**:
-  * The program should update accordingly, e.g. after restarting the `Debug Menu` should appear in the menu bar.
+  * The program should update accordingly, e.g. after restarting the editor should be in Vim mode.
 - **Actual**: As expected (see below).
+
+![](segments/end-to-end/options-vim-restart.png){ width=40% }
+
+![](segments/end-to-end/options-vim-mode.png){ width=40% }
 
 ### Pipeline View ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E16
 
 - **Description**: Pipeline view should only show one instruction at a time when CPU is non-pipelined.
 - **Input**: `count.s`
@@ -287,9 +319,9 @@ Test ID: TC-E2Ex
   * The pipeline view should show an instruction in the fetch stage, then red circles for the decode and fetch stages. Then the same instruction should be shown in the decode stage and then the fetch stage, with the other stages being red circles each time.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E17
 
-- **Description**:
+- **Description**: Pipeline view should show instructions in the pipeline, as well as the waiting and completed instructions, and display any hazards.
 - **Input**: `count.s`
 - **Action**:
   1. Open the `Editor` window.
@@ -312,7 +344,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Program IO window ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E18
 
 - **Description**: Test that messages from the current program are sent to the Program IO window, i.e. check the output of the window.
 - **Input**: `count.s`
@@ -325,7 +357,7 @@ Test ID: TC-E2Ex
   * The window should start showing the number 1, 2, 3 and so on.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E19
 
 - **Description**: Test that text entered by the user is passed to the system, i.e. check the input of the window.
 - **Input**: `add2.s`, `4`, `5`
@@ -341,7 +373,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### CPU visualisation window ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E20
 
 - **Description**: The CPU visualisation should update as the program runs.
 - **Input**: `count.s`
@@ -356,7 +388,7 @@ Test ID: TC-E2Ex
   * There should be animations along the bus lines to indicate the movement of data.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E21
 
 - **Description**: The replay buttons should replay the correct instruction.
 - **Input**: `count.s`
@@ -375,7 +407,7 @@ Test ID: TC-E2Ex
 
 ### High level visualisation window ###
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E22
 
 - **Description**: Test that the Tower of Hanoi visualisation can be controlled from annotations within the code.
 - **Input**: `tower-of-hanoi.s`, `4`.
@@ -392,7 +424,7 @@ Test ID: TC-E2Ex
   * The puzzle should end in a solved state.
 - **Actual**: As expected (see below).
 
-Test ID: TC-E2Ex
+Test ID: TC-E2E23
 
 - **Description**: Test that the list visualisation (sorting) can be controlled from annotations within the code.
 - **Input**: `bubblesort.s`, `5, 3, 6, 7, 2`
@@ -424,7 +456,7 @@ Test ID: TC-E2Ex
 - **Actual**: As expected (see below).
 
 ### Error dialogs ###
-Test ID: TC-E2Ex
+Test ID: TC-E2E24
 
 - **Description**: Test that an error message is shown when trying to run an invalid program.
 - **Input**: `bad-add.s`
