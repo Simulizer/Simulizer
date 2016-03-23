@@ -20,6 +20,3 @@ In order to gauge the interest and potential benefit for this system, communicat
 
 ##Overview##
 As a general overview, this report intends to explain in detail, the processes and techniques used during the creation of Simulizer, as well an explanation of how it was made. This will involve discussing how the back-end of the system was designed, how the UI and visualisations were designed using good HCI techniques, and the Software Engineering practices used during the project to maximise the quality of the software. As well as this, a full evaluation of the project will be provided, along with the methods used to ensure good performance as a team. Finally, at the end of this report, one can find a summary and reflection from each of the 5 team members on how the project went for them personally.
-
-[1]: http://www.cs.bham.ac.uk/internal/modules/2015/19340/ "(School of Computer Science, 2015)"
-[2]: http://pages.cs.wisc.edu/~larus/spim.html "(Larus, 2011)"
