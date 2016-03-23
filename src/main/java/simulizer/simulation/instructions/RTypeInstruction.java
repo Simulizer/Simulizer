@@ -7,7 +7,11 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.data.representation.Word;
 
 
-
+/**this class represents the encapsulation of the information required for r type instructions
+ * these are generally arithmetic/logical instructions
+ * @author charlie street
+ *
+ */
 public class RTypeInstruction extends InstructionFormat {
 
 	private Optional<Word> dest;//data to store

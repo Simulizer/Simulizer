@@ -6,6 +6,11 @@ import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.data.representation.Word;
 
+/**this class is used to encapsulate the information required for a jtype instruction
+ * i.e this is for jump instructions mainly
+ * @author charlie street
+ *
+ */
 public class JTypeInstruction extends InstructionFormat {
 
 	private Optional<Address> jumpAddress;
