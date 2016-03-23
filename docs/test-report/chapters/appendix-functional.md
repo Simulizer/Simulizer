@@ -80,7 +80,7 @@ li $v0 10; syscall
 
 - **Expected**:
   * The high level visualisation should open when `h.show()` is executed. The user should be able to close the window and keep it closed. They should then be able to re-open the window and see the visualisation its current state.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ***Requirement 4.2.3.a***
 
@@ -89,7 +89,7 @@ li $v0 10; syscall
 **How it will be tested**: Checking that the CPU visualisation window always shows these components even after resizing, closing then re-opening, etc.
 
 *See below*:
-$\TODO{Get picture of CPU}$
+![](segments/functional/cpu.png){width=80%}
 
 ***Requirement 4.2.3.b***
 
@@ -98,7 +98,7 @@ $\TODO{Get picture of CPU}$
 **How it will be tested**: By hovering over each component of the CPU and checking that it shows an appropriate tooltip. The tooltips should not be displayed while the CPU is running.
 
 *See below*:
-$\TODO{Take a picture of tooltips}$
+![](segments/functional/cpu-tooltip.png){width=80%}
 
 ***Requirement 4.2.3.c***
 
@@ -113,8 +113,6 @@ $\TODO{Take a picture of tooltips}$
 **Description**: The visualisation will contain abstractions to provide a clearer description of the features we deemed more important, e.g. a collection of related buses will be shown as a single connection between components.
 
 **How it will be tested**: Comparing a complex diagram of a CPU to our own.
-
-Test
 
 *See below*:
 $\TODO{Annotate a picture of the CPU to show how the buses have been grouped together}$
@@ -132,7 +130,7 @@ Test ID: TC-FNC4
   2. Adjust the clock speed throughout execution (max 2Hz)
 - **Expected**:
   * The animations in CPU should speed up and slow down according to the clock speed.
-- **Actual**: As expected (see below).
+- **Actual**: As expected.
 
 ***Requirement 4.2.3.f***
 
@@ -148,13 +146,13 @@ Test ID: TC-FNC5
   3. Step forward step by step.
 - **Expected**:
   * The visualisation should start animating when the simulation is run, stop animating when paused (or finish the buffered animations), and then perform a single set of animations when the user steps forward one step.
-  - **Actual**: As expected (see below).
+  - **Actual**: As expected.
 
 ***Requirement 4.2.3.g***
 
 **Description**: The program will be run using a pipeline superscalar architecture, executing a MIPS-compatible RISC instruction set with significantly fewer instructions. The system will not use speculative execution.
 
-**How it will be tested**: $\TODO{Think of some way to explain this relating to the design, or maybe take it out?}$.
+**How it will be tested**: $\TODO{Think of some way to explain this relating to the design, or maybe take it out in this testing section?}$.
 
 ***Requirement 4.2.3.g***
 
@@ -171,6 +169,7 @@ Test ID: TC-FNC5
 **How it will be tested**: Click the `File` $\to$ `Open` menu item and check that only `.s` files are shown and only `.s` can be opened.
 
 *See below*:
+![](segments/functional/open-s.png){width=80%}
 
 ***Requirement 4.3.3.b***
 
@@ -178,7 +177,7 @@ Test ID: TC-FNC5
 
 **How it will be tested**: Check that a `.s` file can be opened from anywhere on the system; that a new blank file can be created; and that the demo files are bundled in suitable folder.
 
-*See below (also TC-E2E1*.)
+*See TC-E2E1*.
 
 ***Requirement 4.3.3.c***
 
@@ -226,7 +225,8 @@ Test ID: TC-FNC5
 
 **How it will be tested**: Try modifying a new file or an existing file and then try to close the program.
 
-*See below*.
+*See below*:
+![](segments/functional/editor-unsaved.png){width=80%}
 
 ***Requirement 4.4.3.a***
 
@@ -251,6 +251,7 @@ Test ID: TC-FNC5
 **How it will be tested**: Check that the theme colour scheme of the software changes when the user selects a particular theme, and check that this colour scheme is faithful to the source file for the colour scheme.
 
 *See below*.
+$\TODO{Kelsey doesn't know how to test this}$.
 
 ***Requirement 4.4.3.d***
 
@@ -259,6 +260,7 @@ Test ID: TC-FNC5
 **How it will be tested**: Try to close the program while a simulation is running and check that a dialog is shown.
 
 *See below*.
+![](segments/functional/application-editor-close.png){width=80%}
 
 ***Requirement 4.4.3.e***
 
@@ -266,7 +268,7 @@ Test ID: TC-FNC5
 
 **How it will be tested**: Check that each item in the menu bar responds to clicks and performs the expected task.
 
-*See below*.
+*Requirement satisfied*.
 
 ***Requirement 4.4.3.f***
 
