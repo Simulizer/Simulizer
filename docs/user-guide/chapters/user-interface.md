@@ -114,7 +114,97 @@ This section is currently still in development.
 
 
 ### Options ###
-$\TODO{write section}$
+The options window allows you to configure different aspects of Simulizer. These settings are laid out in a tree like fashion to make finding each setting easier.
+
+![Options](segments/options.png){ width=60% }
+
+The full settings tree is printed out below.
+
+- **Settings**
+
+    - **Debug Menu**: Show debug menu in the Menu Bar
+
+    - **Window**
+
+      	- **Width**: Default window width
+
+      	- **Height**:Default window height
+
+    - **Workspace**
+
+      	- **Default Theme**: The default theme to load
+
+      	- **Default Layout**: The default layout to load
+
+        - **Scale User Interface**
+
+            - **Allow autosizing of Internal Windows**: Resize all Internal Windows when the main window resizes
+
+            - **Delay before resize**: How long to wait until the Internal Windows resize
+
+      	- **Grid Settings**: Configure when Internal Windows should snap to a grid
+
+          	- **Allow grid snapping**: Enables/Disable snapping Internal Windows to a grid
+
+          	- **Horizontal Lines**: Number of horizontal gridlines to snap to
+
+          	- **Vertical Lines**: Number of vertical gridlines to snap to
+
+          	- **Sensitivity**: How close the window needs to be to the gridline before it snaps
+
+          	- **Delay before snap**: How long to wait until the window snaps
+
+        - **Lock to main window**: Stops InternalWindows from exiting the Main Window
+
+    - **CPU Simulation**
+
+        - **Default CPU cycle frequency**: Default number of cycles (runs of fetch+decode+execute) per second (Hz)
+
+        - **Use Pipelined CPU**: Sets whether to use the pipelined CPU or not
+
+    - **Editor**
+
+      	- **Font family**: Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas
+
+      	- **Font size**: Font size in px
+
+      	- **Initial file**: Path to a file to load at startup (optional)
+
+      	- **Scroll speed**: Scroll speed
+
+      	- **Soft tabs**: Soft tabs
+
+      	- **Color theme**: Name of the color scheme to load. Supported: (prefix: /ace/theme/) default, high-viz, monokai, ambiance, chaos, tomorrow_night_eighties, predawn, flatland
+
+      	- **User control during execution**: Whether the user is allowed to scroll freely during execution of a program
+
+      	- **Vim mode**: Vim keybindings for the editor
+
+      	- **Wrap long lines**: Wrap long lines
+
+      	- **Continuous Assembly**: Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor
+
+      	- **Continuous Assembly Period**: The time between refreshing the highlighted problems by assembling the program (milliseconds)
+
+    - **Splash Screen**
+
+      	- **Show splash screen**: Toggles whether the splash screen is shown on launch
+
+      	- **Display Time (in ms)**: Minimum time the splash screen should be shown for
+
+      	- **Splash Screen Width**: Width of the splash screen
+
+      	- **Splash Screen Height**: Height of the splash screen
+
+    - **Logger**
+
+      	- **Emphasise Logger**: Toggles whether to emphasise logger when requesting input
+
+      	- **Font Size**: Font size for the Program I/O
+
+    - **High Level Visualiser**
+
+      	- **Automatically Open High Level Visualiser**: Automatically Open High Level Visualiser when a new visualisation is shown
 
 ### Pipeline View ###
 ![Pipeline View](segments/pipeline.png){ width=60% }
