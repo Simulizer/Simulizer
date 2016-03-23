@@ -53,6 +53,9 @@ public class AddressOperand extends Operand {
         this.register  = register;
     }
 
+    /**
+     * whether the address is simply a label and nothing else
+     */
     public boolean labelOnly() {
         return labelName.isPresent() && !constant.isPresent() && !register.isPresent();
     }

@@ -45,7 +45,10 @@ public class UIUtils {
 		}
 	}
 
-
+	/**
+	 * set the icon of a dialog box to the Simulizer logo
+	 * @param dialog the dialog box to set
+	 */
 	// from http://stackoverflow.com/a/27983567
 	// it is OK if the icon is null, will reset to default icon
 	public static void setDialogBoxIcon(Dialog<?> dialog) {
@@ -53,10 +56,19 @@ public class UIUtils {
 		stage.getIcons().add(Simulizer.getIcon());
 	}
 
+	/**
+	 * show a dialog box detailing a non-critical error
+	 */
 	public static void showErrorDialog(String title, String message) {
 		showErrorDialog(title, title, message);
 	}
 
+	/**
+	 * show a dialog box detailing a non-critical error
+	 * @param title the title for the dialog box
+	 * @param header the header for the dialog box
+	 * @param message the message to display in the dialog box
+	 */
 	public static void showErrorDialog(String title, String header, String message) {
 		System.err.println(title + "\n\t" + header + "\n\t" + message);
 
@@ -76,6 +88,12 @@ public class UIUtils {
 		showInfoDialog(title, title, message);
 	}
 
+	/**
+	 * show a dialog box providing some information to the user
+	 * @param title the title for the dialog box
+	 * @param header the header for the dialog box
+	 * @param message the message to display in the dialog box
+	 */
 	public static void showInfoDialog(String title, String header, String message) {
 		System.out.println(title + "\n\t" + header + "\n\t" + message);
 
@@ -91,6 +109,12 @@ public class UIUtils {
 		});
 	}
 
+
+	/**
+	 * show a dialog box showing the stack trace of an exception.
+     * this method should be used instead of printStackTrace as it provides more
+     * information to the user and also logs the exception to a file
+	 */
 	public static void showExceptionDialog(Throwable e) {
 		showExceptionDialog(Thread.currentThread(), e);
 	}
@@ -195,6 +219,9 @@ public class UIUtils {
 		}
 	}
 
+	/**
+	 * show a dialog box to input some text
+	 */
 	public static void openTextInputDialog(String title, String header, String message, String defaultText, Consumer<String> callback) {
 		TextInputDialog dialog = new TextInputDialog(defaultText);
 		dialog.initOwner(Simulizer.getPrimaryStage());
@@ -205,6 +232,10 @@ public class UIUtils {
 
 		dialog.showAndWait().ifPresent(callback);
 	}
+
+	/**
+	 * show a dialog box to input an integer
+	 */
 	public static void openIntInputDialog(String title, String header, String message, int defaultVal, Consumer<Integer> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
 		dialog.initOwner(Simulizer.getPrimaryStage());
@@ -222,6 +253,10 @@ public class UIUtils {
 			callback.accept(val);
 		});
 	}
+
+	/**
+	 * show a dialog box to input a double
+	 */
 	public static void openDoubleInputDialog(String title, String header, String message, double defaultVal, Consumer<Double> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
 		dialog.initOwner(Simulizer.getPrimaryStage());
@@ -256,6 +291,9 @@ public class UIUtils {
 		return result.get() == ButtonType.OK;
 	}
 
+	/**
+	 * show a dialog box which asks the user to confirm yes or no
+	 */
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setResizable(true);
@@ -275,6 +313,9 @@ public class UIUtils {
 		}
 	}
 
+	/**
+	 * show the save dialog box
+	 */
 	public static File saveFileSelector(String title, Stage parent, File directory, FileChooser.ExtensionFilter... filter) {
 		final FileChooser fc = new FileChooser();
 		fc.setInitialDirectory(directory);
@@ -283,6 +324,9 @@ public class UIUtils {
 		return fc.showSaveDialog(parent);
 	}
 
+	/**
+	 * show the load dialog box
+	 */
 	public static File openFileSelector(String title, Stage parent, File directory, FileChooser.ExtensionFilter... filter) {
 		// Set the file chooser to open at the user's last directory
 		final FileChooser fc = new FileChooser();
@@ -292,6 +336,9 @@ public class UIUtils {
 		return fc.showOpenDialog(parent);
 	}
 
+	/**
+	 * show the save-as dialog
+	 */
 	public static void promptSaveAs(Stage parent, Consumer<File> callback) {
 		File file = saveFileSelector("Save an assembly file", parent, new File("code"), new FileChooser.ExtensionFilter("Assembly files *.s", "*.s"));
 		if(file != null) {

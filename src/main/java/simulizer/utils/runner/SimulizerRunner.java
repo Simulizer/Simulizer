@@ -24,6 +24,12 @@ public class SimulizerRunner {
 		cpu = pipelined ? new CPUPipeline(io) : new CPU(io);
 	}
 
+	/**
+	 * Run the given program in Simulizer with the given input and return the captured output
+	 * @param program the program source code
+	 * @param input the input to the program
+	 * @return the captured output
+	 */
 	public String run(String program, String input) {
 		io.feedInput(input);
 

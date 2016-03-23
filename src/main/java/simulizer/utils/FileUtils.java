@@ -16,6 +16,11 @@ import java.io.UnsupportedEncodingException;
  */
 public class FileUtils {
 
+	/**
+	 * read the contents of the given file
+	 * @param path the path on the filesystem to the file
+	 * @return the file contents (read as UTF-8)
+	 */
 	public static String getFileContent(String path) {
 		FileInputStream fis;
 		try {
@@ -34,10 +39,18 @@ public class FileUtils {
 
 		return null;
 	}
+
+	/**
+	 * read the contents of a File object
+	 * @return the file's contents
+	 */
 	public static String getFileContent(File f) {
 		return getFileContent(f.getPath());
 	}
 
+	/**
+	 * write to a file (as Java makes this overly bureaucratic)
+	 */
 	public static void writeToFile(File file, String content) {
 		try {
 			FileWriter fw = new FileWriter(file);
@@ -61,6 +74,10 @@ public class FileUtils {
 			return "";
 		}
 	}
+
+	/**
+	 * transform the path of a resource from inside a Jar to a form that some methods accept.
+	 */
 	public static String getResourceToExternalForm(String path) {
 		assert path.charAt(0) == '/'; // must start with a slash
 		try {
