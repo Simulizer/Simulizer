@@ -94,12 +94,19 @@ public class CPU {
 		this.executor = new Executor(this);
 	}
 
+	/**method stops sim, shuts down clock and message manager
+	 * 
+	 */
 	public void shutdown() {
 		stopRunning();
 		clock.shutdown();
 		messageManager.shutdown();
 	}
 
+	/**returns clock object
+	 * 
+	 * @return clock object
+	 */
 	public Clock getClock() {
 		return clock;
 	}
@@ -118,13 +125,20 @@ public class CPU {
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SPEED_CHANGED));
 	}
 
+	/**returns the frequency of the clock cycles
+	 * 
+	 * @return frequency of clock
+	 */
 	public double getCycleFreq() {
 		// non-pipelined: 1 cycle = 3 ticks
 		// => same speed requires ticks to be 3 times faster
 		return clock.getTickFrequency() / 3;
 	}
 
-
+	/**return if the simulation is currently running
+	 * 
+	 * @return if the simulation is running
+	 */
 	public boolean isRunning() {
 		return isRunning;
 	}
@@ -142,15 +156,26 @@ public class CPU {
 		}
 	}
 
+	/**method pauses the simulation
+	 * 
+	 */
 	public void pause() {
 		isRunning = true;
 		clock.stop();
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_PAUSED));
 	}
+	
+	/**method checks if the cock has paused
+	 * 
+	 * @return is the clock paused?
+	 */
 	public boolean isPaused() {
 		return isRunning && clock.isPaused();
 	}
 
+	/**method restarts the clock after being paused
+	 * 
+	 */
 	public void resume() {
 		if(isRunning) {
 			breakAfterCycle = false;
@@ -159,6 +184,9 @@ public class CPU {
 		}
 	}
 
+	/**method steps through one instruction
+	 * 
+	 */
 	public void resumeForOneCycle() {
 		breakAfterCycle = true;
 		if(!clock.isRunning()) {
@@ -167,6 +195,10 @@ public class CPU {
 		}
 	}
 
+	/**method makes simulation wait for the next clock tick to take place
+	 * 
+	 * @throws EndedException If program ended
+	 */
 	protected void waitForNextTick() throws EndedException {
 		try {
 			if (isRunning) {
@@ -432,7 +464,6 @@ public class CPU {
 				stopRunning();
 			}
 
-			//TODO: aggregate stats like this into a window
 			long cycleDuration = System.currentTimeMillis() - cycleStart;
 		}
 
@@ -471,6 +502,10 @@ public class CPU {
 		return program;
 	}
 
+	/**method states that cpu is not pipelined
+	 * 
+	 * @return false
+	 */
 	public boolean isPipelined() {
 		return false; // overridden in CPUPipeline
 	}

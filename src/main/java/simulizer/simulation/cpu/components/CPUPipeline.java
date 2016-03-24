@@ -51,6 +51,9 @@ public class CPUPipeline extends CPU {
 		
 	}
 
+	/**override the setCycleFreq method in CPU
+	 * 
+	 */
 	@Override
 	public void setCycleFreq(double freq) {
 		// pipelined: 1 cycle = 1 tick
@@ -58,6 +61,9 @@ public class CPUPipeline extends CPU {
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SPEED_CHANGED));
 	}
 
+	/**override the getCycleFreq method in CPU
+	 * 
+	 */
 	@Override
 	public double getCycleFreq() {
 		// pipelined: 1 cycle = 1 tick
@@ -315,7 +321,10 @@ public class CPUPipeline extends CPU {
 		super.execute(instruction);
 	}
 
-
+	
+	/**override isPipelined in CPU
+	 * 
+	 */
 	@Override
 	public boolean isPipelined() {
 		return true;
