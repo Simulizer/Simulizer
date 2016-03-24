@@ -5,3 +5,4 @@ all:
 
 clean:
 	./clean
+	rm A4Report.pdf
