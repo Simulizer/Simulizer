@@ -5,7 +5,7 @@ Ensuring that the system contains all the functionality that a prospective user 
 The functional tests will be non-automated, and will be checked by interacting with the system and checking that each requirement is satisfied. A detailed description of how each functional requirement has been tested is in the appendix. Below is a summary of each set of test cases.
 
 ## High-Level Visualisation ##
-These tests check the functionality of the system to both process the annotations in the source code and represent these visually, e.g. as data structures. We have achieved each of the functional requirements as we intended. In addition, these requirements were surpassed by using a JavaScript-based annotation rather than a restricted custom language,
+These tests check the functionality of the system to both process the annotations in the source code and represent these visually, e.g. as data structures. We have achieved each of the functional requirements as we intended. In addition, these requirements were surpassed by using a JavaScript-based annotation rather than a restricted custom language.
 
 ## CPU Visualisation & Simulation ##
 These tests demonstrate how the CPU visualisation responds to operations in the underlying CPU. Each functional requirement was satisfied, and the visualisation also provides a message box qualitatively informing the user exactly what is happening.
