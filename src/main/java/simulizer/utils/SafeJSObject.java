@@ -15,10 +15,22 @@ public class SafeJSObject {
 		this.obj = obj;
 	}
 
+	/**
+	 * set a member of the javascript object (like assigning to a Map<String, Object>)
+	 * @param s the key / member name
+	 * @param o the value
+	 */
 	public void setMember(String s, Object o) {
 		UIUtils.assertFXThread();
 		obj.setMember(s, o);
 	}
+
+	/**
+	 * call a method of the javascript object
+	 * @param s the key / name of the method
+	 * @param args the arguments to pass to the method (can be nothing)
+	 * @return the return value from the method call
+	 */
 	public synchronized Object call(String s, Object... args) {
 		UIUtils.assertFXThread();
 		return obj.call(s, args);

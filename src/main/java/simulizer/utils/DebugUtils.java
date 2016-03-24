@@ -24,6 +24,9 @@ public class DebugUtils {
 		dumpToFile(str, "debug-out.txt");
 	}
 
+	/**
+	 * A simple profiling class to measure the time taken to do some processing (like a stopwatch)
+	 */
 	public static class Timer {
 		public String name;
 		public long start;
