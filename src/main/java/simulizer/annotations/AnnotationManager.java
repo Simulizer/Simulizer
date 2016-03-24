@@ -37,10 +37,18 @@ public class AnnotationManager {
 		vis = null;
 	}
 
+	/**
+	 * get the current executor (script engine)
+	 * @return
+	 */
 	public AnnotationExecutor getExecutor() {
 		return ex;
 	}
 
+	/**
+	 * refreshes the executor when a new CPU is created
+	 * @param cpu the new CPU object
+	 */
 	public synchronized void onNewProgram(CPU cpu) {
 		// refresh for each new program
 		newExecutor();
@@ -48,6 +56,9 @@ public class AnnotationManager {
 		simulationBridge.cpu = cpu;
 	}
 
+	/**
+	 * create the bridge objects that let the annotation executor interface with the rest of the system
+	 */
 	private synchronized void setupBridges() {
 		// set up access between the bridges and the components they talk to on the Java side
 		debugBridge.wm = wm;
@@ -59,10 +70,16 @@ public class AnnotationManager {
 		wm.getHLVisualManager().removeAll();
 	}
 
+	/**
+	 * handle the end of the program by disabling some access of the bridges
+	 */
 	public void onEndProgram() {
 		simulationBridge.cpu = null;
 	}
 
+	/**
+	 * create a new annotation executor (with a fresh state)
+	 */
 	public synchronized void newExecutor() {
 		ex = new AnnotationExecutor();
 
@@ -86,6 +103,10 @@ public class AnnotationManager {
 		}
 	}
 
+	/**
+	 * extract the annotation from the message and send it to the executor to be executed
+	 * @param msg the message containing the annotation to run
+	 */
 	public synchronized void processAnnotationMessage(AnnotationMessage msg) {
 		try {
 			ex.exec(msg.annotation);
