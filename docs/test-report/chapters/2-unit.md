@@ -12,4 +12,4 @@ Throughout the development of Simulizer, it was made sure that any of the back-e
 - **Parser**: Multiple sets of tests have been used to ensure that the parser is parsing the entered program text correctly, so it could be given to a simulation.
 
 All of these tests are available to view in svn via the src/test/java directory.
-$\TODO{Insert a screenshot of tests passing?}$
+![Unit Test Statistics](segments/unitTests.png){width=80%}
