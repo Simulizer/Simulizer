@@ -1,5 +1,6 @@
 package simulizer.utils;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -123,4 +124,24 @@ public class FileUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Open a file in the default program for the filetype
+	 * @param path the file to open
+	 */
+	public static void openFile(String path) {
+		try {
+			Thread openFileThread = new Thread(() -> {
+				try {
+					Desktop.getDesktop().open(new File(path));
+				} catch (IOException ignored) {
+				}
+			}, "OpenFile-Thread");
+			openFileThread.setDaemon(true);
+			openFileThread.start();
+
+			openFileThread.join(1000);
+		} catch (InterruptedException e) {
+			UIUtils.showErrorDialog("Failed to Open", "Failed to open the file: \"" + path + "\"");
+		}
+	}
 }

@@ -27,6 +27,7 @@ import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
+import simulizer.utils.FileUtils;
 import simulizer.utils.runner.SpimRunner;
 import simulizer.utils.UIUtils;
 
@@ -427,13 +428,7 @@ public class MainMenuBar extends MenuBar {
 		Menu helpMenu = new Menu("Help");
 
 		MenuItem guide = new MenuItem("Guide");
-		guide.setOnAction(e -> {
-			try {
-				Desktop.getDesktop().open(new File("guide.pdf"));
-			} catch (Exception ex) {
-				UIUtils.showExceptionDialog(ex);
-			}
-		});
+		guide.setOnAction(e -> FileUtils.openFile("guide.pdf"));
 
 		MenuItem syscall = new MenuItem("Syscall Reference");
 		syscall.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.SYSCALL_REFERENCE));
