@@ -55,9 +55,9 @@ From the annotation bound to line: 3.`.
 
 **Description**: The visualisation will stay synchronised with the clock but not necessarily strictly in one clock cycle, i.e. swapping two numbers might take three clock cycles.
 
-**How it will be tested**: The code editor shows which line number is currently being evaluated. By setting the clock speed appropriately, we can check that the visualisation performs the correct animation at the correct time. *Could we test anything with a stop watch? e.g. write a dummy program that just says #swap(0,1) and check that it does it every x seconds or something?*
+**How it will be tested**: The code editor shows which line number is currently being evaluated. By setting the clock speed appropriately, we can check that the visualisation performs the correct animation at the correct time.
 
-$\TODO{Write a test somehow}$
+*Requirement satisfied*.
 
 ***Requirement 4.1.3.f***
 
@@ -119,7 +119,9 @@ li $v0 10; syscall
 **How it will be tested**: Comparing a complex diagram of a CPU to our own.
 
 *See below*:
-$\TODO{Annotate a picture of the CPU to show how the buses have been grouped together}$
+![](segments/functional/cpu.png){width=80%}
+
+![](segments/functional/real-cpu.png){width=80%}
 
 ***Requirement 4.2.3.e***
 
@@ -156,7 +158,7 @@ Test ID: TC-FNC5
 
 **Description**: The program will be run using a pipeline superscalar architecture, executing a MIPS-compatible RISC instruction set with significantly fewer instructions. The system will not use speculative execution.
 
-**How it will be tested**: $\TODO{Think of some way to explain this relating to the design, or maybe take it out in this testing section?}$.
+*See TC-IT29, TC-IT30*.
 
 ***Requirement 4.2.3.g***
 
@@ -256,10 +258,9 @@ Test ID: TC-FNC5
 
 **Description**: The interface will allow changing of colour schemes by specification of the user, based upon a set of files bundled with the software.
 
-**How it will be tested**: Check that the theme colour scheme of the software changes when the user selects a particular theme, and check that this colour scheme is faithful to the source file for the colour scheme.
+**How it will be tested**: Go to the options and change the colour scheme to a different one, and repeat this for all colour/accessibility themes.
 
-*See below*.
-$\TODO{Kelsey doesn't know how to test this}$.
+*Requirement satisfied*.
 
 ***Requirement 4.4.3.d***
 
