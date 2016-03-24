@@ -23,8 +23,7 @@ To provide more information, a rectangular box appears at the top of the visuali
 Overall the CPU visualisation has many different visual aspects to aid in the user's learning and allow them to easily observe how a CPU functions inside a computer. As each instruction is executed, detailed information regarding the movement of data and the interaction of the CPU components is shown to the user. This information is also reinforced by the informative tool-tips.
 
 ##Pipeline View##
-The pipeline view is a unique and innovative approach to visualising instruction pipelining, which is traditionally represented in a static form. Simulizer's dynamic pipeline view allows the user to see the pipeline at each stage interactively as the program runs. as opposed to static resources which
-$\TODO{pipeline is a multi-stage process, static resources cannot show the discrete steps}$
+The pipeline view is a unique and innovative approach to visualising instruction pipelining, which is traditionally represented in a static form. Simulizer's dynamic pipeline view gives the user a more natural way to experience a multi-stage process as opposed to static resources which attempt to show multiple stages in a single diagram.
 
 The basis of the design for this pipeline view arose from existing pipeline diagrams available to the students through common resource sources. By designing the component in such a way, it provided a form of compatibility in the scenario in which the user would like to carry out 'further reading' on pipelining (a very large topic which can go into great detail). Additionally, special attention was made in the design of this component; the team had been informed pipelining was typically a highly difficult topic to teach and so special provisions were made to keep this visualisation simple, only boosting its ability as a resource for learning and teaching.
 
