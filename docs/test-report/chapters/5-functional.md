@@ -14,4 +14,6 @@ These tests demonstrate how the CPU visualisation responds to operations in the 
 These tests ensure that the code editor has all the functionality required for a potential user who will be using the system as a learning/teaching resource. In addition, by linking the functionality of other parts of the system, we were able to create a very IDE-like environment.
 
 ## Interface ##
-These tests demonstrate the it and professionalism of the UI. Here we ensure that all general UI capabilities are accessible and usable.
+These tests demonstrate the capability and professionalism of the UI. Here we ensure that all general UI capabilities are accessible and usable.
+
+As can be seen in the appendix, all functional tests passed.
