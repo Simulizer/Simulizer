@@ -18,7 +18,7 @@ The integration tests will concern us integrating the different components of ou
 Due to the fact that our aim in this project is to make a better, more usable alternative to existing software, we feel it is also a sensible idea to concern various outputs from our software with that of the existing software (Spim Simulator in this case). This will tell us whether we have at least reached the same level of quality/accuracy as the current software and, hopefully, tell us where we have made an improvement of some sort.
 
 ### Functional testing
-To ensure that our system has the functionality that we intended to implement, we will go through each of the functional requirements defined in the software requirements specification and ensure that the system has met the requirement and that the feature is appropriate for our intended audience.
+To ensure that our system has the functionality that we intended to implement, we will go through each of the functional requirements defined in the software requirements specification and ensure that the system has met the requirement, and additionally detail features that have surpassed the original requirements.
 
 ### End-to-end testing
 We intend for this to be a usable system that could be used as a teaching/learning resource, therefore we feel it is important to perform end-to-end-tests, which will test the program flow of the system from starting to closing the application. To do this, we will devise various user scenarios/use cases, which will consist of a number of steps that a potential user would perform, and we will test whether the system operates as expected.
