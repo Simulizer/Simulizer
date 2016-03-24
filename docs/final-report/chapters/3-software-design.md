@@ -44,7 +44,7 @@ Another crucial component of the simulation is how it communicates to many diffe
 
 Simulizer uses the producer-consumer pattern to send a large number of messages very quickly and process them concurrently. Whenever an event occurs within the simulation (the producer), it creates a new message object and pushes it onto a processing queue managed by the `MessageManager`. The manager manages a thread pool, which contains a dedicated 'dispatching' thread. This thread is the consumer of the processing queue and repeatedly pops messages off of the queue and dispatches the work of processing the message in each of the listeners to other threads in the pool. The manager guarantees that the simulation will not move on to the next cycle before processing of the messages is complete but does not guarantee the order in which messages are processed.
 
-Variations on the approach were trialled, such as each listener processing in a separate thread in the pool, or having multiple dispatching threads. Ultimately these methods required more synchronization which drastically decreased performance, so these prototypes were abandoned.
+Variations on the approach were trialled, such as each listener processing in a separate thread in the pool, or having multiple dispatching threads. Ultimately these methods required more synchronisation which drastically decreased performance, so these prototypes were abandoned.
 
 Each listener of the CPU extends the `SimulationListener` abstract base class and only implements the methods corresponding to the type of message they are interested in.
 
