@@ -34,6 +34,9 @@ git log > ${SVNREPO}/final/git-log.txt
 echo "Copying marker guide to top level README.md ..."
 cp ${GUIDE} ${SVNREPO}/final/README.md
 
+echo "Copying distribution zip ..."
+cp build/distributions/Simulizer-0.3.zip ${SVNREPO}/final
+
 cd ${SVNREPO}
 svn add --force *
 svn commit -m "Daily commit"
