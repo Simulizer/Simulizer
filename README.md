@@ -4,6 +4,8 @@ Simulizer allows you to write assembly code and run it on a simulated and visual
 
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
+[Final report](https://github.com/mbway/Simulizer/raw/master/docs/Final-Report.pdf) (contains a more in depth description)
+
 Features
 --------
 - A code editor with syntax highlighting for the MIPS language, along with real-time error checking and tooltips.
