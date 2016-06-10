@@ -1,0 +1,9 @@
+dependencies:
+  pre:
+    - sudo apt-get install spim
+  cache_directories:
+    - "build/ace"
+test:
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/
+    - mv build/test-results $CIRCLE_TEST_REPORTS/

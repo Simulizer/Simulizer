@@ -2,6 +2,8 @@
 
 Simulizer allows you to write assembly code and run it on a simulated and visualised CPU. It has been designed to improve various features of [SPIM](http://spimsimulator.sourceforge.net).
 
+[![CircleCI](https://circleci.com/gh/MichaelOultram/Simulizer.svg?style=svg)](https://circleci.com/gh/MichaelOultram/Simulizer)
+
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 [User Guide](work/guide.pdf)
