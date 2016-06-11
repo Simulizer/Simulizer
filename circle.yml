@@ -1,6 +1,10 @@
+machine:
+  environment:
+    TERM: dumb
 dependencies:
-  pre:
-    - sudo apt-get install spim
+  override:
+    - chmod 5755 install_spim.sh && sudo chown root install_spim.sh && ./install_spim.sh
+    - ./gradlew dependencies copyAceFiles compileJava
   cache_directories:
     - "build/ace"
 test:
