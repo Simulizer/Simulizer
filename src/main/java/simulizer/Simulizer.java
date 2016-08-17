@@ -13,8 +13,8 @@ import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 public class Simulizer extends Application {
-	public static final String VERSION = "0.3 (beta)";
-	public static final String REPO = "https://github.com/ToastNumber/Simulizer";
+	public static final String VERSION = "0.4 (beta)";
+	public static final String REPO = "https://github.com/MichaelOultram/Simulizer";
 	private static Image icon = null;
 	private static Stage primaryStage;
 	private static File settingsFile = new File("settings.json");

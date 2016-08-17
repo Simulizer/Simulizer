@@ -9,9 +9,13 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.Window;
+import simulizer.Simulizer;
 import simulizer.ui.WindowManager;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
@@ -25,7 +29,9 @@ import simulizer.ui.theme.Theme;
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
-	private boolean isClosed = false;
+	private boolean isClosed = false, isExtracted = false;
+	private Stage extractedStage = new Stage();
+	private Pane contentPane;
 
 	public InternalWindow() {
 
@@ -34,12 +40,13 @@ public abstract class InternalWindow extends Window {
 		setCacheHint(CacheHint.SPEED);
 
 		// TODO figure out why this isn't working
-		setCursor(Cursor.DEFAULT);
+		getContentPane().setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
-		// Add close icon
+		// Add icons
+		getRightIcons().add(new CustomExtractIcon(this));
 		getRightIcons().add(new CustomCloseIcon(this));
 
 		// Bring to front when clicked
@@ -109,7 +116,9 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Performs an animation to get the users attention
-	 * @param sf the scale factor to enlarge the window by (1.0 => no scale)
+	 * 
+	 * @param sf
+	 *            the scale factor to enlarge the window by (1.0 => no scale)
 	 */
 	public final void emphasise(double sf) {
 		// Ignore if window is just being opened
@@ -193,9 +202,23 @@ public abstract class InternalWindow extends Window {
 		Platform.runLater(sc::playFromStart);
 	}
 
+	/**
+	 * Sets an internal windows title (use this instead of setTitle so that extracted windows have their title updated)
+	 * 
+	 * @param title
+	 *            the title of the internal window
+	 */
+	public void setWindowTitle(String title) {
+		setTitle(title);
+		if (isExtracted)
+			extractedStage.setTitle(title);
+	}
+
 	@Override
 	public void close() {
 		isClosed = true;
+		if (isExtracted)
+			extractedStage.close();
 		super.close();
 	}
 
@@ -220,7 +243,7 @@ public abstract class InternalWindow extends Window {
 	 *            the height of the workspace
 	 */
 	public void setWorkspaceSize(double width, double height) {
-		if (width != Double.NaN && height != Double.NaN) {
+		if (width != Double.NaN && height != Double.NaN && !isExtracted) {
 			setLayoutX(layX * width);
 			setPrefWidth(layWidth * width);
 			setLayoutY(layY * height);
@@ -239,6 +262,60 @@ public abstract class InternalWindow extends Window {
 			layWidth = getWidth() / windowWidth;
 			layY = getLayoutY() / windowHeight;
 			layHeight = getHeight() / windowHeight;
+		}
+	}
+
+	@Override
+	public Pane getContentPane() {
+		// Overridden because the content pane is sometimes in an extracted window
+		if (contentPane == null)
+			return super.getContentPane();
+		else
+			return contentPane;
+	}
+
+	/**
+	 * Switches between the internal window being inside the workspace and in it's own separate window.
+	 */
+	public void toggleWindowExtracted() {
+		if (isExtracted) {
+			// Restore to workspace
+			// Close the window
+			extractedStage.close();
+			extractedStage = null;
+			
+			// Add internal window into the workspace
+			wm.getWorkspace().getPane().getChildren().add(this);
+			setContentPane(contentPane);
+			
+			// Resize the internal window into the workspace
+			isExtracted = false;
+			setWorkspaceSize(wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
+		} else {
+			// Extract to a separate window
+			// Remove content pane from workspace
+			wm.getWorkspace().getPane().getChildren().remove(this);
+			contentPane = getContentPane();
+			setContentPane(new Pane());
+
+			// Create a new window to put the content pane in
+			extractedStage = new Stage();
+			extractedStage.setTitle(getTitle());
+			extractedStage.getIcons().add(Simulizer.getIcon());
+			extractedStage.setOnCloseRequest(e -> toggleWindowExtracted());
+
+			// Create the scene
+			Scene scene = new Scene(contentPane);
+			contentPane.setLayoutX(0);
+			contentPane.setLayoutY(0);
+			// contentPane.setPadding(new Insets(0, 2, 2, 2));
+			// contentPane.getStyleClass().add("background");
+			// scene.getStylesheets().setAll(getStylesheets());
+
+			// Add the content pane to the window and show
+			extractedStage.setScene(scene);
+			extractedStage.show();
+			isExtracted = true;
 		}
 	}
 }

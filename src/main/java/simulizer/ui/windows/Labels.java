@@ -32,10 +32,10 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	private Editor editor;
 
 	public Labels() {
-		widthProperty().addListener((o, old, newValue) -> {
+		getContentPane().widthProperty().addListener((o, old, newValue) -> {
 			int numColumns = table.getColumns().size();
 			for (TableColumn<Label, ?> column : table.getColumns()) {
-				column.setPrefWidth(getWidth() / numColumns);
+				column.setPrefWidth(getContentPane().getWidth() / numColumns);
 			}
 		});
 
