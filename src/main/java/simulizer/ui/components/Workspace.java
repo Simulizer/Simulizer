@@ -255,7 +255,7 @@ public class Workspace extends Observable implements Themeable {
 	public void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (!openWindows.contains(window)) {
-				window.setOnCloseAction((e) -> removeWindows(window));
+				window.setOnCloseAction(e -> removeWindows(window));
 				openWindows.add(window);
 				window.setTheme(wm.getThemes().getTheme());
 				pane.getChildren().addAll(window);

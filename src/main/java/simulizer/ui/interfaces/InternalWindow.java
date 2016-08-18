@@ -218,7 +218,7 @@ public abstract class InternalWindow extends Window {
 	public void close() {
 		isClosed = true;
 		if (isExtracted)
-			extractedStage.close();
+			toggleWindowExtracted();
 		super.close();
 	}
 
@@ -303,6 +303,8 @@ public abstract class InternalWindow extends Window {
 			extractedStage.setTitle(getTitle());
 			extractedStage.getIcons().add(Simulizer.getIcon());
 			extractedStage.setOnCloseRequest(e -> toggleWindowExtracted());
+			extractedStage.setWidth(getWidth());
+			extractedStage.setHeight(getHeight());
 
 			// Create the scene
 			Scene scene = new Scene(contentPane);
