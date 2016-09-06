@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -84,9 +85,16 @@ public class SpimRunner implements Runner {
 
 			Scanner s = new Scanner(stdout);
 
-			// SPIM writes "Loaded: /some/path/exceptions.s"
-			// on the first line of the output
-			s.skip("Loaded: .*\\.s[\n]");
+			try {
+                // SPIM writes "Loaded: /some/path/exceptions.s"
+                // on the first line of the output
+                s.skip("SPIM Version 8.0 of January 8, 2010[\n]");
+				s.skip("Copyright 1990-2010, James R. Larus.[\n]");
+                s.skip("All Rights Reserved.[\n]");
+				s.skip("See the file README for a full copyright notice.[\n]");
+                s.skip("Loaded: .*\\.s[\n]");
+            } catch(NoSuchElementException ignored) { } // if the pattern was not found
+
 
 			StringBuilder sb = new StringBuilder();
 			while(s.hasNextLine()) {

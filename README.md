@@ -46,6 +46,19 @@ Meet the Team
 ---|---|---|---|---|
 [Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
 
+Building
+--------
+Dependencies to build on 64 bit Debian based Linux (eg Ubuntu)
+- `openjdk-8-jdk`
+- `spim` (for compatiability tests)
+- `openjfx` (JavaFX for openJDK-8)
+- `gradle` (or use gradle plugin with an IDE)
+- add `/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jfxrt.jar` to the SDK classpath
+    - your placement might be different. try: `find /usr -name 'jfxrt.jar'`
+    - in Intellij IDEA: File > Project Structure > SDKs > 1.8 > Classpath
+- gradle will handle the rest of the dependencies
+
+
 Licence
 -------
 **Simulizer** is released under the [GNU General Public License v3.0](LICENCE)
