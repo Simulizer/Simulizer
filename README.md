@@ -66,17 +66,15 @@ Dependencies to build on 64 bit Debian based Linux (eg Ubuntu)
 
 Compiler Compatability
 ----------------------
-By installing the `g++-5-mips-linux-gnu` package in Ubuntu, you can compile C
-to MIPS assembly. use the command `mips-linux-gnu-g++-5 -O0 -march=r3000 -meb
--mfp32 -mgp32 -S my_file.c`. Discard all the unsupported assembler directives (lines
-beginning with `.`). Note: not all of these flags may be necessary, but
-informing the compiler as much as possible is probably a good thing
-- `-O0` to disable optmizations
-- `-march=r3000` to target the R3000 processor (which simulizer emulates)
-- `-meb` to use big endian (like Simulizer)
-- `-mfp32` to use 32 bit floating point registers
-- `-mgp32` to use 32-bit general registers
-- `-S` to output an assembly (.s) file
+It is possible to use a compiler to generate MIPS output which Simulizer can
+consume (with some manual editing). See `work/gcc-mips.sh` for a script which
+uses gcc to cross compile for MIPS (the gcc cross compiler must be installed
+manually).
+
+Tip: to easily utilise javascript functionality with compiled code, write a
+void function with the needed arguments (eg `void hanoiMove(int a, int b) {}`)
+leaving the body blank. Then fill in the annotations to interact with the high
+level visualisation manually inside the empty body of the function
 
 
 Licence

@@ -1,5 +1,6 @@
 package simulizer.utils.runner;
 
+import simulizer.Simulizer;
 import simulizer.utils.UIUtils;
 
 import java.io.BufferedReader;
@@ -56,7 +57,7 @@ public class SpimRunner implements Runner {
 			w.close();
 			tmpFilePath = tmp.getAbsolutePath();
 		} catch(IOException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 
 		assert tmp != null;
@@ -117,7 +118,7 @@ public class SpimRunner implements Runner {
 
 
 		} catch(IOException | InterruptedException e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 		}
 
 		tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits
@@ -136,7 +137,7 @@ public class SpimRunner implements Runner {
 			w.write(program);
 			w.close();
 		} catch(IOException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 
 		assert tmp != null;
@@ -144,7 +145,7 @@ public class SpimRunner implements Runner {
 		try {
 			Runtime.getRuntime().exec(new String[] {"qtspim", "-file", tmp.getAbsolutePath()});
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 
 		tmp.getAbsoluteFile().deleteOnExit(); // delete when the JVM exits

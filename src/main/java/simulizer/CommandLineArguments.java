@@ -61,13 +61,20 @@ class CommandLineArguments {
 
     static CommandLineArguments parse(String[] args) {
         CommandLineArguments main = new CommandLineArguments();
-        JCommander jc = new JCommander(main);
 
-        main.cmdMode = new CmdModeArgs();
-        jc.addCommand("cmd", main.cmdMode);
+        JCommander jc;
+        if(specifiesMode(args)) {
+            jc = new JCommander(main);
+            main.cmdMode = new CmdModeArgs();
+            jc.addCommand("cmd", main.cmdMode);
 
-        main.guiMode = new GuiModeArgs();
-        jc.addCommand("gui", main.guiMode);
+            main.guiMode = new GuiModeArgs();
+            jc.addCommand("gui", main.guiMode);
+        } else {
+            main.guiMode = new GuiModeArgs();
+            jc = new JCommander(main.guiMode);
+        }
+
 
         try {
             jc.parse(args);
@@ -104,8 +111,17 @@ class CommandLineArguments {
         return main;
     }
 
+    private static boolean specifiesMode(String[] args) {
+        for(String arg : args) {
+            if(arg.equals("gui") || arg.equals("cmd")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void printUsage(JCommander jc) {
-        System.out.println("Example Usage: java simulizer.jar gui --fullscreen --layout \"High Level\" --pipelined my_file.s\n");
+        System.out.println("Example Usage: java -jar simulizer.jar gui --fullscreen --layout \"High Level\" --pipelined my_file.s\n");
         jc.usage();
         jc.usage("cmd");
         jc.usage("gui");

@@ -18,7 +18,7 @@ public class ConsoleIO implements IO
 	 */
 	public ConsoleIO()
 	{
-		this.scan = new Scanner(System.in);
+		this.scan = new Scanner(System.in, "UTF-8");
 	}
 
 	/**method prints a string passed to it

@@ -1,5 +1,7 @@
 package simulizer.utils;
 
+import simulizer.Simulizer;
+
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +37,7 @@ public class FileUtils {
 			return new String(data, "UTF-8");
 
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 
 		return null;
@@ -58,7 +60,7 @@ public class FileUtils {
 			fw.write(content);
 			fw.close();
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 		}
 	}
 
@@ -71,7 +73,7 @@ public class FileUtils {
 		try {
 			return FileUtils.class.getResource(path).toURI().toString();
 		} catch (Exception e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 			return "";
 		}
 	}
@@ -84,7 +86,7 @@ public class FileUtils {
 		try {
 			return FileUtils.class.getResource(path).toExternalForm();
 		} catch (Exception e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 			return "";
 		}
 	}
@@ -110,7 +112,7 @@ public class FileUtils {
 				throw new FileNotFoundException(path);
 			}
 		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 		}
 
 		try {
@@ -118,7 +120,7 @@ public class FileUtils {
 			for (int c = br.read(); c != -1; c = br.read())
 				sb.append((char) c);
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+		    Simulizer.handleException(e);
 		}
 
 		return sb.toString();

@@ -28,6 +28,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import simulizer.GuiMode;
+import simulizer.Simulizer;
 
 /**
  * Utilities for UI related utilities
@@ -127,6 +128,8 @@ public class UIUtils {
 	 * @param e the exception to display
 	 */
 	public static void showExceptionDialog(Thread where, Throwable e) {
+		assert(Simulizer.hasGUI());
+
 		try {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
