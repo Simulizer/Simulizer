@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.GuiMode;
 import simulizer.Simulizer;
 import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
@@ -89,9 +90,13 @@ public class WindowManager extends GridPane {
 			shutdown();
 		});
 
+		if(GuiMode.args.fullscreen)
+			primaryStage.setFullScreen(true);
+
+
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
-		newCPU((boolean) settings.get("simulation.pipelined"));
+		newCPU(GuiMode.args.pipelined || (boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
 		themes = new Themes((String) settings.get("workspace.theme"));

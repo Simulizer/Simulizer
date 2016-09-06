@@ -15,6 +15,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
+import simulizer.GuiMode;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.utils.UIUtils;
@@ -58,7 +59,13 @@ public class Layouts implements Iterable<Layout> {
 		Gson g = new Gson();
 
 		try {
-			String layoutName = (String) workspace.getSettings().get("workspace.layout");
+			String layoutName;
+			if(GuiMode.args.layout != null) {
+				// eg "High Level" --> "high-level.json"
+				layoutName = GuiMode.args.layout.toLowerCase().replace(" ", "-") + ".json";
+			} else {
+				layoutName = (String) workspace.getSettings().get("workspace.layout");
+			}
 
 			// Check all files in the layouts folder
 			for (Path layout : Files.newDirectoryStream(folder)) {

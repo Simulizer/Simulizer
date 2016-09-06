@@ -17,6 +17,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import simulizer.GuiMode;
 import simulizer.Simulizer;
 import simulizer.settings.Settings;
 import simulizer.utils.FileUtils;
@@ -66,23 +67,21 @@ public class SplashScreen {
 	/**
 	 * Shows the splash screen
 	 *
-	 * @param s
-	 *            the main entry class for the system
 	 * @param primaryStage
 	 *            the stage used to for the main application
 	 */
-	public void show(Simulizer s, Stage primaryStage) {
+	public void show(Stage primaryStage) {
 
 		Stage stage = new Stage(StageStyle.DECORATED);
 		stage.initOwner(primaryStage);
 		stage.setTitle("Simulizer Splash Screen");
-		stage.getIcons().add(Simulizer.getIcon());
+		stage.getIcons().add(GuiMode.getIcon());
 
 		Task<Boolean> startupTask = new Task<Boolean>() {
 			@Override
 			public Boolean call() {
 				try {
-					ThreadUtils.platformRunAndWait(() -> s.launchWindowManager(primaryStage));
+					ThreadUtils.platformRunAndWait(() -> GuiMode.launchWindowManager(primaryStage));
 					updateMessage("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles . . .");
 					long offset = delay - (System.currentTimeMillis() - startTime);
 					if (offset > 0) Thread.sleep(offset);
@@ -101,7 +100,7 @@ public class SplashScreen {
 				fadeSplash.setToValue(0.0);
 				fadeSplash.setOnFinished(actionEvent -> stage.hide());
 
-				s.wm.show();
+				GuiMode.wm.show();
 				fadeSplash.play();
 			}
 		});

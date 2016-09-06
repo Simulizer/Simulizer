@@ -93,7 +93,9 @@ public class SpimRunner implements Runner {
                 s.skip("All Rights Reserved.[\n]");
 				s.skip("See the file README for a full copyright notice.[\n]");
                 s.skip("Loaded: .*\\.s[\n]");
-            } catch(NoSuchElementException ignored) { } // if the pattern was not found
+            } catch(NoSuchElementException ignored) { // if a pattern was not found
+				s.skip("Loaded: .*\\.s[\n]"); // older versions of spim just displayed this message
+			}
 
 
 			StringBuilder sb = new StringBuilder();
