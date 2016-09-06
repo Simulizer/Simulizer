@@ -273,6 +273,13 @@ public abstract class InternalWindow extends Window {
 		else
 			return contentPane;
 	}
+	
+	/**
+	 * @return if the window is extracted or not
+	 */
+	public boolean isExtracted(){
+		return isExtracted;
+	}
 
 	/**
 	 * Switches between the internal window being inside the workspace and in it's own separate window.

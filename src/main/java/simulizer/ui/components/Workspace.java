@@ -187,7 +187,7 @@ public class Workspace extends Observable implements Themeable {
 		InternalWindow w2 = window.createNewWindow();
 		assert w2 != null;
 		w2.setWindowManager(wm);
-		wm.getLayouts().setWindowDimentions(w2);
+		wm.getLayouts().setWindowDimensions(w2);
 		Platform.runLater(() -> addWindows(w2));
 		return w2;
 	}
@@ -225,7 +225,7 @@ public class Workspace extends Observable implements Themeable {
 			final Editor finalE = e;
 			assert e != null;
 			e.setWindowManager(wm);
-			wm.getLayouts().setWindowDimentions(e);
+			wm.getLayouts().setWindowDimensions(e);
 			// starts the page loading
 			addWindows(finalE);
 
