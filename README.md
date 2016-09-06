@@ -4,6 +4,8 @@ Simulizer allows you to write assembly code and run it on a simulated and visual
 
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
+[User Guide](work/guide.pdf)
+
 [Final Report](https://github.com/mbway/Simulizer/raw/master/docs/Final-Report.pdf) (contains a more in depth description)
 
 Features
@@ -32,7 +34,10 @@ Example CPU Visualisation:
 
 Annotations
 -----------
-You can add annotations in comments to signal the high-level visualisation. You can read the [annotation specification]() to learn how to use the annotations in your code.
+Simulizer uses a JavaScript engine along side the CPU emulation. Javascript code is placed between `@{` and `}@` delimiters inside MIPS comments. The JavaScript code can access information about the current state of the CPU (eg registers, memory etc) and can be used to:
+- signal 'high level' algorithm visualisations (eg integer lists: swapping elements and highlighting elements, tower of Hanoi: disk swapping, bitmap rendering of memory location etc)
+- prototype complex code before transcribing to assembly
+- debugging tool (very useful for `printf` debugging or conditional breakpoints)
 
 High-Level Visualiation
 -----------------------
