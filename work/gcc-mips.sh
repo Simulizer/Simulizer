@@ -15,10 +15,10 @@ OUT="${FILE/%.*/.s}"
 #
 
 # flags which are closest to the architecture of the Simulizer CPU
-mips-linux-gnu-g++-5 -O0 -fverbose-asm -fno-leading-underscore \
+mips-linux-gnu-g++-5 -O0  -fno-exceptions \
     -march=r3000 -meb -mfp32 -msoft-float -mgp32 -S "$FILE" -o "$OUT"
 # -O0:           disable optimisations (to make output more readable)
-# -fverbose-asm: add information to the output
+# -fno-exceptions: disabling exceptions removes some cruft added for bookkeeping
 # -march=r3000:  compile for the R3000 processor (which Simulizer emulates)
 # -meb:          big endian (which Simulizer is)
 # -mfp32:        32-bit floating point registers (as opposed to 64-bit).
@@ -28,6 +28,16 @@ mips-linux-gnu-g++-5 -O0 -fverbose-asm -fno-leading-underscore \
 # -mgp32:        32-bit general purpose registers (as opposed to 64-bit)
 # -S:            generate assembly output
 
+if [ $? -ne 0 ]; then
+    echo "compilation failed"
+    exit 1
+fi
+
 # remove assembler directives that Simulizer doesn't understand
-sed --in-place='' '/^\s\./d' "$OUT"
+KNOWN_DIRECTIVES="(text|data|rdata|globl|ascii|asciiz|byte|half|word|space)"
+
+# if on a line matching Simulizer-compatible directives: print
+# if on a line matching some other directive: skip
+# otherwise print
+awk -i inplace '/\.'$KNOWN_DIRECTIVES'/{print} /^\s\./{next} {print}' "$OUT"
 
