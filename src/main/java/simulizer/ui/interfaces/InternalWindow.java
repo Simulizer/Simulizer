@@ -45,10 +45,6 @@ public abstract class InternalWindow extends Window {
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
 
-		// Add icons
-		getRightIcons().add(new CustomExtractIcon(this));
-		getRightIcons().add(new CustomCloseIcon(this));
-
 		// Bring to front when clicked
 		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
 
@@ -58,12 +54,14 @@ public abstract class InternalWindow extends Window {
 		// Fix internal window to main window
 		// @formatter:off
 		addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
-			// Check mouse cursor is still inside workspace
-			if (e.getSceneX() < 0                            ||                              // Left border check
-				e.getSceneY() < wm.getMenuBar().getHeight()  ||                              // Top border check
-				e.getSceneX() > wm.getWorkspace().getWidth() ||                              // Right border check
-				e.getSceneY() > wm.getWorkspace().getHeight() + wm.getMenuBar().getHeight()) // Bottom border check
-					e.consume();
+			// Check whether feature is enabled
+			if ((boolean) wm.getSettings().get("internal-window.mouse-borders"))
+				// Check mouse cursor is still inside workspace
+				if (e.getSceneX() < 0                            ||                              // Left border check
+					e.getSceneY() < wm.getMenuBar().getHeight()  ||                              // Top border check
+					e.getSceneX() > wm.getWorkspace().getWidth() ||                              // Right border check
+					e.getSceneY() > wm.getWorkspace().getHeight() + wm.getMenuBar().getHeight()) // Bottom border check
+						e.consume();
 		});
 		// @formatter:on
 
@@ -116,7 +114,14 @@ public abstract class InternalWindow extends Window {
 	 *            the WindowManager
 	 */
 	public final void setWindowManager(WindowManager wm) {
-		this.wm = wm;
+		if (this.wm == null) {
+			this.wm = wm;
+			
+			// Add window icons
+			if ((boolean) wm.getSettings().get("internal-window.extractable"))
+				getRightIcons().add(new CustomExtractIcon(this));
+			getRightIcons().add(new CustomCloseIcon(this));
+		}
 	}
 
 	/**
