@@ -53,7 +53,19 @@ public abstract class InternalWindow extends Window {
 		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
 
 		// Update layout on move/resize
-		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(this::calculateLayout));
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> Platform.runLater(this::calculateLayout));
+
+		// Fix internal window to main window
+		// @formatter:off
+		addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
+			// Check mouse cursor is still inside workspace
+			if (e.getSceneX() < 0                            ||                              // Left border check
+				e.getSceneY() < wm.getMenuBar().getHeight()  ||                              // Top border check
+				e.getSceneX() > wm.getWorkspace().getWidth() ||                              // Right border check
+				e.getSceneY() > wm.getWorkspace().getHeight() + wm.getMenuBar().getHeight()) // Bottom border check
+					e.consume();
+		});
+		// @formatter:on
 
 		// Adds a small window border
 		setPadding(new Insets(0, 2, 2, 2));
@@ -273,11 +285,11 @@ public abstract class InternalWindow extends Window {
 		else
 			return contentPane;
 	}
-	
+
 	/**
 	 * @return if the window is extracted or not
 	 */
-	public boolean isExtracted(){
+	public boolean isExtracted() {
 		return isExtracted;
 	}
 
@@ -290,11 +302,11 @@ public abstract class InternalWindow extends Window {
 			// Close the window
 			extractedStage.close();
 			extractedStage = null;
-			
+
 			// Add internal window into the workspace
 			wm.getWorkspace().getPane().getChildren().add(this);
 			setContentPane(contentPane);
-			
+
 			// Resize the internal window into the workspace
 			isExtracted = false;
 			setWorkspaceSize(wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
