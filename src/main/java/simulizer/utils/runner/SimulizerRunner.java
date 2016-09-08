@@ -33,7 +33,7 @@ public class SimulizerRunner {
 	public String run(String program, String input) {
 		io.feedInput(input);
 
-		Program p = Assembler.assemble(program, problemLogger);
+		Program p = Assembler.assemble(program, problemLogger, true);
 
 		if(!problemLogger.getProblems().isEmpty()) {
 			return null;

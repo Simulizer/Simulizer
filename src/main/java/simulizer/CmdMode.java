@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.misc.Utils;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.Program;
+import simulizer.cmd.CmdIO;
 import simulizer.cmd.CmdSimulationListener;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
@@ -23,7 +24,7 @@ class CmdMode {
 
     public static CommandLineArguments.CmdModeArgs args;
 
-    public static ConsoleIO io;
+    public static CmdIO io;
     public static CPU cpu;
     public static CmdSimulationListener simListener;
 
@@ -36,7 +37,7 @@ class CmdMode {
             return;
         }
 
-        io = new ConsoleIO();
+        io = new CmdIO(args.showDebugStream);
 
         cpu = new CPU(io); // not pipelined
 
@@ -46,12 +47,12 @@ class CmdMode {
         cpu.setCycleFreq(0); //Hz
 
         String programText = FileUtils.getFileContent(args.files.get(0));
-        assembleAndRun(programText);
+        assembleAndRun(programText, args.permissive);
     }
 
-    private static void assembleAndRun(String programText) {
+    private static void assembleAndRun(String programText, boolean permissive) {
         StoreProblemLogger log = new StoreProblemLogger();
-        final Program p = Assembler.assemble(programText, log);
+        final Program p = Assembler.assemble(programText, log, permissive);
         if(p == null) {
             int size = log.getProblems().size();
             System.err.println("Could Not Run. The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"));

@@ -10,6 +10,11 @@ import org.antlr.v4.runtime.Token;
  */
 public class Problem {
 
+    public enum Severity {
+        NON_CRITICAL,
+        CRITICAL
+    }
+
     /**
      * A constant denoting a problem with no associated line number
      */
@@ -20,6 +25,11 @@ public class Problem {
      * A human readable description of the problem
      */
     public String message;
+
+    /**
+     * Whether the message can safely be ignored or not
+     */
+    public Severity severity;
 
     /**
      * if the problem is localised to a line in the source then this is
@@ -43,18 +53,19 @@ public class Problem {
      * mean to state the program has no associated line number, use:
      * new Problem("message", Problem.NO_LINE_NUM);
      */
-    private Problem(String message) {
-    }
+    private Problem(String message) { }
 
-    public Problem(String message, int lineNum) {
+    Problem(String message, int lineNum, Severity severity) {
         this.message = message;
+        this.severity = severity;
         this.lineNum = lineNum;
         this.rangeStart = -1;
         this.rangeEnd = -1;
     }
 
-    public Problem(String message, int lineNum, int rangeStart, int rangeEnd) {
+    Problem(String message, int lineNum, int rangeStart, int rangeEnd, Severity severity) {
         this.message = message;
+        this.severity = severity;
         this.lineNum = lineNum;
         this.rangeStart = rangeStart;
         this.rangeEnd = rangeEnd;
@@ -65,8 +76,9 @@ public class Problem {
      * @param message a description of the problem
      * @param ctx the context (grammar rule) which the problem pertains to.
      */
-    public Problem(String message, ParserRuleContext ctx) {
+    Problem(String message, ParserRuleContext ctx, Severity severity) {
         this.message = message;
+        this.severity = severity;
 
         if(ctx != null) {
             lineNum = ctx.getStart().getLine();

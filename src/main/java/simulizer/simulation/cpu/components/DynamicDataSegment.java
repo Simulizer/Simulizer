@@ -1,144 +1,106 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.ArrayList;
-
 import simulizer.assembler.representation.Address;
 import simulizer.simulation.exceptions.HeapException;
+
+import java.util.Arrays;
 
 /**this class represents the dynamic heap section of the memory 
  * for our simulated Mips processor
  * @author Charlie Street
+ * @author mbway
  *
  */
 public class DynamicDataSegment 
 {
-	private final int megaByte = 1048576;//restricting heap size
-	private ArrayList<Byte> heap;
-	private Address breakOfHeap;
-	private Address startOfHeap;
-	
-	/**this constructor just initialises the heap and it's end pointer
-	 * 
-	 */
-	public DynamicDataSegment(Address startOfHeap)
+	private Address heapBaseAddress;
+	private int heapBreak; // index of one-past the highest element, relative to the base of the heap
+	private int maxLength;
+	private byte[] heap;
+
+
+	public DynamicDataSegment(Address heapBaseAddress, int maxLength)
 	{
-		this.heap = new ArrayList<>();
-		this.breakOfHeap = startOfHeap;
-		this.startOfHeap = startOfHeap;
-	}
-	
-	/**returns the current size of the heap
-	 * 
-	 * @return the size of the heap
-	 */
-	public int size()
-	{
-		return this.heap.size();
+		this.heapBaseAddress = heapBaseAddress;
+		this.heapBreak = 0;
+		this.maxLength = maxLength;
+        heap = new byte[]{};
 	}
 	
 	/**this method will add bytes new bytes onto the heap
 	 * and return the pointer to the start of that block
 	 * in the negative argument case, it will return the break
-	 * @param bytes the number of bytes to add to the heap
-	 * @return the pointer to the start of that block
+	 * @param additionalBytes the number of bytes (positive or negative) to add to the heap
+	 * @return the pointer to the start (lowest address) of the newly allocated block (or the new break when shrinking)
 	 */
-	public Address sbrk(int bytes) throws HeapException
+	public Address sbrk(int additionalBytes) throws HeapException
 	{
-		if(bytes % 4 != 0)//spim only allows sbrk to be called with multiples of 4
-		{
-			throw new HeapException("Sbrk needs to be called with multiples of 4 bytes.", this.breakOfHeap, this.heap.size());
-		}
-		if(bytes < 0)
-		{
-			Address newPointer = new Address(this.breakOfHeap.getValue() +  bytes);
-			if(newPointer.getValue() >= this.startOfHeap.getValue())//error checking
-			{
-				this.breakOfHeap = newPointer;
-			}
-			else
-			{
-				throw new HeapException("Can't call sbrk with negative arguments behind the static data segment.",this.breakOfHeap,this.heap.size());
-			}
-			return this.breakOfHeap;
-		}
-		else
-		{
-			for(int i = 0; i < bytes; i++)
-			{
-				if(heap.size() < this.megaByte)
-				{
-					this.heap.add((byte) 0x00);//set to a 0 byte (probably fairly accurate to reality)
-				}
-				else
-				{
-					throw new HeapException("Heap over 1MB in size.",this.breakOfHeap,this.heap.size());
-				}
-			}
-			
-			Address result = this.breakOfHeap;
-			this.breakOfHeap = new Address(this.breakOfHeap.getValue() + bytes);//increasing the pointer
+		if(additionalBytes % 4 != 0) {//spim only allows sbrk to be called with multiples of 4
+			throw new HeapException("Sbrk needs to be called with multiples of 4 bytes.", heapBreak, heap.length);
+
+		}else if(additionalBytes < -heap.length) { // shrink below 0 length
+			throw new HeapException("sbrk requested shrink below the start of the heap.",heapBreak,heap.length);
+
+		} if(additionalBytes < 0) {// shrink the heap
+			heapBreak += additionalBytes; // additional bytes is negative
+            return new Address(heapBaseAddress.getValue() + heapBreak);
+
+		} else { // grow the heap
+
+            if(heap.length + additionalBytes > maxLength) {
+                throw new HeapException("sbrk requested extends past maximum heap length.",heapBreak,heap.length);
+            }
+
+            // at least a growth factor of 1.5. definitely enough to accommodate the additional requested bytes
+            // but no longer than the maximum length (if the growth factor extends past it)
+            int newLength = Math.min(Math.max((int) (heap.length * 1.5), heap.length+additionalBytes), maxLength);
+            byte[] newHeap = new byte[newLength];
+            // the old heap is placed at the start of the new heap
+            System.arraycopy(heap, 0, newHeap, 0, heap.length);
+            heap = newHeap;
+
+			Address result = new Address(heapBaseAddress.getValue() + heapBreak);
+			heapBreak += additionalBytes;
 			return result;
 		}
 	}
 	
-	/**will set a byte at a given position
-	 * 
-	 * @param toSet the byte to write into the heap
-	 * @param position the position in the heap
-	 */
-	public void setByte(byte toSet, int position) throws HeapException
-	{
-		if(position < this.heap.size())
-		{
-			this.heap.set(position,toSet);
-		}
-		else
-		{
-			throw new HeapException("Invalid write on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
-		}
-	}
-	
 	/**allows to set multiple bytes in one go on the heap
-	 * 
-	 * @param toSet the byte[] to set
-	 * @param startPos the start position in the heap
+	 *
+     * @param relativeAddress address relative to the base of the heap to place the MSB of the data
+     * @param toWrite the data to write into the heap
 	 */
-	public void setBytes(byte[] toSet, int startPos) throws HeapException
+	public void setBytes(int relativeAddress, byte[] toWrite) throws HeapException
 	{
-		for(int i = startPos; i < startPos + toSet.length; i++)
-		{
-			if(i < this.heap.size())
-			{
-				this.heap.set(i, toSet[i-startPos]);
-			}
-			else
-			{
-				throw new HeapException("Invalid write on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
-			}
+        if(toWrite.length <= 0) {
+            throw new HeapException("Invalid write on heap. (non-positive length)", heapBreak, heap.length);
+        } else if(relativeAddress + toWrite.length > heapBreak) {
+			throw new HeapException("Invalid write on heap. (attempt to write above the break)", heapBreak, heap.length);
+		} else if(relativeAddress < 0) {
+			throw new HeapException("Invalid write on heap. (attempt to write below the heap)", heapBreak, heap.length);
 		}
+
+		// src, srcPos, dest, destPos, length
+		System.arraycopy(toWrite, 0, heap, relativeAddress, toWrite.length);
 	}
 	
 	/**method will get n bytes from the heap 
-	 * 
-	 * @param startPosition the start address in the heap
-	 * @param length the number of bytes to retrieve
+	 *
+	 * @param relativeAddress address relative to the base of the heap to place the MSB of the data
+	 * @param length the number of bytes to retrieve, starting at the given address
 	 * @return the bytes in an array
 	 */
-	public byte[] getBytes(int startPosition, int length) throws HeapException
+	public byte[] getBytes(int relativeAddress, int length) throws HeapException
 	{
-		byte[] result = new byte[length];
-		for(int i = 0; i < length; i++)
-		{
-			if(startPosition+i < this.heap.size())
-			{
-				result[i] = this.heap.get(startPosition+i);
-			}
-			else
-			{
-				throw new HeapException("Invalid read on heap. Out of Bounds.", this.breakOfHeap, this.heap.size());
-			}
+		if(length <= 0) {
+			throw new HeapException("Invalid read on heap. (non-positive length)", heapBreak, heap.length);
+		} else if(relativeAddress + length > heapBreak) {
+			throw new HeapException("Invalid read on heap. (attempt to read above the break)", heapBreak, heap.length);
+
+		} else if(relativeAddress < 0) {
+			throw new HeapException("Invalid read on heap. (attempt to read below the heap)", heapBreak, heap.length);
 		}
-		
-		return result;
+
+		return Arrays.copyOfRange(heap, relativeAddress, relativeAddress+length);
 	}
 }

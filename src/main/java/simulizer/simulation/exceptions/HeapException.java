@@ -1,7 +1,5 @@
 package simulizer.simulation.exceptions;
 
-import simulizer.assembler.representation.Address;
-
 /**
  * exception for problems related to the heap
  * 
@@ -11,33 +9,33 @@ import simulizer.assembler.representation.Address;
 public class HeapException extends Exception {
 	private static final long serialVersionUID = 6007698896140851786L;
 
-	private Address breakOfHeap;
+	private int heapBreak;
 	private int heapSize;
 	
 	/**
 	 * @param message the error message of the exception
-	 * @param breakOfHeap the current location of the break
+	 * @param heapBreak the current location of the break
 	 * @param heapSize the current heap size
 	 */
-	public HeapException(String message, Address breakOfHeap, int heapSize)
+	public HeapException(String message, int heapBreak, int heapSize)
 	{
 		super(message);//calling super constructor
-		this.breakOfHeap = breakOfHeap;
+		this.heapBreak = heapBreak;
 		this.heapSize = heapSize;
 	}
 
 	@Override
 	public String toString() {
-		return getMessage() + ". Details: {breakOfHeap = " + breakOfHeap + ", heapSize=" + heapSize + "}";
+		return getMessage() + ". Details: {breakOfHeap = " + heapBreak + ", heapSize=" + heapSize + "}";
 	}
 
 	/**return the current heap break point
 	 * 
 	 * @return the current break point
 	 */
-	public Address getBreak()
+	public int getBreak()
 	{
-		return this.breakOfHeap;
+		return heapBreak;
 	}
 	
 	/**returns the heap size at time of exception
@@ -46,6 +44,6 @@ public class HeapException extends Exception {
 	 */
 	public int getHeapSize()
 	{
-		return this.heapSize;
+		return heapSize;
 	}
 }

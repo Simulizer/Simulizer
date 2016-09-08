@@ -2,10 +2,7 @@ package simulizer.assembler;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -17,6 +14,7 @@ import simulizer.assembler.extractor.problem.ProblemCountLogger;
 import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
 import simulizer.assembler.representation.*;
+import simulizer.assembler.representation.operand.Operand;
 import simulizer.parser.SimpLexer;
 import simulizer.parser.SimpParser;
 import simulizer.simulation.data.representation.DataConverter;
@@ -62,7 +60,7 @@ public class Assembler {
      * @param log the logger to send the error messages (may be null)
      * @return the assembled program (or null if errors are encountered)
      */
-    public static Program assemble(String input, ProblemLogger log) {
+    public static Program assemble(String input, ProblemLogger log, boolean permissive) {
 
         input += '\n'; // to parse correctly, must end with a newline
 
@@ -80,8 +78,14 @@ public class Assembler {
         ProgramExtractor extractor = new ProgramExtractor(counter);
         ParseTreeWalker.DEFAULT.walk(extractor, tree);
 
-        if(counter.problemCount != 0) {
-            return null;
+        if(permissive) {
+            if(counter.criticalCount > 0) {
+                return null;
+            }
+        } else {
+            if(counter.problemCount > 0) {
+                return null;
+            }
         }
 
         Map<Integer, List<String>> reverseTextLabels = reverseMapping(extractor.textSegmentLabels);
@@ -166,7 +170,7 @@ public class Assembler {
     }
 
 
-    public static <K, V> Map<V, List<K>> reverseMapping(Map<K, V> map) {
+    private static <K, V> Map<V, List<K>> reverseMapping(Map<K, V> map) {
         Map<V, List<K>> rev = new HashMap<>();
 
         for(Map.Entry<K, V> e : map.entrySet()) {
@@ -183,29 +187,34 @@ public class Assembler {
     }
 
     private static byte[] variableInitialBytes(Variable v) {
-        if(!v.getInitialValue().isPresent()) {
+        Optional<Operand> operand = v.getInitialValue();
+        Operand op;
+        if(!operand.isPresent()) {
             return new byte[v.getSize()];
+        } else {
+            op = operand.get();
         }
+
         switch(v.getType()) {
             case Byte: {
-                int val = v.getInitialValue().get().asIntegerOp().value;
+                int val = op.asIntegerOp().value;
                 return new byte[]{(byte) val};
             }
             case Half: {
-                int val = v.getInitialValue().get().asIntegerOp().value;
+                int val = op.asIntegerOp().value;
                 return new byte[]{
                     (byte)((val >> 8) & 0xFF),
                     (byte)(val & 0xFF)
                 };
             }
             case Word: {
-                int val = v.getInitialValue().get().asIntegerOp().value;
+                int val = op.asIntegerOp().value;
                 return ByteBuffer.allocate(4).putInt(val).array();
             }
             case ASCII:
             case ASCIIZ: {
                 // null terminator was added earlier so these are equivalent
-                String val = v.getInitialValue().get().asStringOp().value;
+                String val = op.asStringOp().value;
                 return val.getBytes(Charset.forName("US-ASCII"));
             }
             case Space:

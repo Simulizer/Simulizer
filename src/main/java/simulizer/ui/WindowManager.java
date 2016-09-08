@@ -227,7 +227,7 @@ public class WindowManager extends GridPane {
 			StoreProblemLogger log = new StoreProblemLogger();
 
 			try {
-				final Program p = Assembler.assemble(programText, log);
+				final Program p = Assembler.assemble(programText, log, false);
 				// doing as little as possible in the FX thread
 				if(getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 					getWorkspace().openEditorWithCallback((editor2) -> {

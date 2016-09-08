@@ -462,7 +462,7 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-			Program p = Assembler.assemble(Editor.getText(), null);
+			Program p = Assembler.assemble(Editor.getText(), null, false);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {

@@ -20,9 +20,20 @@ class CommandLineArguments {
         @Parameter(names = {"-i", "--interactive"})
         public boolean interactive = false;
 
+        @Parameter(names = {"-p", "--permissive"}, description = "configures the assembler to permit harmless problems (eg assembler directive in the wrong place)")
+        boolean permissive = false;
+
+        //TODO: maybe add a flag to allow out of bounds reads/writes?
+
+        @Parameter(names = {"--show-debug-stream"}, description = "show the output that would get written to the debug tab in GUI mode")
+        boolean showDebugStream = false;
+
+        //TODO: not implemented
+        //@Parameter(names = {"--output-errors"}, description = "file to output encountered parse errors")
+        //public String errorOutputPath;
 
         @Parameter(description = "<file to run>")
-        public List<String> files = new ArrayList<>();
+        List<String> files = new ArrayList<>();
     }
 
 

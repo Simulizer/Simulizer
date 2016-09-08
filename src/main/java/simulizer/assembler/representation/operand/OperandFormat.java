@@ -54,6 +54,9 @@ public class OperandFormat {
     public static final OperandFormat label = new OperandFormat()
         .allowed1(OperandType.LABEL);
 
+    public static final OperandFormat labelOrReg = new OperandFormat()
+            .allowed1(OperandType.LABEL, OperandType.REGISTER);
+
     public static final OperandFormat cmpLabel = new OperandFormat()
         .allowed1(OperandType.REGISTER)
         .allowed2(OperandType.LABEL);
@@ -84,11 +87,6 @@ public class OperandFormat {
         .allowed2(OperandType.SRC_REGISTER)
         .allowed3(OperandType.IMMEDIATE);
 
-    public static final OperandFormat destSrcImmU = new OperandFormat()
-        .allowed1(OperandType.DEST_REGISTER)
-        .allowed2(OperandType.SRC_REGISTER)
-        .allowed3(OperandType.UNSIGNED_IMMEDIATE);
-
     public static final OperandFormat cmpCmpLabel = new OperandFormat()
         .allowed1(OperandType.REGISTER)
         .allowed2(OperandType.REGISTER)
@@ -96,9 +94,9 @@ public class OperandFormat {
 
 
 
-    public OperandType[] allowedPos1;
-    public OperandType[] allowedPos2;
-    public OperandType[] allowedPos3;
+    private OperandType[] allowedPos1;
+    private OperandType[] allowedPos2;
+    private OperandType[] allowedPos3;
     public EncodingFormat encodingFormat;
 
     public OperandFormat() {
