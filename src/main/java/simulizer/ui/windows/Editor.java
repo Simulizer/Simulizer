@@ -523,7 +523,7 @@ public class Editor extends InternalWindow {
 	 *
 	 * @param obs the observer to add
 	 */
-	public void addObserver(TemporaryObserver obs) {
+	void addObserver(TemporaryObserver obs) {
 		observers.add(obs);
 	}
 
@@ -597,6 +597,9 @@ public class Editor extends InternalWindow {
 
 		if(continuousAssemblyEnabled)
 			startContinuousAssembly();
+	}
+	public void reloadFile() {
+		loadFile(currentFile);
 	}
 
 	public void newFile() {
