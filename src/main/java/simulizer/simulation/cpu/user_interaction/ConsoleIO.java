@@ -18,7 +18,7 @@ public class ConsoleIO implements IO
 	 */
 	public ConsoleIO()
 	{
-		this.scan = new Scanner(System.in);
+		this.scan = new Scanner(System.in, "UTF-8");
 	}
 
 	/**method prints a string passed to it
@@ -55,8 +55,7 @@ public class ConsoleIO implements IO
 	public String readString(IOStream stream)
 	{
 
-		String read = scan.nextLine();
-		return read;
+		return scan.nextLine();
 	}
 
 	/**reads an int from the console
@@ -65,8 +64,7 @@ public class ConsoleIO implements IO
 	 */
 	public int readInt(IOStream stream)
 	{
-		int num = scan.nextInt();
-		return num;
+		return scan.nextInt();
 	}
 
 	/**reads a character from the console

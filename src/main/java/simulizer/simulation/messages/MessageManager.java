@@ -1,5 +1,6 @@
 package simulizer.simulation.messages;
 
+import simulizer.Simulizer;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.utils.ThreadUtils;
@@ -103,7 +104,7 @@ public class MessageManager {
 					l.delegateMessage(m);
 				}
 			} catch (Exception e) {
-				UIUtils.showExceptionDialog(e);
+				Simulizer.handleException(e);
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 package simulizer.utils;
 
+import simulizer.Simulizer;
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
@@ -16,7 +18,7 @@ public class DebugUtils {
 			out.print(str);
 			out.close();
 		} catch (FileNotFoundException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 	}
 

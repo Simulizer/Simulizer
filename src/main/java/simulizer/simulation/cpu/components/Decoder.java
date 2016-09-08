@@ -92,7 +92,7 @@ public class Decoder {
             return new RTypeInstruction(instruction, Optional.empty(), destinationRegister, src1, src2);
         }
         else if(instruction.getOperandFormat() == OperandFormat.destSrcImm
-                || instruction.getOperandFormat() == OperandFormat.destSrcImmU) { //immediate arithmetic operations (signed and unsigned)
+                || instruction.getOperandFormat() == OperandFormat.destSrcImm) { //immediate arithmetic operations (signed and unsigned)
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
             Register destinationRegister = op1.asRegisterOp().value;
@@ -120,14 +120,16 @@ public class Decoder {
         else if(instruction.getOperandFormat() == OperandFormat.noArguments||instruction.equals(Instruction.BREAK)) {//syscall, nop, break
             return new SpecialInstruction(instruction);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.label) {//branch, jal, j
+        else if(instruction.getOperandFormat() == OperandFormat.label
+                || (instruction.getOperandFormat() == OperandFormat.labelOrReg && op1 != null && op1.asAddressOp() != null)) {//branch, jal, j
             assert (op1 != null) && (op2 == null) && (op3 == null);
 
             Optional<Address> goToAddress = Optional.of(this.decodeAddressOperand(op1.asAddressOp()));//where to jump
             Optional<Word> currentAddress = Optional.of(new Word(DataConverter.encodeAsSigned((long)this.cpu.getProgramCounter().getValue())));
             return new JTypeInstruction(instruction,goToAddress,currentAddress);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.register) {//for jr
+        else if(instruction.getOperandFormat() == OperandFormat.register
+                || (instruction.getOperandFormat() == OperandFormat.labelOrReg && op1 != null && op1.asRegisterOp() != null)) {//for jr or j
             assert (op1 != null) && (op2 == null) && (op3 == null);
 
             Word registerContents = this.decodeRegister(op1.asRegisterOp());//getting register contents

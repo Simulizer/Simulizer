@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.extractor.problem.ValidityListener;
 import simulizer.assembler.representation.Register;
@@ -25,12 +26,12 @@ import simulizer.parser.SimpParser;
  * Java objects for use in the simulation.
  * @author mbway
  */
-public class OperandExtractor {
+class OperandExtractor {
 
     /**
      * The logger to send encountered problems to
      */
-    final ProblemLogger log;
+    final private ProblemLogger log;
 
     /**
      * when accessing a sub-rule from a grammar rule, the result may be null
@@ -56,7 +57,7 @@ public class OperandExtractor {
     /**
      * @param log the problem logger to use
      */
-    public OperandExtractor(ProblemLogger log) {
+    OperandExtractor(ProblemLogger log) {
         this.log = log;
     }
 
@@ -68,7 +69,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the directive list grammar rule to extract from
      * @return the extracted valid operands
      */
-    public List<Operand> extractDirectiveOperands(SimpParser.DirectiveOperandListContext ctx) {
+    List<Operand> extractDirectiveOperands(SimpParser.DirectiveOperandListContext ctx) {
         List<Operand> operands = new ArrayList<>();
 
         if(!goodMatch(ctx)) {
@@ -91,7 +92,7 @@ public class OperandExtractor {
             } else if(goodMatch(opCtx.address())) {
                 operands.add(extractAddress(opCtx.address()));
             } else {
-                log.logProblem("invalid directive operand", opCtx);
+                log.logProblem("invalid directive operand", opCtx, Problem.Severity.NON_CRITICAL);
             }
         }
 
@@ -105,7 +106,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the operand list grammar rule to extract from
      * @return the extracted valid operands
      */
-    public List<Operand> extractStatementOperands(SimpParser.StatementOperandListContext ctx) {
+    List<Operand> extractStatementOperands(SimpParser.StatementOperandListContext ctx) {
         List<Operand> operands = new ArrayList<>();
 
         if(!goodMatch(ctx)) {
@@ -128,7 +129,7 @@ public class OperandExtractor {
             } else if(goodMatch(opCtx.address())) {
                 operands.add(extractAddress(opCtx.address()));
             } else {
-                log.logProblem("invalid instruction operand", opCtx);
+                log.logProblem("invalid instruction operand", opCtx, Problem.Severity.CRITICAL);
             }
         }
 
@@ -144,7 +145,7 @@ public class OperandExtractor {
      * @return the extracted integer with the correct sign or 0 if a problem is
      *         encountered
      */
-    public int extractInteger(SimpParser.IntegerContext ctx) {
+    int extractInteger(SimpParser.IntegerContext ctx) {
         int abs = 0;
         int val = 0;
 
@@ -179,7 +180,7 @@ public class OperandExtractor {
 
         } catch(NumberFormatException e) {
             log.logProblem("NumberFormatException while extracting an integer: \"" +
-                    ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx);
+                    ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx, Problem.Severity.CRITICAL);
         }
 
         return val;
@@ -192,7 +193,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the unsigned integer grammar rule to extract from
      * @return the extracted integer or 0 if a problem is encountered
      */
-    public int extractUnsignedInteger(SimpParser.UnsignedIntegerContext ctx) {
+    int extractUnsignedInteger(SimpParser.UnsignedIntegerContext ctx) {
         int abs = 0;
 
         if(!goodMatch(ctx)) {
@@ -218,7 +219,7 @@ public class OperandExtractor {
             */
         } catch(NumberFormatException e) {
             log.logProblem("NumberFormatException while extracting an unsigned integer: \"" +
-                ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx);
+                ctx.getText() + "\". This value is probably too large to fit into a 32 bit integer.", ctx, Problem.Severity.CRITICAL);
         }
 
         return abs;
@@ -237,7 +238,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the string to extract from
      * @return the extracted string or null if a problem is encountered
      */
-    public String extractString(SimpParser.StringContext ctx) {
+    String extractString(SimpParser.StringContext ctx) {
 
         if(!goodMatch(ctx) || !goodMatch(ctx.STRING_LITERAL())) {
             log.logParseError("string", ctx);
@@ -369,7 +370,7 @@ public class OperandExtractor {
                 "string contains an invalid escape sequence, must be one of:" +
                     "\\\\,\\n,\\t,\\\",\\nnn,\\xhh " +
                     "where nnn is an octal integer (1-3 digits) < 377 (255 in base 10) "+
-                    "and hh is a hexadecimal integer", ctx);
+                    "and hh is a hexadecimal integer", ctx, Problem.Severity.CRITICAL);
             return null;
         }
 
@@ -388,7 +389,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the address grammar rule to extract from
      * @return the extracted address or null if a problem is encountered
      */
-    public AddressOperand extractAddress(SimpParser.AddressContext ctx) {
+    AddressOperand extractAddress(SimpParser.AddressContext ctx) {
 
         if(!goodMatch(ctx)) {
             log.logParseError("address", ctx);
@@ -432,8 +433,7 @@ public class OperandExtractor {
                     // is attached to the constant and is lost otherwise
                     log.logParseError("address", ctx);
                     return null;
-                }
-                if(ctx.SIGN().getText().equals("-")) { // negative otherwise positive
+                } else if(ctx.SIGN().getText().equals("-")) { // negative otherwise positive
                     int x = constant.get();
                     constant = Optional.of(-x);
                 }
@@ -476,7 +476,7 @@ public class OperandExtractor {
      * @param ctx a valid parse of the register grammar rule to extract from
      * @return the extracted register or null if a problem is encountered
      */
-    public Register extractRegister(SimpParser.RegisterContext ctx) {
+    Register extractRegister(SimpParser.RegisterContext ctx) {
 
         if(!goodMatch(ctx)) {
             log.logParseError("register", ctx);
@@ -498,7 +498,7 @@ public class OperandExtractor {
                 log.logParseError("register", ctx);
             }
         } catch (NoSuchElementException | NumberFormatException e) {
-            log.logProblem("no such register: \"" + ctx.getText() + "\"", ctx);
+            log.logProblem("no such register: \"" + ctx.getText() + "\"", ctx, Problem.Severity.CRITICAL);
         }
 
         return null;

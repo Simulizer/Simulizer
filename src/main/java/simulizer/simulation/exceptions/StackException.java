@@ -9,33 +9,36 @@ package simulizer.simulation.exceptions;
 public class StackException extends Exception {
 	private static final long serialVersionUID = 3575131873818521606L;
 
-	/**
-	 * address relative to the base of the stack (index 0)
+	/** start of the problematic range (inclusive)
+	 * address relative to the base of the stack (highest address) (index 0)
 	 */
-	private int stackAddress;
+	private int startAddress;
+
+	/** end of the problematic range (inclusive)
+	 * address relative to the base of the stack (highest address) (index 0)
+	 */
+	private int endAddress;
+
 	
 	/**constructor calls super constructor and initialises field
 	 * 
 	 * @param message exception message
-	 * @param stackAddress internal address of error in stack
+     * @param startAddress the start of the range where the error occurred
+	 * @param endAddress the end of the range where the error occurred
 	 */
-	public StackException(String message, int stackAddress)
+	public StackException(String message, int startAddress, int endAddress)
 	{
 		super(message);
-		this.stackAddress = stackAddress;
+        this.startAddress = startAddress;
+		this.endAddress = endAddress;
 	}
 
 	@Override
 	public String toString() {
-		return getMessage() + ". Details: {stackAddress = " + stackAddress + "}";
+	    if(startAddress == endAddress) // single item, not a range
+            return getMessage() + ". Details: {stackAddress = " + startAddress + "}";
+        else
+			return getMessage() + ". Details: {startAddress = " + startAddress + ", endAddress=" + endAddress + "}";
 	}
 
-	/**method will return the internal address where there was an error with the stack
-	 * 
-	 * @return internal stack address of error
-	 */
-	public int getStackAddress()
-	{
-		return this.stackAddress;
-	}
 }

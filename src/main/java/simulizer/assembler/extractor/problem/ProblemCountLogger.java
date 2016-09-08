@@ -10,19 +10,28 @@ public class ProblemCountLogger extends ProblemLogger {
     /**
      * the logger to redirect messages to (can be null)
      */
-    public ProblemLogger redirect;
+    private ProblemLogger redirect;
 
     public int problemCount;
+    public int nonCriticalCount;
+    public int criticalCount;
 
     public ProblemCountLogger(ProblemLogger redirect) {
         this.redirect = redirect;
         problemCount = 0;
+        nonCriticalCount = 0;
+        criticalCount = 0;
     }
 
 
     @Override
     public void logProblem(Problem p) {
         problemCount++;
+        switch (p.severity) {
+            case NON_CRITICAL: nonCriticalCount++; break;
+            case CRITICAL: criticalCount++; break;
+            default: throw new RuntimeException("unexpected error severity");
+        }
         if(redirect != null) {
             redirect.logProblem(p);
         }

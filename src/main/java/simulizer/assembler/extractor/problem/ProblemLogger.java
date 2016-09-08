@@ -15,18 +15,18 @@ public abstract class ProblemLogger {
      */
     abstract public void logProblem(Problem p);
 
-    public void logProblem(String message, int lineNum) {
-        logProblem(new Problem(message, lineNum));
+    public void logProblem(String message, int lineNum, Problem.Severity severity) {
+        logProblem(new Problem(message, lineNum, severity));
     }
-    public void logProblem(String message, int lineNum, int rangeStart, int rangeEnd) {
-        logProblem(new Problem(message, lineNum, rangeStart, rangeEnd));
+    public void logProblem(String message, int lineNum, int rangeStart, int rangeEnd, Problem.Severity severity) {
+        logProblem(new Problem(message, lineNum, rangeStart, rangeEnd, severity));
     }
 
     /**
      * log a generic error regarding a particular stretch of text
      */
-    public void logProblem(String message, ParserRuleContext ctx) {
-        logProblem(new Problem(message, ctx));
+    public void logProblem(String message, ParserRuleContext ctx, Problem.Severity severity) {
+        logProblem(new Problem(message, ctx, severity));
     }
 
     /**
@@ -38,13 +38,13 @@ public abstract class ProblemLogger {
         if(ctx == null) {
             logProblem(
                 "invalid parse for " + ruleName +
-                " grammar rule for null input", Problem.NO_LINE_NUM);
+                " grammar rule for null input", Problem.NO_LINE_NUM, Problem.Severity.CRITICAL);
         } else {
             logProblem(
                 "invalid parse for " + ruleName +
                 " grammar rule for the input: \"" + ctx.getText() + "\". " +
                 "context exception: " +
-                (ctx.exception == null ? "null" : ctx.exception.getMessage()), ctx);
+                (ctx.exception == null ? "null" : ctx.exception.getMessage()), ctx, Problem.Severity.CRITICAL);
         }
     }
 }

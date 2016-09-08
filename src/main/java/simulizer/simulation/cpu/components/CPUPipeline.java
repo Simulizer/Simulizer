@@ -84,8 +84,7 @@ public class CPUPipeline extends CPU {
 						   opForm.equals(OperandFormat.cmpCmpLabel) || opForm.equals(OperandFormat.cmpLabel);
 		
 		boolean readOne = opForm.equals(OperandFormat.destSrc) || opForm.equals(OperandFormat.destSrcImm) ||
-						  opForm.equals(OperandFormat.destSrcImmU) || opForm.equals(OperandFormat.destSrcSrc) ||
-						  opForm.equals(OperandFormat.cmpCmpLabel);
+						  opForm.equals(OperandFormat.destSrcSrc) || opForm.equals(OperandFormat.cmpCmpLabel);
 		
 		boolean readTwo = opForm.equals(OperandFormat.destSrcSrc);
 		

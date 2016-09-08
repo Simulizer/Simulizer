@@ -2,7 +2,7 @@
 
 Simulizer allows you to write assembly code and run it on a simulated and visualised CPU. It has been designed to improve various features of [SPIM](http://spimsimulator.sourceforge.net).
 
-[![CircleCI](https://circleci.com/gh/MichaelOultram/Simulizer.svg?style=svg)](https://circleci.com/gh/MichaelOultram/Simulizer)
+[![CircleCI](https://circleci.com/gh/Simulizer/Simulizer/tree/master.svg?style=svg)](https://circleci.com/gh/Simulizer/Simulizer/tree/master)
 
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
@@ -52,6 +52,32 @@ Meet the Team
 [![Charlie Street](https://avatars3.githubusercontent.com/u/11256801?v=3&s=150)](https://github.com/charlie1329) | [![Kelsey McKenna](https://avatars1.githubusercontent.com/u/3618330?v=3&s=150)](https://github.com/ToastNumber) | [![Matthew Broadway](https://avatars3.githubusercontent.com/u/4923501?v=3&s=150)](https://github.com/mbway) | [![Michael Oultram](https://avatars0.githubusercontent.com/u/9907700?v=3&s=150)](https://github.com/MichaelOultram) | [![Theo Styles](https://avatars2.githubusercontent.com/u/2779884?v=3&s=150)](https://github.com/ThusStyles)
 ---|---|---|---|---|
 [Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
+
+Building
+--------
+Dependencies to build on 64 bit Debian based Linux (eg Ubuntu)
+- `openjdk-8-jdk`
+- `spim` (for compatiability tests)
+- `openjfx` (JavaFX for openJDK-8)
+- `gradle` (or use gradle plugin with an IDE)
+- add `/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jfxrt.jar` to the SDK classpath
+    - your placement might be different. try: `find /usr -name 'jfxrt.jar'`
+    - in Intellij IDEA: File > Project Structure > SDKs > 1.8 > Classpath
+- gradle will handle the rest of the dependencies
+
+
+Compiler Compatability
+----------------------
+It is possible to use a compiler to generate MIPS output which Simulizer can
+consume (with some manual editing). See `work/gcc-mips.sh` for a script which
+uses gcc to cross compile for MIPS (the gcc cross compiler must be installed
+manually).
+
+Tip: to easily utilise javascript functionality with compiled code, write a
+void function with the needed arguments (eg `void hanoiMove(int a, int b) {}`)
+leaving the body blank. Then fill in the annotations to interact with the high
+level visualisation manually inside the empty body of the function
+
 
 Licence
 -------

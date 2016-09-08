@@ -27,6 +27,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import simulizer.GuiMode;
 import simulizer.Simulizer;
 
 /**
@@ -53,7 +54,7 @@ public class UIUtils {
 	// it is OK if the icon is null, will reset to default icon
 	public static void setDialogBoxIcon(Dialog<?> dialog) {
 		Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-		stage.getIcons().add(Simulizer.getIcon());
+		stage.getIcons().add(GuiMode.getIcon());
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class UIUtils {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setResizable(true);
-			alert.initOwner(Simulizer.getPrimaryStage());
+			alert.initOwner(GuiMode.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -94,13 +95,13 @@ public class UIUtils {
 	 * @param header the header for the dialog box
 	 * @param message the message to display in the dialog box
 	 */
-	public static void showInfoDialog(String title, String header, String message) {
+	private static void showInfoDialog(String title, String header, String message) {
 		System.out.println(title + "\n\t" + header + "\n\t" + message);
 
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setResizable(true);
-			alert.initOwner(Simulizer.getPrimaryStage());
+			alert.initOwner(GuiMode.getPrimaryStage());
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -127,6 +128,8 @@ public class UIUtils {
 	 * @param e the exception to display
 	 */
 	public static void showExceptionDialog(Thread where, Throwable e) {
+		assert(Simulizer.hasGUI());
+
 		try {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
@@ -178,7 +181,7 @@ public class UIUtils {
 
 					Alert alert = new Alert(Alert.AlertType.ERROR);
 					alert.setResizable(true);
-					alert.initOwner(Simulizer.getPrimaryStage());
+					alert.initOwner(GuiMode.getPrimaryStage());
 					alert.setTitle("Exception");
 					setDialogBoxIcon(alert);
 					alert.setHeaderText("Something went wrong with Simulizer.");
@@ -224,7 +227,7 @@ public class UIUtils {
 	 */
 	public static void openTextInputDialog(String title, String header, String message, String defaultText, Consumer<String> callback) {
 		TextInputDialog dialog = new TextInputDialog(defaultText);
-		dialog.initOwner(Simulizer.getPrimaryStage());
+		dialog.initOwner(GuiMode.getPrimaryStage());
 		setDialogBoxIcon(dialog);
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
@@ -238,7 +241,7 @@ public class UIUtils {
 	 */
 	public static void openIntInputDialog(String title, String header, String message, int defaultVal, Consumer<Integer> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
-		dialog.initOwner(Simulizer.getPrimaryStage());
+		dialog.initOwner(GuiMode.getPrimaryStage());
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
@@ -259,7 +262,7 @@ public class UIUtils {
 	 */
 	public static void openDoubleInputDialog(String title, String header, String message, double defaultVal, Consumer<Double> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
-		dialog.initOwner(Simulizer.getPrimaryStage());
+		dialog.initOwner(GuiMode.getPrimaryStage());
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
@@ -281,7 +284,7 @@ public class UIUtils {
 	public static boolean confirm(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setResizable(true);
-		alert.initOwner(Simulizer.getPrimaryStage());
+		alert.initOwner(GuiMode.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
@@ -297,7 +300,7 @@ public class UIUtils {
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setResizable(true);
-		alert.initOwner(Simulizer.getPrimaryStage());
+		alert.initOwner(GuiMode.getPrimaryStage());
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);

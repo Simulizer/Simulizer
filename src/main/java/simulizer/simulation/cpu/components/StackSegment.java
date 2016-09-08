@@ -1,104 +1,177 @@
 package simulizer.simulation.cpu.components;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
-import simulizer.assembler.representation.Address;
 import simulizer.simulation.exceptions.StackException;
 
 
-/**represents the stack of our main memory
- * 
- * @author Charlie Street
+/** Stack memory segment for the CPU
  *
+ * //TODO: potential optimisation: replace getBytes with getBytes(int address, byte[] array) so the buffer being written to can be re-used rather than reallocated each time bytes are read
+ *
+ * @author mbway
+ *
+ * memory access is performed 'upwards' towards the top of the stack, with the address passed to the accessing methods
+ * being the lowest address (MSB) to access and length referring to a length 'above' and including the first address.
+ *
+ * since the stack grows downwards and values are stored in big Endian format (MSB in lowest address),
+ * it is most efficient to store the bytes in an array with the top of the past the end of the array
+ * and $sp be element 0 of the array
+ *
+ * topOfStack     is out of bounds
+ * topOfStack - 1 is the last element of the array
+ * $sp + 1        is the second element of the array (stack[1])
+ * $sp            is the first element of the array (stack[0])
+ *
+ * example:
+ *
+ * index  0     1     2     3     4
+ *       $sp                      topOfStack
+ *      [ 0xAA  0xBB  0xCC  0xDD ]
+ *              MSB         LSB
+ *
+ *   addresses are passed relative to topOfStack. ie highest element of the stack at relative address -1
  */
 public class StackSegment {
-	
-	private Address stackPointer;//the stack pointer (memory and cpu will figure everything else out)
-	private Address lowestAddress;//heap start + 1MB
-	private ArrayList<Byte> stack;
-	
+
+	private int maxLength;
+    private byte[] stack;
+
+    private class ArrayRange {
+        int MSBIndex;
+        int LSBIndex;
+
+        /**
+         * construct an array range given an address relative to the top of the stack and a length
+         * @param MSBAddress address of the MSB of the range, relative to the top of the stack (should be negative)
+         * @param length the length of the array range
+         */
+        ArrayRange(int MSBAddress, int length) {
+            // MSB => lowest address => lower index in array
+            // index from the end of the array (top of stack)
+            MSBIndex = stack.length + MSBAddress; // MSBAddress should be negative
+
+            // LSB => highest address => higher index in array
+            // -1 because want to be inclusive
+            LSBIndex = MSBIndex + length - 1;
+        }
+
+        /**
+         * @return whether the range includes elements above the top of the stack (invalid)
+         */
+        boolean spansAboveStack() {
+            return LSBIndex >= stack.length;
+        }
+
+        /**
+         * @return whether the range includes elements below the 'stack pointer'
+         *          (the lowest address written to up to this point, not to be confused
+         *           with the actual stack pointer of the CPU)
+         */
+        boolean spansBelowSp() {
+            return MSBIndex < 0;
+        }
+    }
+
 	/**initialise stack to difference between stack pointer and lowest address
-	 * 
-	 * @param stackPointer the pointer in the stack
-	 * @param lowestAddress the lowest address in memory
+	 *
+     * @param maxLength the maximum number of bytes the stack is allowed to grow to
 	 */
-	public StackSegment(Address stackPointer, Address lowestAddress)
+	public StackSegment(int maxLength)
 	{
-		this.stackPointer = stackPointer;
-		this.lowestAddress = lowestAddress;
-		this.stack = new ArrayList<>();
-		for(int i = 0; i < 4; i++)//giving stack an initial 4 bytes to work with, it then expands as necessary
-		{
-			this.stack.add((byte) 0x00);//initialising stack
-		}
+		this.maxLength = maxLength;
+        int initialLength = Math.min(100, maxLength); // either 100 or the maximum length if max length <100
+		stack = new byte[initialLength]; // a small starting stack
 	}
-	
-	/**method reads a number of bytes from the stack
-	 * 
-	 * @param address the address relative to the 0 point of the stack
+
+    /**
+     * @param MSBAddress the address to rest (relative to the top of the stack) (should be negative)
+     */
+    private boolean insideStackSegment(int MSBAddress) {
+	    return -maxLength <= MSBAddress && MSBAddress < 0;
+    }
+
+	/** method reads a number of bytes from the stack.
+	 *
+	 * Reads from 'address' to 'address'+'length'-1 inclusive
+	 *
+	 * @param MSBAddress the address of the most significant byte relative to the top of the stack (should be negative)
 	 * @param length the number of bytes to read
 	 * @return the byte array with the desired contents
 	 * @throws StackException if reading goes out of bounds
 	 */
-	public byte[] getBytes(int address, int length) throws StackException
+	public byte[] getBytes(int MSBAddress, int length) throws StackException
 	{
-		byte[] result = new byte[length];
-		for(int i = 0; i < length; i++)
-		{
-			if(address+i < this.stack.size())
-			{
-				result[i] = this.stack.get(address+i);
-			}
-			else
-			{
-				throw new StackException("Invalid read on stack.", address+i);
-			}
+	    ArrayRange r = new ArrayRange(MSBAddress, length);
+
+        if(length <= 0) {
+            throw new StackException("Invalid read on stack. (non-positive length)", r.MSBIndex, r.LSBIndex);
+        }
+
+		if(r.spansAboveStack()) {
+			throw new StackException("Invalid read on stack. (attempt to read above the top)", r.MSBIndex, r.LSBIndex);
+
+		} else if(r.spansBelowSp()) { // at least part of the requested range is below the allocated range
+
+            // range still within valid stack memory (because if MSB is and range doesn't span above the stack then LSB is too)
+            if(insideStackSegment(MSBAddress)) {
+                // below the current stack pointer is only zeroes until written to
+                byte[] result = new byte[length];
+                for (int i = 0; i < length; ++i) {
+                    int index = r.MSBIndex + i;
+                    result[i] = index < 0 ? 0 : stack[index];
+                }
+                return result;
+            } else {
+                throw new StackException("Stack Overflow. (attempt to read from the stack beyond its maximum length)", r.MSBIndex, r.LSBIndex);
+            }
+
+		} else {
+			// copyFrom, from (inclusive), to (exclusive)
+		    return Arrays.copyOfRange(stack, r.MSBIndex, r.LSBIndex+1); // +1 because exclusive
 		}
-		return result;
 	}
 	
 	/**goes about writing onto the stack
-	 * 
-	 * @param address the start address of the setting
+	 *
+	 * @param MSBAddress the address of the most significant byte relative to the top of the stack (should be negative)
 	 * @param toWrite the byte array to write
 	 * @throws StackException if an invalid write is made
 	 */
-	public void setBytes(int address, byte[] toWrite) throws StackException
+	public void setBytes(int MSBAddress, byte[] toWrite) throws StackException
 	{
-		for(int i = address; i < address + toWrite.length; i++)
-		{
-			if(stack.size() > this.stackPointer.getValue() - this.lowestAddress.getValue())//bounds checking (need to do before and after)
-			{
-				throw new StackException("Stack overflow.", i);
-			}
-			
-			if(i < this.stack.size())
-			{
-					this.stack.set(i, toWrite[i-address]);
-			}
-			else if (i == this.stack.size())
-			{
-				
-				this.stack.add(toWrite[i-address]);//growing stack
-			}
-			else
-			{
-				throw new StackException("Invalid write onto stack.", i);
-			}
-			
-			if(stack.size() > this.stackPointer.getValue() - this.lowestAddress.getValue())//bounds checking
-			{
-				throw new StackException("Stack overflow.", i);
-			}
+	    ArrayRange r = new ArrayRange(MSBAddress, toWrite.length);
+
+        if(toWrite.length <= 0) {
+            throw new StackException("Invalid write on stack. (non-positive length)", r.MSBIndex, r.LSBIndex);
+
+        } else if(r.spansAboveStack()) {
+			throw new StackException("Invalid write to stack. (attempt to write above the top)", r.MSBIndex, r.LSBIndex);
+
+		} else if(r.spansBelowSp()) { // must grow stack to at least the whole span is in range
+
+            // range still within valid stack memory (because if MSB is and range doesn't span above the stack then LSB is too)
+            if(!insideStackSegment(MSBAddress)) {
+                throw new StackException("Stack Overflow. (attempt to write to the stack beyond its maximum length)", r.MSBIndex, r.LSBIndex);
+            }
+
+			// at least a growth factor of 1.5. definitely enough to accommodate the range being written to
+            // but no longer than the maximum length (if the growth factor extends past it)
+			int newLength = Math.min(Math.max((int) (stack.length * 1.5), Math.abs(MSBAddress)), maxLength);
+			byte[] newStack = new byte[newLength];
+            // the old stack is placed at the end of the new stack
+			System.arraycopy(stack, 0, newStack, newLength-stack.length, stack.length);
+			stack = newStack;
+
+            // re-calculate indices
+            r = new ArrayRange(MSBAddress, toWrite.length);
+			if(r.spansBelowSp() || r.spansAboveStack()) {
+				throw new StackException("Invalid write (this shouldn't happen).", r.MSBIndex, r.LSBIndex);
+            }
 		}
+
+        // src, srcPos, dest, destPos, length
+        System.arraycopy(toWrite, 0, stack, r.MSBIndex, toWrite.length);
 	}
 	
-	/**gets the size of the stack
-	 * 
-	 * @return the stack size
-	 */
-	public int size()
-	{
-		return this.stack.size();
-	}
 }

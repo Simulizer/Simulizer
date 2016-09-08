@@ -153,7 +153,7 @@ public class DataConverter {
      * This is achieved by truncating the integer if it is too large to fit in
      * 32 bits.
      * It is allowed for the integer to overflow the representation.
-     * @param value the value to encode
+     * @param value the value to encode (can be negative)
      * @return the 32 bit representation of the value
      */
     public static byte[] encodeAsUnsigned(long value) {

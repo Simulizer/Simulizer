@@ -35,7 +35,7 @@ public class ProgramExtractor extends SimpBaseListener {
     }
 
     private State currentState;
-    final ProblemLogger log;
+    final private ProblemLogger log;
 
     public final Map<String, Integer> textSegmentLabels;
     public final List<Statement> textSegment;
@@ -51,7 +51,7 @@ public class ProgramExtractor extends SimpBaseListener {
     /**
      * keep track of labels that are waiting to be assigned to a line
      */
-    public final List<String> outstandingLabels;
+    private final List<String> outstandingLabels;
 
 	/**
      * keep track of annotations which are yet to be bound to a statement.
@@ -72,7 +72,7 @@ public class ProgramExtractor extends SimpBaseListener {
 	 * 	# end
 	 *
 	 */
-	public final List<String> outstandingAnnotations;
+	private final List<String> outstandingAnnotations;
 	/**
      * annotation code which comes before either the data or text segment is run
      * before the program starts execution. This code can be used to setup the
@@ -132,9 +132,9 @@ public class ProgramExtractor extends SimpBaseListener {
             int rangeStart = node.getSymbol().getStartIndex();
             int rangeEnd = node.getSymbol().getStopIndex();
 
-            log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd);
+            log.logProblem("Error node: \"" + node.getText() + "\"", line, rangeStart, rangeEnd, Problem.Severity.CRITICAL);
         } else {
-            log.logProblem("Error node with no position information: \"" + node.getText() + "\"", Problem.NO_LINE_NUM);
+            log.logProblem("Error node with no position information: \"" + node.getText() + "\"", Problem.NO_LINE_NUM, Problem.Severity.CRITICAL);
         }
     }
 
@@ -143,7 +143,7 @@ public class ProgramExtractor extends SimpBaseListener {
         currentState = State.DATA_SEGMENT;
 		if(!outstandingLabels.isEmpty()) {
 			log.logProblem("the following labels cross this segment boundary: " +
-					StringUtils.joinList(outstandingLabels), ctx);
+					StringUtils.joinList(outstandingLabels), ctx, Problem.Severity.CRITICAL);
 		}
     }
     @Override
@@ -151,7 +151,7 @@ public class ProgramExtractor extends SimpBaseListener {
         currentState = State.TEXT_SEGMENT;
 		if(!outstandingLabels.isEmpty()) {
 			log.logProblem("the following labels cross this segment boundary: " +
-					StringUtils.joinList(outstandingLabels), ctx);
+					StringUtils.joinList(outstandingLabels), ctx, Problem.Severity.CRITICAL);
 		}
     }
 
@@ -198,7 +198,7 @@ public class ProgramExtractor extends SimpBaseListener {
         }
 
         if(!segmentDirectiveOperandsGood(ctx.directiveOperandList())) {
-            log.logProblem("invalid operand(s) to .data directive. format: .data ADDRESS?", ctx);
+            log.logProblem("invalid operand(s) to .data directive. format: .data ADDRESS?", ctx, Problem.Severity.NON_CRITICAL);
         }
     }
 
@@ -212,19 +212,19 @@ public class ProgramExtractor extends SimpBaseListener {
         }
 
         if(!segmentDirectiveOperandsGood(ctx.directiveOperandList())) {
-            log.logProblem("invalid operand(s) to .text directive. format: .text ADDRESS?", ctx);
+            log.logProblem("invalid operand(s) to .text directive. format: .text ADDRESS?", ctx, Problem.Severity.NON_CRITICAL);
         }
     }
 
     @Override
     public void exitProgram(SimpParser.ProgramContext ctx) {
         if(!textSegmentLabels.containsKey("main")) {
-            log.logProblem("The program has no 'main' label", Problem.NO_LINE_NUM);
+            log.logProblem("The program has no 'main' label", Problem.NO_LINE_NUM, Problem.Severity.CRITICAL);
         }
         if(!outstandingLabels.isEmpty()) {
 			log.logProblem("These labels could not be assigned to addresses" +
 					"because the end of the program was reached: " +
-					StringUtils.joinList(outstandingLabels), Problem.NO_LINE_NUM);
+					StringUtils.joinList(outstandingLabels), Problem.NO_LINE_NUM, Problem.Severity.NON_CRITICAL);
         }
     }
 
@@ -243,9 +243,9 @@ public class ProgramExtractor extends SimpBaseListener {
         String labelName = ctx.labelID().getText();
 
         if(textSegmentLabels.containsKey(labelName) || dataSegmentLabels.containsKey(labelName)) {
-            log.logProblem("the label name: \"" + labelName + "\" is taken", ctx);
+            log.logProblem("the label name: \"" + labelName + "\" is taken", ctx, Problem.Severity.CRITICAL);
         } else if(currentState != State.TEXT_SEGMENT && labelName.equals("main")) {
-            log.logProblem("The 'main' label must be inside the .text segment", ctx);
+            log.logProblem("The 'main' label must be inside the .text segment", ctx, Problem.Severity.CRITICAL);
         }
 
 
@@ -273,18 +273,18 @@ public class ProgramExtractor extends SimpBaseListener {
                     if(operands.isEmpty() || !operands.stream().allMatch(op ->
                         op.getType() == Operand.Type.Address &&
                         op.asAddressOp().labelOnly())) {
-                        log.logProblem("invalid operand(s) to .globl directive. format: .globl LABEL(, LABEL)*", ctx);
+                        log.logProblem("invalid operand(s) to .globl directive. format: .globl LABEL(, LABEL)*", ctx, Problem.Severity.NON_CRITICAL);
                     }
                     break;
                 case ".align":
                     // ignored other than to log errors
                     if(operands.size() != 1 || operands.get(0).getType() != Operand.Type.Integer) {
-                        log.logProblem("invalid operand(s) to .align directive. format: .align INT", ctx);
+                        log.logProblem("invalid operand(s) to .align directive. format: .align INT", ctx, Problem.Severity.NON_CRITICAL);
                     }
                     break;
                 case ".ascii":
                     if(operands.size() != 1 || !operands.stream().allMatch(op -> op.getType() == Operand.Type.String)) {
-                        log.logProblem("invalid operand(s) to .ascii directive. format: .ascii STRING", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .ascii directive. format: .ascii STRING", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         Operand op = operands.get(0); // only one argument permitted
                         pushVariable(new Variable(
@@ -293,7 +293,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     break;
                 case ".asciiz":
                     if(operands.size() != 1 || !operands.stream().allMatch(op -> op.getType() == Operand.Type.String)) {
-                        log.logProblem("invalid operand(s) to .asciiz directive. format: .asciiz STRING", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .asciiz directive. format: .asciiz STRING", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         Operand op = operands.get(0); // only one argument permitted
                         op = new StringOperand(op.asStringOp().value + '\0'); // add the null terminator
@@ -304,7 +304,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     break;
                 case ".byte":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
-                        log.logProblem("invalid operand(s) to .byte directive. format: .byte INT(, INT)*", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .byte directive. format: .byte INT(, INT)*", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
@@ -314,7 +314,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     break;
                 case ".half":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
-                        log.logProblem("invalid operand(s) to .half directive. format: .half INT(, INT)*", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .half directive. format: .half INT(, INT)*", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
@@ -324,7 +324,7 @@ public class ProgramExtractor extends SimpBaseListener {
                     break;
                 case ".word":
                     if(operands.isEmpty() || !operands.stream().allMatch(op -> op.getType() == Operand.Type.Integer)) {
-                        log.logProblem("invalid operand(s) to .word directive. format: .word INT(, INT)*", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .word directive. format: .word INT(, INT)*", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         for(Operand op : operands) {
                             pushVariable(new Variable(
@@ -335,7 +335,7 @@ public class ProgramExtractor extends SimpBaseListener {
 
                 case ".space":
                     if(operands.size() != 1 || operands.get(0).getType() != Operand.Type.Integer) {
-                        log.logProblem("invalid operand(s) to .space directive. format: .space INT", ctx.directiveOperandList());
+                        log.logProblem("invalid operand(s) to .space directive. format: .space INT", ctx.directiveOperandList(), Problem.Severity.CRITICAL);
                     } else {
                         Operand op = operands.get(0);
                         pushVariable(new Variable(
@@ -351,11 +351,11 @@ public class ProgramExtractor extends SimpBaseListener {
             if(directive.equals(".globl")) {
                 // ignore this directive
             } else {
-                log.logProblem("only .globl directives should be placed inside the .text segment", ctx);
+                log.logProblem("only .globl directives should be placed inside the .text segment", ctx, Problem.Severity.NON_CRITICAL);
             }
         } else {
             log.logProblem("Assembler directives should only be placed inside " +
-                           "either the .data or .text segment", ctx);
+                           "either the .data or .text segment", ctx, Problem.Severity.NON_CRITICAL);
         }
     }
 
@@ -370,7 +370,7 @@ public class ProgramExtractor extends SimpBaseListener {
             try {
                 instruction = Instruction.fromString(instructionName);
             } catch(NoSuchElementException e) {
-                log.logProblem("Unknown instruction: \"" + instructionName + "\"", ctx.instruction());
+                log.logProblem("Unknown instruction: \"" + instructionName + "\"", ctx.instruction(), Problem.Severity.CRITICAL);
                 return;
             }
 
@@ -386,7 +386,7 @@ public class ProgramExtractor extends SimpBaseListener {
             int requiredNum = instruction.getOperandFormat().getNumArgs();
             if(operands.size() != requiredNum) {
                 log.logProblem("Wrong number of operands for " +
-                    instructionName + " instruction (" + requiredNum + " required)", ctx.statementOperandList());
+                    instructionName + " instruction (" + requiredNum + " required)", ctx.statementOperandList(), Problem.Severity.CRITICAL);
             } else {
                 OperandFormat.OperandType arg1 = operands.size() > 0 ?
                     operands.get(0).getOperandFormatType() : null;
@@ -400,14 +400,14 @@ public class ProgramExtractor extends SimpBaseListener {
                 if(!instruction.getOperandFormat().valid(arg1, arg2, arg3)) {
                     log.logProblem("Operands invalid for " + instructionName +
                         " instruction. Correct format: " + instruction.getOperandFormat().toString(),
-                        ctx.statementOperandList());
+                        ctx.statementOperandList(), Problem.Severity.CRITICAL);
                 }
             }
 
             pushStatement(new Statement(instruction, operands, startLine(ctx)));
 
         } else {
-            log.logProblem("Statements should only be placed inside the .text segment", ctx);
+            log.logProblem("Statements should only be placed inside the .text segment", ctx, Problem.Severity.CRITICAL);
         }
     }
 
@@ -421,7 +421,7 @@ public class ProgramExtractor extends SimpBaseListener {
 		int aStart = text.indexOf(startMark);
 		if(aStart != -1) {
 			if(currentState == State.DATA_SEGMENT) {
-				log.logProblem("Annotations must be placed inside the text segment, or before any segment", ctx);
+				log.logProblem("Annotations must be placed inside the text segment, or before any segment", ctx, Problem.Severity.CRITICAL);
 				return;
 			}
 
@@ -429,7 +429,7 @@ public class ProgramExtractor extends SimpBaseListener {
 				int aEnd = text.indexOf(endMark, aStart);
 
 				if(aEnd == -1) {
-					log.logProblem("Annotation not closed", ctx);
+					log.logProblem("Annotation not closed", ctx, Problem.Severity.CRITICAL);
 					return;
 				}
 				outstandingAnnotations.add(text.substring(aStart+startMark.length(), aEnd));
@@ -443,13 +443,13 @@ public class ProgramExtractor extends SimpBaseListener {
 			}
 			// annotation before first statement or label
 			else if(textSegment.isEmpty() && outstandingLabels.isEmpty()) {
-				log.logProblem("Annotations must be placed after a statement or label", ctx);
+				log.logProblem("Annotations inside the .text segment must be placed after a statement or label", ctx, Problem.Severity.CRITICAL);
 			}
 		}
 
     }
 
-	public void pushAnnotations() {
+	private void pushAnnotations() {
 		if(!outstandingAnnotations.isEmpty()) {
 			String annotationCode = String.join("\n", outstandingAnnotations);
 			if(currentState == State.OUTSIDE) {
@@ -458,7 +458,7 @@ public class ProgramExtractor extends SimpBaseListener {
 			} else {
 				if (textSegment.isEmpty()) {
 					// could happen if text segment is: "label: # @{}@" with no instructions
-					log.logProblem("annotation could not be bound to an instruction: \"" + annotationCode + "\"", Problem.NO_LINE_NUM);
+					log.logProblem("annotation could not be bound to an instruction: \"" + annotationCode + "\"", Problem.NO_LINE_NUM, Problem.Severity.CRITICAL);
 					return;
 				}
 				int index = textSegment.size() - 1;

@@ -50,7 +50,7 @@ public class ExecuteTest {
 	 */
 	private Program createProgram(String myInstructions)
 	{
-		String program = ".data\n" + //forming string of program
+		String program = ".data\n" +
 						 "mystr: .asciiz \"This is my test String\"\n"+
 						 "mynum: .word -10\n" +
 						 "mynewnum: .byte 10\n" +
@@ -60,7 +60,7 @@ public class ExecuteTest {
 						 "main:\n" + 
 						 myInstructions;
 		
-		return Assembler.assemble(program, null);//assembling program
+		return Assembler.assemble(program, null, false);
 	}
 	
 	/**method will access a register and get it's signed long value

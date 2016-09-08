@@ -199,7 +199,7 @@ public class CPU {
 	 * 
 	 * @throws EndedException If program ended
 	 */
-	protected void waitForNextTick() throws EndedException {
+	void waitForNextTick() throws EndedException {
 		try {
 			if (isRunning) {
 				// if the clock is stopped then it advances by 1 tick to unlock this thread
@@ -243,7 +243,7 @@ public class CPU {
 	 * @param m
 	 *            the message to send
 	 */
-	protected void sendMessage(Message m) {
+	void sendMessage(Message m) {
 		this.messageManager.sendMessage(m);
 	}
 

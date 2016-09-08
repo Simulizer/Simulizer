@@ -118,6 +118,7 @@ public class ALUTest {
 			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),executeU(Instruction.addu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31)-1)));
 			assertEquals((long)(Math.pow(2,31)),executeU(Instruction.addu,unsignedW((long)Math.pow(2,30)),unsignedW((long)Math.pow(2,30))));
 			assertEquals(4,executeU(Instruction.addu,unsignedW(0),unsignedW(4)));
+			assertEquals(4,executeU(Instruction.addu,unsignedW(20),unsignedW(-16))); // interpret as unsigned: still works
 		}
 		
 		{//addi (same tests as for add)
@@ -130,6 +131,7 @@ public class ALUTest {
 			assertEquals((long)(Math.pow(2, 31) + Math.pow(2, 31) - 1),executeU(Instruction.addiu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31)-1)));
 			assertEquals((long)(Math.pow(2,31)),executeU(Instruction.addiu,unsignedW((long)Math.pow(2,30)),unsignedW((long)Math.pow(2,30))));
 			assertEquals(4,executeU(Instruction.addiu,unsignedW(0),unsignedW(4)));
+			assertEquals(4,executeU(Instruction.addiu,unsignedW(20),unsignedW(-16))); // interpret as unsigned: still works
 		}
 		
 		{//sub
@@ -142,6 +144,7 @@ public class ALUTest {
 			assertEquals(0,executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31))));
 			assertEquals((long)Math.pow(2,31),executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW(0)));
 			assertEquals((long)Math.pow(2,32)-2,executeU(Instruction.subu,unsignedW((long)Math.pow(2,32)-1),unsignedW(1)));
+			assertEquals(4,executeS(Instruction.subu,unsignedW(20),unsignedW(16)));
 		}
 		
 		{//subi
@@ -154,6 +157,7 @@ public class ALUTest {
 			assertEquals(0,executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW((long)Math.pow(2,31))));
 			assertEquals((long)Math.pow(2,31),executeU(Instruction.subu,unsignedW((long)Math.pow(2,31)),unsignedW(0)));
 			assertEquals((long)Math.pow(2,32)-2,executeU(Instruction.subu,unsignedW((long)Math.pow(2,32)-1),unsignedW(1)));
+			assertEquals(4,executeS(Instruction.subiu,unsignedW(20),unsignedW(16)));
 		}
 		
 		{//mul

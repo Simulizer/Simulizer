@@ -1,7 +1,5 @@
 package simulizer.simulation.messages;
 
-import java.util.concurrent.atomic.LongAdder;
-
 /**
  * Receives messages about the internal workings of the simulation as it runs
  * @author mbway

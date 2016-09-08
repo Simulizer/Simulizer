@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import simulizer.Simulizer;
 import simulizer.settings.types.BooleanSetting;
 import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
@@ -219,7 +220,7 @@ public class Settings {
 				saveSetting(element, s);
 			gson.toJson(element, writer);
 		} catch (IOException e) {
-			UIUtils.showExceptionDialog(e);
+			Simulizer.handleException(e);
 		}
 	}
 

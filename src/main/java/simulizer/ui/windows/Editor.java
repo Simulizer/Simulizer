@@ -28,6 +28,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import simulizer.GuiMode;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
@@ -368,7 +369,12 @@ public class Editor extends InternalWindow {
 		continuousAssemblyRefreshPeriod = (int) settings.get("editor.continuous-assembly-refresh-period");
 
 		if(initialLoad) {
-			String initialFilename = (String) settings.get("editor.initial-file");
+			String initialFilename;
+			if(!GuiMode.args.files.isEmpty())
+				initialFilename = GuiMode.args.files.get(0);
+            else
+                initialFilename = (String) settings.get("editor.initial-file");
+
 			if (initialFilename != null && !initialFilename.isEmpty()) {
 				File f = new File(initialFilename);
 				if (f.exists()) {

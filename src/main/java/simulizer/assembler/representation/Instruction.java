@@ -16,50 +16,50 @@ public enum Instruction {
 
 
 // Arithmetic and Logic Instructions
-    abs    (OperandFormat.destSrc,     "dest <- abs(src)"),
+    abs    (OperandFormat.destSrc,    "dest <- abs(src)"),
 
-    and    (OperandFormat.destSrcSrc,  "logical AND"),
-    andi   (OperandFormat.destSrcImm,  "logical and immediate (zero extended)"),
+    and    (OperandFormat.destSrcSrc, "logical AND"),
+    andi   (OperandFormat.destSrcImm, "logical and immediate (zero extended)"),
 
-    add    (OperandFormat.destSrcSrc,  "addition (with overflow)"),
-    addu   (OperandFormat.destSrcSrc,  "addition (without overflow)"),
-    addi   (OperandFormat.destSrcImm,  "add immediate (with overflow)"),
-    addiu  (OperandFormat.destSrcImmU, "add immediate (without overflow)"),
+    add    (OperandFormat.destSrcSrc, "addition (with overflow)"),
+    addu   (OperandFormat.destSrcSrc, "addition (without overflow)"),
+    addi   (OperandFormat.destSrcImm, "add immediate (with overflow)"),
+    addiu  (OperandFormat.destSrcImm, "add immediate (without overflow)"),
 
-    sub    (OperandFormat.destSrcSrc,  "subtraction (with overflow)"),
-    subu   (OperandFormat.destSrcSrc,  "subtraction (without overflow)"),
-    subi   (OperandFormat.destSrcImm,  "subtract immediate (with overflow)"),
-    subiu  (OperandFormat.destSrcImmU, "subtract immediate (without overflow)"),
+    sub    (OperandFormat.destSrcSrc, "subtraction (with overflow)"),
+    subu   (OperandFormat.destSrcSrc, "subtraction (without overflow)"),
+    subi   (OperandFormat.destSrcImm, "subtract immediate (with overflow)"),
+    subiu  (OperandFormat.destSrcImm, "subtract immediate (without overflow)"),
 
-    mul    (OperandFormat.destSrcSrc,  "multiplication (without overflow) store low 32 bits in destination"),
-    mulo   (OperandFormat.destSrcSrc,  "multiplication (with overflow) store low 32 bits in destination"),
-    mulou  (OperandFormat.destSrcSrc,  "unsigned multiplication (with overflow) store low 32 bits in destination"),
+    mul    (OperandFormat.destSrcSrc, "multiplication (without overflow) store low 32 bits in destination"),
+    mulo   (OperandFormat.destSrcSrc, "multiplication (with overflow) store low 32 bits in destination"),
+    mulou  (OperandFormat.destSrcSrc, "unsigned multiplication (with overflow) store low 32 bits in destination"),
 
-    div    (OperandFormat.destSrcSrc,  "division (with overflow)"),
-    divu   (OperandFormat.destSrcSrc,  "division (without overflow)"),
+    div    (OperandFormat.destSrcSrc, "division (with overflow)"),
+    divu   (OperandFormat.destSrcSrc, "division (without overflow)"),
 
-    rem    (OperandFormat.destSrcSrc,  "remainder of division"),
-    remu   (OperandFormat.destSrcSrc,  "remainder of division (unsigned)"),
+    rem    (OperandFormat.destSrcSrc, "remainder of division"),
+    remu   (OperandFormat.destSrcSrc, "remainder of division (unsigned)"),
     
-    neg    (OperandFormat.destSrc,     "dest <- -(src) (with overflow)"),
-    negu   (OperandFormat.destSrc,     "dest <- -(src) (without overflow)"),
+    neg    (OperandFormat.destSrc,    "dest <- -(src) (with overflow)"),
+    negu   (OperandFormat.destSrc,    "dest <- -(src) (without overflow)"),
 
-    nor    (OperandFormat.destSrcSrc,  "logical NOR"),
-    not    (OperandFormat.destSrc,     "logical NOT"),
-    or     (OperandFormat.destSrcSrc,  "logical OR"),
-    ori    (OperandFormat.destSrcImm,  "logical OR immediate"),
-    xor    (OperandFormat.destSrcSrc,  "XOR"),
-    xori   (OperandFormat.destSrcImm,  "XOR immediate"),    
+    nor    (OperandFormat.destSrcSrc, "logical NOR"),
+    not    (OperandFormat.destSrc,    "logical NOT"),
+    or     (OperandFormat.destSrcSrc, "logical OR"),
+    ori    (OperandFormat.destSrcImm, "logical OR immediate"),
+    xor    (OperandFormat.destSrcSrc, "XOR"),
+    xori   (OperandFormat.destSrcImm, "XOR immediate"),
     
 // Shift and Rotations
-    rol    (OperandFormat.destSrcSrc,  "rotate left"),
-    ror    (OperandFormat.destSrcSrc,  "rotate right"),
-    sll    (OperandFormat.destSrcImm,  "shift left logical"),
-    sllv   (OperandFormat.destSrcSrc,  "shift left logical variable"),
-    sra    (OperandFormat.destSrcImm,  "shift right arithmetic"),
-    srav   (OperandFormat.destSrcSrc,  "shift right arithmetic variable"),
-    srl    (OperandFormat.destSrcImm,  "shift right logical"),
-    srlv   (OperandFormat.destSrcSrc,  "shift right logical variable"),
+    rol    (OperandFormat.destSrcSrc, "rotate left"),
+    ror    (OperandFormat.destSrcSrc, "rotate right"),
+    sll    (OperandFormat.destSrcImm, "shift left logical"),
+    sllv   (OperandFormat.destSrcSrc, "shift left logical variable"),
+    sra    (OperandFormat.destSrcImm, "shift right arithmetic"),
+    srav   (OperandFormat.destSrcSrc, "shift right arithmetic variable"),
+    srl    (OperandFormat.destSrcImm, "shift right logical"),
+    srlv   (OperandFormat.destSrcSrc, "shift right logical variable"),
 
 // Set Instructions    
     seq    (OperandFormat.destSrcSrc, "set to 1 if equal"),
@@ -102,7 +102,7 @@ public enum Instruction {
     
 
 // Jump Instructions
-    j      (OperandFormat.label,       "unconditional jump to label"),
+    j      (OperandFormat.labelOrReg,  "unconditional jump to label"),
     jal    (OperandFormat.label,       "unconditional jump and link"),
     jr     (OperandFormat.register,    "unconditional jump using register value"),
 

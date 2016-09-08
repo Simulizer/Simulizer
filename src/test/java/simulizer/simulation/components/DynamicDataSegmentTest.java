@@ -2,6 +2,7 @@ package simulizer.simulation.components;
 
 import static org.junit.Assert.*;
 
+import category.UnitTests;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,7 +12,6 @@ import org.junit.rules.ExpectedException;
 import simulizer.assembler.representation.Address;
 import simulizer.simulation.cpu.components.DynamicDataSegment;
 import simulizer.simulation.exceptions.HeapException;
-import category.UnitTests;
 
 /**this class aims to test all methods within the dynamic data segment
  * of the cpu
@@ -26,15 +26,13 @@ public class DynamicDataSegmentTest {
 
 	
 	private DynamicDataSegment heap;
-	
-	/**initialising the heap
-	 * using spoofed start address
-	 */
-	@Before
-	public void setUpHeap()
-	{
+
+	private void setUpHeap() {
+	    setUpHeap(20);
+	}
+	private void setUpHeap(int maxHeapSize) {
 		Address startAddress = new Address(10);//spoof start address for testing purposes
-		this.heap = new DynamicDataSegment(startAddress);
+		this.heap = new DynamicDataSegment(startAddress, maxHeapSize);
 	}
 	
 	/**this method aims to test the sbrk method
@@ -46,42 +44,46 @@ public class DynamicDataSegmentTest {
 	{
 		{//valid positive input
 			setUpHeap();
-			assertEquals(0,heap.size());
 			assertEquals(10,heap.sbrk(8).getValue());
 			assertEquals(18,heap.sbrk(4).getValue());
-			assertEquals(12,heap.size());
 		}
 		
 		{//heap overflow
-			setUpHeap();
-			assertEquals(0,heap.size());
-			assertEquals(10,heap.sbrk(1048576).getValue());
-			assertEquals(1048576,heap.size());
+			setUpHeap(20); // max length
+			assertEquals(10,heap.sbrk(20).getValue()); // OK
 			exception.expect(HeapException.class);//expecting an exception when overflowing
-			heap.sbrk(4);
+			heap.sbrk(1);
 		}
-		
-		{//invalid number of bytes
+
+		{//valid: grow and shrink
+			setUpHeap(); // max length
+			assertEquals(10,heap.sbrk(5).getValue());
+			assertEquals(10,heap.sbrk(-5).getValue());
+		}
+
+		{//invalid: shrink below the bottom of the heap
+			setUpHeap(); // max length
+			assertEquals(10,heap.sbrk(5).getValue());
+			exception.expect(HeapException.class);//expecting an exception when overflowing
+			heap.sbrk(-6);
+		}
+
+		{//invalid number of bytes (not multiple of 4)
 			setUpHeap();
-			assertEquals(0,heap.size());
 			exception.expect(HeapException.class);//expecting exception when sbrk run with non multiple of 4
 			heap.sbrk(3);
 			assertEquals(10,heap.sbrk(4).getValue());//now valid input
-			assertEquals(4,heap.size());
 		}
 		
 		{//negative valid input
 			setUpHeap();
-			assertEquals(0,heap.size());
-			
+
 			heap.sbrk(8);//moving it forward 8
 			assertEquals(14,heap.sbrk(-4).getValue());
-			assertEquals(8,heap.size());
 		}
 		
 		{//negative invalid input
 			setUpHeap();
-			assertEquals(0,heap.size());
 			exception.expect(HeapException.class);
 			heap.sbrk(-4);
 		}
@@ -97,14 +99,14 @@ public class DynamicDataSegmentTest {
 		{//testing valid reads
 			setUpHeap();
 			heap.sbrk(8);
-			heap.setByte((byte)0x11, 5);
+			heap.setBytes(5, new byte[]{0x11});
 			assertEquals(0x11,heap.getBytes(5, 1)[0]);	
 		}
 		
 		{//valid reads in bigger block sizes
 			setUpHeap();
 			heap.sbrk(8);
-			heap.setBytes(new byte[]{0x11,0x10,0x78,0x65}, 2);
+			heap.setBytes(2, new byte[]{0x11,0x10,0x78,0x65});
 			byte[] result = heap.getBytes(2, 4);
 			assertEquals(0x11,result[0]);
 			assertEquals(0x10,result[1]);
@@ -129,7 +131,7 @@ public class DynamicDataSegmentTest {
 		{//valid setting of bytes (using corect getBytes code to test)
 			setUpHeap();
 			heap.sbrk(8);
-			heap.setBytes(new byte[]{0x11,0x10,0x78,0x65}, 2);
+			heap.setBytes(2, new byte[]{0x11,0x10,0x78,0x65});
 			byte[] result = heap.getBytes(2, 4);
 			assertEquals(0x11,result[0]);
 			assertEquals(0x10,result[1]);
@@ -137,19 +139,24 @@ public class DynamicDataSegmentTest {
 			assertEquals(0x65,result[3]);
 		}
 		
-		{//if empty byte array written shouldn't change anythin
-			setUpHeap();
-			heap.sbrk(8);
-			heap.setByte((byte)0x11, 2);
-			heap.setBytes(new byte[]{},2);
-			assertEquals(0x11,heap.getBytes(2, 1)[0]);//shouldn't have been changed
-		}
-		
-		{//invalid i.e will eventually run out of heap space
+		{//invalid: empty array
 			setUpHeap();
 			heap.sbrk(8);
 			exception.expect(HeapException.class);
-			heap.setBytes(new byte[]{0x00,0x00,0x00,0x00,0x00},4);
+			heap.setBytes(2, new byte[]{});
+		}
+		
+		{//invalid: write beyond the break
+			setUpHeap();
+			heap.sbrk(8);
+			exception.expect(HeapException.class);
+			heap.setBytes(4, new byte[]{0x00,0x00,0x00,0x00,0x00});
+		}
+
+		{//invalid: write below the heap
+			setUpHeap();
+			exception.expect(HeapException.class);
+			heap.setBytes(-1, new byte[]{0x00});
 		}
 	}
 }

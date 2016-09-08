@@ -1,5 +1,6 @@
 package simulizer.simulation.cpu.components;
 
+import java.util.Arrays;
 import java.util.Map;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Statement;
@@ -14,16 +15,17 @@ import simulizer.simulation.exceptions.StackException;
  * different data structure
  * 
  * @author Charlie Street
+ * @author mbway
  */
 public class MainMemory {
 
 
 	private Address startOfTextSegment;
 	private Address startOfStaticData;//start of the static data segment
-	private Address startOfDynamicData; //the end of the static data segment
-	private Address startOfStack;
+	private Address bottomOfDynamicData; //the end of the static data segment
+	private Address topOfStack;
 	private final Address endOfMemory;
-	private final Address megabyte;
+	private final int mebibyte = 1024*1024;
 
 
 	private Map<Address,Statement> textSegment;
@@ -37,20 +39,46 @@ public class MainMemory {
 	 * partitions in it
 	 *
 	 */
-	public MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address startOfDynamicData, Address stackPointer) {
+	MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address bottomOfDynamicData, Address stackPointer) {
 		this.startOfTextSegment = startTextSegment;
 		this.startOfStaticData = startOfStaticData;
-		this.startOfDynamicData = startOfDynamicData;
-		this.startOfStack = stackPointer;
+		this.bottomOfDynamicData = bottomOfDynamicData;
+		this.topOfStack = stackPointer;
 		this.endOfMemory = new Address(2147483644);
-		this.megabyte = new Address(1048576);
 
 		this.textSegment = textSegment;
 		this.staticDataSegment = staticDataSegment;
-		this.heap = new DynamicDataSegment(this.startOfDynamicData);
-		this.stack = new StackSegment(this.startOfStack, new Address(this.startOfDynamicData.getValue() + this.megabyte.getValue() + 1));
+		this.heap = new DynamicDataSegment(bottomOfDynamicData, mebibyte);
+		int topOfHeap = bottomOfDynamicData.getValue() + mebibyte;
+		int maxStackSize = topOfStack.getValue() - topOfHeap;
+		this.stack = new StackSegment(maxStackSize);
+	}
 
+	// definition of being 'in' a segment: if you write 1 byte at that location, that byte would be inside the segment
+	// eg the top of the stack is not inside the stack because it points past the highest element
 
+	private boolean inDynamicSegment(int address) {
+		return address >= bottomOfDynamicData.getValue()
+				  && address < bottomOfDynamicData.getValue() + mebibyte;
+	}
+	private boolean inDynamicSegment(int address, int length) {
+		return inDynamicSegment(address) && inDynamicSegment(address + length - 1);
+	}
+
+	private boolean inStaticSegment(int address) {
+		return address >= startOfStaticData.getValue()
+				&& address < startOfStaticData.getValue() + staticDataSegment.length;
+	}
+	private boolean inStaticSegment(int address, int length) {
+		return inStaticSegment(address) && inStaticSegment(address + length - 1);
+	}
+
+	private boolean inStack(int address) {
+		return address < topOfStack.getValue() // top of stack is not inside the stack
+				&& address >= bottomOfDynamicData.getValue() + mebibyte;
+	}
+	private boolean inStack(int address, int length) {
+		return inStack(address) && inStack(address + length - 1);
 	}
 
 	/**allows the use of sbrk outside of this memory class
@@ -70,35 +98,20 @@ public class MainMemory {
 	 */
 	public byte[] readFromMem(int address, int length) throws MemoryException, HeapException, StackException
 	{
-		if((address >=  this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue() + this.staticDataSegment.length))//if in the static data part of memory
-		{
-			byte[] result = new byte[length];
-			for(int i = 0; i < length; i++)
-			{
-				if(address-this.startOfStaticData.getValue()+i < this.startOfStaticData.getValue() + this.staticDataSegment.length)
-				{
-					result[i] = this.staticDataSegment[address-this.startOfStaticData.getValue()+i];//reading from the static data segment
-				}
-				else
-				{
-					throw new MemoryException("Reading from invalid area of memory", new Address(address-this.startOfStaticData.getValue()+i));
-				}
-			}
-			return result;
-		}
-		else if(address >= this.startOfDynamicData.getValue() && address <= this.startOfDynamicData.getValue() + this.megabyte.getValue() )//if in the dynamic data segment
-		{
-			int heapVal = address-this.startOfDynamicData.getValue();
-			return this.heap.getBytes(heapVal, length);
-		}
-		else if(address <= this.startOfStack.getValue() && address > this.startOfDynamicData.getValue() + this.megabyte.getValue())//stack access
-		{
-			int stackVal = this.startOfStack.getValue() - address;//where to start in the stack
-			return this.stack.getBytes(stackVal, length);
-		}
-		else
-		{
-			throw new MemoryException("Reading from invalid area of memory",new Address(address));
+        if(inStaticSegment(address, length)) {
+            int relativeAddress = address - startOfStaticData.getValue();
+			return Arrays.copyOfRange(staticDataSegment, relativeAddress, relativeAddress+length);
+
+		} else if(inDynamicSegment(address, length)) {
+			int relativeAddress = address - bottomOfDynamicData.getValue();
+			return heap.getBytes(relativeAddress, length);
+
+		} else if(inStack(address, length)) {
+			int relativeAddress = address - topOfStack.getValue(); // will be negative
+			return stack.getBytes(relativeAddress, length);
+
+		} else {
+			throw new MemoryException("Reading from invalid area of memory", new Address(address));
 		}
 	}
 
@@ -112,38 +125,20 @@ public class MainMemory {
 	 */
 	public void writeToMem(int address, byte[] toWrite) throws MemoryException, HeapException, StackException
 	{
-		if(address >= this.startOfStaticData.getValue() && address < this.startOfStaticData.getValue()+ this.staticDataSegment.length)//if in static data segment
-		{
-			for(int i = 0; i < toWrite.length; i++)
-			{
-				if(address + i < this.startOfStaticData.getValue()+ this.staticDataSegment.length)
-				{
-					this.staticDataSegment[address-this.startOfStaticData.getValue() + i] = toWrite[i];
-				}
-				else
-				{
-					throw new MemoryException("Writing to an invalid area of memory",new Address(address+i));
-				}
-			}
-		}
-		else if(address >= this.startOfDynamicData.getValue() && address <= this.startOfDynamicData.getValue() + this.megabyte.getValue() + 1)//write to heap
-		{
-			if(!(address-this.startOfDynamicData.getValue() + toWrite.length > this.heap.size()))
-			{
-				this.heap.setBytes(toWrite,address-this.startOfDynamicData.getValue());//writing to the heap
-			}
-			else//invalid heap write
-			{
-				throw new MemoryException("Writing to an invalid area of memory",new Address(address));
-			}
-		}
-		else if(address <= this.startOfStack.getValue() && address > this.startOfDynamicData.getValue() + this.megabyte.getValue())//stack write
-		{
-			this.stack.setBytes(this.startOfStack.getValue()-address, toWrite);//writing to the stack
-		}
-		else//invalid memory write
-		{
-			throw new MemoryException("Writing to an invalid area of memory",new Address(address));
+		if(inStaticSegment(address, toWrite.length)) {
+		    int relativeAddress = address - startOfStaticData.getValue();
+			System.arraycopy(toWrite, 0, staticDataSegment, relativeAddress, toWrite.length);
+
+		} else if(inDynamicSegment(address, toWrite.length)) {
+		    int relativeAddress = address - bottomOfDynamicData.getValue();
+            heap.setBytes(relativeAddress, toWrite);
+
+		} else if(inStack(address, toWrite.length)) {
+		    int relativeAddress = address - topOfStack.getValue(); // will be negative
+			stack.setBytes(relativeAddress, toWrite);
+
+		} else {
+			throw new MemoryException("Writing to an invalid area of memory", new Address(address));
 		}
 	}
 	
@@ -154,13 +149,10 @@ public class MainMemory {
 	 */
 	public Statement readFromTextSegment(Address address) throws MemoryException
 	{
-		Statement retrieved = this.textSegment.get(address);
-		if(retrieved != null)
-		{
+		Statement retrieved = textSegment.get(address);
+		if(retrieved != null) {
 			return retrieved;
-		}
-		else
-		{
+		} else {
 			throw new MemoryException("Reading from invalid area of memory",address);
 		}
 	}

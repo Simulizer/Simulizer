@@ -38,7 +38,7 @@ public class MemoryTest {
 	 */
 	private Program createProgram(String myInstructions)
 	{
-		String program = ".data\n" + //forming string of program
+		String program = ".data\n" +
 						 "mystr: .asciiz \"This is my test String\"\n"+
 						 "mynum: .word -10\n" +
 						 "mynewnum: .byte 10\n" +
@@ -48,8 +48,7 @@ public class MemoryTest {
 						 "main:\n" + 
 						 myInstructions;
 		
-		Assembler assembler = new Assembler();
-		return assembler.assemble(program, null);//assembling program
+		return Assembler.assemble(program, null, false);
 	}
 	
 	/**method will test the read and write functionality of the memory
@@ -71,7 +70,7 @@ public class MemoryTest {
 	{
 		String myInstructions = "li $v0, 9;\n" +
 								"li $a0, 4;\n" +
-								"syscall;\n";//allocating some heap mem
+								"syscall;\n";//allocating some heap mem (amount in $a0)
 		
 		Program program = createProgram(myInstructions);
 		
@@ -82,7 +81,7 @@ public class MemoryTest {
 		//now to carry out tests
 		Address dataSegStart = program.dataSegmentStart;
 		Address dynamicSegStart = program.dynamicSegmentStart;
-		Address stackPointer = new Address((int)DataConverter.decodeAsSigned(program.initialSP.getWord()));
+		Address topOfStack = new Address((int)DataConverter.decodeAsSigned(program.initialSP.getWord()));
 		
 		Field mem = cpu.getClass().getDeclaredField("memory");
 		mem.setAccessible(true);
@@ -109,13 +108,25 @@ public class MemoryTest {
 		}
 		
 		{//test 3:read write from stack
-			memory.writeToMem(stackPointer.getValue(), new byte[]{0x00,0x11,0x12,0x33});
-			byte[] result = memory.readFromMem(stackPointer.getValue(), 4);
+			// stored as big-Endian
+            // read upwards from the start address
+			memory.writeToMem(topOfStack.getValue()-4, new byte[]{0x00,0x11,0x12,0x33});
+			byte[] result = memory.readFromMem(topOfStack.getValue()-4, 4);
 			assertEquals(4,result.length);
 			assertEquals(0x00,result[0]);
 			assertEquals(0x11,result[1]);
 			assertEquals(0x12,result[2]);
 			assertEquals(0x33,result[3]);
+
+			// LSB --> highest address. So in memory:
+			// $sp [0x00, 0x11, 0x12, 0x33] topOfStack
+			result = memory.readFromMem(topOfStack.getValue()-2, 1);
+			assertEquals(1, result.length);
+			assertEquals(0x12,result[0]);
+
+			result = memory.readFromMem(topOfStack.getValue()-3, 1);
+			assertEquals(1, result.length);
+			assertEquals(0x11,result[0]);
 		}
 		
 		{//test address below dataSegement
@@ -160,7 +171,7 @@ public class MemoryTest {
 				memory.readFromMem(dynamicSegStart.getValue()+7, 4);
 				fail();
 			} catch(HeapException e) {
-				assertTrue(e.getMessage().equals("Invalid read on heap. Out of Bounds."));
+				assertTrue(e.getMessage().equals("Invalid read on heap. (attempt to read above the break)"));
 			}
 		}
 		
@@ -168,26 +179,25 @@ public class MemoryTest {
 			try {
 				memory.writeToMem(dynamicSegStart.getValue()+7, new byte[]{0x11,0x12,0x13,0x14});
 				fail();
-			} catch(MemoryException e) {
-				assertTrue(e.getMessage().equals("Writing to an invalid area of memory"));
+			} catch(HeapException e) {
+				assertTrue(e.getMessage().equals("Invalid write on heap. (attempt to write above the break)"));
 			}
 		}
 		
-		{//test reading too far into stack when not reached yet (invalid)
+		{//test reading too far into stack when not reached yet (could be anything)
 			try {
-				memory.readFromMem(stackPointer.getValue()-4,4);
-				fail();
+				byte[] result = memory.readFromMem(topOfStack.getValue()-4,4);
+				assertEquals(4,result.length);
 			} catch(StackException e) {
-				assertTrue(e.getMessage().equals("Invalid read on stack."));
+				assertTrue(e.getMessage().equals("Invalid read on stack. (attempt to read above the top)"));
 			}
 		}
 		
-		{//test reading too far into stack when not reached yet (invalid)
+		{//test writing too far into stack when not reached yet (should work)
 			try {
-				memory.writeToMem(stackPointer.getValue()-8, new byte[]{0x11,0x12,0x13,0x14});
-				fail();
+				memory.writeToMem(topOfStack.getValue()-8, new byte[]{0x11,0x12,0x13,0x14});
 			} catch(StackException e) {
-				assertTrue(e.getMessage().equals("Invalid write onto stack."));
+				assertTrue(e.getMessage().equals("Invalid write on stack. (non-positive length)"));
 			}
 		}
 			

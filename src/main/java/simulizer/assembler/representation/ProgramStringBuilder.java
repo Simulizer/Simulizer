@@ -1,5 +1,6 @@
 package simulizer.assembler.representation;
 
+import simulizer.Simulizer;
 import simulizer.utils.UIUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -20,7 +21,7 @@ public class ProgramStringBuilder {
             out.print(dumpToString(p));
             out.close();
         } catch(IOException e) {
-            UIUtils.showExceptionDialog(e);
+            Simulizer.handleException(e);
         }
     }
 

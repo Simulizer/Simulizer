@@ -149,7 +149,7 @@ public class SpimBehaviour {
                     "  li $v0, 4; la $a0, mystring; syscall\n" + // print string
                     "  li $v0, 10; syscall\n"; // exit
                 SpimRunner spim = new SpimRunner();
-                expectCorrectParse("\011", spim.run(p, ""));
+                expectCorrectParse("\01", spim.run(p, ""));
             }
             // a bug: parses `"abc\"` as `abc"` (backticks not included)
             {
