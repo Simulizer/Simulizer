@@ -1,0 +1,15 @@
+machine:
+  environment:
+    TERM: dumb
+dependencies:
+  override:
+    - chmod 5755 install_spim.sh && sudo chown root install_spim.sh && ./install_spim.sh
+    - rm ~/.gitconfig
+    - ./gradlew dependencies copyAceFiles compileJava
+  cache_directories:
+    - "build/ace"
+    - "/usr/bin/spim"
+test:
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/
+    - mv build/test-results $CIRCLE_TEST_REPORTS/
