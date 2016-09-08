@@ -70,7 +70,10 @@ public class Settings {
 					);
 		settings.add(new ObjectSetting("internal-window", "Internal Window")
 				.add(new BooleanSetting("mouse-borders", "Lock to main window", "Stop internal windows from being lost outside the Main Window", true))
-				.add(new BooleanSetting("extractable", "Extractable", "Allow for internal windows to be extracted from the main window", true))
+				.add(new ObjectSetting("extractable", "Extractable")
+					.add(new BooleanSetting("enabled", "Enable feature", "Allow for internal windows to be extracted from the main window", true))
+					.add(new BooleanSetting("menu-bar", "Include menu bar", "Include the main menu bar in each extracted window for easy access", false))
+					)
 			);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
 						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))

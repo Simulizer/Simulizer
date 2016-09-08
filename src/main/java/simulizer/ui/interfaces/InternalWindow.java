@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,14 +10,19 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.Window;
 import simulizer.Simulizer;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
@@ -31,7 +37,7 @@ public abstract class InternalWindow extends Window {
 	private WindowManager wm;
 	private boolean isClosed = false, isExtracted = false;
 	private Stage extractedStage = new Stage();
-	private Pane contentPane;
+	private StackPane contentPane;
 
 	public InternalWindow() {
 
@@ -116,9 +122,9 @@ public abstract class InternalWindow extends Window {
 	public final void setWindowManager(WindowManager wm) {
 		if (this.wm == null) {
 			this.wm = wm;
-			
+
 			// Add window icons
-			if ((boolean) wm.getSettings().get("internal-window.extractable"))
+			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
 				getRightIcons().add(new CustomExtractIcon(this));
 			getRightIcons().add(new CustomCloseIcon(this));
 		}
@@ -308,19 +314,32 @@ public abstract class InternalWindow extends Window {
 			extractedStage.close();
 			extractedStage = null;
 
+			// Move all contentPane components back to the Internal Window
+			for (Iterator<Node> i = contentPane.getChildren().iterator(); i.hasNext();) {
+				Node n = i.next();
+				i.remove();
+				super.getContentPane().getChildren().add(n);
+			}
+
 			// Add internal window into the workspace
 			wm.getWorkspace().getPane().getChildren().add(this);
-			setContentPane(contentPane);
+			contentPane = null;
 
 			// Resize the internal window into the workspace
 			isExtracted = false;
 			setWorkspaceSize(wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
 		} else {
 			// Extract to a separate window
-			// Remove content pane from workspace
+			// Remove this internal window pane from workspace
 			wm.getWorkspace().getPane().getChildren().remove(this);
-			contentPane = getContentPane();
-			setContentPane(new Pane());
+
+			// Move all components to a new StackPane (because JavaFX...)
+			contentPane = new StackPane();
+			for (Iterator<Node> i = super.getContentPane().getChildren().iterator(); i.hasNext();) {
+				Node n = i.next();
+				i.remove();
+				contentPane.getChildren().add(n);
+			}
 
 			// Create a new window to put the content pane in
 			extractedStage = new Stage();
@@ -331,9 +350,24 @@ public abstract class InternalWindow extends Window {
 			extractedStage.setHeight(getHeight());
 
 			// Create the scene
-			Scene scene = new Scene(contentPane);
-			contentPane.setLayoutX(0);
-			contentPane.setLayoutY(0);
+			Scene scene = null;
+			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
+				GridPane root = new GridPane();
+				scene = new Scene(root);
+
+				// Create a new MainMenuBar and add to the gridPane
+				MainMenuBar menuBar = new MainMenuBar(wm);
+				GridPane.setHgrow(menuBar, Priority.ALWAYS);
+				root.add(menuBar, 0, 0);
+
+				GridPane.setHgrow(contentPane, Priority.ALWAYS);
+				GridPane.setVgrow(contentPane, Priority.ALWAYS);
+				root.add(contentPane, 0, 1);
+			} else {
+				scene = new Scene(contentPane);
+			}
+
+			// Fix style
 			// contentPane.setPadding(new Insets(0, 2, 2, 2));
 			// contentPane.getStyleClass().add("background");
 			// scene.getStylesheets().setAll(getStylesheets());
