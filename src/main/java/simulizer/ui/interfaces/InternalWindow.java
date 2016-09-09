@@ -220,7 +220,7 @@ public abstract class InternalWindow extends Window {
 	 *            the height of the workspace
 	 */
 	public void setWorkspaceSize(double width, double height) {
-		if (width != Double.NaN && height != Double.NaN) {
+		if(!Double.isNaN(width) && !Double.isNaN(height)) {
 			setLayoutX(layX * width);
 			setPrefWidth(layWidth * width);
 			setLayoutY(layY * height);

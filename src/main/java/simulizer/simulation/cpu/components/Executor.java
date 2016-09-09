@@ -1,5 +1,6 @@
 package simulizer.simulation.cpu.components;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import simulizer.assembler.representation.Address;
@@ -186,17 +187,11 @@ public class Executor {
     			cpu.getIO().printInt(IOStream.STANDARD, a0);//printing to console
     			break;
     		case 4://print string
-    			String toPrint = "";//initial string
-    			byte[] currentByte;
-    			int addressPStr = a0;
-    			currentByte = cpu.getMainMemory().readFromMem(a0, 1);//reading in bytes, i.e 1 character
-    			while(DataConverter.decodeAsSigned(currentByte) != 0) {//while not at null terminator
-    				toPrint += new String(currentByte);//converting to char
-    				addressPStr += 1;//incrementing address to next byte
-    				currentByte = cpu.getMainMemory().readFromMem(addressPStr, 1);//next word to read
-    			}
-    			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(currentByte)),Optional.empty()));
-    			cpu.getIO().printString(IOStream.STANDARD, toPrint);
+				byte[] stringData = cpu.getMainMemory().readUntilNull(a0);
+				String str = new String(stringData, StandardCharsets.UTF_8);
+
+    			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(new byte[4])),Optional.empty()));
+    			cpu.getIO().printString(IOStream.STANDARD, str);
     			break;
     		case 5://read int
     			int read = cpu.getIO().readInt(IOStream.STANDARD);//reading in from console

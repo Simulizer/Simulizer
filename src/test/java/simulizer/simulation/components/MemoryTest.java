@@ -118,7 +118,7 @@ public class MemoryTest {
 			assertEquals(0x12,result[2]);
 			assertEquals(0x33,result[3]);
 
-			// LSB --> highest address. So in memory:
+			// LSB --> highest address. So in memory: (imagine a 90 degrees anti-clockwise rotation)
 			// $sp [0x00, 0x11, 0x12, 0x33] topOfStack
 			result = memory.readFromMem(topOfStack.getValue()-2, 1);
 			assertEquals(1, result.length);
@@ -127,6 +127,25 @@ public class MemoryTest {
 			result = memory.readFromMem(topOfStack.getValue()-3, 1);
 			assertEquals(1, result.length);
 			assertEquals(0x11,result[0]);
+		}
+
+		{//write and read until null in the static data segment
+			memory.writeToMem(dataSegStart.getValue(), new byte[]{0x11,0x12,0x13,'\0'});
+			byte[] result = memory.readUntilNull(dataSegStart.getValue());
+			assertEquals(3,result.length);
+			assertEquals(0x11,result[0]);
+			assertEquals(0x12,result[1]);
+			assertEquals(0x13,result[2]);
+
+			int endOfStaticSegment = dataSegStart.getValue() + program.dataSegment.length;
+			memory.writeToMem(endOfStaticSegment-4, new byte[]{0x11,0x12,0x13,0x11});
+			try {
+				result = memory.readUntilNull(endOfStaticSegment-4);
+                fail();
+            } catch(MemoryException e) {
+                assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+            }
+
 		}
 		
 		{//test address below dataSegement
@@ -185,20 +204,13 @@ public class MemoryTest {
 		}
 		
 		{//test reading too far into stack when not reached yet (could be anything)
-			try {
-				byte[] result = memory.readFromMem(topOfStack.getValue()-4,4);
-				assertEquals(4,result.length);
-			} catch(StackException e) {
-				assertTrue(e.getMessage().equals("Invalid read on stack. (attempt to read above the top)"));
-			}
+            byte[] result = memory.readFromMem(topOfStack.getValue()-4,4);
+            assertEquals(4,result.length);
+            // values in result are undefined (but probably 0)
 		}
 		
 		{//test writing too far into stack when not reached yet (should work)
-			try {
-				memory.writeToMem(topOfStack.getValue()-8, new byte[]{0x11,0x12,0x13,0x14});
-			} catch(StackException e) {
-				assertTrue(e.getMessage().equals("Invalid write on stack. (non-positive length)"));
-			}
+            memory.writeToMem(topOfStack.getValue()-10, new byte[]{0x11,0x12,0x13,0x14});
 		}
 			
 	}

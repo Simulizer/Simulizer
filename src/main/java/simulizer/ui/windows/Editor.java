@@ -352,7 +352,7 @@ public class Editor extends InternalWindow {
 		int fontSize = (int) settings.get("editor.font-size");
 		jsWindow.call("setFont", fontFamily, fontSize);
 
-		jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+		jsEditor.call("setScrollSpeed", (Double) settings.get("editor.scroll-speed"));
 		engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
 		jsEditor.call("setTheme", (String) settings.get("editor.theme"));
 

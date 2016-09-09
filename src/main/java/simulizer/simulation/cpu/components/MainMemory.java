@@ -24,8 +24,8 @@ public class MainMemory {
 	private Address startOfStaticData;//start of the static data segment
 	private Address bottomOfDynamicData; //the end of the static data segment
 	private Address topOfStack;
-	private final Address endOfMemory;
-	private final int mebibyte = 1024*1024;
+	private final Address endOfMemory; //TODO: why is this not used?
+	private static final int mebibyte = 1024*1024;
 
 
 	private Map<Address,Statement> textSegment;
@@ -40,7 +40,7 @@ public class MainMemory {
 	 *
 	 */
 	MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address bottomOfDynamicData, Address stackPointer) {
-		this.startOfTextSegment = startTextSegment;
+		this.startOfTextSegment = startTextSegment; //TODO: why is this not used?
 		this.startOfStaticData = startOfStaticData;
 		this.bottomOfDynamicData = bottomOfDynamicData;
 		this.topOfStack = stackPointer;
@@ -112,6 +112,38 @@ public class MainMemory {
 
 		} else {
 			throw new MemoryException("Reading from invalid area of memory", new Address(address));
+		}
+	}
+
+	/**
+     * read bytes until a null character is read. Use this to extract strings from memory.
+	 * An exception is thrown if the end of a segment is reached while scanning for a null character
+	 *
+	 * @param address the address to begin scanning at
+	 * @return the bytes up to but _not_ including the null character
+	 * @throws MemoryException
+	 * @throws StackException
+	 */
+	public byte[] readUntilNull(int address) throws MemoryException, HeapException, StackException {
+		if(inStaticSegment(address)) {
+			int relativeAddress = address - startOfStaticData.getValue();
+            for(int i = relativeAddress; i < staticDataSegment.length; ++i) {
+                if(staticDataSegment[i] == '\0') {
+					return Arrays.copyOfRange(staticDataSegment, relativeAddress, i); // exclusive so null not included
+				}
+			}
+			throw new MemoryException("Reading from invalid area of memory (scanning for a null character)", new Address(address));
+
+		} else if(inDynamicSegment(address)) {
+			int relativeAddress = address - bottomOfDynamicData.getValue();
+			return heap.readUntilNull(relativeAddress);
+
+		} else if(inStack(address)) {
+			int relativeAddress = address - topOfStack.getValue(); // will be negative
+			return stack.readUntilNull(relativeAddress);
+
+		} else {
+			throw new MemoryException("Reading from invalid area of memory (scanning for a null character)", new Address(address));
 		}
 	}
 

@@ -91,8 +91,7 @@ public class Decoder {
             cpu.sendMessage(new DataMovementMessage(src2,Optional.empty()));
             return new RTypeInstruction(instruction, Optional.empty(), destinationRegister, src1, src2);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm
-                || instruction.getOperandFormat() == OperandFormat.destSrcImm) { //immediate arithmetic operations (signed and unsigned)
+        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm) { //immediate arithmetic operations (signed or unsigned)
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
             Register destinationRegister = op1.asRegisterOp().value;

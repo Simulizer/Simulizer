@@ -50,14 +50,22 @@ public class SpimRunner implements Runner {
 		this.input = sendStdin;
 
 		File tmp = null;
+        FileWriter w = null;
 		try {
 			tmp = File.createTempFile("program", ".s");
-			FileWriter w = new FileWriter(tmp);
+			w = new FileWriter(tmp);
 			w.write(program);
-			w.close();
 			tmpFilePath = tmp.getAbsolutePath();
 		} catch(IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+			if(w != null) {
+				try {
+					w.close();
+				} catch (IOException e) {
+					Simulizer.handleException(e);
+				}
+			}
 		}
 
 		assert tmp != null;
@@ -131,13 +139,22 @@ public class SpimRunner implements Runner {
 	 */
 	public static void runQtSpim(String program) {
 		File tmp = null;
+		FileWriter w = null;
 		try {
 			tmp = File.createTempFile("program", ".s");
-			FileWriter w = new FileWriter(tmp);
+			w = new FileWriter(tmp);
 			w.write(program);
 			w.close();
 		} catch(IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+			if(w != null) {
+				try {
+					w.close();
+				} catch (IOException e) {
+					Simulizer.handleException(e);
+				}
+			}
 		}
 
 		assert tmp != null;

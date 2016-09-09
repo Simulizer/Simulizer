@@ -120,13 +120,80 @@ public class DynamicDataSegmentTest {
 			assertEquals(0x65,result[3]);
 		}
 		
-		{//invalid get
+		{//invalid get (empty heap)
 			setUpHeap();
 			exception.expect(HeapException.class);
 			heap.getBytes(0, 5);
 		}
+
+		{//invalid get (address below the heap)
+			setUpHeap();
+			heap.sbrk(8);
+			exception.expect(HeapException.class);
+			heap.getBytes(-1, 5);
+		}
+
+		{//invalid get (address above the heap)
+			setUpHeap();
+			heap.sbrk(8);
+			exception.expect(HeapException.class);
+			heap.getBytes(8, 5);
+		}
+
+		{//valid read on the boundary
+			setUpHeap();
+			heap.sbrk(8);
+			heap.setBytes(8, new byte[]{0x11});
+			assertEquals(0x11,heap.getBytes(8, 1)[0]);
+		}
 	}
-	
+
+
+	@Test
+	public void testReadUntilNull() throws HeapException
+	{
+		{//valid read
+			setUpHeap();
+			heap.sbrk(8);
+			heap.setBytes(5, new byte[]{0x11, 0x22, '\0'});
+			byte[] read = heap.readUntilNull(5);
+		}
+
+		{//invalid read (no null before end)
+			setUpHeap();
+			heap.sbrk(8);
+			heap.setBytes(5, new byte[]{0x11, 0x22, 0x11});
+			try {
+				byte[] read = heap.readUntilNull(5);
+				fail();
+			} catch (HeapException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+
+		{//invalid read (start address above the top of the heap)
+			setUpHeap();
+			heap.sbrk(8);
+			try {
+				byte[] read = heap.readUntilNull(8);
+				fail();
+			} catch (HeapException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+
+		{//invalid read (start address below the bottom of the heap)
+			setUpHeap();
+			heap.sbrk(8);
+			try {
+				byte[] read = heap.readUntilNull(-1);
+				fail();
+			} catch (HeapException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+	}
+
 	/**method will test the setBytes method of DynamicDataSegment (if setBytes works so will setByte)
 	 * 
 	 * @throws HeapException if problem with the heap during use

@@ -25,19 +25,26 @@ public class FileUtils {
 	 * @return the file contents (read as UTF-8)
 	 */
 	public static String getFileContent(String path) {
-		FileInputStream fis;
+		FileInputStream fis = null;
 		try {
 			File file = new File(path);
 			fis = new FileInputStream(file);
 			byte[] data = new byte[(int) file.length()];
 			//noinspection ResultOfMethodCallIgnored
 			fis.read(data);
-			fis.close();
 
 			return new String(data, "UTF-8");
 
 		} catch (IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+			if(fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					Simulizer.handleException(e);
+				}
+			}
 		}
 
 		return null;
@@ -55,12 +62,20 @@ public class FileUtils {
 	 * write to a file (as Java makes this overly bureaucratic)
 	 */
 	public static void writeToFile(File file, String content) {
+	    FileWriter fw = null;
 		try {
-			FileWriter fw = new FileWriter(file);
+			fw = new FileWriter(file);
 			fw.write(content);
-			fw.close();
 		} catch (IOException e) {
 		    Simulizer.handleException(e);
+		} finally {
+			if(fw != null) {
+				try {
+					fw.close();
+				} catch (IOException e) {
+					Simulizer.handleException(e);
+				}
+			}
 		}
 	}
 

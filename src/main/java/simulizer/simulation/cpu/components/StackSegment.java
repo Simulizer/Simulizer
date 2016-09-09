@@ -131,6 +131,28 @@ public class StackSegment {
 		    return Arrays.copyOfRange(stack, r.MSBIndex, r.LSBIndex+1); // +1 because exclusive
 		}
 	}
+
+	/**
+	 * read bytes until a null character is read. Use this to extract strings from memory.
+	 * An exception is thrown if the end of the stack is reached while scanning for a null character
+	 *
+	 * @param MSBAddress the relative address to begin scanning at
+	 * @return the bytes up to but _not_ including the null character
+	 * @throws StackException
+	 */
+	public byte[] readUntilNull(int MSBAddress) throws StackException {
+		ArrayRange r = new ArrayRange(MSBAddress, 1);
+		int i = r.MSBIndex;
+
+		if(insideStackSegment(MSBAddress)) {
+			for (; i < stack.length; ++i) {
+				if (stack[i] == '\0') {
+					return Arrays.copyOfRange(stack, r.MSBIndex, i); // exclusive so null is excluded
+				}
+			}
+		}
+		throw new StackException("Reading from invalid area of memory (scanning for a null character)", r.MSBIndex, i);
+	}
 	
 	/**goes about writing onto the stack
 	 *
@@ -173,5 +195,4 @@ public class StackSegment {
         // src, srcPos, dest, destPos, length
         System.arraycopy(toWrite, 0, stack, r.MSBIndex, toWrite.length);
 	}
-	
 }
