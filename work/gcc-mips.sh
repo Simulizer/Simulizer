@@ -86,6 +86,8 @@ fi
 # .globl is understood, but ignored by Simulizer
 # .rdata is not understood, but is useful to keep in so you can see where the
 #        read-only data segment is so you can move it to the .data segment
+# note that sometimes GCC places data in the .bss segment which is also not
+#   supported by Simulizer
 KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 
 
@@ -95,9 +97,16 @@ KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 # remove #APP and #NO_APP messages which surround asm() statements
 # remove # 0 "" 2 and # XX "input.c" 1 lines which surround asm() statements
 AWK_FILTER='
-/\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print} /^\s*\./{next}
+/\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print}
+/\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
+/^\s*\./{next}  # unknown directives
+
 /\s*#nop$/{next}
-/^\s*#(NO_)?APP$/{next} / # 0 "" 2$/{next} /\s*# [0-9]+ "'"$TMP_FILE"'" 1/{next}
+/^\s*#(NO_)?APP$/{next}
+/ # 0 "" 2$/{next}
+/\s*# [0-9]+ "'"$TMP_FILE"'" 1/{next}
+/\s*# [0-9]+ "libc-simulizer.h" 1/{next}
+
 {print}
 '
 # explanations
@@ -113,6 +122,10 @@ awk -i inplace "$AWK_FILTER" "$OUT"
 # like registers. (Note spim can handle these labels)
 # eg $L4 --> LBL_4
 sed --in-place='' 's/\$L\(\d*\)/LBL_\1/' "$OUT"
+
+# when optimising, gcc creates labels of the form: functionName.constprop.XXX
+# but Simulizer does not support . in label names
+sed --in-place='' 's/\([[:alpha:]]\+\)\./\1_/g' "$OUT"
 
 
 # substitute mnemonic register names (personal preference)
@@ -135,5 +148,6 @@ AWK_FIX_OVERLOADS='
 '
 awk -i inplace "$AWK_FIX_OVERLOADS" "$OUT"
 
-
+# missing instructions
+# jalr
 

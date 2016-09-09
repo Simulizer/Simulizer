@@ -129,7 +129,7 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 // by default Simulizer allocates a maximum of 1MiB to the heap
 #define HEAP_SIZE (1024*1024)
 // CPU can more efficiently work on data that is aligned to 2^n where n depends
-// on the CPU in question. int may only has to be 4-aligned but long may have to
+// on the CPU in question. int may only have to be 4-aligned but long may have to
 // be 8-aligned to be efficient.
 // In Simulizer, this isn't really a concern so only ensure that data is
 // word-aligned (4 bytes)
