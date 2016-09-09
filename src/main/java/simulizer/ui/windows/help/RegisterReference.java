@@ -19,11 +19,10 @@ import simulizer.ui.windows.Registers;
  */
 public class RegisterReference extends InternalWindow {
 
-	private TableView<Data> table = new TableView<>();
-
 	// requirements for observable:
 	// class public. public 'get' methods corresponding to the value passed to the PropertyValueFactory
-	public class Data {
+	@SuppressWarnings("unused")
+	public static class Data {
 		private String mnemonic;
 		private String numeric;
 		private String description;
@@ -63,6 +62,7 @@ public class RegisterReference extends InternalWindow {
 			data.add(new Data("$" + register.getName(), "$" + register.getID(), register.getDescription()));
 		}
 
+		TableView<Data> table = new TableView<>();
 		table.setItems(data);
 
 		table.getColumns().addAll(idCol, descCol);

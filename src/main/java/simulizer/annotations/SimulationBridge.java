@@ -20,7 +20,7 @@ import java.util.List;
  * @author mbway
  */
 @SuppressWarnings("unused")
-public class SimulationBridge {
+class SimulationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
 	CPU cpu = null;

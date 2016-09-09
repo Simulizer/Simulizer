@@ -209,11 +209,12 @@ public class Options extends InternalWindow {
 		}
 	}
 
-	private class FolderItem extends TreeItem<String> {
+	@SuppressWarnings("WeakerAccess") // getters need to be public
+	private static class FolderItem extends TreeItem<String> {
 
 		private final ObjectSetting setting;
 
-		public FolderItem(ObjectSetting setting) {
+		FolderItem(ObjectSetting setting) {
 			super(setting.getHumanName());
 			this.setting = setting;
 		}
@@ -221,6 +222,5 @@ public class Options extends InternalWindow {
 		public ObjectSetting getObjectSetting() {
 			return setting;
 		}
-
 	}
 }

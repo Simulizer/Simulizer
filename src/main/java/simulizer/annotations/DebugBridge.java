@@ -14,7 +14,7 @@ import simulizer.utils.UIUtils;
  * @author mbway
  */
 @SuppressWarnings("unused")
-public class DebugBridge {
+class DebugBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
 	WindowManager wm = null;

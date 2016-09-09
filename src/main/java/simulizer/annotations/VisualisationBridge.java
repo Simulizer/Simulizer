@@ -11,7 +11,7 @@ import simulizer.ui.interfaces.WindowEnum;
  * @author mbway
  */
 @SuppressWarnings("unused")
-public class VisualisationBridge {
+class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
 	WindowManager wm;

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MessageManager {
 
-	private final long allowedProcessingTime = 1000; // milliseconds
+	private final static long allowedProcessingTime = 1000; // milliseconds
 
 	private final CopyOnWriteArrayList<SimulationListener> listeners;
 	private final ThreadPoolExecutor executor;

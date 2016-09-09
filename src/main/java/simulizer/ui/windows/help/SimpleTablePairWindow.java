@@ -46,7 +46,8 @@ class SimpleTablePairWindow extends InternalWindow {
 
 	// requirements for observable:
 	// class public. public 'get' methods corresponding to the value passed to the PropertyValueFactory
-	public class Data {
+	@SuppressWarnings("unused")
+	public static class Data {
 		private final String col1, col2;
 
 		Data(String col1, String col2) {

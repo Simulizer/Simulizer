@@ -91,12 +91,12 @@ public class AssemblingDialog extends Alert {
 			if (current.charAt(i) == '.') ++count;
 
 		int newNum = (count + 1) % 4;
-		String svar = contentText;
+		StringBuilder svar = new StringBuilder(contentText);
 
 		for (int i = 0; i < newNum; ++i)
-			svar += ".";
+			svar.append('.');
 
-		return svar;
+		return svar.toString();
 	}
 
 	/**

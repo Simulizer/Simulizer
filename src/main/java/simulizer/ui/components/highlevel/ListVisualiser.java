@@ -40,7 +40,7 @@ import simulizer.ui.windows.HighLevelVisualisation;
  * @author Kelsey McKenna
  *
  */
-public class ListVisualiser extends DataStructureVisualiser {
+public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchronization of this class (currently synchronizing on non-final fields)
 	private Canvas canvas = new Canvas();
 	private long[] list;
 	private ListModel model;
@@ -71,8 +71,8 @@ public class ListVisualiser extends DataStructureVisualiser {
 	private Set<Integer> highlightedMarkers = new HashSet<>();
 
 	// Dimensions used for calculations
-	private final double XPAD = 10;
-	private final double YPAD = 10;
+	private final static double XPAD = 10;
+	private final static double YPAD = 10;
 	private double rectLength;
 	private double y0;
 	private double x0;
@@ -397,7 +397,7 @@ public class ListVisualiser extends DataStructureVisualiser {
 			// List changed
 			ListAction list = (ListAction) action;
 			synchronized (this.list) {
-				synchronized (markers) {
+				synchronized (markers) { // TODO: don't hold more than 1 lock (might deadlock)
 					this.list = list.structure;
 					markers.clear();
 				}

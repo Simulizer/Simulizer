@@ -15,6 +15,7 @@ import simulizer.utils.UIUtils;
  *
  * @author mbway
  */
+@SuppressWarnings("WeakerAccess") // because bridges accessed from javascript
 public class AnnotationManager {
 	private WindowManager wm;
 	private AnnotationExecutor ex;
@@ -39,7 +40,6 @@ public class AnnotationManager {
 
 	/**
 	 * get the current executor (script engine)
-	 * @return
 	 */
 	public AnnotationExecutor getExecutor() {
 		return ex;

@@ -21,11 +21,11 @@ public class AnimationProcessor {
 	 * Represents an animation to be run
 	 * @author Theo Styles
 	 */
-    class Animation{
-        public int delayFromCycleStart;
-        public Runnable job;
+    static class Animation{
+        int delayFromCycleStart;
+        Runnable job;
 
-        public Animation(int delayFromCycleStart, Runnable job){
+        Animation(int delayFromCycleStart, Runnable job){
             this.delayFromCycleStart = delayFromCycleStart;
             this.job = job;
         }
@@ -38,8 +38,8 @@ public class AnimationProcessor {
 	private long cycleStartTime; // in ms
 	private int cycleDelay; // in ms
 	private boolean showingWarning;
-    public CPUListener cpuListener;
-    public CPU cpuVisualisation;
+    private CPUListener cpuListener;
+    private CPU cpuVisualisation;
 
 	/**
 	 * Sets initial values and sets up the executor service and task
@@ -152,7 +152,7 @@ public class AnimationProcessor {
 	public synchronized void addToPreviousList(String instructionName){
 		// Add to the list of previous instructions
 		ArrayList<Animation> animations = new ArrayList<>();
-		animationsForInstruction.forEach(item -> animations.add(item));
+        animations.addAll(animationsForInstruction);
 		if (!showingWarning) cpuVisualisation.previousInstructions.addInstruction(instructionName, animations);
 	}
 
@@ -160,7 +160,7 @@ public class AnimationProcessor {
 	 * Replays animations
 	 * @param animations The animations to replay
      */
-	public synchronized void replayAnimations(ArrayList<Animation> animations){
+	synchronized void replayAnimations(ArrayList<Animation> animations){
 		// Start a new cycle to get the timings right
 		newCycle();
 		animationTasks.addAll(animations);

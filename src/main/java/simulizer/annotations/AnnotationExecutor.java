@@ -36,7 +36,7 @@ public class AnnotationExecutor {
 	private ScriptObjectMirror nhGlobals;
 
 
-	private class AnnotationClassFilter implements ClassFilter {
+	private static class AnnotationClassFilter implements ClassFilter {
 		boolean apiLoaded = false;
 
 		@Override public boolean exposeToScripts(String s) {
