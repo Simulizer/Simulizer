@@ -38,11 +38,15 @@ public class Settings {
 	 * @return the settings object representing the json file
 	 * @throws IOException
 	 */
-	public static Settings loadSettings(File json) throws IOException {
-		JsonParser parser = new JsonParser();
-		JsonElement jsonElement = parser.parse(new FileReader(json));
-		JsonObject jsonObject = jsonElement.getAsJsonObject();
-		return new Settings(json, jsonObject);
+	public static Settings loadSettings(File json) {
+		try {
+			JsonParser parser = new JsonParser();
+			JsonElement jsonElement = parser.parse(new FileReader(json));
+			JsonObject jsonObject = jsonElement.getAsJsonObject();
+			return new Settings(json, jsonObject);
+		} catch (IOException e) {
+			return new Settings(json, null);
+		}
 	}
 
 	private Settings(File json, JsonObject jsonObject) {
@@ -102,10 +106,11 @@ public class Settings {
 				);
 		// @formatter:on
 
-		// Loads all the values from jsonObject
-		for (SettingValue<?> setting : settings.getValue()) {
-			loadFromJson(jsonObject, setting);
-		}
+		// Loads all the values from jsonObject (if we have one)
+		if (jsonObject != null)
+			for (SettingValue<?> setting : settings.getValue()) {
+				loadFromJson(jsonObject, setting);
+			}
 	}
 
 	private void loadFromJson(JsonObject jsonObject, SettingValue<?> setting) {

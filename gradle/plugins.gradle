@@ -1,0 +1,30 @@
+
+/////////////////////////////////////////////////
+//
+// Built-in Plugins
+//
+/////////////////////////////////////////////////
+
+// able to compile java files
+apply plugin: 'java'
+
+// able to create parsers from Antlr grammars.
+// task compileJava automatically depends on generateGrammarSource
+apply plugin: 'antlr'
+
+// able to create executables. Automatically includes the 'distribution' plugin
+apply plugin: 'application'
+
+// able to create IntelliJ project files (not required for modern IntelliJ)
+// to sync with gradle: gradle toolbar (default on the right) and press the
+// refresh icon
+apply plugin: 'idea'
+
+// able to create Eclipse project files
+//
+// to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
+// will regenerate the project files, re-open eclipse.
+//
+// better option: use the Eclipse plugin: 'Buildship'
+// http://projects.eclipse.org/projects/tools.buildship
+apply plugin: 'eclipse'

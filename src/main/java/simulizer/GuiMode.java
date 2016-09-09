@@ -17,83 +17,76 @@ import java.io.IOException;
  */
 public class GuiMode {
 
-    private static Image icon = null;
-    private static File settingsFile;
-    private static Stage primaryStage;
+	private static Image icon = null;
+	private static File settingsFile;
+	private static Stage primaryStage;
 
-    private static App app;
-    public static WindowManager wm;
-    public static Settings settings;
-    public static CommandLineArguments.GuiModeArgs args;
+	private static App app;
+	public static WindowManager wm;
+	public static Settings settings;
+	public static CommandLineArguments.GuiModeArgs args;
 
-    public static Image getIcon() {
-        if (icon == null) {
-            icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
-        }
-        return icon;
-    }
+	public static Image getIcon() {
+		if (icon == null) {
+			icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
+		}
+		return icon;
+	}
 
-    public static Stage getPrimaryStage() {
-        return primaryStage;
-    }
+	public static Stage getPrimaryStage() {
+		return primaryStage;
+	}
 
-    public static class App extends Application {
+	public static class App extends Application {
 
-        void launchApp(String[] args) {
-            launch(args);
-        }
+		void launchApp(String[] args) {
+			launch(args);
+		}
 
-        @Override
-        public void init() throws Exception {
-            try {
-                GuiMode.settings = Settings.loadSettings(settingsFile);
-            } catch (IOException ex) {
-                UIUtils.showErrorDialog("Failed To Launch", "Failed to launch: settings file: '" +
-                        settingsFile.getPath() + "' was missing");
-                throw new RuntimeException("missing settings file " + settingsFile.getPath());
-            }
-        }
+		@Override
+		public void init() {
+			GuiMode.settings = Settings.loadSettings(settingsFile);
+		}
 
-        @Override
-        public void start(Stage primaryStage) throws Exception {
-            GuiMode.primaryStage = primaryStage;
-            primaryStage.getIcons().add(GuiMode.getIcon());
+		@Override
+		public void start(Stage primaryStage) throws Exception {
+			GuiMode.primaryStage = primaryStage;
+			primaryStage.getIcons().add(GuiMode.getIcon());
 
+			boolean showSplash = (boolean) settings.get("splash-screen.enabled");
+			if (args.noSplash) // takes precedence over settings file
+				showSplash = false;
 
-            boolean showSplash = (boolean) settings.get("splash-screen.enabled");
-            if(args.noSplash) // takes precedence over settings file
-                showSplash = false;
+			if (showSplash) {
+				SplashScreen s = new SplashScreen(settings);
+				s.show(primaryStage);
+			} else {
+				GuiMode.launchWindowManager(primaryStage);
+				GuiMode.wm.show();
+			}
+		}
+	}
 
-            if (showSplash) {
-                SplashScreen s = new SplashScreen(settings);
-                s.show(primaryStage);
-            } else {
-                GuiMode.launchWindowManager(primaryStage);
-                GuiMode.wm.show();
-            }
-        }
-    }
+	public static void start(String[] rawArgs, CommandLineArguments parsedArgs) {
+		Thread.setDefaultUncaughtExceptionHandler(UIUtils::showExceptionDialog);
 
-    public static void start(String[] rawArgs, CommandLineArguments parsedArgs) {
-        Thread.setDefaultUncaughtExceptionHandler(UIUtils::showExceptionDialog);
+		settingsFile = new File(parsedArgs.guiMode.settingsPath);
+		args = parsedArgs.guiMode;
 
-        settingsFile = new File(parsedArgs.guiMode.settingsPath);
-        args = parsedArgs.guiMode;
+		app = new App();
+		app.launchApp(rawArgs);
+	}
 
-        app = new App();
-        app.launchApp(rawArgs);
-    }
+	public static void launchWindowManager(Stage primaryStage) {
+		// Close application
+		primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
 
-    public static void launchWindowManager(Stage primaryStage) {
-        // Close application
-        primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
-
-        // Just show the main window for now
-        try {
-            wm = new WindowManager(app, primaryStage, settings);
-        } catch (IOException ex) {
-            UIUtils.showErrorDialog("Failed To Launch", ex.getMessage());
-            throw new RuntimeException("failed to launch: " + ex.getMessage());
-        }
-    }
+		// Just show the main window for now
+		try {
+			wm = new WindowManager(app, primaryStage, settings);
+		} catch (IOException ex) {
+			UIUtils.showErrorDialog("Failed To Launch", ex.getMessage());
+			throw new RuntimeException("failed to launch: " + ex.getMessage());
+		}
+	}
 }

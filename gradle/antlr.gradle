@@ -1,0 +1,29 @@
+dependencies {
+    // Antlr
+    // only needs antlr-runtime at runtime
+    compile 'org.antlr:antlr4-runtime:4.5'
+
+    // version for generating parsers during build
+    antlr   'org.antlr:antlr4:4.5'
+}
+
+def generatedSrcDir = file('src/generated/')
+// extends the clean task
+clean {
+    delete generatedSrcDir
+}
+
+// Antlr
+
+// where to place generated files such as Antlr parsers
+def antlrOutput     = "$generatedSrcDir/antlr/"
+
+sourceSets.main.java.srcDirs += antlrOutput
+
+// Antlr options
+generateGrammarSource {
+    outputDirectory = file(antlrOutput)
+
+    // by default only listeners are generated
+    arguments += ['-listener', '-visitor']
+}

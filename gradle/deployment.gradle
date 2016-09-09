@@ -1,0 +1,48 @@
+/////////////////////////////////////////////////
+//
+// Deployment Configuration
+//
+/////////////////////////////////////////////////
+
+
+// a slim jar (does not contain dependencies)
+jar {
+    manifest {
+        attributes 'Implementation-Title':   'Simulizer',
+                   'Implementation-Version': '0.3',
+                   'Main-Class':             'simulizer.Simulizer'
+    }
+}
+
+
+// bundle a jar with all dependencies
+// modified from:
+// http://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
+task deploymentJar(type: Jar) {
+    with jar
+    manifest.attributes = jar.manifest.attributes
+
+    baseName = project.name + '-bundled-depends'
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+
+task deploy(type:Zip) {
+    destinationDir file("${buildDir}/distributions/")
+    extension "zip"
+
+    def depJar = "${deploymentJar.baseName}-${version}.jar"
+
+    into("$name/") {
+        from run.workingDir
+        exclude "*.log"
+        exclude "program-dump.txt"
+    }
+    into("$name/") {
+        from "$buildDir/libs/"
+        include depJar
+        rename(depJar, "Simulizer.jar")
+    }
+}
+deploy.dependsOn deploymentJar

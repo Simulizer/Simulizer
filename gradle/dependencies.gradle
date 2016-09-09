@@ -1,0 +1,21 @@
+repositories {
+    // not used
+    // jcenter()
+
+    // search for packages here: https://search.maven.org
+    mavenCentral()
+}
+
+dependencies {
+    // JFXtras (internal window only)
+        compile 'org.jfxtras:jfxtras-window:8.0-r4'
+
+    // GSON: JSON Parsing
+    	compile 'com.google.code.gson:gson:2.5'
+
+    // JCommander: Command line arguments parsing
+        compile group: 'com.beust', name: 'jcommander', version: '1.7'
+
+    // Testing
+        testCompile 'junit:junit:4.12'
+}
