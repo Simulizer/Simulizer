@@ -44,7 +44,7 @@ public class Clock {
 
 
 
-	public Clock() {
+	Clock() {
 		this.tickPeriod = MIN_PERIOD;
 		ticks = new LongAdder();
 		executor = Executors.newSingleThreadScheduledExecutor(
@@ -53,7 +53,7 @@ public class Clock {
 	}
 
 
-	public void setTickFrequency(double freq) {
+	void setTickFrequency(double freq) {
 		if(freq < 0.00001) {
 			// practically zero => max speed
 			setTickPeriod(0);
@@ -61,7 +61,7 @@ public class Clock {
 			setTickPeriod((long) (1000000 / freq));
 		}
 	}
-	public double getTickFrequency() {
+	double getTickFrequency() {
 		return 1000000.0 / tickPeriod;
 	}
 

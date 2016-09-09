@@ -71,7 +71,7 @@ public class MemoryTest {
 		String myInstructions = "li $v0, 9;\n" +
 								"li $a0, 4;\n" +
 								"syscall;\n";//allocating some heap mem (amount in $a0)
-		
+
 		Program program = createProgram(myInstructions);
 		
 		CPU cpu = new CPU(new IOTest());

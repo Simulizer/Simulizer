@@ -1,6 +1,7 @@
 package simulizer.simulation.cpu.components;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Optional;
 
 import simulizer.assembler.representation.Address;
@@ -30,14 +31,14 @@ import simulizer.utils.UIUtils;
  * @author Charlie Street
  *
  */
-public class Executor {
+class Executor {
 	private CPU cpu;//needs access to the cpu to execute
 	
 	/**initialise cpu
 	 * 
 	 * @param cpu the cpu object currently being used
 	 */
-	public Executor(CPU cpu) {
+	Executor(CPU cpu) {
 		this.cpu = cpu;
 	}
 	
@@ -47,9 +48,9 @@ public class Executor {
      * @param programCounter the current program counter value
      * @throws InstructionException if problem during execution
      * @throws ExecuteException if problem during execution
-     * @throws HeapException if problem with heap
+     * @throws HeapException if problem accessing heap
      * @throws MemoryException if problem accessing memory
-     * @throws StackException 
+     * @throws StackException if problem accessing the stack
      */
     public Address execute(InstructionFormat instruction, Address programCounter) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
         Address toReturn = programCounter;
@@ -69,7 +70,7 @@ public class Executor {
             	cpu.sendMessage(new DataMovementMessage(instruction.asIType().getCmp1(),Optional.empty()));
             	cpu.sendMessage(new DataMovementMessage(instruction.asIType().getCmp2(),Optional.empty()));
                 Word branchTest = cpu.getALU().execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
-                if(equalByteArrays(branchTest.getWord(), ALU.branchTrue)) {
+                if(Arrays.equals(branchTest.getWord(), ALU.branchTrue)) {
                     toReturn = instruction.asIType().getBranchAddress().get();//set the program counter
                     cpu.sendMessage(new DataMovementMessage(Optional.of(encodeU((long)toReturn.getValue())),Optional.empty()));
                 }
@@ -178,7 +179,7 @@ public class Executor {
      * @throws InstructionException if invalid syscall code
      * @throws HeapException if problem using sbrk like a0 not multiple of 4
      * @throws MemoryException if problem reading from memory for read string
-     * @throws StackException 
+     * @throws StackException if problem accessing the stack
      */
     private void syscall(int v0) throws InstructionException, HeapException, MemoryException, StackException {
     	int a0 = (int)DataConverter.decodeAsSigned(cpu.getRegisters()[Register.a0.getID()].getWord());//getting main argument register
@@ -186,60 +187,54 @@ public class Executor {
     		case 1://print int
     			cpu.getIO().printInt(IOStream.STANDARD, a0);//printing to console
     			break;
-    		case 4://print string
+    		case 4: {//print string
 				byte[] stringData = cpu.getMainMemory().readUntilNull(a0);
 				String str = new String(stringData, StandardCharsets.UTF_8);
 
-    			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(new byte[4])),Optional.empty()));
-    			cpu.getIO().printString(IOStream.STANDARD, str);
-    			break;
-    		case 5://read int
+				cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(new byte[4])), Optional.empty()));
+				cpu.getIO().printString(IOStream.STANDARD, str);
+			} break;
+    		case 5: {//read int
     			int read = cpu.getIO().readInt(IOStream.STANDARD);//reading in from console
     			Word readAsWord = new Word(DataConverter.encodeAsSigned((long)read));
     			cpu.getRegisters()[Register.v0.getID()] = readAsWord;//storing in v0
     			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
     			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
-    			break;
-    		case 8://read string
-    			String readInString = cpu.getIO().readString(IOStream.STANDARD);//this string will be cut to maxChars -1 i.e last one will be null terminator
-    			int a1 = (int)DataConverter.decodeAsSigned(cpu.getRegisters()[Register.a1.getID()].getWord());//max chars stored here
-    			int addressIBuf = a0;//start of input buffer
-    			if(readInString.length() >= a1) {//truncating string
-    				readInString = readInString.substring(0, a1-1);
-    			}
-    			for(int i = 0; i < readInString.length(); i++) {//writing each character to memory
-    				String toWriteStr = "" + readInString.charAt(i);
-    				byte[] toWrite = toWriteStr.getBytes();
-    				cpu.getMainMemory().writeToMem(addressIBuf, toWrite);//write into memory
-    				addressIBuf += 1;//moving to next word in memory
-    			}
-    			
-    			byte[] nullTerminator = new byte[]{0x00,0x00,0x00,0x00};//null terminator for string
-    			cpu.getMainMemory().writeToMem(addressIBuf, nullTerminator);//adding terminator signals end of string
-    			cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(nullTerminator)),Optional.empty()));
-    			break;
-    		case 9://sbrk
-    			Address newBreak = cpu.getMainMemory().getHeap().sbrk(a0);
-    			cpu.getRegisters()[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
-    			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
-    			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
-    			break;
+    		} break;
+    		case 8: {//read string
+				String readInString = cpu.getIO().readString(IOStream.STANDARD);//this string will be cut to maxChars -1 i.e last one will be null terminator
+				int a1 = (int) DataConverter.decodeAsUnsigned(cpu.getRegisters()[Register.a1.getID()].getWord());//max chars stored here
+				if (readInString.length() + 1 > a1) {//truncating string (+1 to include null terminator)
+                    // exclusive, so substring has length a1-1 (leaving room for the null terminator)
+					readInString = readInString.substring(0, a1 - 1);
+				}
+				readInString += '\0';
+				byte[] stringData = readInString.getBytes(StandardCharsets.UTF_8);
+				cpu.getMainMemory().writeToMem(a0, stringData);
+				cpu.sendMessage(new DataMovementMessage(Optional.of(new Word(new byte[4])), Optional.empty())); // send a word of nulls
+			} break;
+    		case 9: {//sbrk
+				Address newBreak = cpu.getMainMemory().getHeap().sbrk(a0);
+				cpu.getRegisters()[Register.v0.getID()] = new Word(DataConverter.encodeAsSigned(newBreak.getValue()));
+				cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]), Optional.empty()));
+				cpu.sendMessage(new RegisterChangedMessage(Register.v0));
+			} break;
     		case 10://exit program
     			cpu.stopRunning();
     			break;
-    		case 11://print char
-    			char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
-    			cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
-    			break;
-    		case 12://read char
-    			String readChar = cpu.getIO().readChar(IOStream.STANDARD) + "";//from console
-    			byte[] asBytes = readChar.getBytes();
-    			long asLong = DataConverter.decodeAsSigned(asBytes);
-    			Word toWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage
-    			cpu.getRegisters()[Register.v0.getID()] = toWord;
-    			cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegisters()[Register.v0.getID()]),Optional.empty()));
-    			cpu.sendMessage(new RegisterChangedMessage(Register.v0));
-    			break;
+    		case 11: {//print char
+				char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
+				cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
+			} break;
+    		case 12: {//read char
+				String readChar = cpu.getIO().readChar(IOStream.STANDARD) + "";//from console
+				byte[] asBytes = readChar.getBytes();
+				long asLong = DataConverter.decodeAsSigned(asBytes);
+				Word charAsWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage
+				cpu.getRegisters()[Register.v0.getID()] = charAsWord;
+				cpu.sendMessage(new DataMovementMessage(Optional.of(charAsWord), Optional.empty()));
+				cpu.sendMessage(new RegisterChangedMessage(Register.v0));
+			} break;
     		case 67697865://AND HIS NAME IS...
 				UIUtils.openURL("https://www.youtube.com/watch?v=5LitDGyxFh4");
 				UIUtils.showInfoDialog("And His Name Is", "JOHN CENA!!!");
@@ -253,21 +248,6 @@ public class Executor {
     	}
     }
     
-    /**useful auxiliary method to check if 2 byte arrays equal
-    *
-    * @param arr1 first array
-    * @param arr2 second array
-    * @return are they equal?
-    */
-   private boolean equalByteArrays(byte[] arr1, byte[] arr2) {
-       for(int i = 0; i < arr1.length; i++) {
-           if(arr1[i] != arr2[i]) {
-               return false;
-           }
-       }
-       return true;
-   }
-   
    /**
     * take a value interpreted as being unsigned and encode it as a word
     *
