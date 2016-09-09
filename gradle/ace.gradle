@@ -3,7 +3,11 @@
 // Generated Resources Configuration
 //
 /////////////////////////////////////////////////
-
+import org.ajoberstar.grgit.*
+buildscript {
+ repositories { mavenCentral() }
+ dependencies { classpath 'org.ajoberstar:gradle-git:1.4.2' }
+}
 def ExternalResDir = file("$projectDir/src/main/resources/external")
 
 clean {

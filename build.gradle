@@ -51,11 +51,32 @@ Custom tasks:
 
 // from https://plugins.gradle.org/
 plugins {
-    // git dependencies
-        id 'org.ajoberstar.grgit' version '1.4.2'
+    id 'org.ajoberstar.grgit' version '1.4.2'   // git dependencies
+    id "de.undercouch.download" version "2.1.0" // HTTP download dependencies
 
-    // HTTP download dependencies
-        id "de.undercouch.download" version "2.1.0"
+    // able to compile java files
+    id 'java'
+
+    // able to create parsers from Antlr grammars.
+    // task compileJava automatically depends on generateGrammarSource
+    id 'antlr'
+
+    // able to create executables. Automatically includes the 'distribution' plugin
+    id 'application'
+
+    // able to create IntelliJ project files (not required for modern IntelliJ)
+    // to sync with gradle: gradle toolbar (default on the right) and press the
+    // refresh icon
+    id 'idea'
+
+    // able to create Eclipse project files
+    //
+    // to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
+    // will regenerate the project files, re-open eclipse.
+    //
+    // better option: use the Eclipse plugin: 'Buildship'
+    // http://projects.eclipse.org/projects/tools.buildship
+    id 'eclipse'
 }
 
 /////////////////////////////////////////////////
@@ -64,7 +85,6 @@ plugins {
 //
 /////////////////////////////////////////////////
 
-apply from: 'gradle/plugins.gradle'
 apply from: 'gradle/antlr.gradle'
 apply from: 'gradle/ace.gradle'
 apply from: 'gradle/dependencies.gradle'
