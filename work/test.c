@@ -1,7 +1,10 @@
 
-#include "libc-simulizer.h"
 
 // A playground for early testing of libc-simulizer
+
+
+
+// .data
 
 
 // use of static stops .globl directives from being generated
@@ -11,6 +14,16 @@
 // char[] => string and variable placed in .data
 char input[] = "Enter the number of items:";
 int globalA = 5;
+
+
+
+
+
+// .text segment
+
+
+#define NO_MALLOC
+#include "libc-simulizer.h"
 
 
 // this disables name mangling. Otherwise called: _Z6addTwoii or similar
@@ -44,9 +57,28 @@ extern "C" int doThing(short a, char b) { return b; }
 // with extern "C" { FILE } at compile time
 int doOtherThing(int a, int b) { return a; }
 
+void offsetTest() {
+    char a = input[2]; // since in static segment, +2?
+    char arr[5];
+    int val;
+    READ_INT(val);
+    memset(input, val, 5);
+    for(int i = 0; i < 5; ++i) {
+        arr[i] = val+i;
+    }
+    C("b:");
+    char b = arr[2]; // since on stack, -2?
+
+    PRINT_CHAR(a);
+    PRINT_CHAR(b);
+}
 
 // main does not have its name mangled
 int main() {
+    offsetTest();
+
+
+
     PRINT_STRING(input);
     int res;
     C("reading int");
@@ -58,6 +90,7 @@ int main() {
     ANN("debug.alert('going to read a string!');");
     READ_STRING(input, 5);
     PRINT_STRING(input);
+
 
     C("sbrk:");
     char *heapBreak;

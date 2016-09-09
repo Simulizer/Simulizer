@@ -62,9 +62,9 @@ public class DynamicDataSegment
             System.arraycopy(heap, 0, newHeap, 0, heap.length);
             heap = newHeap;
 
-			Address result = new Address(heapBaseAddress.getValue() + heapBreak);
+			Address oldBreak = new Address(heapBaseAddress.getValue() + heapBreak);
 			heapBreak += additionalBytes;
-			return result;
+			return oldBreak;
 		}
 	}
 	

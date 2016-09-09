@@ -41,19 +41,19 @@ public class RegisterReference extends InternalWindow {
 
 	@SuppressWarnings("unchecked")
 	public RegisterReference() {
-		TableColumn idCol = new TableColumn("ID");
+		TableColumn<Data, String> idCol = new TableColumn<>("ID");
 
-		TableColumn<Data, String> idCol1 = new TableColumn("Mnemonic");
+		TableColumn<Data, String> idCol1 = new TableColumn<>("Mnemonic");
 		idCol1.setCellValueFactory(new PropertyValueFactory<>("mnemonic"));
 		idCol1.setPrefWidth(100);
 
-		TableColumn<Data, String> idCol2 = new TableColumn("Numeric");
+		TableColumn<Data, String> idCol2 = new TableColumn<>("Numeric");
 		idCol2.setCellValueFactory(new PropertyValueFactory<>("numeric"));
 		idCol2.setPrefWidth(100);
 
 		idCol.getColumns().addAll(idCol1, idCol2);
 
-		TableColumn<Data, String> descCol = new TableColumn("Description");
+		TableColumn<Data, String> descCol = new TableColumn<>("Description");
 		descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 

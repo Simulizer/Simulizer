@@ -28,7 +28,7 @@ export OUT
 
 function compile {
     # flags which are closest to the architecture of the Simulizer CPU
-    mips-linux-gnu-g++-5 -O$OPTIMISATION -Wall -Wpedantic \
+    mips-linux-gnu-g++-5 -O$OPTIMISATION -Wall -Wpedantic -std=c++14 \
         -fno-exceptions -mno-explicit-relocs \
         -march=r3000 -meb -mgp32 -mfp32 -msoft-float \
         -mno-llsc -fno-stack-protector -fno-delayed-branch \
@@ -108,18 +108,32 @@ AWK_FILTER='
 awk -i inplace "$AWK_FILTER" "$OUT"
 
 
+# gcc uses labels of the form: $LXXX eg $L4 (where XXX is a unique number) for
+# loops Simulizer does not understand these as they are confusing as they look
+# like registers. (Note spim can handle these labels)
+# eg $L4 --> LBL_4
+sed --in-place='' 's/\$L\(\d*\)/LBL_\1/' "$OUT"
+
+
 # substitute mnemonic register names (personal preference)
 sed --in-place='' 's/\$31/$ra/' "$OUT"
 
 
-# gcc incorrectly uses the 'move' instruction to move from memory into
-# registers. This is legal because 'move' is a macro and not a primitive
-# instruction on a real processor, however since neither Spim nor Simulizer
-# supports this overloading of move replace occurrences with the relevant
-# instruction (lw)
-AWK_FIX_MOVE='
+# gcc uses these macros which simulizer does not understand for a particular
+# overloading, for example the 'move' instruction is used to move from memory to
+# a register. The following program replaces these instructions with an
+# appropriate replacement
+
+AWK_FIX_OVERLOADS='
+# match: "address as the second argument"
 /move[^,]*,[^#]*\(/{$1="\tlw"; print $0; next;}
+
+# match "not a register as the third argument"
+/slt([^,]*,){2}[^\$]/{$1="\tslti"; print $0; next;}
+
 {print}
 '
-awk -i inplace "$AWK_FIX_MOVE" "$OUT"
+awk -i inplace "$AWK_FIX_OVERLOADS" "$OUT"
+
+
 
