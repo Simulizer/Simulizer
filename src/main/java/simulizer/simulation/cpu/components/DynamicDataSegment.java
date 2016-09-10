@@ -42,7 +42,10 @@ public class DynamicDataSegment
 			throw new HeapException("sbrk requested shrink below the start of the heap.",heapBreak,heap.length);
 
 		} if(additionalBytes < 0) {// shrink the heap
-			heapBreak += additionalBytes; // additional bytes is negative
+            heapBreak += additionalBytes; // additional bytes is negative
+            return new Address(heapBaseAddress.getValue() + heapBreak);
+
+        } else if(additionalBytes == 0) { // sbrk used to get break address, not expand
             return new Address(heapBaseAddress.getValue() + heapBreak);
 
 		} else { // grow the heap
@@ -59,9 +62,9 @@ public class DynamicDataSegment
             System.arraycopy(heap, 0, newHeap, 0, heap.length);
             heap = newHeap;
 
-			Address result = new Address(heapBaseAddress.getValue() + heapBreak);
+			Address oldBreak = new Address(heapBaseAddress.getValue() + heapBreak);
 			heapBreak += additionalBytes;
-			return result;
+			return oldBreak;
 		}
 	}
 	

@@ -62,18 +62,18 @@ public class Editor extends InternalWindow {
 	private boolean changedSinceLastNotify;
 
 	// handle key combos for copy and paste
-	final static KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_x = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN); // Caps lock + =
-	final static KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
-	final static KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
-	final static KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_x = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN); // Caps lock + =
+	final static private KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
+	final static private KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
 	// references to javascript objects
 	private SafeJSObject jsWindow;
@@ -253,7 +253,7 @@ public class Editor extends InternalWindow {
 	}
 
 
-	public void startContinuousAssembly() {
+	private void startContinuousAssembly() {
 		if(assembleTask != null) {
 			assembleTask.cancel(false); // wait to finish
 		}
@@ -523,7 +523,7 @@ public class Editor extends InternalWindow {
 	 *
 	 * @param obs the observer to add
 	 */
-	public void addObserver(TemporaryObserver obs) {
+	void addObserver(TemporaryObserver obs) {
 		observers.add(obs);
 	}
 
@@ -597,6 +597,9 @@ public class Editor extends InternalWindow {
 
 		if(continuousAssemblyEnabled)
 			startContinuousAssembly();
+	}
+	public void reloadFile() {
+		loadFile(currentFile);
 	}
 
 	public void newFile() {
