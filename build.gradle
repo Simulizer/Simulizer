@@ -87,6 +87,7 @@ plugins {
 
 apply from: 'gradle/antlr.gradle'
 apply from: 'gradle/ace.gradle'
+apply from: 'gradle/build-metadata.gradle'
 apply from: 'gradle/dependencies.gradle'
 apply from: 'gradle/testing.gradle'
 apply from: 'gradle/deployment.gradle'

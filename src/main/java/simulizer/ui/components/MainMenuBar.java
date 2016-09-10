@@ -1,6 +1,5 @@
 package simulizer.ui.components;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,8 +27,8 @@ import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.FileUtils;
-import simulizer.utils.runner.SpimRunner;
 import simulizer.utils.UIUtils;
+import simulizer.utils.runner.SpimRunner;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 /**

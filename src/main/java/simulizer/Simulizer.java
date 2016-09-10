@@ -3,8 +3,6 @@ package simulizer;
 import simulizer.utils.UIUtils;
 
 public class Simulizer {
-	public static final String VERSION = "0.3 (beta)";
-	public static final String REPO = "https://github.com/mbway/Simulizer";
 	public static CommandLineArguments.Mode mode; // CMD_MODE || GUI_MODE
 
     public static void main(String[] args) {

@@ -1,7 +1,6 @@
 package simulizer.ui.components.cpu;
 
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import simulizer.ui.windows.CPUVisualisation;
 
 /**
