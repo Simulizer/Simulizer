@@ -61,6 +61,12 @@ public class DynamicDataSegmentTest {
 			assertEquals(10,heap.sbrk(-5).getValue());
 		}
 
+		{//valid: expand by 0. Used to retrieve break address
+			setUpHeap(); // max length
+			assertEquals(10,heap.sbrk(0).getValue());
+			assertEquals(10,heap.sbrk(0).getValue()); // check no movement
+		}
+
 		{//invalid: shrink below the bottom of the heap
 			setUpHeap(); // max length
 			assertEquals(10,heap.sbrk(5).getValue());

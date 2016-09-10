@@ -50,7 +50,7 @@ public enum Register {
 	private final int id;
 	private final String description;
 
-	private Register(int id, String description) {
+	Register(int id, String description) {
 		this.id = id;
 		this.description = description;
 	}
@@ -96,7 +96,7 @@ public enum Register {
 	 * @return the register with the given id
 	 */
 	public static Register fromID(int id) {
-		return Arrays.asList(values()).stream().filter(r -> r.getID() == id).findAny().get();
+		return Arrays.stream(values()).filter(r -> r.getID() == id).findAny().get();
 	}
 
 }

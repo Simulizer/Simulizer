@@ -113,18 +113,27 @@ public class MainMenuBar extends MenuBar {
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
-		saveAsItem.setDisable(wm.getCPU().isRunning());
+		saveAsItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
 
+		// | |-- Re-load
+		MenuItem reloadItem = new MenuItem("Reload");
+		reloadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
+		reloadItem.setOnAction(e -> {
+			if(!wm.getCPU().isRunning()) {
+                wm.getWorkspace().openEditorWithCallback(Editor::reloadFile);
+			}
+		});
+
 		// | |-- Options
-		MenuItem options = new MenuItem("Options");
-		options.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.OPTIONS));
+		MenuItem optionsItem = new MenuItem("Options");
+		optionsItem.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.OPTIONS));
 
 		// | |-- Exit
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
 
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, options, exitItem);
+		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, reloadItem, optionsItem, exitItem);
 	}
 
 

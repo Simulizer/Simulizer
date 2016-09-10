@@ -55,11 +55,11 @@ Meet the Team
 
 Building
 --------
-Dependencies to build on 64 bit Debian based Linux (eg Ubuntu)
+Package dependencies to build on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
 - `openjdk-8-jdk`
 - `spim` (for compatiability tests)
 - `openjfx` (JavaFX for openJDK-8)
-- `gradle` (or use gradle plugin with an IDE)
+- `gradle` (or use gradle plugin with an IDE or the `gradlew` wrapper)
 - add `/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jfxrt.jar` to the SDK classpath
     - your placement might be different. try: `find /usr -name 'jfxrt.jar'`
     - in Intellij IDEA: File > Project Structure > SDKs > 1.8 > Classpath
@@ -72,11 +72,6 @@ It is possible to use a compiler to generate MIPS output which Simulizer can
 consume (with some manual editing). See `work/gcc-mips.sh` for a script which
 uses gcc to cross compile for MIPS (the gcc cross compiler must be installed
 manually).
-
-Tip: to easily utilise javascript functionality with compiled code, write a
-void function with the needed arguments (eg `void hanoiMove(int a, int b) {}`)
-leaving the body blank. Then fill in the annotations to interact with the high
-level visualisation manually inside the empty body of the function
 
 
 Licence
