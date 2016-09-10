@@ -28,6 +28,9 @@ class CommandLineArguments {
         @Parameter(names = {"--show-debug-stream"}, description = "show the output that would get written to the debug tab in GUI mode")
         boolean showDebugStream = false;
 
+        @Parameter(names = {"--run-annotations"}, description = "whether annotations should be run")
+        boolean runAnnotations = false;
+        
         //TODO: not implemented
         //@Parameter(names = {"--output-errors"}, description = "file to output encountered parse errors")
         //public String errorOutputPath;

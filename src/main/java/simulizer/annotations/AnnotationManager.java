@@ -16,29 +16,36 @@ import simulizer.utils.UIUtils;
  * @author mbway
  */
 public class AnnotationManager {
-	private WindowManager wm;
 	private AnnotationExecutor ex;
-	private static final boolean giveDetailedInfo = true;
+	private static final boolean giveDetailedInfo = false;
+
+	private WindowManager wm = null;
+	private CPU cpu;
+	private IO io;
 
 	DebugBridge debugBridge;
 	SimulationBridge simulationBridge;
-	VisualisationBridge visualisationBridge;
+	VisualisationBridge visualisationBridge = null;
 
-	HighLevelVisualisation vis;
+	HighLevelVisualisation vis = null;
 
-	public AnnotationManager(WindowManager wm) {
-		this.wm = wm;
+	public AnnotationManager(CPU cpu, IO io) {
 		ex = null;
+		this.cpu = cpu;
+		this.io = io;
 
 		debugBridge = new DebugBridge();
 		simulationBridge = new SimulationBridge();
-		visualisationBridge = new VisualisationBridge();
+	}
 
-		vis = null;
+	public AnnotationManager(WindowManager wm) {
+		this(wm.getCPU(), wm.getIO());
+		visualisationBridge = new VisualisationBridge();
 	}
 
 	/**
 	 * get the current executor (script engine)
+	 * 
 	 * @return
 	 */
 	public AnnotationExecutor getExecutor() {
@@ -47,7 +54,9 @@ public class AnnotationManager {
 
 	/**
 	 * refreshes the executor when a new CPU is created
-	 * @param cpu the new CPU object
+	 * 
+	 * @param cpu
+	 *            the new CPU object
 	 */
 	public synchronized void onNewProgram(CPU cpu) {
 		// refresh for each new program
@@ -61,13 +70,15 @@ public class AnnotationManager {
 	 */
 	private synchronized void setupBridges() {
 		// set up access between the bridges and the components they talk to on the Java side
-		debugBridge.wm = wm;
-		debugBridge.io = wm.getIO();
+		debugBridge.cpu = cpu;
+		debugBridge.io = io;
 
-		simulationBridge.cpu = null;
-		
-		visualisationBridge.wm = wm;
-		wm.getHLVisualManager().removeAll();
+		simulationBridge.cpu = cpu;
+
+		if (visualisationBridge != null) {
+			visualisationBridge.wm = wm;
+			wm.getHLVisualManager().removeAll();
+		}
 	}
 
 	/**
@@ -88,16 +99,18 @@ public class AnnotationManager {
 		ex.bindGlobal("simulation", simulationBridge);
 		ex.bindGlobal("sim", simulationBridge);
 
-		ex.bindGlobal("visualisation", visualisationBridge);
-		ex.bindGlobal("vis", visualisationBridge);
+		if (visualisationBridge != null) {
+			ex.bindGlobal("visualisation", visualisationBridge);
+			ex.bindGlobal("vis", visualisationBridge);
+		}
 
 		setupBridges();
 	}
 
 	private String getAnnotationLineString(AnnotationMessage msg) {
-		if(msg.boundAddress != null) {
-			int lineNum = wm.getCPU().getProgram().lineNumbers.get(msg.boundAddress);
-			return "the annotation bound to line: " + (lineNum+1) + ".";
+		if (msg.boundAddress != null) {
+			int lineNum = cpu.getProgram().lineNumbers.get(msg.boundAddress);
+			return "the annotation bound to line: " + (lineNum + 1) + ".";
 		} else {
 			return "the initial annotation.";
 		}
@@ -105,22 +118,22 @@ public class AnnotationManager {
 
 	/**
 	 * extract the annotation from the message and send it to the executor to be executed
-	 * @param msg the message containing the annotation to run
+	 * 
+	 * @param msg
+	 *            the message containing the annotation to run
 	 */
 	public synchronized void processAnnotationMessage(AnnotationMessage msg) {
 		try {
 			ex.exec(msg.annotation);
-		} catch(AnnotationEarlyReturn ignored) {
-		} catch(AssertionError e) {
-			IO io = wm.getIO();
+		} catch (AnnotationEarlyReturn ignored) {
+		} catch (AssertionError e) {
 			io.printString(IOStream.ERROR, "Assertion error:\n");
 			io.printString(IOStream.ERROR, "  From " + getAnnotationLineString(msg) + "\n");
 			io.printString(IOStream.ERROR, "  With the code: \"" + e.getMessage().trim() + "\"\n");
 		} catch (ScriptException e) {
-			IO io = wm.getIO();
 			io.printString(IOStream.ERROR, "Annotation error: " + e.getMessage() + "\n");
 			io.printString(IOStream.ERROR, "  From " + getAnnotationLineString(msg) + "\n");
-			if(giveDetailedInfo)
+			if (giveDetailedInfo)
 				UIUtils.showExceptionDialog(e);
 		}
 	}
