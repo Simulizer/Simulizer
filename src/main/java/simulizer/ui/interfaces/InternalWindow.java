@@ -7,7 +7,6 @@ import java.util.TimerTask;
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -70,9 +69,6 @@ public abstract class InternalWindow extends Window {
 						e.consume();
 		});
 		// @formatter:on
-
-		// Adds a small window border
-		setPadding(new Insets(0, 2, 2, 2));
 
 		// For open animation
 		setScaleX(0);
@@ -167,6 +163,10 @@ public abstract class InternalWindow extends Window {
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
+		if (contentPane != null) {
+			contentPane.getStylesheets().clear();
+			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
+		}
 	}
 
 	/**
@@ -368,9 +368,8 @@ public abstract class InternalWindow extends Window {
 			}
 
 			// Fix style
-			// contentPane.setPadding(new Insets(0, 2, 2, 2));
-			// contentPane.getStyleClass().add("background");
-			// scene.getStylesheets().setAll(getStylesheets());
+			contentPane.getStylesheets().addAll(getStylesheets());
+			contentPane.getStyleClass().addAll(getStyleClass());
 
 			// Add the content pane to the window and show
 			extractedStage.setScene(scene);
