@@ -26,7 +26,6 @@ task buildMetadata << {
 
     def git = Grgit.open(file('.'))
     git.remote.list().each {
-      println it.name
       if (it.name == "origin") {meta.repo = it.url}
     }
     meta.branch   = git.branch.getCurrent().getName()

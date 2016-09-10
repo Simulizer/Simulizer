@@ -128,14 +128,14 @@ public class CPUVisualisation extends InternalWindow {
 		cpu = new CPU(this);
 		cpu.drawCPU();
 
-		widthProperty().addListener((observable, oldValue, newValue) -> {
+		getContentPane().widthProperty().addListener((observable, oldValue, newValue) -> {
 			width = newValue.doubleValue();
 			setPaneWidth(width);
 			setPaneHeight(height);
 			cpu.resizeShapes();
 		});
 
-		heightProperty().addListener((observable, oldValue, newValue) -> {
+		getContentPane().heightProperty().addListener((observable, oldValue, newValue) -> {
 			height = newValue.doubleValue();
 			setPaneHeight(height);
 			setPaneWidth(width);

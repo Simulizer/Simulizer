@@ -106,8 +106,8 @@ public class Logger extends InternalWindow implements Observer {
 		});
 		pane.add(submit, 1, 1);
 
-		widthProperty().addListener((e) -> pane.setPrefWidth(getContentPane().getWidth()));
-		heightProperty().addListener((e) -> pane.setPrefHeight(getContentPane().getHeight()));
+		getContentPane().widthProperty().addListener(e -> pane.setPrefWidth(getContentPane().getWidth()));
+		getContentPane().heightProperty().addListener(e -> pane.setPrefHeight(getContentPane().getHeight()));
 
 		input.getStyleClass().add("logger-input");
 		submit.getStyleClass().add("logger-submit");

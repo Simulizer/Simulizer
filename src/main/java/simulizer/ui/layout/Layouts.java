@@ -89,14 +89,13 @@ public class Layouts implements Iterable<Layout> {
 		layouts = layouts.stream().sorted((l1, l2) -> {
 			String n1 = l1.getName();
 			String n2 = l2.getName();
-			if(n1.equals("Default"))
+			if (n1.equals("Default"))
 				return -1;
-			else if(n2.equals("Default"))
+			else if (n2.equals("Default"))
 				return 1;
 			else
 				return n1.compareTo(n2);
 		}).collect(Collectors.toList());
-
 
 		if (defaultLayout == null)
 			defaultLayout = new Layout("MISSING_LAYOUT", new WindowLocation[0]);
@@ -142,10 +141,18 @@ public class Layouts implements Iterable<Layout> {
 		WindowLocation[] locations = layout.getWindowLocations();
 		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
 		for (int i = 0; i < locations.length; i++) {
+			// Open/Find the internal window
 			newOpenWindows[i] = workspace.openInternalWindow(locations[i].getWindowEnum());
-			setWindowDimentions(newOpenWindows[i]);
+
+			// Ensure the window is not extracted
+			if (newOpenWindows[i].isExtracted())
+				newOpenWindows[i].toggleWindowExtracted();
+			
+			// Update internal window dimensions
+			setWindowDimensions(newOpenWindows[i]);
 		}
 
+		// Close any internal windows not in the layout
 		workspace.closeAllExcept(newOpenWindows);
 
 	}
@@ -153,9 +160,10 @@ public class Layouts implements Iterable<Layout> {
 	/**
 	 * Sets the passed InternalWindow to the dimensions defined in the selected layout
 	 * 
-	 * @param w the InternalWindow to set the dimensions for
+	 * @param w
+	 *            the InternalWindow to set the dimensions for
 	 */
-	public void setWindowDimentions(InternalWindow w) {
+	public void setWindowDimensions(InternalWindow w) {
 		double width = workspace.getWidth(), height = workspace.getHeight();
 
 		WindowLocation[] wl = layout.getWindowLocations();

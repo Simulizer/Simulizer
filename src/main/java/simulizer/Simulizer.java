@@ -1,8 +1,11 @@
 package simulizer;
 
+import javafx.scene.image.Image;
+import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 public class Simulizer {
+	private static Image icon = null;
 	public static CommandLineArguments.Mode mode; // CMD_MODE || GUI_MODE
 
     public static void main(String[] args) {
@@ -39,5 +42,14 @@ public class Simulizer {
 			UIUtils.showExceptionDialog(e);
 		}
 	}
-
+   
+	/**
+	 * @return Simulizer icon image
+	 */
+	public static Image getIcon() {
+		if (icon == null) {
+			icon = new Image(FileUtils.getResourcePath("/img/logo.png"));
+		}
+		return icon;
+	}
 }

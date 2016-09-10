@@ -410,7 +410,7 @@ public class MainMenuBar extends MenuBar {
 		for (WindowEnum wenum : WindowEnum.values()) {
 			if (wenum.showInWindowsMenu()) {
 				CheckMenuItem item = new CheckMenuItem(wenum.toString());
-				item.setSelected(wm.getWorkspace().findInternalWindow(wenum) != null);
+				item.setSelected(wm.getWorkspace().windowIsOpen(wenum));
 				item.setOnAction(e -> {
 					InternalWindow window = wm.getWorkspace().findInternalWindow(wenum);
 					if (window == null)

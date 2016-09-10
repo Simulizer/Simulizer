@@ -15,6 +15,7 @@ import simulizer.simulation.messages.ProblemMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
 import simulizer.ui.WindowManager;
+import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Editor;
 import simulizer.ui.windows.PipelineView;
@@ -37,28 +38,32 @@ public class UISimulationListener extends SimulationListener {
 		switch (m.detail) {
 			case PROGRAM_LOADED: {
 				wm.getAnnotationManager().onNewProgram(wm.getCPU());
-
-			} break;
+			}
+				break;
 			case SPEED_CHANGED: {
-				Platform.runLater(() -> wm.getMenuBar().getControls().setSliderToMatch(wm.getCPU().getCycleFreq()));
-			} break;
+				Platform.runLater(() -> {
+					wm.getMenuBar().getControls().setSliderToMatch(wm.getCPU().getCycleFreq());
+					for (InternalWindow w : wm.getWorkspace().getAllWindows()) {
+						MainMenuBar bar = w.getMenuBar();
+						if (bar != null)
+							bar.getControls().setSliderToMatch(wm.getCPU().getCycleFreq());
+					}
+				});
+			}
+				break;
 			case SIMULATION_STARTED: {
 				startTime = System.currentTimeMillis();
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Simulation Running"));
 
-				if(wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
+				if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 					wm.getWorkspace().openEditorWithCallback((editor) -> {
-						System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'"
-								+ (editor.hasOutstandingChanges() ? " with outstanding changes" : "")
-								+ (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+						System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'" + (editor.hasOutstandingChanges() ? " with outstanding changes" : "") + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 
 						editor.executeMode();
 					});
 				} else {
-					System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'"
-							+ " with the editor closed"
-							+ (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+					System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'" + " with the editor closed" + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 				}
 
 				// Clear the pipeline model when a new simulation starts
@@ -119,8 +124,7 @@ public class UISimulationListener extends SimulationListener {
 					int decodeL = lineNums.getOrDefault(decode, -1);
 					int executeL = lineNums.getOrDefault(execute, -1);
 
-					wm.getWorkspace().openEditorWithCallback((editor) ->
-							editor.highlightPipeline(fetchL, decodeL, executeL));
+					wm.getWorkspace().openEditorWithCallback((editor) -> editor.highlightPipeline(fetchL, decodeL, executeL));
 				}
 			}
 		}

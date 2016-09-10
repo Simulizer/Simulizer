@@ -1,18 +1,27 @@
 package simulizer.ui.interfaces;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import jfxtras.scene.control.window.Window;
+import simulizer.Simulizer;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
 
@@ -25,7 +34,10 @@ import simulizer.ui.theme.Theme;
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
-	private boolean isClosed = false;
+	private boolean isClosed = false, isExtracted = false;
+	private Stage extractedStage = new Stage();
+	private StackPane contentPane;
+	private MainMenuBar menuBar;
 
 	public InternalWindow() {
 
@@ -34,22 +46,30 @@ public abstract class InternalWindow extends Window {
 		setCacheHint(CacheHint.SPEED);
 
 		// TODO figure out why this isn't working
-		setCursor(Cursor.DEFAULT);
+		getContentPane().setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
 		setTitle(WindowEnum.getName(this));
-
-		// Add close icon
-		getRightIcons().add(new CustomCloseIcon(this));
 
 		// Bring to front when clicked
 		addEventFilter(MouseEvent.MOUSE_CLICKED, e -> toFront());
 
 		// Update layout on move/resize
-		addEventHandler(MouseEvent.MOUSE_DRAGGED, (e) -> Platform.runLater(this::calculateLayout));
+		addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> Platform.runLater(this::calculateLayout));
 
-		// Adds a small window border
-		setPadding(new Insets(0, 2, 2, 2));
+		// Fix internal window to main window
+		// @formatter:off
+		addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
+			// Check whether feature is enabled
+			if ((boolean) wm.getSettings().get("internal-window.mouse-borders"))
+				// Check mouse cursor is still inside workspace
+				if (e.getSceneX() < 0                            ||                              // Left border check
+					e.getSceneY() < wm.getMenuBar().getHeight()  ||                              // Top border check
+					e.getSceneX() > wm.getWorkspace().getWidth() ||                              // Right border check
+					e.getSceneY() > wm.getWorkspace().getHeight() + wm.getMenuBar().getHeight()) // Bottom border check
+						e.consume();
+		});
+		// @formatter:on
 
 		// For open animation
 		setScaleX(0);
@@ -97,7 +117,14 @@ public abstract class InternalWindow extends Window {
 	 *            the WindowManager
 	 */
 	public final void setWindowManager(WindowManager wm) {
-		this.wm = wm;
+		if (this.wm == null) {
+			this.wm = wm;
+
+			// Add window icons
+			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
+				getRightIcons().add(new CustomExtractIcon(this));
+			getRightIcons().add(new CustomCloseIcon(this));
+		}
 	}
 
 	/**
@@ -109,7 +136,9 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Performs an animation to get the users attention
-	 * @param sf the scale factor to enlarge the window by (1.0 => no scale)
+	 * 
+	 * @param sf
+	 *            the scale factor to enlarge the window by (1.0 => no scale)
 	 */
 	public final void emphasise(double sf) {
 		// Ignore if window is just being opened
@@ -135,6 +164,10 @@ public abstract class InternalWindow extends Window {
 	public void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
+		if (contentPane != null) {
+			contentPane.getStylesheets().clear();
+			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
+		}
 	}
 
 	/**
@@ -193,9 +226,23 @@ public abstract class InternalWindow extends Window {
 		Platform.runLater(sc::playFromStart);
 	}
 
+	/**
+	 * Sets an internal windows title (use this instead of setTitle so that extracted windows have their title updated)
+	 * 
+	 * @param title
+	 *            the title of the internal window
+	 */
+	public void setWindowTitle(String title) {
+		setTitle(title);
+		if (isExtracted)
+			extractedStage.setTitle(title);
+	}
+
 	@Override
 	public void close() {
 		isClosed = true;
+		if (isExtracted)
+			toggleWindowExtracted();
 		super.close();
 	}
 
@@ -220,7 +267,7 @@ public abstract class InternalWindow extends Window {
 	 *            the height of the workspace
 	 */
 	public void setWorkspaceSize(double width, double height) {
-		if (width != Double.NaN && height != Double.NaN) {
+		if (width != Double.NaN && height != Double.NaN && !isExtracted) {
 			setLayoutX(layX * width);
 			setPrefWidth(layWidth * width);
 			setLayoutY(layY * height);
@@ -239,6 +286,103 @@ public abstract class InternalWindow extends Window {
 			layWidth = getWidth() / windowWidth;
 			layY = getLayoutY() / windowHeight;
 			layHeight = getHeight() / windowHeight;
+		}
+	}
+
+	@Override
+	public Pane getContentPane() {
+		// Overridden because the content pane is sometimes in an extracted window
+		if (contentPane == null)
+			return super.getContentPane();
+		else
+			return contentPane;
+	}
+
+	/**
+	 * @return if the window is extracted or not
+	 */
+	public boolean isExtracted() {
+		return isExtracted;
+	}
+
+	/**
+	 * @return main menu bar if window has one 
+	 */
+	public MainMenuBar getMenuBar() {
+		return menuBar;
+	}
+
+	/**
+	 * Switches between the internal window being inside the workspace and in it's own separate window.
+	 */
+	public synchronized void toggleWindowExtracted() {
+		if (isExtracted) {
+			// Restore to workspace
+			// Close the window
+			extractedStage.close();
+			extractedStage = null;
+			menuBar = null;
+
+			// Move all contentPane components back to the Internal Window
+			for (Iterator<Node> i = contentPane.getChildren().iterator(); i.hasNext();) {
+				Node n = i.next();
+				i.remove();
+				super.getContentPane().getChildren().add(n);
+			}
+
+			// Add internal window into the workspace
+			wm.getWorkspace().getPane().getChildren().add(this);
+			contentPane = null;
+
+			// Resize the internal window into the workspace
+			isExtracted = false;
+			setWorkspaceSize(wm.getWorkspace().getWidth(), wm.getWorkspace().getHeight());
+		} else {
+			// Extract to a separate window
+			// Remove this internal window pane from workspace
+			wm.getWorkspace().getPane().getChildren().remove(this);
+
+			// Move all components to a new StackPane (because JavaFX...)
+			contentPane = new StackPane();
+			for (Iterator<Node> i = super.getContentPane().getChildren().iterator(); i.hasNext();) {
+				Node n = i.next();
+				i.remove();
+				contentPane.getChildren().add(n);
+			}
+
+			// Create a new window to put the content pane in
+			extractedStage = new Stage();
+			extractedStage.setTitle(getTitle());
+			extractedStage.getIcons().add(Simulizer.getIcon());
+			extractedStage.setOnCloseRequest(e -> toggleWindowExtracted());
+			extractedStage.setWidth(getWidth());
+			extractedStage.setHeight(getHeight());
+
+			// Create the scene
+			Scene scene = null;
+			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
+				GridPane root = new GridPane();
+				scene = new Scene(root);
+
+				menuBar = new MainMenuBar(wm);
+				GridPane.setHgrow(menuBar, Priority.ALWAYS);
+				root.add(menuBar, 0, 0);
+
+				GridPane.setHgrow(contentPane, Priority.ALWAYS);
+				GridPane.setVgrow(contentPane, Priority.ALWAYS);
+				root.add(contentPane, 0, 1);
+			} else {
+				scene = new Scene(contentPane);
+			}
+
+			// Fix style
+			contentPane.getStylesheets().addAll(getStylesheets());
+			contentPane.getStyleClass().addAll(getStyleClass());
+
+			// Add the content pane to the window and show
+			extractedStage.setScene(scene);
+			extractedStage.show();
+			isExtracted = true;
 		}
 	}
 }
