@@ -37,6 +37,7 @@ public abstract class InternalWindow extends Window {
 	private boolean isClosed = false, isExtracted = false;
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
+	private MainMenuBar menuBar;
 
 	public InternalWindow() {
 
@@ -305,14 +306,22 @@ public abstract class InternalWindow extends Window {
 	}
 
 	/**
+	 * @return main menu bar if window has one 
+	 */
+	public MainMenuBar getMenuBar() {
+		return menuBar;
+	}
+
+	/**
 	 * Switches between the internal window being inside the workspace and in it's own separate window.
 	 */
-	public void toggleWindowExtracted() {
+	public synchronized void toggleWindowExtracted() {
 		if (isExtracted) {
 			// Restore to workspace
 			// Close the window
 			extractedStage.close();
 			extractedStage = null;
+			menuBar = null;
 
 			// Move all contentPane components back to the Internal Window
 			for (Iterator<Node> i = contentPane.getChildren().iterator(); i.hasNext();) {
@@ -355,8 +364,7 @@ public abstract class InternalWindow extends Window {
 				GridPane root = new GridPane();
 				scene = new Scene(root);
 
-				// Create a new MainMenuBar and add to the gridPane
-				MainMenuBar menuBar = new MainMenuBar(wm);
+				menuBar = new MainMenuBar(wm);
 				GridPane.setHgrow(menuBar, Priority.ALWAYS);
 				root.add(menuBar, 0, 0);
 

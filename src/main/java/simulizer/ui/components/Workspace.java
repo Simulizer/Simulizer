@@ -171,6 +171,10 @@ public class Workspace extends Observable implements Themeable {
 		return findInternalWindow(window) != null;
 	}
 
+	public Set<InternalWindow> getAllWindows() {
+		return Collections.unmodifiableSet(openWindows);
+	}
+
 	/**
 	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open
 	 *
@@ -240,7 +244,7 @@ public class Workspace extends Observable implements Themeable {
 				} catch (InterruptedException ex) {
 					UIUtils.showExceptionDialog(ex);
 				}
-			} , "Editor-Waiting-For-Load");
+			}, "Editor-Waiting-For-Load");
 			waiting.setDaemon(true);
 			waiting.start();
 		}
