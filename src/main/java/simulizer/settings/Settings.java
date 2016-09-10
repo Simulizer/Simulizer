@@ -50,7 +50,7 @@ public class Settings {
 		// Sets up the structure of the settings file
 		// @formatter:off
 		settings.add(new BooleanSetting("debug", "Debug Menu", "Show debug menu in the Menu Bar", false));
-		settings.add(new ObjectSetting("window", "Window")
+		settings.add(new ObjectSetting("window", "Main Window")
 				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 300, Integer.MAX_VALUE))
 				.add(new IntegerSetting("height", "Height", "Default window height", 705, 300, Integer.MAX_VALUE))
 			);
@@ -67,8 +67,14 @@ public class Settings {
 					  	.add(new DoubleSetting("sensitivity", "Sensitivity", "How close the window needs to be to the gridline before it snaps", 10, 0, Double.MAX_VALUE))
 					  	.add(new IntegerSetting("delay", "Delay before snap", "How long to wait until the window snaps", 200, 0, Integer.MAX_VALUE))
 					  	)
-					.add(new BooleanSetting("lock-to-window", "Lock to main window", "Stops InternalWindows from exiting the Main Window"))
 					);
+		settings.add(new ObjectSetting("internal-window", "Internal Window")
+				.add(new BooleanSetting("mouse-borders", "Lock to main window", "Stop internal windows from being lost outside the Main Window", true))
+				.add(new ObjectSetting("extractable", "Extractable")
+					.add(new BooleanSetting("enabled", "Enable feature", "Allow for internal windows to be extracted from the main window", true))
+					.add(new BooleanSetting("menu-bar", "Include menu bar", "Include the main menu bar in each extracted window for easy access", false))
+					)
+			);
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
 						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))

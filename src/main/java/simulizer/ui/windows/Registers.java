@@ -43,10 +43,10 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private Set<Integer> changedRegisters = new HashSet<>();
 
 	public Registers() {
-		widthProperty().addListener((o, old, newValue) -> {
+		getContentPane().widthProperty().addListener((o, old, newValue) -> {
 			int numColumns = table.getColumns().size();
 			for (TableColumn<Data, ?> column : table.getColumns())
-				column.setPrefWidth(getWidth() / numColumns);
+				column.setPrefWidth(getContentPane().getWidth() / numColumns);
 		});
 		table.setCursor(Cursor.DEFAULT);
 	}
