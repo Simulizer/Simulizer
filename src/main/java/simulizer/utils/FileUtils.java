@@ -123,19 +123,21 @@ public class FileUtils {
 			InputStream in = FileUtils.class.getResourceAsStream(path);
 			if(in != null) {
 				br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+				for(int c = br.read(); c != -1; c = br.read())
+                    sb.append((char) c);
 			} else {
 				throw new FileNotFoundException(path);
 			}
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-		    Simulizer.handleException(e);
-		}
-
-		try {
-			assert br != null;
-			for (int c = br.read(); c != -1; c = br.read())
-				sb.append((char) c);
 		} catch (IOException e) {
-		    Simulizer.handleException(e);
+			Simulizer.handleException(e);
+		} finally {
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					Simulizer.handleException(e);
+				}
+			}
 		}
 
 		return sb.toString();

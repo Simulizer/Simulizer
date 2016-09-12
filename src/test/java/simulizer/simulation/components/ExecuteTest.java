@@ -75,7 +75,7 @@ public class ExecuteTest {
 		reg.setAccessible(true);
 		Word[] registers = (Word[])reg.get(cpu);
 		
-		return DataConverter.decodeAsSigned(registers[register.getID()].getWord());
+		return DataConverter.decodeAsSigned(registers[register.getID()].getBytes());
 	}
 	
 	/**method will access a register and get it's unsigned long value
@@ -90,7 +90,7 @@ public class ExecuteTest {
 		reg.setAccessible(true);
 		Word[] registers = (Word[])reg.get(cpu);
 		
-		return DataConverter.decodeAsUnsigned(registers[register.getID()].getWord());
+		return DataConverter.decodeAsUnsigned(registers[register.getID()].getBytes());
 	}
 	
 	/**method creates a cpu and then runs a program on it

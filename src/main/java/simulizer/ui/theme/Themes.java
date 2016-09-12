@@ -56,15 +56,14 @@ public class Themes implements Iterable<Theme> {
 
 		try {
 			File[] fs = folder.toFile().listFiles();
-
-			if(fs == null)
-				throw new NullPointerException();
+			assert(fs != null);
 
 			// Check all folders in the theme folder
 			for (File themeFolder : fs) {
 				if (themeFolder.isDirectory()) {
 					// Check for a theme.json file
 					File[] themeJSONs = themeFolder.listFiles((e) -> e.getName().toLowerCase().equals("theme.json"));
+                    assert(themeJSONs != null);
 					if (themeJSONs.length == 1) {
 						File themeJSON = themeJSONs[0];
 						InputStream in = Files.newInputStream(themeJSON.toPath());

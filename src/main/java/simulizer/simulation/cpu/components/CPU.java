@@ -48,16 +48,15 @@ public class CPU {
 
 	private MessageManager messageManager;
 
-	protected Address programCounter;
-	protected Statement instructionRegister;
+	Address programCounter;
+	Statement instructionRegister;
 
-	private ALU Alu;
-	protected final Clock clock;
-	protected long cycles;
+	final Clock clock;
+	long cycles;
 	/**
 	 * used for resume for single cycle
 	 */
-	protected boolean breakAfterCycle;
+	boolean breakAfterCycle;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -71,8 +70,8 @@ public class CPU {
 
 	protected Map<Address, Annotation> annotations;
 
-	protected boolean isRunning;// for program status
-	protected Address lastAddress;// used to determine end of program
+	boolean isRunning;// for program status
+	Address lastAddress;// used to determine end of program
 
 	private IO io;
 
@@ -263,7 +262,7 @@ public class CPU {
 		Address textSegmentStart = this.program.textSegmentStart;
 		Address dataSegmentStart = this.program.dataSegmentStart;
 		Address dynamicSegmentStart = this.program.dynamicSegmentStart;
-		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getWord()));
+		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getBytes()));
 		byte[] staticDataSegment = this.program.dataSegment;
 		Map<Address, Statement> textSegment = this.program.textSegment;
 		this.memory = new MainMemory(textSegment, staticDataSegment, textSegmentStart, dataSegmentStart, dynamicSegmentStart, stackPointer);
@@ -289,7 +288,6 @@ public class CPU {
 		this.registers[Register.sp.getID()] = this.program.initialSP;// setting up stack pointer
 		sendMessage(new RegisterChangedMessage(Register.gp));
 
-		this.Alu = new ALU();// initialising Alu
 		this.lastAddress = program.textSegmentLast;
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.PROGRAM_LOADED));
@@ -478,8 +476,18 @@ public class CPU {
 	}
 
 	// Standard get methods, don't do anything special
+
+	/**
+     * only use this method with the simulation bridge.
+	 */
 	public Word[] getRegisters() {
 		return registers;
+	}
+	public Word getRegister(Register r) {
+		return registers[r.getID()];
+	}
+	public void setRegister(Register r, Word w) {
+		registers[r.getID()] = w;
 	}
 
 	public MainMemory getMainMemory() {
@@ -488,10 +496,6 @@ public class CPU {
 
 	public Address getProgramCounter() {
 		return programCounter;
-	}
-
-	public ALU getALU() {
-		return Alu;
 	}
 
 	public IO getIO() {

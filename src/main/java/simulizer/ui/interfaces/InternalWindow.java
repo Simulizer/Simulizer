@@ -163,6 +163,7 @@ public abstract class InternalWindow extends Window {
 						public void run() {
 							double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
 							coords = grid.moveToGrid(coords, resize);
+							// TODO: this is doing floating point equality!
 							if (coords[2] != getLayoutX() + getWidth())
 								setPrefWidth(coords[2] - coords[0]);
 							if (coords[3] != getLayoutY() + getHeight())

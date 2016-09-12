@@ -302,12 +302,9 @@ public class Workspace extends Observable implements Themeable {
 		List<InternalWindow> keepOpen = new ArrayList<>();
 		Collections.addAll(keepOpen, theseWindows);
 
-		List<InternalWindow> close = new ArrayList<>();
-		for (InternalWindow window : openWindows)
-			if (!keepOpen.contains(window))
-				close.add(window);
-
-		close.forEach(this::removeWindows);
+		openWindows.stream()
+				.filter(window -> !keepOpen.contains(window))
+				.forEach(this::removeWindows);
 	}
 
 	/**

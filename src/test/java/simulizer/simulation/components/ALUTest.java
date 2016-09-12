@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -21,21 +20,11 @@ import simulizer.simulation.exceptions.InstructionException;
  * @author Charlie Street
  * 
  */
+@SuppressWarnings("WeakerAccess")
 @Category({UnitTests.class})
 public class ALUTest {
 
-	private ALU alu;
-	
-	/**initialising the alu
-	 * 
-	 */
-	@Before
-	public void ALUSetup()
-	{
-		this.alu = new ALU();
-	}
-	
-	/**produces an optional signed word 
+	/**produces an optional signed word
 	 * this is the type required by the alu
 	 * @param num the number to convert
 	 * @return number in correct format
@@ -65,7 +54,7 @@ public class ALUTest {
 	 */
 	public long executeS(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsSigned(this.alu.execute(instruction, word1, word2).getWord());
+		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2).getBytes());
 	}
 	
 	/**executes a given alu operation with data passed in 
@@ -78,7 +67,7 @@ public class ALUTest {
 	 */
 	public long executeU(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsUnsigned(this.alu.execute(instruction, word1, word2).getWord());
+		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2).getBytes());
 	}
 	
 	/**testing all alu operations with 3 cases each

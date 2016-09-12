@@ -3,13 +3,11 @@ package simulizer.annotations;
 import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.MainMemory;
-import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
-import simulizer.utils.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +17,8 @@ import java.util.List;
  *
  * @author mbway
  */
-@SuppressWarnings("unused")
-class SimulationBridge {
+@SuppressWarnings({"unused", "WeakerAccess"})
+public class SimulationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
 	CPU cpu = null;
@@ -44,21 +42,19 @@ class SimulationBridge {
 	}
 
 	public long getRegisterU(Register r) {
-		Word[] regs = getRegisters();
-		return DataConverter.decodeAsUnsigned(regs[r.getID()].getWord());
+		return DataConverter.decodeAsUnsigned(cpu.getRegister(r).getBytes());
 	}
 	public long getRegisterS(Register r) {
-		Word[] regs = getRegisters();
-		return DataConverter.decodeAsSigned(regs[r.getID()].getWord());
+		return DataConverter.decodeAsSigned(cpu.getRegister(r).getBytes());
 	}
 
 	public void setRegisterU(Register r, long val) {
 		Word w = new Word(DataConverter.encodeAsUnsigned(val));
-		getRegisters()[r.getID()] = w;
+        cpu.setRegister(r, w);
 	}
 	public void setRegisterS(Register r, long val) {
 		Word w = new Word(DataConverter.encodeAsSigned(val));
-		getRegisters()[r.getID()] = w;
+		cpu.setRegister(r, w);
 	}
 
 	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) throws MemoryException, HeapException, StackException {

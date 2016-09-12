@@ -138,7 +138,7 @@ public class CPUPipeline extends CPU {
 				break;
 			case SPECIAL:
 				if(instruction.getInstruction().equals(Instruction.syscall)) {
-					long syscallCode = DataConverter.decodeAsSigned(getRegisters()[Register.v0.getID()].getWord());
+					long syscallCode = DataConverter.decodeAsSigned(getRegister(Register.v0).getBytes());
 					if(syscallCode == 5||syscallCode==8||syscallCode==9||syscallCode==12) {//these syscall codes write to v0
 						registers.add(Register.v0);
 					}
@@ -312,7 +312,7 @@ public class CPUPipeline extends CPU {
 	 */
 	protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
 		if(instruction.getInstruction().equals(Instruction.jal)) {//jal by default will take incorrect PC value, this needs to be dealt with
-			long newCurrentAddress = DataConverter.decodeAsUnsigned(instruction.asJType().getCurrentAddress().get().getWord())-4;
+			long newCurrentAddress = DataConverter.decodeAsUnsigned(instruction.asJType().getCurrentAddress().get().getBytes())-4;
 			Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
 			instruction = new JTypeInstruction(Instruction.jal,instruction.asJType().getJumpAddress(),trueCurrent);
 		}

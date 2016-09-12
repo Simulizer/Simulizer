@@ -54,16 +54,6 @@ public class MemoryTest {
 	/**method will test the read and write functionality of the memory
 	 * everything except the test segment will be tested
 	 * due to the nature of the memory I will test at the boundaries, if they work, everything in between will work
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testReadWriteMem() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -81,7 +71,7 @@ public class MemoryTest {
 		//now to carry out tests
 		Address dataSegStart = program.dataSegmentStart;
 		Address dynamicSegStart = program.dynamicSegmentStart;
-		Address topOfStack = new Address((int)DataConverter.decodeAsSigned(program.initialSP.getWord()));
+		Address topOfStack = new Address((int)DataConverter.decodeAsSigned(program.initialSP.getBytes()));
 		
 		Field mem = cpu.getClass().getDeclaredField("memory");
 		mem.setAccessible(true);
@@ -220,16 +210,6 @@ public class MemoryTest {
 	 * it will check if it can find valid instructions in the segment
 	 * invalid instructions within the segment
 	 * and out of bounds checks
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testReadTextSegment() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException

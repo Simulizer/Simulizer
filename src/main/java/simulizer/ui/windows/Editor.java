@@ -49,7 +49,8 @@ import simulizer.utils.UIUtils;
  *
  * @author mbway
  */
-public class Editor extends InternalWindow {
+@SuppressWarnings("WeakerAccess")
+public class Editor extends InternalWindow { //TODO: extract model from the view.
 
 	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
 	private static File currentFile = null; // persists across instances of the window
@@ -103,7 +104,7 @@ public class Editor extends InternalWindow {
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	public static class Bridge {
 		private Editor editor;
 		public List<Problem> problems;
@@ -328,8 +329,8 @@ public class Editor extends InternalWindow {
 			"/external/theme-chaos.js",
 			"/external/theme-monokai.js",
 			"/external/theme-tomorrow_night_eighties.js",
-				"/external/theme-predawn.js",
-				"/external/theme-flatland.js"
+            "/external/theme-predawn.js",
+            "/external/theme-flatland.js"
 		);
 		for(String theme : availableThemes) {
 			// eg "/external/theme-monokai.js" contains the substring "monokai"

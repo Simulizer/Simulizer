@@ -70,10 +70,10 @@ public class CPUListener extends SimulationListener {
      * Creates animations for the instructions and passes them to the animation processor
      * @param instruction The current instruction
      */
-    public void processInstruction(Instruction instruction) {
+    private void processInstruction(Instruction instruction) {
         if(instruction == null) return;
         String instructionName = instruction.toString();
-        switch(instruction) {
+        switch(instruction) { //TODO: switch is not exhaustive. Add a default case as well.
             case beq:
             case beqz:
             case bgtz:
@@ -354,7 +354,7 @@ public class CPUListener extends SimulationListener {
      * Processes an I-TYPE instruction
      * @param instruction The name of the instruction
      */
-    public void processIType(String instruction){
+    private void processIType(String instruction){
         int speed = getInstructionFraction(4);
 
         Runnable t1 = () -> {
@@ -392,7 +392,7 @@ public class CPUListener extends SimulationListener {
      * Processes an R-TYPE instruction
      * @param instruction The name of the instruction
      */
-    public void processRType(String instruction){
+    private void processRType(String instruction){
         int speed = getInstructionFraction(3);
 
         Runnable t1 = () -> {
@@ -423,7 +423,7 @@ public class CPUListener extends SimulationListener {
     /**
      * When a new cycle starts
      */
-    public void startOfCycle(){
+    private void startOfCycle(){
         animationProcessor.newCycle();
     }
 
