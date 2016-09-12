@@ -1,11 +1,10 @@
 package simulizer.assembler.representation;
 
 import simulizer.Simulizer;
-import simulizer.utils.UIUtils;
+import simulizer.utils.FileUtils;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,20 +16,22 @@ import java.util.stream.Collectors;
 public class ProgramStringBuilder {
 
     public static void dumpToFile(Program p, String filename) {
+        Writer out = null;
         try {
-            PrintWriter out = new PrintWriter(filename);
-            out.print(dumpToString(p));
-            out.close();
+            out = FileUtils.getUTF8FileWriter(filename);
+            out.write(dumpToString(p));
         } catch(IOException e) {
             Simulizer.handleException(e);
+        } finally {
+            FileUtils.quietClose(out);
         }
     }
 
-	public static String lineNumString(Integer i) {
+	private static String lineNumString(Integer i) {
 		return "line:" + i.toString() + " (" + (i+1) + " in the editor)";
 	}
 
-    public static class DescriptiveStringBuilder {
+    private static class DescriptiveStringBuilder {
 		private final StringBuilder sb = new StringBuilder();
 
 		@Override public String toString() {
@@ -78,7 +79,7 @@ public class ProgramStringBuilder {
 		}
 	}
 
-    public static String dumpToString(Program p) {
+    private static String dumpToString(Program p) {
         DescriptiveStringBuilder sb = new DescriptiveStringBuilder();
 
         sb.append("# Misc Data #\n");

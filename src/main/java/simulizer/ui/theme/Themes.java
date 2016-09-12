@@ -1,10 +1,7 @@
 package simulizer.ui.theme;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +13,7 @@ import java.util.TreeSet;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -66,8 +64,7 @@ public class Themes implements Iterable<Theme> {
                     assert(themeJSONs != null);
 					if (themeJSONs.length == 1) {
 						File themeJSON = themeJSONs[0];
-						InputStream in = Files.newInputStream(themeJSON.toPath());
-						BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                        Reader reader = FileUtils.getUTF8FileReader(themeJSON);
 						Theme t = g.fromJson(new JsonReader(reader), Theme.class);
 						t.location = themeFolder.toURI().toString();
 						t.themes = this;

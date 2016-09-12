@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,6 +19,7 @@ import simulizer.settings.types.DoubleSetting;
 import simulizer.settings.types.IntegerSetting;
 import simulizer.settings.types.ObjectSetting;
 import simulizer.settings.types.StringSetting;
+import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -36,11 +38,10 @@ public class Settings {
 	 * @param json
 	 *            the json file to load/parse
 	 * @return the settings object representing the json file
-	 * @throws IOException
 	 */
 	public static Settings loadSettings(File json) throws IOException {
 		JsonParser parser = new JsonParser();
-		JsonElement jsonElement = parser.parse(new FileReader(json));
+		JsonElement jsonElement = parser.parse(FileUtils.getUTF8FileReader(json));
 		JsonObject jsonObject = jsonElement.getAsJsonObject();
 		return new Settings(json, jsonObject);
 	}
@@ -210,7 +211,7 @@ public class Settings {
 	 * Saves settings to the json file
 	 */
 	public void save() {
-		try (Writer writer = new FileWriter(json)) {
+		try (Writer writer = FileUtils.getUTF8FileWriter(json)) {
 			Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().setPrettyPrinting().disableHtmlEscaping().create();
 			JsonObject element = new JsonObject();
 			for (SettingValue<?> s : settings.getValue())

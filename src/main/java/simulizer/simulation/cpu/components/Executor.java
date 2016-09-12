@@ -226,12 +226,12 @@ class Executor {
     			cpu.stopRunning();
     			break;
     		case 11: {//print char
-				char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}).charAt(0);//int directly to char
+				char toPrintChar = new String(new byte[]{DataConverter.encodeAsUnsigned(a0)[3]}, StandardCharsets.UTF_8).charAt(0);//int directly to char
 				cpu.getIO().printChar(IOStream.STANDARD, toPrintChar);
 			} break;
     		case 12: {//read char
 				String readChar = cpu.getIO().readChar(IOStream.STANDARD) + "";//from console
-				byte[] asBytes = readChar.getBytes();
+				byte[] asBytes = readChar.getBytes(StandardCharsets.UTF_8);
 				long asLong = DataConverter.decodeAsSigned(asBytes);
 				Word charAsWord = new Word(DataConverter.encodeAsSigned(asLong));//format for register storage
 				cpu.setRegister(Register.v0, charAsWord);

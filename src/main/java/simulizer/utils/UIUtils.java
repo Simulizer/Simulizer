@@ -2,12 +2,7 @@ package simulizer.utils;
 
 import java.awt.Desktop;
 import java.awt.Font;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -154,21 +149,15 @@ public class UIUtils {
 			System.err.print(exceptionText);
 
 			// write to a file log
-			BufferedWriter log = null;
+			Writer log = null;
 			try {
-				log = new BufferedWriter(new FileWriter("./exceptions.log", true));
+                log = FileUtils.getUTF8FileAppendWriter("./exceptions.log");
 				log.write(exceptionText + "\n\n\n");
 				log.flush();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			} finally {
-				if(log != null) {
-					try {
-						log.close();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
+                FileUtils.quietClose(log);
 			}
 
 			simultaneousExceptionDialogs.increment();

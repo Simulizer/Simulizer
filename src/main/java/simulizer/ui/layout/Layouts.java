@@ -2,6 +2,7 @@ package simulizer.ui.layout;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,7 +124,8 @@ public class Layouts implements Iterable<Layout> {
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
-			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(StandardCharsets.UTF_8),
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			UIUtils.showErrorDialog("Error Saving Layout", "Unable to save the file");
 		}

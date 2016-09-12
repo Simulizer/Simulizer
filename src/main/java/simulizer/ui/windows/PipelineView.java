@@ -45,6 +45,7 @@ import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
+import simulizer.utils.FileUtils;
 
 /**
  * Visualises the instructions during each stage of the pipeline (fetch, decode, execute).
@@ -659,16 +660,11 @@ public class PipelineView extends InternalWindow implements Observer {
 	private static List<String> fortunes = new ArrayList<>();
 
 	{
-		try (BufferedReader reader = new BufferedReader(new FileReader(new File(getClass().getResource("/fortunes").getFile())))) {
+        String fortunesContent = FileUtils.getResourceContent("/fortunes");
+        for(String line : FileUtils.splitIntoLines(fortunesContent))
+            if (!line.trim().isEmpty()) fortunes.add(line);
 
-			String s;
-			while ((s = reader.readLine()) != null)
-				if (!s.trim().isEmpty()) fortunes.add(s);
-
-			Collections.shuffle(fortunes);
-		} catch (IOException e) {
-			// Fail silently
-		}
+        Collections.shuffle(fortunes);
 	}
 
 	/**
