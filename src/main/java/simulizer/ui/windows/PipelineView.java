@@ -81,7 +81,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	private String selectedAddress;
 
 	// Model (currently static - watch out)
-	public static PipelineHistoryModel model = new PipelineHistoryModel();
+	public static final PipelineHistoryModel model = new PipelineHistoryModel();
 	// Canvas has a maximum size, so don't draw more than it!
 	private int numColumnsToDraw;
 	private int startCycle = 0;

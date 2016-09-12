@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javafx.scene.text.FontSmoothingType;
 import org.w3c.dom.Document;
 
 import javafx.application.Platform;
@@ -125,6 +126,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 	public Editor() {
 		editor = this;
 		WebView view = new WebView();
+		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
 		pageLoaded = false;
 		bridge = new Bridge(this);
 
