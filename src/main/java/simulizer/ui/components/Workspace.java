@@ -171,6 +171,10 @@ public class Workspace extends Observable implements Themeable {
 		return findInternalWindow(window) != null;
 	}
 
+	public Set<InternalWindow> getAllWindows() {
+		return Collections.unmodifiableSet(openWindows);
+	}
+
 	/**
 	 * Opens an Internal Window if it is not already open. Returns the open Internal Window if it is already open
 	 *
@@ -187,7 +191,7 @@ public class Workspace extends Observable implements Themeable {
 		InternalWindow w2 = window.createNewWindow();
 		assert w2 != null;
 		w2.setWindowManager(wm);
-		wm.getLayouts().setWindowDimentions(w2);
+		wm.getLayouts().setWindowDimensions(w2);
 		Platform.runLater(() -> addWindows(w2));
 		return w2;
 	}
@@ -225,7 +229,7 @@ public class Workspace extends Observable implements Themeable {
 			final Editor finalE = e;
 			assert e != null;
 			e.setWindowManager(wm);
-			wm.getLayouts().setWindowDimentions(e);
+			wm.getLayouts().setWindowDimensions(e);
 			// starts the page loading
 			addWindows(finalE);
 
@@ -240,7 +244,7 @@ public class Workspace extends Observable implements Themeable {
 				} catch (InterruptedException ex) {
 					UIUtils.showExceptionDialog(ex);
 				}
-			} , "Editor-Waiting-For-Load");
+			}, "Editor-Waiting-For-Load");
 			waiting.setDaemon(true);
 			waiting.start();
 		}
@@ -255,7 +259,7 @@ public class Workspace extends Observable implements Themeable {
 	public void addWindows(InternalWindow... windows) {
 		for (InternalWindow window : windows) {
 			if (!openWindows.contains(window)) {
-				window.setOnCloseAction((e) -> removeWindows(window));
+				window.setOnCloseAction(e -> removeWindows(window));
 				openWindows.add(window);
 				window.setTheme(wm.getThemes().getTheme());
 				pane.getChildren().addAll(window);

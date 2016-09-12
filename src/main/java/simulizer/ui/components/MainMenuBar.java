@@ -27,8 +27,8 @@ import simulizer.ui.layout.Layout;
 import simulizer.ui.theme.Theme;
 import simulizer.ui.windows.Editor;
 import simulizer.utils.FileUtils;
-import simulizer.utils.runner.SpimRunner;
 import simulizer.utils.UIUtils;
+import simulizer.utils.runner.SpimRunner;
 
 // Thanks: http://docs.oracle.com/javafx/2/ui_controls/menu_controls.htm
 /**
@@ -410,7 +410,7 @@ public class MainMenuBar extends MenuBar {
 		for (WindowEnum wenum : WindowEnum.values()) {
 			if (wenum.showInWindowsMenu()) {
 				CheckMenuItem item = new CheckMenuItem(wenum.toString());
-				item.setSelected(wm.getWorkspace().findInternalWindow(wenum) != null);
+				item.setSelected(wm.getWorkspace().windowIsOpen(wenum));
 				item.setOnAction(e -> {
 					InternalWindow window = wm.getWorkspace().findInternalWindow(wenum);
 					if (window == null)

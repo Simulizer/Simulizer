@@ -8,6 +8,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
@@ -39,6 +43,16 @@ public class UIUtils {
 		if(!Platform.isFxApplicationThread()) {
 			throw new IllegalStateException("Not on FX application thread; currentThread = " + Thread.currentThread().getName());
 		}
+	}
+
+	public static <V> V runLaterWithResult(Callable<V> c) throws Exception {
+        if(Platform.isFxApplicationThread()) {
+            return c.call();
+        } else {
+            FutureTask<V> f = new FutureTask<>(c);
+            Platform.runLater(f);
+            return f.get();
+        }
 	}
 
 	/**

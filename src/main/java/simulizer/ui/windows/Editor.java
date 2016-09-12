@@ -633,7 +633,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
 		String assembling = continuousAssemblyInProgress ? " ~ " : " - ";
 		String editedSymbol = changedSinceLastSave ? " *" : "";
-		setTitle(WindowEnum.getName(this) + modeString + assembling + getBackingFilename() + editedSymbol);
+		setWindowTitle(WindowEnum.getName(this) + modeString + assembling + getBackingFilename() + editedSymbol);
 	}
 
 	/**

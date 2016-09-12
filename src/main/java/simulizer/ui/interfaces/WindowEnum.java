@@ -1,6 +1,10 @@
 package simulizer.ui.interfaces;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import simulizer.utils.UIUtils;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Contains all possible InternalWindows
@@ -46,9 +50,9 @@ public enum WindowEnum {
 	 */
 	public InternalWindow createNewWindow() {
 		try {
-			return (InternalWindow) Class.forName(pkg + className).newInstance();
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			UIUtils.showExceptionDialog(e);
+			return UIUtils.runLaterWithResult(() -> (InternalWindow) Class.forName(pkg + className).newInstance());
+		} catch (Exception e) {
+            UIUtils.showExceptionDialog(e);
 		}
 		return null;
 	}
