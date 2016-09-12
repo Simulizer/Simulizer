@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
@@ -39,10 +40,11 @@ public abstract class InternalWindow extends Window {
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
 	private MainMenuBar menuBar;
+	private EventManager internalEventManager = new EventManager(this), externalEventManager;
 
 	public InternalWindow() {
 
-        UIUtils.assertFXThread(); // needed to create a stage
+		UIUtils.assertFXThread(); // needed to create a stage
 
 		// Using caching to smooth movement
 		setCache(true);
@@ -73,6 +75,9 @@ public abstract class InternalWindow extends Window {
 						e.consume();
 		});
 		// @formatter:on
+
+		// Pseudo Class
+		pseudoClassStateChanged(PseudoClass.getPseudoClass("internal"), true);
 
 		// For open animation
 		setScaleX(0);
@@ -270,8 +275,8 @@ public abstract class InternalWindow extends Window {
 	 * @param height
 	 *            the height of the workspace
 	 */
-	public void setWorkspaceSize(double width, double height) {
-		if(!Double.isNaN(width) && !Double.isNaN(height) && !isExtracted) {
+	public final void setWorkspaceSize(double width, double height) {
+		if (!Double.isNaN(width) && !Double.isNaN(height) && !isExtracted) {
 			setLayoutX(layX * width);
 			setPrefWidth(layWidth * width);
 			setLayoutY(layY * height);
@@ -305,21 +310,25 @@ public abstract class InternalWindow extends Window {
 	/**
 	 * @return if the window is extracted or not
 	 */
-	public boolean isExtracted() {
+	public final boolean isExtracted() {
 		return isExtracted;
 	}
 
 	/**
 	 * @return main menu bar if window has one
 	 */
-	public MainMenuBar getMenuBar() {
+	public final MainMenuBar getMenuBar() {
 		return menuBar;
+	}
+
+	public final EventManager getEventManager() {
+		return internalEventManager;
 	}
 
 	/**
 	 * Switches between the internal window being inside the workspace and in it's own separate window.
 	 */
-	public synchronized void toggleWindowExtracted() {
+	public final synchronized void toggleWindowExtracted() {
 		if (isExtracted) {
 			// Restore to workspace
 			// Close the window
@@ -333,6 +342,10 @@ public abstract class InternalWindow extends Window {
 				i.remove();
 				super.getContentPane().getChildren().add(n);
 			}
+
+			// Transfer Events
+			externalEventManager.transferTo(internalEventManager);
+			externalEventManager = null;
 
 			// Add internal window into the workspace
 			wm.getWorkspace().getPane().getChildren().add(this);
@@ -375,9 +388,17 @@ public abstract class InternalWindow extends Window {
 				GridPane.setHgrow(contentPane, Priority.ALWAYS);
 				GridPane.setVgrow(contentPane, Priority.ALWAYS);
 				root.add(contentPane, 0, 1);
+
 			} else {
 				scene = new Scene(contentPane);
 			}
+
+			// Pseudo Class
+			contentPane.pseudoClassStateChanged(PseudoClass.getPseudoClass("external"), true);
+
+			// Transfer Events
+			externalEventManager = new EventManager(contentPane);
+			internalEventManager.transferTo(externalEventManager);
 
 			// Fix style
 			contentPane.getStylesheets().addAll(getStylesheets());

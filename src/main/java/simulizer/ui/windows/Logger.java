@@ -96,7 +96,7 @@ public class Logger extends InternalWindow implements Observer {
 		submit.setText("Enter");
 		submit.setOnAction((e) -> submitText());
 		submit.setDisable(true);
-		addEventHandler(KeyEvent.ANY, (e) -> {
+		getEventManager().addEventHandler(KeyEvent.ANY, (e) -> {
 			if (input.isFocused() && e.getCode() == KeyCode.ENTER)
 				submitText();
 		});

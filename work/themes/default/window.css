@@ -5,6 +5,10 @@
     -fx-opacity: 0.95;
 }
 
+.window:external {
+	-fx-opacity: 1;
+}
+
 .window:hover {
     -fx-opacity: 1;
 }
