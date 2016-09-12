@@ -27,20 +27,29 @@ public class AnnotationManager {
 	SimulationBridge simulationBridge;
 	VisualisationBridge visualisationBridge = null;
 
+	boolean enableVisualisations;
+
 	HighLevelVisualisation vis = null;
 
-	public AnnotationManager(CPU cpu, IO io) {
+	public AnnotationManager(CPU cpu, IO io, boolean enableVisualisations) {
 		ex = null;
 		this.cpu = cpu;
 		this.io = io;
 
 		debugBridge = new DebugBridge();
 		simulationBridge = new SimulationBridge();
+
+		this.enableVisualisations = enableVisualisations;
+        if(enableVisualisations) {
+			visualisationBridge = new VisualisationBridge();
+		} else {
+			visualisationBridge = new VisualisationBridgeStub();
+		}
 	}
 
 	public AnnotationManager(WindowManager wm) {
-		this(wm.getCPU(), wm.getIO());
-		visualisationBridge = new VisualisationBridge();
+		this(wm.getCPU(), wm.getIO(), true/*enable visualisations*/);
+		this.wm = wm;
 	}
 
 	/**
@@ -75,7 +84,7 @@ public class AnnotationManager {
 
 		simulationBridge.cpu = cpu;
 
-		if (visualisationBridge != null) {
+		if (enableVisualisations) {
 			visualisationBridge.wm = wm;
 			wm.getHLVisualManager().removeAll();
 		}

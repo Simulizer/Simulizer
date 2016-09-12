@@ -25,10 +25,10 @@ class CommandLineArguments {
 
         //TODO: maybe add a flag to allow out of bounds reads/writes?
 
-        @Parameter(names = {"--show-debug-stream"}, description = "show the output that would get written to the debug tab in GUI mode")
+        @Parameter(names = {"--show-debug-stream"}, description = "show the output that would get written to the debug tab in GUI mode (required to view annotation output)")
         boolean showDebugStream = false;
 
-        @Parameter(names = {"--run-annotations"}, description = "whether annotations should be run")
+        @Parameter(names = {"-a", "--run-annotations"}, description = "whether annotations should be run")
         boolean runAnnotations = false;
         
         //TODO: not implemented

@@ -36,7 +36,7 @@ class CmdMode {
 
 		AnnotationManager a = null;
 		if (args.runAnnotations) {
-			a = new AnnotationManager(cpu, io);
+			a = new AnnotationManager(cpu, io, false/*enable visualisations*/);
 			a.newExecutor();
 		}
 
