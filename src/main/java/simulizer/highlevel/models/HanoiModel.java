@@ -84,6 +84,7 @@ public class HanoiModel extends DataStructureModel {
 		notifyObservers(new Move(startPeg, endPeg));
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Stack<Integer>> getPegs() {
 		synchronized (pegs) {
 			// Copies all the pegs to a new object
