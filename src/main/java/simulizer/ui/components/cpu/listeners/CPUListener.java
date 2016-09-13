@@ -61,7 +61,8 @@ public class CPUListener extends SimulationListener {
      * Processes a data movement message and updates the current instruction
      * @param message The data message message
      */
-    public void processDataMovementMessage(DataMovementMessage message) {
+    @Override
+	public void processDataMovementMessage(DataMovementMessage message) {
         if(message.getInstruction().isPresent()){
             currentInstruction = message.getInstruction().get().getInstruction();
         }
@@ -347,6 +348,9 @@ public class CPUListener extends SimulationListener {
                 break;
             }
 
+           // Switch is missing BREAK, nop and syscall.
+            default:
+            	break;
         }
     }
 
@@ -431,7 +435,8 @@ public class CPUListener extends SimulationListener {
      * Handles certain stages e.g the fetch, decode or execute stage
      * @param m The stage enter message
      */
-    public void processStageEnterMessage(StageEnterMessage m) {
+    @Override
+	public void processStageEnterMessage(StageEnterMessage m) {
         switch (m.getStage()){
             case Fetch:
             {

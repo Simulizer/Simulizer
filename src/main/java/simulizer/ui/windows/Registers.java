@@ -154,7 +154,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 * @author Michael
 	 *
 	 */
-	@SuppressWarnings({"unused", "WeakerAccess"})
+	@SuppressWarnings("WeakerAccess")
 	public class Data {
 		private final Register reg;
 		private byte[] contents;

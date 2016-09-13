@@ -1,10 +1,6 @@
 package simulizer.ui.interfaces;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import simulizer.utils.UIUtils;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Contains all possible InternalWindows

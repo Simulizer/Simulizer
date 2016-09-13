@@ -17,187 +17,185 @@ import static org.junit.Assert.*;
 
 /**
  * test the ProgramExtractor class
+ * 
  * @author mbway
  */
-@Category({UnitTests.class})
+@Category({ UnitTests.class })
 public class ProgramExtractorTests {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
-    private StoreProblemLogger log;
-    private ProgramExtractor ex;
+	private StoreProblemLogger log;
+	private ProgramExtractor ex;
 
-    private Parser parserDoNotUseDirectly;
-    private SimpParser parse(String s) {
-        parserDoNotUseDirectly = new Parser();
-        return parserDoNotUseDirectly.parse(s);
-    }
-    private SimpParser parseWithTrace(String s) {
-        parserDoNotUseDirectly = new Parser();
-        return parserDoNotUseDirectly.parseWithTrace(s);
-    }
-    private List<String> getParserErrors() {
-        return parserDoNotUseDirectly.getErrors();
-    }
-    private ParserRuleContext giveParseException(ParserRuleContext ctx) {
-        ctx.exception = new InputMismatchException(parserDoNotUseDirectly.p);
-        return ctx;
-    }
+	private Parser parserDoNotUseDirectly;
 
+	private SimpParser parse(String s) {
+		parserDoNotUseDirectly = new Parser();
+		return parserDoNotUseDirectly.parse(s);
+	}
 
-    private void expectGood() {
-        assertTrue(getParserErrors().isEmpty());
-        assertTrue(log.getProblems().isEmpty());
-        log.getProblems().clear();
-    }
+	@SuppressWarnings("unused")
+	private SimpParser parseWithTrace(String s) {
+		parserDoNotUseDirectly = new Parser();
+		return parserDoNotUseDirectly.parseWithTrace(s);
+	}
 
-    private void expectValidParseButProblem(String messageContains) {
-        assertTrue(getParserErrors().isEmpty());
-        assertFalse(log.getProblems().isEmpty());
+	private List<String> getParserErrors() {
+		return parserDoNotUseDirectly.getErrors();
+	}
 
-        assertTrue(log.getProblems().stream().anyMatch(pr -> pr.message.contains(messageContains)));
-        log.getProblems().clear();
-    }
-    private void expectBadParse(String messageContains) {
-        assertFalse(getParserErrors().isEmpty());
-        assertFalse(log.getProblems().isEmpty());
+	@SuppressWarnings("unused")
+	private ParserRuleContext giveParseException(ParserRuleContext ctx) {
+		ctx.exception = new InputMismatchException(parserDoNotUseDirectly.p);
+		return ctx;
+	}
 
-        assertTrue(log.getProblems().stream().anyMatch(pr -> pr.message.contains(messageContains)));
-        log.getProblems().clear();
-    }
+	private void expectGood() {
+		assertTrue(getParserErrors().isEmpty());
+		assertTrue(log.getProblems().isEmpty());
+		log.getProblems().clear();
+	}
 
+	private void expectValidParseButProblem(String messageContains) {
+		assertTrue(getParserErrors().isEmpty());
+		assertFalse(log.getProblems().isEmpty());
 
-    @Test
-    public void testIgnoredRules() {
-        // refresh objects
-        log = new StoreProblemLogger();
-        ex = new ProgramExtractor(log);
+		assertTrue(log.getProblems().stream().anyMatch(pr -> pr.message.contains(messageContains)));
+		log.getProblems().clear();
+	}
 
-        // data directive
-        {
-            ex.enterDataDirective(parse(".data").dataDirective());
-            expectGood();
+	private void expectBadParse(String messageContains) {
+		assertFalse(getParserErrors().isEmpty());
+		assertFalse(log.getProblems().isEmpty());
 
-            ex.enterDataDirective(parse(".data 123").dataDirective());
-            expectGood();
-        }
-        // data directive bad
-        {
-            ex.enterDataDirective(parse(".data 123 345").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+		assertTrue(log.getProblems().stream().anyMatch(pr -> pr.message.contains(messageContains)));
+		log.getProblems().clear();
+	}
 
-            ex.enterDataDirective(parse(".data -123").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+	@Test
+	public void testIgnoredRules() {
+		// refresh objects
+		log = new StoreProblemLogger();
+		ex = new ProgramExtractor(log);
 
-            ex.enterDataDirective(parse(".data mylabel").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+		// data directive
+		{
+			ex.enterDataDirective(parse(".data").dataDirective());
+			expectGood();
 
-            ex.enterDataDirective(parse(".data mylabel+15").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterDataDirective(parse(".data 123").dataDirective());
+			expectGood();
+		}
+		// data directive bad
+		{
+			ex.enterDataDirective(parse(".data 123 345").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterDataDirective(parse(".data mylabel+15($s0)").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterDataDirective(parse(".data -123").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterDataDirective(parse(".data 123, 345").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterDataDirective(parse(".data mylabel").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterDataDirective(parse(".data \"hello\"").dataDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterDataDirective(parse(".data mylabel+15").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            // doesn't recognise $s0 as a directiveOperandList
-            // errors would be detected later when parsing $s0
-            ex.enterDataDirective(parse(".data $s0").dataDirective());
-            expectGood();
-        }
+			ex.enterDataDirective(parse(".data mylabel+15($s0)").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-        // text directive
-        {
-            ex.enterTextDirective(parse(".text").textDirective());
-            expectGood();
+			ex.enterDataDirective(parse(".data 123, 345").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterTextDirective(parse(".text 123").textDirective());
-            expectGood();
-        }
-        // text directive bad
-        {
-            ex.enterTextDirective(parse(".text 123 345").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterDataDirective(parse(".data \"hello\"").dataDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterTextDirective(parse(".text -123").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			// doesn't recognise $s0 as a directiveOperandList
+			// errors would be detected later when parsing $s0
+			ex.enterDataDirective(parse(".data $s0").dataDirective());
+			expectGood();
+		}
 
-            ex.enterTextDirective(parse(".text mylabel").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+		// text directive
+		{
+			ex.enterTextDirective(parse(".text").textDirective());
+			expectGood();
 
-            ex.enterTextDirective(parse(".text mylabel+15").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterTextDirective(parse(".text 123").textDirective());
+			expectGood();
+		}
+		// text directive bad
+		{
+			ex.enterTextDirective(parse(".text 123 345").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterTextDirective(parse(".text mylabel+15($s0)").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterTextDirective(parse(".text -123").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterTextDirective(parse(".text 123, 345").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterTextDirective(parse(".text mylabel").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            ex.enterTextDirective(parse(".text \"hello\"").textDirective());
-            expectValidParseButProblem("invalid operand(s)");
+			ex.enterTextDirective(parse(".text mylabel+15").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-            // doesn't recognise $s0 as a directiveOperandList
-            // errors would be detected later when parsing $s0
-            ex.enterTextDirective(parse(".text $s0").textDirective());
-            expectGood();
-        }
+			ex.enterTextDirective(parse(".text mylabel+15($s0)").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-    }
+			ex.enterTextDirective(parse(".text 123, 345").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
+			ex.enterTextDirective(parse(".text \"hello\"").textDirective());
+			expectValidParseButProblem("invalid operand(s)");
 
-    @Test
-    public void testStatements() {
-        // refresh objects
-        log = new StoreProblemLogger();
+			// doesn't recognise $s0 as a directiveOperandList
+			// errors would be detected later when parsing $s0
+			ex.enterTextDirective(parse(".text $s0").textDirective());
+			expectGood();
+		}
 
-        // base offset addressing
-        {
-            String p = "sw $s0, 16($s1)";
-            ex = new ProgramExtractor(log);
-            ex.enterTextSegment(null); // pretend inside text segment
-            ex.enterStatement(parse(p).statement());
-            expectGood();
-        }
-    }
+	}
 
-    @Test
-    public void testWholeParses() {
-        // refresh objects
-        log = new StoreProblemLogger();
+	@Test
+	public void testStatements() {
+		// refresh objects
+		log = new StoreProblemLogger();
 
-        //TODO: multiple data and text segments
-        //TODO: not recognising syscall as an argument when placed on the last line
+		// base offset addressing
+		{
+			String p = "sw $s0, 16($s1)";
+			ex = new ProgramExtractor(log);
+			ex.enterTextSegment(null); // pretend inside text segment
+			ex.enterStatement(parse(p).statement());
+			expectGood();
+		}
+	}
 
-        {
-            String p = "" +
-                ".text\n" +
-                "main: add $s0, $s0, $s1\n";
-            ex = new ProgramExtractor(log);
-            ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
-            expectGood();
-        }
-        {
-            String p = "" +
-                ".text\n" +
-                "\n" +
-                "main:\n" +
-                "  li $t2 25\n";
-            ex = new ProgramExtractor(log);
-            ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
-            expectGood();
-        }
-        {
-            String p = "" +
-                ".data; .asciiz \"\\hello\\\"\n.text; main: syscall;";
-            ex = new ProgramExtractor(log);
-            ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
-            expectBadParse("Error node: \"\"\\hello\\\"\"");
-        }
-    }
+	@Test
+	public void testWholeParses() {
+		// refresh objects
+		log = new StoreProblemLogger();
+
+		// TODO: multiple data and text segments
+		// TODO: not recognising syscall as an argument when placed on the last line
+
+		{
+			String p = "" + ".text\n" + "main: add $s0, $s0, $s1\n";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectGood();
+		}
+		{
+			String p = "" + ".text\n" + "\n" + "main:\n" + "  li $t2 25\n";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectGood();
+		}
+		{
+			String p = "" + ".data; .asciiz \"\\hello\\\"\n.text; main: syscall;";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectBadParse("Error node: \"\"\\hello\\\"\"");
+		}
+	}
 }

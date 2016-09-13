@@ -1,13 +1,18 @@
 package simulizer.assembler.representation;
 
-import simulizer.Simulizer;
-import simulizer.utils.FileUtils;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+
+import simulizer.Simulizer;
+import simulizer.utils.FileUtils;
 
 /**
  * dump a program object to a string

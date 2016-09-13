@@ -9,7 +9,6 @@ import java.util.Set;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.components.Workspace;
-import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.interfaces.WindowEnum;
 
 /**

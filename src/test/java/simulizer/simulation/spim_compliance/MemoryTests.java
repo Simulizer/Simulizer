@@ -1,15 +1,15 @@
 package simulizer.simulation.spim_compliance;
 
-import category.SpimTests;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import category.SpimTests;
 import simulizer.simulation.cpu.user_interaction.IOStream;
-import simulizer.simulation.data.representation.DataConverter;
 import simulizer.utils.FileUtils;
 import simulizer.utils.runner.SimulizerRunner;
 import simulizer.utils.runner.SpimRunner;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * test that Simulizer's memory access resembles SPIM correctly

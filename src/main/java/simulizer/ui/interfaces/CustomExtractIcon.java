@@ -1,8 +1,11 @@
 package simulizer.ui.interfaces;
 
 import javafx.scene.image.Image;
-import javafx.scene.layout.*;
-import jfxtras.scene.control.window.Window;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import jfxtras.scene.control.window.WindowIcon;
 import simulizer.utils.FileUtils;
 

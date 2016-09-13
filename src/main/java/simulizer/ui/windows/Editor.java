@@ -105,7 +105,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings({"unused", "WeakerAccess"})
+	@SuppressWarnings("WeakerAccess")
 	public static class Bridge {
 		private Editor editor;
 		public List<Problem> problems;
@@ -471,6 +471,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		super.close();
 	}
 
+	@SuppressWarnings("unused")
 	private void enableFirebug() {
 		// from: http://stackoverflow.com/a/9405733
 		engine.executeScript(
