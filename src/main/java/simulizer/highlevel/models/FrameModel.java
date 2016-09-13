@@ -8,6 +8,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
  * @author Michael
  *
  */
+@SuppressWarnings("WeakerAccess")
 public class FrameModel extends DataStructureModel {
 
 	public FrameModel(IO io) {

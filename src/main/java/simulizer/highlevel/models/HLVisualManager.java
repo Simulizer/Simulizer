@@ -109,6 +109,6 @@ public class HLVisualManager extends Observable implements Observer {
 	 *
 	 */
 	public enum Action {
-		CREATED, DELETED;
+		CREATED, DELETED
 	}
 }

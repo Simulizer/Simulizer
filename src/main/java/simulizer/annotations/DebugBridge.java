@@ -17,7 +17,7 @@ import simulizer.utils.UIUtils;
 public class DebugBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory
-	WindowManager wm = null;
+	CPU cpu = null;
 	IO io = null;
 
 	public void log(String string) {
@@ -38,6 +38,6 @@ public class DebugBridge {
 	}
 
 	public CPU getCPU() {
-		return wm.getCPU();
+		return cpu;
 	}
 }
