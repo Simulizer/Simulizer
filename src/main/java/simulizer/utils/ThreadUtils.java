@@ -64,6 +64,7 @@ public class ThreadUtils {
 		} else {
 			final Lock lock = new ReentrantLock();
 			final Condition condition = lock.newCondition();
+            final boolean[] done = {false};
 			// to get around the requirement for final
 			final Throwable[] ex = { null };
 			lock.lock();
@@ -77,6 +78,7 @@ public class ThreadUtils {
 						ex[0] = e;
 					} finally {
 						try {
+							done[0] = true;
 							condition.signal();
 						} finally {
 							lock.unlock();
@@ -84,7 +86,8 @@ public class ThreadUtils {
 					}
 				});
 
-				condition.await();
+				while(!done[0])
+                    condition.await();
 
 				if(ex[0] != null) {
 					// re-throw exception from the runLater thread

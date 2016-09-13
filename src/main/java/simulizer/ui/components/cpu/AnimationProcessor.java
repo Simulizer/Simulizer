@@ -118,7 +118,7 @@ public class AnimationProcessor {
 	 * Sets the cpu listener
 	 * @param cpuListener The cpu listener
      */
-    public void setCpuListener(CPUListener cpuListener){
+    public synchronized void setCpuListener(CPUListener cpuListener){
         this.cpuListener = cpuListener;
     }
 

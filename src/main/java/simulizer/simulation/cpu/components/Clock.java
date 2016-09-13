@@ -9,11 +9,11 @@ public class Clock {
         RUNNING,
         PAUSED
     }
-    private volatile long tickPeriod; // in ns (10^-9 seconds)
-    private volatile Status status;
+    private long tickPeriod; // in ns (10^-9 seconds)
+    private Status status;
 
-    private volatile long lastTickns;
-    private volatile long ticks;
+    private long lastTickns;
+    private long ticks;
 
     Clock() {
         tickPeriod = 0;
@@ -27,12 +27,12 @@ public class Clock {
             // practically zero => max speed
             tickPeriod = 0;
         } else {
-            tickPeriod = (long) (1000000000 / freq);
+            tickPeriod = (long) (1e9 / freq);
         }
     }
 
     double getTickFrequency() {
-        return 1000000000.0 / tickPeriod;
+        return 1e9 / tickPeriod;
     }
 
     long getTicks() {
@@ -90,7 +90,7 @@ public class Clock {
         notify();
     }
 
-    Status getStatus() {
+    synchronized Status getStatus() {
         return status;
     }
 }

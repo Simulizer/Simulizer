@@ -31,7 +31,7 @@ public class AssemblingDialog extends Alert {
 	private final ScheduledFuture<?> updateTask;
 	private WindowManager wm;
 
-	private static AssemblingDialog assemblingDialog = null;
+	private static volatile AssemblingDialog assemblingDialog = null;
 
 	/**
 	 * Displays the dialog
@@ -39,7 +39,7 @@ public class AssemblingDialog extends Alert {
 	 * @param wm
 	 *            the window manager for the system
 	 */
-	public static void showAssemblingDialog(WindowManager wm) {
+	static void showAssemblingDialog(WindowManager wm) {
 		assemblingDialog = new AssemblingDialog(wm);
 	}
 

@@ -111,31 +111,29 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 	 * @param gc
 	 *            the graphics context for the canvas being drawn onto
 	 */
-	private void drawStaticDiscs(GraphicsContext gc) {
-		synchronized (pegs) {
-			for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
-				Stack<Integer> peg = pegs.get(pegIndex);
+	private synchronized void drawStaticDiscs(GraphicsContext gc) {
+        for (int pegIndex = 0; pegIndex < pegs.size(); ++pegIndex) {
+            Stack<Integer> peg = pegs.get(pegIndex);
 
-				for (int i = 0; i < peg.size(); ++i) {
-					// n will go from the disc at the bottom to the top
-					// 0 means it's the smallest disc
-					int n = peg.get(i);
+            for (int i = 0; i < peg.size(); ++i) {
+                // n will go from the disc at the bottom to the top
+                // 0 means it's the smallest disc
+                int n = peg.get(i);
 
-					// Don't draw the animated disc
-					if (isUpdatePaused() && n == animatedDiscIndex) continue;
+                // Don't draw the animated disc
+                if (isUpdatePaused() && n == animatedDiscIndex) continue;
 
-					double discWidth = getDiscWidth(n, numDiscs);
-					double discY = getDiscY(i);
-					double discX = getPegX(pegIndex) - discWidth / 2;
+                double discWidth = getDiscWidth(n, numDiscs);
+                double discY = getDiscY(i);
+                double discX = getPegX(pegIndex) - discWidth / 2;
 
-					drawBorderedRectangle(gc, colorGradient[n % colorGradient.length], discX, discY, discWidth, discHeight);
+                drawBorderedRectangle(gc, colorGradient[n % colorGradient.length], discX, discY, discWidth, discHeight);
 
-					gc.setFill(colorGradient[n % colorGradient.length]);
-					gc.fillRect(discX, discY, discWidth, discHeight);
-					gc.strokeRect(discX, discY, discWidth, discHeight);
-				}
-			}
-		}
+                gc.setFill(colorGradient[n % colorGradient.length]);
+                gc.fillRect(discX, discY, discWidth, discHeight);
+                gc.strokeRect(discX, discY, discWidth, discHeight);
+            }
+        }
 	}
 
 	/**
@@ -218,72 +216,72 @@ public class TowerOfHanoiVisualiser extends DataStructureVisualiser {
 		return "Towers of Hanoi";
 	}
 
+	@SuppressWarnings("UnnecessaryLocalVariable")
 	@Override
 	public synchronized void processChange(ModelAction<?> action) {
-		synchronized (pegs) {
-			if (action instanceof Discs) {
-				Discs discs = (Discs) action;
-				pegs = discs.structure;
-				numDiscs = discs.numDiscs;
-			} else if (action instanceof Move) {
-				Move move = (Move) action;
+        if (action instanceof Discs) {
+            Discs discs = (Discs) action;
+            pegs = discs.structure;
+            numDiscs = discs.numDiscs;
+        } else if (action instanceof Move) {
+            Move move = (Move) action;
 
-				int numDiscsOnStart = pegs.get(move.start).size();
-				int numDiscsOnEnd = pegs.get(move.end).size();
+            int numDiscsOnStart = pegs.get(move.start).size();
+            int numDiscsOnEnd = pegs.get(move.end).size();
 
-				animatedDiscIndex = pegs.get(move.start).peek();
-				this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, model.getNumDiscs());
+            animatedDiscIndex = pegs.get(move.start).peek();
+            this.animatedDiscWidth = getDiscWidth(animatedDiscIndex, model.getNumDiscs());
 
-				double startX = getPegX(move.start) - animatedDiscWidth / 2;
-				double startY = getDiscY(numDiscsOnStart);
+            double startX = getPegX(move.start) - animatedDiscWidth / 2;
+            double startY = getDiscY(numDiscsOnStart);
 
-				double upX = startX;
-				double upY = pegY0 - canvas.getHeight() / 10;
+            double upX = startX;
+            double upY = pegY0 - canvas.getHeight() / 10;
 
-				double shiftX = getPegX(move.end) - animatedDiscWidth / 2;
-				double shiftY = upY;
+            double shiftX = getPegX(move.end) - animatedDiscWidth / 2;
+            double shiftY = upY;
 
-				double endX = shiftX;
-				double endY = getDiscY(numDiscsOnEnd);
+            double endX = shiftX;
+            double endY = getDiscY(numDiscsOnEnd);
 
-				animatedDiscX.set(startX);
-				animatedDiscY.set(startY);
+            animatedDiscX.set(startX);
+            animatedDiscY.set(startY);
 
-				// @formatter:off
-				Timeline timeline = new Timeline(
-					new KeyFrame(Duration.seconds(0),
-						new KeyValue(animatedDiscX, startX),
-						new KeyValue(animatedDiscY, startY)
-					),
-					new KeyFrame(Duration.seconds(0.5),
-						new KeyValue(animatedDiscX, upX),
-						new KeyValue(animatedDiscY, upY)
-					),
-					new KeyFrame(Duration.seconds(0.8),
-						new KeyValue(animatedDiscX, shiftX),
-						new KeyValue(animatedDiscY, shiftY)
-					),
-					new KeyFrame(Duration.seconds(1.3),
-						new KeyValue(animatedDiscX, endX),
-						new KeyValue(animatedDiscY, endY)
-					)
-				);
-				// @formatter:on
-				timeline.setCycleCount(1);
-				timeline.setRate(rate);
-				timeline.setOnFinished(e -> {
-					// Apply Update
-					synchronized (pegs) {
-						pegs = move.structure;
-					}
-					setUpdatePaused(false);
-				});
+            // @formatter:off
+            Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0),
+                    new KeyValue(animatedDiscX, startX),
+                    new KeyValue(animatedDiscY, startY)
+                ),
+                new KeyFrame(Duration.seconds(0.5),
+                    new KeyValue(animatedDiscX, upX),
+                    new KeyValue(animatedDiscY, upY)
+                ),
+                new KeyFrame(Duration.seconds(0.8),
+                    new KeyValue(animatedDiscX, shiftX),
+                    new KeyValue(animatedDiscY, shiftY)
+                ),
+                new KeyFrame(Duration.seconds(1.3),
+                    new KeyValue(animatedDiscX, endX),
+                    new KeyValue(animatedDiscY, endY)
+                )
+            );
+            // @formatter:on
+            timeline.setCycleCount(1);
+            timeline.setRate(rate);
+            final TowerOfHanoiVisualiser self = this;
+            timeline.setOnFinished(e -> {
+                // Apply Update
+                synchronized (self) {
+                    pegs = move.structure;
+                }
+                setUpdatePaused(false);
+            });
 
-				timeline.play();
+            timeline.play();
 
-				setUpdatePaused(true);
-			}
-		}
+            setUpdatePaused(true);
+        }
 	}
 
 }

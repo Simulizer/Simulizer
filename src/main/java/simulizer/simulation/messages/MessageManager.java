@@ -39,7 +39,7 @@ public class MessageManager {
 		// one of the threads is dedicated to dispatching to the others
 		messages = new LinkedBlockingQueue<>();
 		noWaitingMessages = new AtomicBoolean(true);
-		executor.submit((Runnable) this::processMessageQueue);
+		executor.submit(this::processMessageQueue);
 
 		// if the executor runs out of threads, the calling thread to submit the tasks has to run them
 		// this essentially means the list of waiting messages can grow indefinitely, as the dispatching
@@ -91,9 +91,9 @@ public class MessageManager {
 
 	private class MessageTask implements Runnable {
 		public Message m;
-		public Future<?> future;
+		Future<?> future;
 
-		public MessageTask(Message m) {
+		MessageTask(Message m) {
 			this.m = m;
 		}
 
@@ -158,7 +158,7 @@ public class MessageManager {
 	public void waitForAll() {
 		waitForAll(allowedProcessingTime);
 	}
-	public void waitForAll(long timeoutTime) {
+	private void waitForAll(long timeoutTime) {
 		try {
 			synchronized (noWaitingMessages) {
 				while (!noWaitingMessages.get()) {

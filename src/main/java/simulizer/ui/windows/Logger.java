@@ -2,10 +2,7 @@ package simulizer.ui.windows;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import javafx.application.Platform;
 import javafx.scene.Cursor;
@@ -42,9 +39,9 @@ public class Logger extends InternalWindow implements Observer {
 	private TextField input = new TextField();
 	private Button submit;
 
-	private CountDownLatch cdl = new CountDownLatch(1);
+	private final Semaphore inputWait;
 	private String lastInput = "";
-	private boolean lastInputCancelled = false;
+	private volatile boolean lastInputCancelled = false;
 
 	private TabPane tabPane;
 	private boolean[] ioChanged;
@@ -59,6 +56,11 @@ public class Logger extends InternalWindow implements Observer {
 		logs = new StringBuilder[IOStream.values().length];
 		outputs = new TextArea[IOStream.values().length];
 		GridPane pane = new GridPane();
+
+		inputWait = new Semaphore(1);
+		try {
+			inputWait.acquire(); // so first read blocks
+		} catch (InterruptedException ignored) { }
 
 		tabPane = new TabPane();
 		tabPane.setCursor(Cursor.DEFAULT);
@@ -120,11 +122,11 @@ public class Logger extends InternalWindow implements Observer {
 			lastInput = input.getText();
 			if (!lastInput.equals("")) {
 				input.setText("");
-				cdl.countDown();
+                inputWait.release();
 			}
 		} else {
 			// @formatter:off
-			String code = input.getText().toLowerCase();
+			String code = input.getText().trim().toLowerCase();
 			if (code.equals("i code better when i'm drunk")  || 
 				code.equals("i code better when im drunk")   ||
 				code.equals("i code better when i am drunk")) {
@@ -206,11 +208,8 @@ public class Logger extends InternalWindow implements Observer {
 					}
 				});
 			submit.setDisable(false);
-			synchronized (this) { // cannot create new latch and count down at the same time
-				cdl = new CountDownLatch(1);
-				lastInputCancelled = false;
-			}
-			cdl.await();
+            lastInputCancelled = false;
+			inputWait.acquire(); // released once cancelled or text received
 			submit.setDisable(true);
 		} catch (InterruptedException e) {
 			UIUtils.showExceptionDialog(e);
@@ -232,7 +231,7 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public synchronized void cancelNextMessage() {
 		lastInputCancelled = true;
-		cdl.countDown();
+        inputWait.release();
 	}
 
 	@Override

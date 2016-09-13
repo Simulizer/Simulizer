@@ -36,7 +36,8 @@ import simulizer.utils.UIUtils;
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
-	private boolean isClosed = false, isExtracted = false;
+	private boolean isClosed = false;
+	private volatile boolean isExtracted = false;
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
 	private MainMenuBar menuBar;
@@ -169,7 +170,7 @@ public abstract class InternalWindow extends Window {
 	 * @param theme
 	 *            the theme to use
 	 */
-	public void setTheme(Theme theme) {
+	public synchronized void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 		if (contentPane != null) {
@@ -241,7 +242,7 @@ public abstract class InternalWindow extends Window {
 	 * @param title
 	 *            the title of the internal window
 	 */
-	protected void setWindowTitle(String title) {
+	protected synchronized void setWindowTitle(String title) {
 		setTitle(title);
 		if (isExtracted)
 			extractedStage.setTitle(title);
@@ -299,7 +300,7 @@ public abstract class InternalWindow extends Window {
 	}
 
 	@Override
-	public Pane getContentPane() {
+	public synchronized Pane getContentPane() {
 		// Overridden because the content pane is sometimes in an extracted window
 		if (contentPane == null)
 			return super.getContentPane();
@@ -321,7 +322,7 @@ public abstract class InternalWindow extends Window {
 		return menuBar;
 	}
 
-	public final EventManager getEventManager() {
+	protected final EventManager getEventManager() {
 		return internalEventManager;
 	}
 
