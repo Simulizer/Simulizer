@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Manages a thread which processes messages sent from the simulation
  * @author Charlie Street
+ * @author mbway
  */
 public class MessageManager {
 
@@ -25,7 +26,7 @@ public class MessageManager {
 	private final BlockingQueue<Message> messages;
 	private final AtomicBoolean noWaitingMessages; // all messages submitted
 	private final List<MessageTask> tasks;
-	private final static int maxTasks = 12;
+	private final static int maxTasks = 5; // >> numCores is useless because the switching becomes significant
 
 	private final IO io;
 

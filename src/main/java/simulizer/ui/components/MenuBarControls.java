@@ -67,7 +67,7 @@ class MenuBarControls {
 	private final ChangeListener<Number> sliderListener;
 	private final static int sliderMax = 500; // start from 0
 	private final double lgClockSpeedMin = Math.log(0.05);
-	private final double lgClockSpeedMax = Math.log(2000);
+	private final double lgClockSpeedMax = Math.log(5000);
 	private long lastClockSpeedSetTime;
 	private final Label clockSpeedLabel;
 
@@ -253,6 +253,10 @@ class MenuBarControls {
 		clockSpeedSlider.valueProperty().removeListener(sliderListener);
 		clockSpeedSlider.setValue(sliderVal);
 		clockSpeedSlider.valueProperty().addListener(sliderListener);
-		clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
+		if(cyclesPerSecond < 200) {
+			clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
+		} else {
+			clockSpeedLabel.setText(String.format("%.1f", cyclesPerSecond/1000) + " kHz");
+		}
 	}
 }
