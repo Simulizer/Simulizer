@@ -49,15 +49,13 @@ public class InstructionsWindow extends StackPane {
         Pane pane = new Pane();
         Button button = new Button("Replay");
         PreviousAnimation lastItem;
-        AnimationProcessor animationProcessor;
 
         /**
          * Sets up the layout and the button action
          * @param animationProcessor The animation processor to replay the animations on
          */
-        ButtonCell(AnimationProcessor animationProcessor) {
+        ButtonCell(final AnimationProcessor animationProcessor) {
             super();
-            this.animationProcessor = animationProcessor;
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
             button.setOnAction((e) -> {

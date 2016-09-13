@@ -20,7 +20,6 @@ import simulizer.simulation.exceptions.StackException;
 public class MainMemory {
 
 
-	private Address startOfTextSegment;
 	private Address startOfStaticData;//start of the static data segment
 	private Address bottomOfDynamicData; //the end of the static data segment
 	private Address topOfStack;
@@ -39,8 +38,7 @@ public class MainMemory {
 	 * partitions in it
 	 *
 	 */
-	MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startTextSegment, Address startOfStaticData, Address bottomOfDynamicData, Address stackPointer) {
-		this.startOfTextSegment = startTextSegment; //TODO: why is this not used?
+	MainMemory(Map<Address,Statement> textSegment, byte[] staticDataSegment, Address startOfStaticData, Address bottomOfDynamicData, Address stackPointer) {
 		this.startOfStaticData = startOfStaticData;
 		this.bottomOfDynamicData = bottomOfDynamicData;
 		this.topOfStack = stackPointer;

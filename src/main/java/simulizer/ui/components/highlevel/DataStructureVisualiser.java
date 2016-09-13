@@ -3,7 +3,6 @@ package simulizer.ui.components.highlevel;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javafx.animation.AnimationTimer;
@@ -11,6 +10,8 @@ import javafx.scene.layout.Pane;
 import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.ModelAction;
 import simulizer.ui.windows.HighLevelVisualisation;
+import simulizer.utils.CircularIntBuffer;
+import simulizer.utils.ThreadUtils;
 
 /**
  * A high level visualisation
@@ -29,13 +30,13 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private int FRAME_RATE = 45;
 	private AnimationTimer timer;
 
-	protected volatile double rate = 1;
-	private int[] updateTimes = { -1 }, processTimes = { -1 };
+	volatile double rate = 1;
+    private final CircularIntBuffer updateTimes;
+	private final CircularIntBuffer processTimes;
 	private long lastUpdate = -1;
 
 	private Thread updateThread;
-	private CountDownLatch updateWait;
-	private Boolean updatePaused = false;
+    private ThreadUtils.Blocker updatePaused;
 	private volatile boolean alive = false;
 
 	/**
@@ -44,9 +45,12 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	 * @param vis
 	 *            the high level visualisation window
 	 */
-	public DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
+	DataStructureVisualiser(DataStructureModel model, HighLevelVisualisation vis) {
 		this.model = model;
 		this.vis = vis;
+		updateTimes = new CircularIntBuffer(1);
+		processTimes = new CircularIntBuffer(1);
+        updatePaused = new ThreadUtils.Blocker();
 		model.addObserver(this);
 
 		widthProperty().addListener(e -> repaint());
@@ -66,7 +70,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	/**
 	 * Hides the visualisation
 	 */
-	public void hide() {
+	private void hide() {
 		if (showing) {
 			vis.removeTab(this);
 			stopUpdateThreads();
@@ -118,34 +122,11 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			}
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
-			for (int i = 1; i < updateTimes.length; i++)
-				updateTimes[i - 1] = updateTimes[i];
 			long now = System.currentTimeMillis();
-			if (lastUpdate != -1)
-				updateTimes[updateTimes.length - 1] = (int) (now - lastUpdate);
+			if(lastUpdate != -1)
+			    updateTimes.add((int) (now - lastUpdate));
 			lastUpdate = now;
 		}
-	}
-
-	/**
-	 * Calculates the average time from a list
-	 * 
-	 * @param times
-	 *            the times to average
-	 * @return the average time
-	 */
-	private int averageTime(int[] times) {
-		int totalTime = 0;
-		int numTimes = 0;
-
-		for (int i = times.length - 1; i >= 0; i--) {
-			if (times[i] < 0)
-				return -1;
-			totalTime += times[i];
-			numTimes++;
-		}
-
-		return totalTime / numTimes;
 	}
 
 	/**
@@ -166,27 +147,19 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 						processChange(change);
 
 						// Wait if paused
-						boolean hold = false;
-						synchronized (updatePaused) {
-							hold = updatePaused;
-						}
-						if (hold)
-							updateWait.await();
+						updatePaused.waitIfPaused();
 
 						after = System.currentTimeMillis();
 					}
 
 					if (alive && before != -1 && after != -1) {
 						// Add process time
-						for (int i = 1; i < processTimes.length; i++)
-							processTimes[i - 1] = processTimes[i];
-						processTimes[processTimes.length - 1] = (int) (after - before);
+                        processTimes.add((int) (after - before));
 
 						// Recalculate rate/skips
 						rateSkips();
 					}
-				} catch (InterruptedException e) {
-				}
+				} catch (InterruptedException ignored) { }
 			}
 		} , "DataStructure " + getName() + " Updates");
 		updateThread.setDaemon(true);
@@ -210,8 +183,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	 * Calculate the rate at which animations should be animating at to stay in sync. Skips some changes if it gets too far behind
 	 */
 	private synchronized void rateSkips() {
-		int avgUpdate = averageTime(updateTimes);
-		int avgProcess = averageTime(processTimes);
+		int avgUpdate = updateTimes.mean();
+		int avgProcess = processTimes.mean();
 		if (avgUpdate > 0 && avgProcess > 0) {
 			double newRate = rate - 1;
 			// Averages are roughly the same, do nothing
@@ -240,13 +213,15 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		setUpdatePaused(false);
 		updateThread.interrupt();// In case of waiting on an empty list
 		timer.stop();
+		updateTimes.clear();
+		processTimes.clear();
 	}
 
 	/**
 	 * @return whether the updates are paused
 	 */
-	protected boolean isUpdatePaused() {
-		return updatePaused;
+	boolean isUpdatePaused() {
+		return updatePaused.isPaused();
 	}
 
 	/**
@@ -255,15 +230,10 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	 * @param paused
 	 *            whether updates should be paused
 	 */
-	protected void setUpdatePaused(boolean paused) {
-		synchronized (updatePaused) {
-			if (updatePaused == paused) // No Change
-				return;
-			else if (!paused) // Resuming
-				updateWait.countDown();
-			else // Pausing
-				updateWait = new CountDownLatch(1);
-			updatePaused = paused;
-		}
+	 void setUpdatePaused(boolean paused) {
+         if(paused)
+			 updatePaused.pause();
+         else
+			 updatePaused.resume();
 	}
 }

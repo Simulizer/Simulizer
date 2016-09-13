@@ -266,13 +266,12 @@ public class CPU {
 		this.clearRegisters();// reset the registers
 
 		// setting up memory
-		Address textSegmentStart = this.program.textSegmentStart;
 		Address dataSegmentStart = this.program.dataSegmentStart;
 		Address dynamicSegmentStart = this.program.dynamicSegmentStart;
 		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getBytes()));
 		byte[] staticDataSegment = this.program.dataSegment;
 		Map<Address, Statement> textSegment = this.program.textSegment;
-		this.memory = new MainMemory(textSegment, staticDataSegment, textSegmentStart, dataSegmentStart, dynamicSegmentStart, stackPointer);
+		this.memory = new MainMemory(textSegment, staticDataSegment, dataSegmentStart, dynamicSegmentStart, stackPointer);
 
 		labels = new HashMap<>();
 		labelMetaData = new HashMap<>();

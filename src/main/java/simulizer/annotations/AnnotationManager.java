@@ -25,8 +25,6 @@ public class AnnotationManager {
 	SimulationBridge simulationBridge;
 	VisualisationBridge visualisationBridge;
 
-	HighLevelVisualisation vis;
-
 	public AnnotationManager(WindowManager wm) {
 		this.wm = wm;
 		ex = null;
@@ -34,8 +32,6 @@ public class AnnotationManager {
 		debugBridge = new DebugBridge();
 		simulationBridge = new SimulationBridge();
 		visualisationBridge = new VisualisationBridge();
-
-		vis = null;
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.geometry.Side;
@@ -124,7 +125,10 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the model to remove
 	 */
 	private synchronized void removeTab(DataStructureModel model) {
-		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).forEach(t -> removeTab(t));
+		tabs.getTabs().stream()
+				.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model)
+				.collect(Collectors.toList()) // create copy since the list will be modified
+				.forEach(this::removeTab);
 	}
 
 	/**
@@ -134,7 +138,10 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the visualisation to remove
 	 */
 	public synchronized void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(this::removeTab);
+		tabs.getTabs().stream()
+				.filter(t -> t.getContent() == vis)
+				.collect(Collectors.toList()) // create copy since the list will be modified
+				.forEach(this::removeTab);
 	}
 
 	/**

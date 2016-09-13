@@ -17,6 +17,38 @@ import javafx.application.Platform;
  */
 public class ThreadUtils {
 
+	public static class Blocker {
+		private volatile boolean paused;
+
+		public Blocker() {
+            paused = false;
+		}
+
+		public boolean isPaused() {
+			return paused;
+		}
+
+		public void waitIfPaused() throws InterruptedException {
+			// don't synchronize until you have to. should be faster in the un-paused case
+			if(paused) {
+				synchronized (this) {
+                    while (paused) {
+                        wait();
+                    }
+				}
+			}
+		}
+
+		public void pause() {
+            paused = true;
+		}
+
+		public synchronized void resume() {
+			paused = false;
+			notifyAll();
+		}
+	}
+
 	/**
 	 * like Platform.runLater but waits until the thread has finished
 	 * based on: http://www.guigarage.com/2013/01/invokeandwait-for-javafx/
@@ -83,7 +115,7 @@ public class ThreadUtils {
 			threadID = 0;
 		}
 
-		@SuppressWarnings("NullableProblems")
+		@SuppressWarnings({"NullableProblems", "ConstantConditions"})
 		@Override
 		public synchronized Thread newThread(Runnable runnable) {
 			if(runnable == null) runnable = () -> {};
