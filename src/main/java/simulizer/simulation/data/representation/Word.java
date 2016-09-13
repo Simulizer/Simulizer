@@ -33,9 +33,9 @@ public class Word {
 	 * 
 	 * @return the word stored
 	 */
-	public byte[] getWord()
+	public byte[] getBytes()
 	{
-		return this.word;
+		return word;
 	}
 
 

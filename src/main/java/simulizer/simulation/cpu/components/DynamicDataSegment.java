@@ -67,7 +67,48 @@ public class DynamicDataSegment
 			return oldBreak;
 		}
 	}
-	
+
+	/**method will get n bytes from the heap
+	 *
+	 * @param relativeAddress address relative to the base of the heap to place the MSB of the data
+	 * @param length the number of bytes to retrieve, starting at the given address
+	 * @return the bytes in an array
+	 */
+	public byte[] getBytes(int relativeAddress, int length) throws HeapException
+	{
+		if(length <= 0) {
+			throw new HeapException("Invalid read on heap. (non-positive length)", heapBreak, heap.length);
+		} else if(relativeAddress + length > heapBreak) {
+			throw new HeapException("Invalid read on heap. (attempt to read above the break)", heapBreak, heap.length);
+
+		} else if(relativeAddress < 0) {
+			throw new HeapException("Invalid read on heap. (attempt to read below the heap)", heapBreak, heap.length);
+		}
+
+		return Arrays.copyOfRange(heap, relativeAddress, relativeAddress+length);
+	}
+
+
+	/**
+	 * read bytes until a null character is read. Use this to extract strings from memory.
+	 * An exception is thrown if the end of the stack is reached while scanning for a null character
+	 *
+	 * @param relativeAddress the relative address to begin scanning at
+	 * @return the bytes up to but _not_ including the null character
+	 * @throws HeapException
+	 */
+	public byte[] readUntilNull(int relativeAddress) throws HeapException {
+		int i = relativeAddress;
+		if(0 <= i && i < heap.length) {
+			for(; i < heap.length; ++i) {
+				if(heap[i] == '\0') {
+					return Arrays.copyOfRange(heap, relativeAddress, i); // exclusive so null is excluded
+				}
+			}
+		}
+		throw new HeapException("Reading from invalid area of memory (scanning for a null character)", relativeAddress, i);
+	}
+
 	/**allows to set multiple bytes in one go on the heap
 	 *
      * @param relativeAddress address relative to the base of the heap to place the MSB of the data
@@ -87,23 +128,4 @@ public class DynamicDataSegment
 		System.arraycopy(toWrite, 0, heap, relativeAddress, toWrite.length);
 	}
 	
-	/**method will get n bytes from the heap 
-	 *
-	 * @param relativeAddress address relative to the base of the heap to place the MSB of the data
-	 * @param length the number of bytes to retrieve, starting at the given address
-	 * @return the bytes in an array
-	 */
-	public byte[] getBytes(int relativeAddress, int length) throws HeapException
-	{
-		if(length <= 0) {
-			throw new HeapException("Invalid read on heap. (non-positive length)", heapBreak, heap.length);
-		} else if(relativeAddress + length > heapBreak) {
-			throw new HeapException("Invalid read on heap. (attempt to read above the break)", heapBreak, heap.length);
-
-		} else if(relativeAddress < 0) {
-			throw new HeapException("Invalid read on heap. (attempt to read below the heap)", heapBreak, heap.length);
-		}
-
-		return Arrays.copyOfRange(heap, relativeAddress, relativeAddress+length);
-	}
 }

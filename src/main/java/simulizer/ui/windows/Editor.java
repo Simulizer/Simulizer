@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javafx.scene.text.FontSmoothingType;
 import org.w3c.dom.Document;
 
 import javafx.application.Platform;
@@ -49,7 +50,8 @@ import simulizer.utils.UIUtils;
  *
  * @author mbway
  */
-public class Editor extends InternalWindow {
+@SuppressWarnings("WeakerAccess")
+public class Editor extends InternalWindow { //TODO: extract model from the view.
 
 	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
 	private static File currentFile = null; // persists across instances of the window
@@ -103,7 +105,7 @@ public class Editor extends InternalWindow {
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	public static class Bridge {
 		private Editor editor;
 		public List<Problem> problems;
@@ -124,6 +126,7 @@ public class Editor extends InternalWindow {
 	public Editor() {
 		editor = this;
 		WebView view = new WebView();
+		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
 		pageLoaded = false;
 		bridge = new Bridge(this);
 
@@ -328,8 +331,8 @@ public class Editor extends InternalWindow {
 			"/external/theme-chaos.js",
 			"/external/theme-monokai.js",
 			"/external/theme-tomorrow_night_eighties.js",
-				"/external/theme-predawn.js",
-				"/external/theme-flatland.js"
+            "/external/theme-predawn.js",
+            "/external/theme-flatland.js"
 		);
 		for(String theme : availableThemes) {
 			// eg "/external/theme-monokai.js" contains the substring "monokai"
@@ -352,7 +355,7 @@ public class Editor extends InternalWindow {
 		int fontSize = (int) settings.get("editor.font-size");
 		jsWindow.call("setFont", fontFamily, fontSize);
 
-		jsEditor.call("setScrollSpeed", (double) settings.get("editor.scroll-speed"));
+		jsEditor.call("setScrollSpeed", (Double) settings.get("editor.scroll-speed"));
 		engine.executeScript("session.setUseSoftTabs(" + settings.get("editor.soft-tabs") + ")");
 		jsEditor.call("setTheme", (String) settings.get("editor.theme"));
 

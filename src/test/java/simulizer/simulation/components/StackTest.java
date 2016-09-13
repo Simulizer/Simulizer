@@ -148,6 +148,57 @@ public class StackTest {
 			assertEquals(0x00,read[4]);
 		}
 	}
+
+	@Test
+	public void testReadUntilNull() throws StackException
+	{
+		{//valid read
+			StackSegment stack = new StackSegment(10);
+			// addresses are relative to the top of the stack
+			stack.setBytes(-4,new byte[]{0x11,0x10,0x21,'\0'});
+			byte[] read = stack.readUntilNull(-4);
+			assertEquals(3, read.length);
+			assertEquals(0x11,read[0]);
+			assertEquals(0x10,read[1]);
+			assertEquals(0x21,read[2]);
+		}
+
+		{//invalid read (no null before end)
+			StackSegment stack = new StackSegment(10);
+			// addresses are relative to the top of the stack
+			stack.setBytes(-4,new byte[]{0x11,0x10,0x21,0x11});
+			try {
+				byte[] read = stack.readUntilNull(-4);
+				fail();
+			} catch (StackException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+
+		{//invalid read (start address above the top of the stack)
+			StackSegment stack = new StackSegment(10);
+			// addresses are relative to the top of the stack
+			stack.setBytes(-4,new byte[]{0x11,0x10,0x21,'\0'});
+			try {
+				byte[] read = stack.readUntilNull(0);
+				fail();
+			} catch (StackException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+
+		{//invalid read (start address below the bottom of the stack)
+			StackSegment stack = new StackSegment(10);
+			// addresses are relative to the top of the stack
+			stack.setBytes(-4,new byte[]{0x11,0x10,0x21,'\0'});
+			try {
+				byte[] read = stack.readUntilNull(-11);
+				fail();
+			} catch (StackException e) {
+				assertTrue(e.getMessage().equals("Reading from invalid area of memory (scanning for a null character)"));
+			}
+		}
+	}
 	
 	/**method will test the set bytes method of the stack segment
 	 * @throws StackException 

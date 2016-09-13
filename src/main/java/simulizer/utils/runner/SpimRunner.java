@@ -1,6 +1,7 @@
 package simulizer.utils.runner;
 
 import simulizer.Simulizer;
+import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 import java.io.BufferedReader;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -50,14 +52,16 @@ public class SpimRunner implements Runner {
 		this.input = sendStdin;
 
 		File tmp = null;
+        Writer w = null;
 		try {
 			tmp = File.createTempFile("program", ".s");
-			FileWriter w = new FileWriter(tmp);
+			w = FileUtils.getUTF8FileWriter(tmp);
 			w.write(program);
-			w.close();
 			tmpFilePath = tmp.getAbsolutePath();
 		} catch(IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+            FileUtils.quietClose(w);
 		}
 
 		assert tmp != null;
@@ -74,10 +78,10 @@ public class SpimRunner implements Runner {
 
 			Process spim = spimBuilder.start();
 
-			BufferedReader stdout = new BufferedReader(new InputStreamReader(spim.getInputStream()));
+			BufferedReader stdout = new BufferedReader(new InputStreamReader(spim.getInputStream(), StandardCharsets.UTF_8));
 
 			if(sendStdin != null && sendStdin.length() != 0) {
-				Writer stdin = new BufferedWriter(new OutputStreamWriter(spim.getOutputStream()));
+				Writer stdin = new BufferedWriter(new OutputStreamWriter(spim.getOutputStream(), StandardCharsets.UTF_8));
 
 				stdin.write(sendStdin);
 				stdin.flush();
@@ -130,14 +134,16 @@ public class SpimRunner implements Runner {
 	 * Used as a debugging tool, not for automatic testing
 	 */
 	public static void runQtSpim(String program) {
-		File tmp = null;
+        File tmp = null;
+		Writer w = null;
 		try {
 			tmp = File.createTempFile("program", ".s");
-			FileWriter w = new FileWriter(tmp);
+            w = FileUtils.getUTF8FileWriter(tmp);
 			w.write(program);
-			w.close();
 		} catch(IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+            FileUtils.quietClose(w);
 		}
 
 		assert tmp != null;

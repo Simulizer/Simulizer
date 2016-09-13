@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
@@ -24,6 +25,7 @@ import simulizer.ui.WindowManager;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.theme.Theme;
+import simulizer.utils.UIUtils;
 
 /**
  * InternalWindow contains the standard methods for being a window in the workspace
@@ -34,18 +36,22 @@ import simulizer.ui.theme.Theme;
 public abstract class InternalWindow extends Window {
 	private double layX, layY, layWidth, layHeight, windowWidth, windowHeight;
 	private WindowManager wm;
-	private boolean isClosed = false, isExtracted = false;
+	private boolean isClosed = false;
+	private volatile boolean isExtracted = false;
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
 	private MainMenuBar menuBar;
+	private EventManager internalEventManager = new EventManager(this), externalEventManager;
 
 	public InternalWindow() {
+
+		UIUtils.assertFXThread(); // needed to create a stage
 
 		// Using caching to smooth movement
 		setCache(true);
 		setCacheHint(CacheHint.SPEED);
 
-		// TODO figure out why this isn't working
+		// TODO figure out why this isn't working (after getContentPane was added, is it now working?)
 		getContentPane().setCursor(Cursor.DEFAULT);
 
 		// Sets to default title
@@ -70,6 +76,9 @@ public abstract class InternalWindow extends Window {
 						e.consume();
 		});
 		// @formatter:on
+
+		// Pseudo Class
+		pseudoClassStateChanged(PseudoClass.getPseudoClass("internal"), true);
 
 		// For open animation
 		setScaleX(0);
@@ -136,11 +145,11 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Performs an animation to get the users attention
-	 * 
+	 *
 	 * @param sf
 	 *            the scale factor to enlarge the window by (1.0 => no scale)
 	 */
-	public final void emphasise(double sf) {
+	protected final void emphasise(double sf) {
 		// Ignore if window is just being opened
 		if (getScaleX() == 1 && getScaleY() == 1) {
 			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
@@ -161,7 +170,7 @@ public abstract class InternalWindow extends Window {
 	 * @param theme
 	 *            the theme to use
 	 */
-	public void setTheme(Theme theme) {
+	public synchronized void setTheme(Theme theme) {
 		getStylesheets().clear();
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 		if (contentPane != null) {
@@ -196,6 +205,7 @@ public abstract class InternalWindow extends Window {
 						public void run() {
 							double[] coords = { getLayoutX(), getLayoutY(), getLayoutX() + getWidth(), getLayoutY() + getHeight() };
 							coords = grid.moveToGrid(coords, resize);
+							// TODO: this is doing floating point equality!
 							if (coords[2] != getLayoutX() + getWidth())
 								setPrefWidth(coords[2] - coords[0]);
 							if (coords[3] != getLayoutY() + getHeight())
@@ -228,11 +238,11 @@ public abstract class InternalWindow extends Window {
 
 	/**
 	 * Sets an internal windows title (use this instead of setTitle so that extracted windows have their title updated)
-	 * 
+	 *
 	 * @param title
 	 *            the title of the internal window
 	 */
-	public void setWindowTitle(String title) {
+	protected synchronized void setWindowTitle(String title) {
 		setTitle(title);
 		if (isExtracted)
 			extractedStage.setTitle(title);
@@ -266,8 +276,8 @@ public abstract class InternalWindow extends Window {
 	 * @param height
 	 *            the height of the workspace
 	 */
-	public void setWorkspaceSize(double width, double height) {
-		if (width != Double.NaN && height != Double.NaN && !isExtracted) {
+	public final void setWorkspaceSize(double width, double height) {
+		if (!Double.isNaN(width) && !Double.isNaN(height) && !isExtracted) {
 			setLayoutX(layX * width);
 			setPrefWidth(layWidth * width);
 			setLayoutY(layY * height);
@@ -290,7 +300,7 @@ public abstract class InternalWindow extends Window {
 	}
 
 	@Override
-	public Pane getContentPane() {
+	public synchronized Pane getContentPane() {
 		// Overridden because the content pane is sometimes in an extracted window
 		if (contentPane == null)
 			return super.getContentPane();
@@ -301,21 +311,25 @@ public abstract class InternalWindow extends Window {
 	/**
 	 * @return if the window is extracted or not
 	 */
-	public boolean isExtracted() {
+	public final boolean isExtracted() {
 		return isExtracted;
 	}
 
 	/**
-	 * @return main menu bar if window has one 
+	 * @return main menu bar if window has one
 	 */
-	public MainMenuBar getMenuBar() {
+	public final MainMenuBar getMenuBar() {
 		return menuBar;
+	}
+
+	protected final EventManager getEventManager() {
+		return internalEventManager;
 	}
 
 	/**
 	 * Switches between the internal window being inside the workspace and in it's own separate window.
 	 */
-	public synchronized void toggleWindowExtracted() {
+	public final synchronized void toggleWindowExtracted() {
 		if (isExtracted) {
 			// Restore to workspace
 			// Close the window
@@ -329,6 +343,10 @@ public abstract class InternalWindow extends Window {
 				i.remove();
 				super.getContentPane().getChildren().add(n);
 			}
+
+			// Transfer Events
+			externalEventManager.transferTo(internalEventManager);
+			externalEventManager = null;
 
 			// Add internal window into the workspace
 			wm.getWorkspace().getPane().getChildren().add(this);
@@ -371,9 +389,17 @@ public abstract class InternalWindow extends Window {
 				GridPane.setHgrow(contentPane, Priority.ALWAYS);
 				GridPane.setVgrow(contentPane, Priority.ALWAYS);
 				root.add(contentPane, 0, 1);
+
 			} else {
 				scene = new Scene(contentPane);
 			}
+
+			// Pseudo Class
+			contentPane.pseudoClassStateChanged(PseudoClass.getPseudoClass("external"), true);
+
+			// Transfer Events
+			externalEventManager = new EventManager(contentPane);
+			internalEventManager.transferTo(externalEventManager);
 
 			// Fix style
 			contentPane.getStylesheets().addAll(getStylesheets());

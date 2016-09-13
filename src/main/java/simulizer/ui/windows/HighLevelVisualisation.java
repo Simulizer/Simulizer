@@ -4,6 +4,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.geometry.Side;
@@ -81,7 +82,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
 		super.close();
 
 		// Close all tabs
@@ -97,7 +98,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param vis
 	 *            the visualisation to add
 	 */
-	public void addTab(DataStructureVisualiser vis) {
+	public synchronized void addTab(DataStructureVisualiser vis) {
 		Tab tab = new Tab(vis.getName());
 		tab.setContent(vis);
 
@@ -123,8 +124,11 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param model
 	 *            the model to remove
 	 */
-	public void removeTab(DataStructureModel model) {
-		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).forEach(t -> removeTab(t));
+	private synchronized void removeTab(DataStructureModel model) {
+		tabs.getTabs().stream()
+				.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model)
+				.collect(Collectors.toList()) // create copy since the list will be modified
+				.forEach(this::removeTab);
 	}
 
 	/**
@@ -133,8 +137,11 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param vis
 	 *            the visualisation to remove
 	 */
-	public void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(t -> removeTab(t));
+	public synchronized void removeTab(DataStructureVisualiser vis) {
+		tabs.getTabs().stream()
+				.filter(t -> t.getContent() == vis)
+				.collect(Collectors.toList()) // create copy since the list will be modified
+				.forEach(this::removeTab);
 	}
 
 	/**
@@ -143,7 +150,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param tab
 	 *            the tab to remove
 	 */
-	public void removeTab(Tab tab) {
+	private synchronized void removeTab(Tab tab) {
 		((DataStructureVisualiser) tab.getContent()).close();
 		Platform.runLater(() -> tabs.getTabs().remove(tab));
 	}
@@ -202,7 +209,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 				vis = new ListVisualiser((ListModel) model, this);
 				break;
 		}
-		if (vis != null && model.isVisible()) vis.show();
+		if (model.isVisible()) vis.show();
 	}
 
 }

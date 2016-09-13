@@ -13,11 +13,12 @@ import simulizer.simulation.cpu.user_interaction.IO;
  * @author Michael
  *
  */
+@SuppressWarnings("WeakerAccess")
 public class HanoiModel extends DataStructureModel {
 	private final List<Stack<Integer>> pegs = new ArrayList<>(3);
 	private int numDiscs = 0;
 
-	public HanoiModel(IO io) {
+	HanoiModel(IO io) {
 		super(io);
 		setNumDisks(0);
 	}

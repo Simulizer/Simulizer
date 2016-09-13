@@ -31,7 +31,7 @@ public class AssemblingDialog extends Alert {
 	private final ScheduledFuture<?> updateTask;
 	private WindowManager wm;
 
-	private static AssemblingDialog assemblingDialog = null;
+	private static volatile AssemblingDialog assemblingDialog = null;
 
 	/**
 	 * Displays the dialog
@@ -39,7 +39,7 @@ public class AssemblingDialog extends Alert {
 	 * @param wm
 	 *            the window manager for the system
 	 */
-	public static void showAssemblingDialog(WindowManager wm) {
+	static void showAssemblingDialog(WindowManager wm) {
 		assemblingDialog = new AssemblingDialog(wm);
 	}
 
@@ -91,12 +91,12 @@ public class AssemblingDialog extends Alert {
 			if (current.charAt(i) == '.') ++count;
 
 		int newNum = (count + 1) % 4;
-		String svar = contentText;
+		StringBuilder svar = new StringBuilder(contentText);
 
 		for (int i = 0; i < newNum; ++i)
-			svar += ".";
+			svar.append('.');
 
-		return svar;
+		return svar.toString();
 	}
 
 	/**

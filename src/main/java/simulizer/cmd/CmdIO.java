@@ -30,9 +30,9 @@ public class CmdIO implements IO {
     public void printString(IOStream stream, String str)
     {
         switch(stream) {
-            case STANDARD: System.out.println(str); break;
-            case ERROR: System.err.println(str); break;
-            case DEBUG: if(printDebugStream) System.out.println(str); break;
+            case STANDARD: System.out.print(str); break;
+            case ERROR: System.err.print(str); break;
+            case DEBUG: if(printDebugStream) System.out.print(str); break;
         }
     }
 

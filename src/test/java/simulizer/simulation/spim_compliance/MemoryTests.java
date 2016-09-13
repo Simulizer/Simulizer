@@ -18,19 +18,19 @@ import static org.junit.Assert.assertTrue;
 @Category({SpimTests.class})
 public class MemoryTests {
 
-	public static String getTestFile(String name) {
+	private static String getTestFile(String name) {
 		return FileUtils.getResourceContent("/simulizer/simulation/spim_compliance/" + name);
 	}
 
-	public static class Outputs {
+	private static class Outputs {
 		public SimulizerRunner simulizer;
-		public SpimRunner spim;
+		SpimRunner spim;
 
-		public String program;
-		public String simulizerOutput;
-		public String spimOutput;
+		String program;
+		String simulizerOutput;
+		String spimOutput;
 
-		public Outputs(String filename) {
+		Outputs(String filename) {
 			program = getTestFile(filename);
 
 			spim = new SpimRunner();
@@ -42,7 +42,7 @@ public class MemoryTests {
 			testGood();
 		}
 
-		public void testGood() {
+		void testGood() {
 			assertTrue(simulizer.problemLogger.getProblems().isEmpty());
 			assertTrue(simulizer.io.getOutput(IOStream.ERROR).isEmpty());
 		}

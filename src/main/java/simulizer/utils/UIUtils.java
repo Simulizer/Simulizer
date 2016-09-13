@@ -2,27 +2,22 @@ package simulizer.utils;
 
 import java.awt.Desktop;
 import java.awt.Font;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
@@ -44,6 +39,16 @@ public class UIUtils {
 		if(!Platform.isFxApplicationThread()) {
 			throw new IllegalStateException("Not on FX application thread; currentThread = " + Thread.currentThread().getName());
 		}
+	}
+
+	public static <V> V runLaterWithResult(Callable<V> c) throws Exception {
+        if(Platform.isFxApplicationThread()) {
+            return c.call();
+        } else {
+            FutureTask<V> f = new FutureTask<>(c);
+            Platform.runLater(f);
+            return f.get();
+        }
 	}
 
 	/**
@@ -154,21 +159,15 @@ public class UIUtils {
 			System.err.print(exceptionText);
 
 			// write to a file log
-			BufferedWriter log = null;
+			Writer log = null;
 			try {
-				log = new BufferedWriter(new FileWriter("./exceptions.log", true));
+                log = FileUtils.getUTF8FileAppendWriter("./exceptions.log");
 				log.write(exceptionText + "\n\n\n");
 				log.flush();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			} finally {
-				if(log != null) {
-					try {
-						log.close();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
+                FileUtils.quietClose(log);
 			}
 
 			simultaneousExceptionDialogs.increment();
@@ -294,11 +293,22 @@ public class UIUtils {
 		return result.get() == ButtonType.OK;
 	}
 
+	// from http://stackoverflow.com/a/37610648
+	private static class FixedOrderButtonDialog extends DialogPane {
+		@Override
+		protected Node createButtonBar() {
+			ButtonBar node = (ButtonBar) super.createButtonBar();
+			node.setButtonOrder(ButtonBar.BUTTON_ORDER_NONE);
+			return node;
+		}
+	}
+
 	/**
 	 * show a dialog box which asks the user to confirm yes or no
 	 */
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setDialogPane(new FixedOrderButtonDialog());
 		alert.setResizable(true);
 		alert.initOwner(GuiMode.getPrimaryStage());
 		alert.setTitle("Confirmation");

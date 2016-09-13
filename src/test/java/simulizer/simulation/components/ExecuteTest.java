@@ -39,7 +39,7 @@ import simulizer.simulation.exceptions.StackException;
 @Category({UnitTests.class})
 public class ExecuteTest {
 
-	public IOTest io = new IOTest();
+	private IOTest io = new IOTest();
 	
 	/**this method will create a test program for the execute
 	 * tests; these programs will be let to run but are
@@ -68,10 +68,6 @@ public class ExecuteTest {
 	 * @param cpu the cpu object to access
 	 * @param register the specific gp register to be read from
 	 * @return the long value of said register
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	private long accessRegisterSigned(CPU cpu, Register register) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
@@ -79,7 +75,7 @@ public class ExecuteTest {
 		reg.setAccessible(true);
 		Word[] registers = (Word[])reg.get(cpu);
 		
-		return DataConverter.decodeAsSigned(registers[register.getID()].getWord());
+		return DataConverter.decodeAsSigned(registers[register.getID()].getBytes());
 	}
 	
 	/**method will access a register and get it's unsigned long value
@@ -87,10 +83,6 @@ public class ExecuteTest {
 	 * @param cpu the cpu object to access
 	 * @param register the specific gp register to be read from
 	 * @return the long value of said register
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	private long accessRegisterUnsigned(CPU cpu, Register register) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
@@ -98,24 +90,18 @@ public class ExecuteTest {
 		reg.setAccessible(true);
 		Word[] registers = (Word[])reg.get(cpu);
 		
-		return DataConverter.decodeAsUnsigned(registers[register.getID()].getWord());
+		return DataConverter.decodeAsUnsigned(registers[register.getID()].getBytes());
 	}
 	
 	/**method creates a cpu and then runs a program on it
 	 * 
 	 * @param myInstructions instructions to run
 	 * @return the cpu object after execution
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
 	 */
 	private CPU createCPU(String myInstructions) throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
 	{
 		CPU cpu = new CPU(io);
-		cpu.setCycleFreq(9999);
+		cpu.setCycleFreq(0); // as fast as possible
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
 		cpu.runProgram();//execute the program
 		cpu.shutdown();
@@ -127,16 +113,12 @@ public class ExecuteTest {
 	 * @param cpu the cpu object to retrieve from
 	 * @return the program counter of that cpu object
 	 * @throws NoSuchFieldException all related to me accessing private methods for testing
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	private Address getProgramCounter(CPU cpu) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
 		Field pc = cpu.getClass().getDeclaredField("programCounter");//accesing private stuff for testing
 		pc.setAccessible(true);
-		Address programCounter = (Address)pc.get(cpu);
-		return programCounter;
+		return (Address)pc.get(cpu);
 	}
 	
 	/**method will get the labels in the program along with their addresses, used for testing
@@ -144,9 +126,6 @@ public class ExecuteTest {
 	 * @param cpu the cpu object being run on
 	 * @return the map of labels to addresses
 	 * @throws IllegalArgumentException if problem while accessing a provate field
-	 * @throws IllegalAccessException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
 	 */
 	private Map<String,Address> getLabels(CPU cpu) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
 	{
@@ -158,17 +137,7 @@ public class ExecuteTest {
 	}
 	
 	/**test the execution of the add instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAddExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -186,17 +155,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the abs instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAbsExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -211,17 +170,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the and instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAndExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -239,16 +188,6 @@ public class ExecuteTest {
 	
 	/**this method will test the addu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testAdduExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -265,17 +204,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the addi instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAddiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -290,17 +219,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the addiu instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAddiuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -315,17 +234,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the sub instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSubExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -342,17 +251,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the subu instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSubuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -369,17 +268,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the subi instruction execute
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSubiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -395,16 +284,6 @@ public class ExecuteTest {
 	
 	/**method will test the subiu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	@Test
 	public void testSubiuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -419,17 +298,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the mul instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testMulExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -447,17 +316,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the mulo instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testMuloExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -474,17 +333,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the mulou instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testMulouExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -501,17 +350,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the div instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testDivExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -529,16 +368,6 @@ public class ExecuteTest {
 	
 	/**method will test the divu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	@Test
 	public void testDivuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -555,17 +384,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the neg instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testNegExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -580,17 +399,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the negu instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testNeguExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -605,17 +414,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the nor instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testNorExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -631,17 +430,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the not instruction execution
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testNotExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -657,16 +446,6 @@ public class ExecuteTest {
 	
 	/**method will test the or instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	@Test
 	public void testOrExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -683,17 +462,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the ori instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testOriExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -708,17 +477,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the xor instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testXorExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -736,16 +495,6 @@ public class ExecuteTest {
 	
 	/**method will test the xori insruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
 	@Test
 	public void testXoriExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -760,17 +509,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the li instruction's execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -783,17 +522,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the b instruction's execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -814,16 +543,6 @@ public class ExecuteTest {
 	
 	/**method tests beq instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBeqExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -862,17 +581,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method will test the execution of the bne instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBneExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -911,17 +620,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the bgez instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBgezExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -958,17 +657,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the bgtz instruction
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBgtzExecute() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -1005,17 +694,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method will test the execution of the blez instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBlezExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1052,17 +731,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method will test the execution of the bltz instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBltzExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1099,17 +768,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the beqz instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testBeqzExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1146,17 +805,7 @@ public class ExecuteTest {
 	}
 	
 	/**will test the execution of the j instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testJExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1176,17 +825,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the jal instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testJalExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -1208,17 +847,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method aims to test the execution of the jr instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testJrExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1241,17 +870,7 @@ public class ExecuteTest {
 	}
 	
 	/**will test the execution of the move instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testMoveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1265,17 +884,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the nop instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testNopExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1294,17 +903,7 @@ public class ExecuteTest {
 	}
 	
 	/**tests the execution of the la instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLaExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -1321,17 +920,7 @@ public class ExecuteTest {
 	}
 	
 	/**testing the execution of the lw instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLwExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -1343,17 +932,7 @@ public class ExecuteTest {
 	}
 	
 	/**testing the execution of the sw instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSwExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1369,17 +948,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the lb instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLBExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1392,17 +961,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the lbu instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLbuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1415,17 +974,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the lh instruction execution
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLhExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1439,16 +988,6 @@ public class ExecuteTest {
 	
 	/**method tests the execution of the lhu instruction
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testLhuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1460,17 +999,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the sb instructin
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 *  
+	 *
 	 */
 	@Test
 	public void testSbExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1486,17 +1015,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the sh instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testShExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1512,17 +1031,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of syscall with code 10 (exit)
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallTenExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1538,13 +1047,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of syscall with code 1 (print int_
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallOneExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -1559,13 +1062,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of syscall code 4: print string
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallFourExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -1580,13 +1077,7 @@ public class ExecuteTest {
 	}
 	
 	/**will test the execution of syscall with code 11: print char
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallElevenExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -1601,17 +1092,7 @@ public class ExecuteTest {
 	}
 	
 	/**will test the execution of syscall with code 5: read int
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallFiveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1628,17 +1109,7 @@ public class ExecuteTest {
 	
 	
 	/**method used to test the execution of syscall code 12: read char
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallTwelveExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1654,26 +1125,16 @@ public class ExecuteTest {
 	}
 	
 	/**method used to test the execution of syscall code 8: read string
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallEightExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
 		{//test with too long input
 			String myInstructions = "li $v0, 8;\n" +
-									"li $a1, 4;\n" +
 									"la $a0, mystr;\n" +
-									"syscall;\n" + 
+                                    "li $a1, 4;\n" +
+									"syscall;\n" +
 									"lw $t1, mystr;\n" + 
 									"li $v0, 4;\n" + 
 									"la $a0, mystr;\n" + 
@@ -1683,41 +1144,36 @@ public class ExecuteTest {
 			CPU cpu = createCPU(myInstructions);
 			
 			assertEquals("THI",this.io.scanner);
-			assertEquals(1414023424,accessRegisterSigned(cpu,Register.t1));
+			byte nullByte = '\0';
+			assertEquals(('T' << 24) | ('H' << 16) | ('I' << 8) | (nullByte),accessRegisterSigned(cpu,Register.t1));
 			this.io.scanner = "";
 		}
 		
 		{//test with too short input
 			String myInstructions = "li $v0, 8;\n" +
+                                    "la $a0, mystr;\n" +
 									"li $a1, 4;\n" +
-									"la $a0, mystr;\n" +
-									"syscall;\n" + 
+									"syscall;\n" +
 									"lw $t1, mystr;\n" + 
 									"li $v0, 4;\n" + 
 									"la $a0, mystr;\n" + 
 									"syscall;\n";
 
+			// original myStr value: "This is my test String"
+
 			this.io.scanner = "TH";//should only read up to end of THIS
 			CPU cpu = createCPU(myInstructions);
 			
 			assertEquals("TH",this.io.scanner);
-			assertEquals(1414004736,accessRegisterSigned(cpu,Register.t1));
+			byte nullByte = '\0';
+            // note: the 's' is from the original value of the string that was there before
+			assertEquals(('T'<<24)|('H'<<16)|(nullByte<<8)|('s'),accessRegisterSigned(cpu,Register.t1));
 			this.io.scanner = "";
 		}
 	}
 	
 	/**method will test the execution of syscall code 9: sbrk
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSyscallNineExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1742,17 +1198,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the andi instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testAndiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1767,17 +1213,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the rem instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testRemExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1793,17 +1229,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the remu instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testRemuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -1820,16 +1246,6 @@ public class ExecuteTest {
 	
 	/**method tests bge instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBgeExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -1869,16 +1285,6 @@ public class ExecuteTest {
 	
 	/**method tests bgeu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBgeuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -1918,16 +1324,6 @@ public class ExecuteTest {
 	
 	/**method tests bgt instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBgtExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -1967,16 +1363,6 @@ public class ExecuteTest {
 	
 	/**method tests bgtu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBgtuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -2016,16 +1402,6 @@ public class ExecuteTest {
 	
 	/**method tests ble instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBleExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -2065,16 +1441,6 @@ public class ExecuteTest {
 	
 	/**method tests bleu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBleuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -2114,16 +1480,6 @@ public class ExecuteTest {
 	
 	/**method tests blt instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBltExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -2163,16 +1519,6 @@ public class ExecuteTest {
 	
 	/**method tests bltu instruction execution
 	 * 
-	 * @throws MemoryException
-	 * @throws DecodeException
-	 * @throws InstructionException
-	 * @throws ExecuteException
-	 * @throws HeapException
-	 * @throws StackException
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
 	 */
 	@Test
 	public void testBltuExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
@@ -2211,17 +1557,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the seq instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSeqExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2252,17 +1588,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sne instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSneExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2293,17 +1619,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sge instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSgeExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2334,17 +1650,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sgeu instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSgeuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2375,17 +1681,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sgt instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSgtExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2416,17 +1712,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sgtu instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSgtuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2457,17 +1743,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sle instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSleExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2498,17 +1774,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sleu instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSleuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2539,17 +1805,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the slt instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSltExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2580,17 +1836,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sltu instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSltuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2621,17 +1867,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the slti instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSltiExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2658,17 +1894,7 @@ public class ExecuteTest {
 	}
 	
 	/**this method tests the execution of the sltiu instruction
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSltiuExecute() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException
@@ -2695,17 +1921,7 @@ public class ExecuteTest {
 	}
 	
 	/**method will test the execution of the lui instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testLuiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
@@ -2718,17 +1934,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the rol instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testRolExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2745,17 +1951,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the ror instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testRorExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2772,17 +1968,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the sll instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSllExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2797,17 +1983,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the sllv instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSllvExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2824,17 +2000,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the srl instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSrlExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2849,17 +2015,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the srlv instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSrlvExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2876,17 +2032,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the sra instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSraExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 
@@ -2901,17 +2047,7 @@ public class ExecuteTest {
 	}
 	
 	/**method tests the execution of the srav instruction
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * @throws DecodeException 
-	 * @throws MemoryException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * 
+	 *
 	 */
 	@Test
 	public void testSravExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException 

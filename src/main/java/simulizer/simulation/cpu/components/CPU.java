@@ -48,16 +48,15 @@ public class CPU {
 
 	private MessageManager messageManager;
 
-	protected Address programCounter;
-	protected Statement instructionRegister;
+	Address programCounter;
+	Statement instructionRegister;
 
-	private ALU Alu;
-	protected final Clock clock;
-	protected long cycles;
+	final Clock clock;
+	long cycles;
 	/**
 	 * used for resume for single cycle
 	 */
-	protected boolean breakAfterCycle;
+	boolean breakAfterCycle;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -71,8 +70,8 @@ public class CPU {
 
 	protected Map<Address, Annotation> annotations;
 
-	protected boolean isRunning;// for program status
-	protected Address lastAddress;// used to determine end of program
+	boolean isRunning;// for program status
+	Address lastAddress;// used to determine end of program
 
 	private IO io;
 
@@ -99,16 +98,8 @@ public class CPU {
 	 */
 	public void shutdown() {
 		stopRunning();
-		clock.shutdown();
+		clock.stop();
 		messageManager.shutdown();
-	}
-
-	/**returns clock object
-	 * 
-	 * @return clock object
-	 */
-	public Clock getClock() {
-		return clock;
 	}
 
 	/**
@@ -135,6 +126,16 @@ public class CPU {
 		return clock.getTickFrequency() / 3;
 	}
 
+	public Clock.Status getClockState() {
+		return clock.getStatus();
+	}
+	public boolean clockRunning() {
+		return clock.getStatus() == Clock.Status.RUNNING;
+	}
+	public long getTicks() {
+		return clock.getTicks();
+	}
+
 	/**return if the simulation is currently running
 	 * 
 	 * @return if the simulation is running
@@ -152,7 +153,7 @@ public class CPU {
 		if (isRunning) {
 			isRunning = false;
 			io.cancelRead(); // must cancel to release simulation thread
-			clock.stop(); // will send some pseudo-ticks to release the simulation thread
+			clock.stop(); // will release the simulation thread
 		}
 	}
 
@@ -161,7 +162,7 @@ public class CPU {
 	 */
 	public void pause() {
 		isRunning = true;
-		clock.stop();
+		clock.pause();
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_PAUSED));
 	}
 	
@@ -170,7 +171,7 @@ public class CPU {
 	 * @return is the clock paused?
 	 */
 	public boolean isPaused() {
-		return isRunning && clock.isPaused();
+		return isRunning && clock.getStatus() == Clock.Status.PAUSED;
 	}
 
 	/**method restarts the clock after being paused
@@ -179,7 +180,7 @@ public class CPU {
 	public void resume() {
 		if(isRunning) {
 			breakAfterCycle = false;
-			clock.start();
+			clock.resume();
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_RESUMED));
 		}
 	}
@@ -189,8 +190,8 @@ public class CPU {
 	 */
 	public void resumeForOneCycle() {
 		breakAfterCycle = true;
-		if(!clock.isRunning()) {
-			clock.start();
+		if(clock.getStatus() != Clock.Status.RUNNING) {
+			clock.resume();
 			// does not send resumed message because not fully resumed
 		}
 	}
@@ -201,14 +202,19 @@ public class CPU {
 	 */
 	void waitForNextTick() throws EndedException {
 		try {
-			if (isRunning) {
-				// if the clock is stopped then it advances by 1 tick to unlock this thread
-				clock.waitForNextTick();
-				if(!isRunning) {
-					throw new EndedException();
-				}
-				messageManager.waitForAll();
+			if(!isRunning) {
+				throw new EndedException();
 			}
+
+            messageManager.waitForAll();
+
+            // if the clock is stopped then it advances by 1 tick to unlock this thread
+            clock.waitForNextTick();
+
+			if(!isRunning) {
+				throw new EndedException();
+			}
+
 		} catch (InterruptedException e) {
 			sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_INTERRUPTED));
 		}
@@ -260,13 +266,12 @@ public class CPU {
 		this.clearRegisters();// reset the registers
 
 		// setting up memory
-		Address textSegmentStart = this.program.textSegmentStart;
 		Address dataSegmentStart = this.program.dataSegmentStart;
 		Address dynamicSegmentStart = this.program.dynamicSegmentStart;
-		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getWord()));
+		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getBytes()));
 		byte[] staticDataSegment = this.program.dataSegment;
 		Map<Address, Statement> textSegment = this.program.textSegment;
-		this.memory = new MainMemory(textSegment, staticDataSegment, textSegmentStart, dataSegmentStart, dynamicSegmentStart, stackPointer);
+		this.memory = new MainMemory(textSegment, staticDataSegment, dataSegmentStart, dynamicSegmentStart, stackPointer);
 
 		labels = new HashMap<>();
 		labelMetaData = new HashMap<>();
@@ -289,7 +294,6 @@ public class CPU {
 		this.registers[Register.sp.getID()] = this.program.initialSP;// setting up stack pointer
 		sendMessage(new RegisterChangedMessage(Register.gp));
 
-		this.Alu = new ALU();// initialising Alu
 		this.lastAddress = program.textSegmentLast;
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.PROGRAM_LOADED));
@@ -393,7 +397,7 @@ public class CPU {
 
 		waitForNextTick();
 
-		InstructionFormat instruction = decode(this.instructionRegister.getInstruction(), this.instructionRegister.getOperandList());
+		InstructionFormat instruction = decode(instructionRegister.getInstruction(), instructionRegister.getOperandList());
 		sendMessage(new PipelineStateMessage(null, thisInstruction, null));
 
 		waitForNextTick();
@@ -408,7 +412,7 @@ public class CPU {
 		waitForNextTick();
 
 
-		if (this.programCounter.getValue() == this.lastAddress.getValue()+4&&this.isRunning) {// if end of program reached
+		if (programCounter.getValue() == lastAddress.getValue()+4 && isRunning) {// if end of program reached
 			// clean exit but representing in reality an error would be thrown
 			sendMessage(new ProblemMessage(
 					new MemoryException(
@@ -433,7 +437,6 @@ public class CPU {
 	public void runProgram() {
 		isRunning = true;
 		breakAfterCycle = false;
-		clock.resetTicks();
 		cycles = 0;
 
 		messageManager.waitForAll();
@@ -445,7 +448,6 @@ public class CPU {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
-		// 'un-pause' the simulation
 		clock.start();
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
@@ -453,7 +455,7 @@ public class CPU {
 		messageManager.waitForAll();
 
 		while (isRunning) {
-			long cycleStart = System.currentTimeMillis();
+			//long cycleStart = System.nanoTime();
 
 			try {
 				this.runSingleCycle();// run one loop of Fetch,Decode,Execute
@@ -464,12 +466,12 @@ public class CPU {
 				stopRunning();
 			}
 
-			long cycleDuration = System.currentTimeMillis() - cycleStart;
+			//long cycleDuration = System.nanoTime() - cycleStart;
 		}
 
 		// clean up
 
-		if(clock.isRunning())
+		if(clock.getStatus() != Clock.Status.STOPPED)
 			clock.stop();
 		io.cancelRead();
 		// make sure the simulation stopped message is the very last message
@@ -478,8 +480,18 @@ public class CPU {
 	}
 
 	// Standard get methods, don't do anything special
+
+	/**
+     * only use this method with the simulation bridge.
+	 */
 	public Word[] getRegisters() {
 		return registers;
+	}
+	public Word getRegister(Register r) {
+		return registers[r.getID()];
+	}
+	public void setRegister(Register r, Word w) {
+		registers[r.getID()] = w;
 	}
 
 	public MainMemory getMainMemory() {
@@ -488,10 +500,6 @@ public class CPU {
 
 	public Address getProgramCounter() {
 		return programCounter;
-	}
-
-	public ALU getALU() {
-		return Alu;
 	}
 
 	public IO getIO() {

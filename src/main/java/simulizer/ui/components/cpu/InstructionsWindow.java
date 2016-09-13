@@ -27,12 +27,12 @@ public class InstructionsWindow extends StackPane {
      * Represents a previous animation, contains the name and list of animations
      * @author Theo Styles
      */
-    public class PreviousAnimation{
+    static class PreviousAnimation{
 
         public String name;
-        public ArrayList<AnimationProcessor.Animation> animations;
+        ArrayList<AnimationProcessor.Animation> animations;
 
-        public PreviousAnimation(String name, ArrayList<AnimationProcessor.Animation> animations){
+        PreviousAnimation(String name, ArrayList<AnimationProcessor.Animation> animations){
             this.name = name;
             this.animations = animations;
         }
@@ -43,21 +43,19 @@ public class InstructionsWindow extends StackPane {
      * Represents a list cell containing a button
      * @author Theo Styles
      */
-    static class ButtonCell extends ListCell<PreviousAnimation> {
+    private static class ButtonCell extends ListCell<PreviousAnimation> {
         HBox hbox = new HBox();
         Label label = new Label("(empty)");
         Pane pane = new Pane();
         Button button = new Button("Replay");
         PreviousAnimation lastItem;
-        AnimationProcessor animationProcessor;
 
         /**
          * Sets up the layout and the button action
          * @param animationProcessor The animation processor to replay the animations on
          */
-        public ButtonCell(AnimationProcessor animationProcessor) {
+        ButtonCell(final AnimationProcessor animationProcessor) {
             super();
-            this.animationProcessor = animationProcessor;
             hbox.getChildren().addAll(label, pane, button);
             HBox.setHgrow(pane, Priority.ALWAYS);
             button.setOnAction((e) -> {
@@ -107,7 +105,7 @@ public class InstructionsWindow extends StackPane {
      * @param name The instruction name to use for the label
      * @param animations The animations for the cell
      */
-    public void addInstruction(String name, ArrayList<AnimationProcessor.Animation> animations){
+    void addInstruction(String name, ArrayList<AnimationProcessor.Animation> animations){
         Platform.runLater(() -> {
             instructions.add(0, new PreviousAnimation(name, animations));
             if(instructions.size() > 10)

@@ -33,7 +33,7 @@ public class Wire extends Group {
 	private Type type;
 	private Path path;
 	private double time;
-	private Double progressed = 0.0;
+	private double progressed = 0.0;
 	private boolean animating;
 	private boolean reverse;
 	private List<PathTransition> transitions;
@@ -44,7 +44,7 @@ public class Wire extends Group {
 	 * @param arrowHead the poly line to use for the arrowhead
 	 * @param type The type of wire
      */
-	public Wire(Polyline line, Polyline arrowHead, Type type) {
+	Wire(Polyline line, Polyline arrowHead, Type type) {
 		this.line = line;
 		this.arrowHead = arrowHead;
 		this.type = type;
@@ -68,7 +68,7 @@ public class Wire extends Group {
 	 * Gets the arrowhead
 	 * @return The arrowhead
      */
-	public Polyline getArrowhead(){
+	Polyline getArrowhead(){
 		return arrowHead;
 	}
 
@@ -84,14 +84,14 @@ public class Wire extends Group {
 	 * Sets the wire reversed
 	 * @param reverseNew The new reverse value
      */
-	public void setReverse(boolean reverseNew){
+	void setReverse(boolean reverseNew){
 		this.reverse = reverseNew;
 	}
 
 	/**
 	 * Reanimates the data, used when resizing occurs
 	 */
-	public void reanimateData() {
+	void reanimateData() {
 		setUpAnimationPath();
 		if (!animating)
 			return;
@@ -102,7 +102,7 @@ public class Wire extends Group {
 			p.playFrom(new Duration(progressed));
 		}
 
-		synchronized(progressed){
+		synchronized (this) {
 			progressed++;
 		}
 	}
@@ -110,7 +110,7 @@ public class Wire extends Group {
 	/**
 	 * Sets up the animation path for the wire
 	 */
-	public void setUpAnimationPath() {
+	private void setUpAnimationPath() {
 		if(line.getPoints().size() < 2) return;
 		path.getElements().clear();
 
@@ -144,6 +144,7 @@ public class Wire extends Group {
 	 * @param animTime The time for the animation to complete in
      */
 	public void animateData(double animTime) {
+        final Wire self = this;
 		Platform.runLater(() -> {
 			animating = true;
 			PathTransition pathTransition = new PathTransition();
@@ -172,7 +173,7 @@ public class Wire extends Group {
 				transitions.remove(pathTransition);
 			});
 
-			synchronized(progressed){
+			synchronized (self) {
 				progressed++;
 			}
 		});

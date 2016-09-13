@@ -322,7 +322,6 @@ public class MainMenuBar extends MenuBar {
 		runMenu.getItems().clear();
 
 		final CPU cpu = wm.getCPU();
-		final Clock clock = cpu.getClock();
 
 		MenuItem assembleAndRun = new MenuItem("Assemble and Run");
 		assembleAndRun.setAccelerator(new KeyCodeCombination(KeyCode.F5));
@@ -335,24 +334,24 @@ public class MainMenuBar extends MenuBar {
 		});
 
 		MenuItem pauseResume;
-		if (!clock.isRunning()) {
+		if (!cpu.clockRunning()) {
 			pauseResume = new MenuItem("Resume Simulation");
-			pauseResume.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
+			pauseResume.setDisable(allowDisabling && (cpu.clockRunning() || !cpu.isRunning()));
 		} else {
 			pauseResume = new MenuItem("Pause Simulation");
-			pauseResume.setDisable(allowDisabling && (!clock.isRunning() || !cpu.isRunning()));
+			pauseResume.setDisable(allowDisabling && (!cpu.clockRunning() || !cpu.isRunning()));
 		}
 		pauseResume.setAccelerator(new KeyCodeCombination(KeyCode.F6));
 		pauseResume.setOnAction(e -> {
-			if (!clock.isRunning() && cpu.isRunning())
+			if (!cpu.clockRunning() && cpu.isRunning())
 				cpu.resume();
-			else if (clock.isRunning() && cpu.isRunning())
+			else if (cpu.clockRunning() && cpu.isRunning())
 				cpu.pause();
 		});
 
 		MenuItem singleStep = new MenuItem("Single Step");
 		singleStep.setAccelerator(new KeyCodeCombination(KeyCode.F7));
-		singleStep.setDisable(allowDisabling && (clock.isRunning() || !cpu.isRunning()));
+		singleStep.setDisable(allowDisabling && (cpu.clockRunning() || !cpu.isRunning()));
 		singleStep.setOnAction(e -> {
 			if (cpu.isPaused()) {
 				cpu.resumeForOneCycle();
@@ -375,7 +374,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
 			double currentRounded = Double.parseDouble(String.format("%.5f", cpu.getCycleFreq()));
-			UIUtils.openDoubleInputDialog("Clock Speed", "Set Clock Speed:", "Cycles per second (Hz)", currentRounded, (val) -> {
+			UIUtils.openDoubleInputDialog("Clock Speed", "Set Clock Speed:", "Cycles per second (Hz) (0 => ∞)", currentRounded, (val) -> {
 				if (val >= 0) {
 					cpu.setCycleFreq(val);
 				} else {

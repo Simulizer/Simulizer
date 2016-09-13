@@ -15,12 +15,12 @@ import java.util.List;
  * postmortem examination
  * @author mbway
  */
-public class Parser {
-    public class ANTLRErrorCounter implements ANTLRErrorListener {
+class Parser {
+    private static class ANTLRErrorCounter implements ANTLRErrorListener {
 
-        public List<String> errors;
+        List<String> errors;
 
-        public ANTLRErrorCounter() {
+        ANTLRErrorCounter() {
             errors = new ArrayList<>();
         }
 
@@ -51,16 +51,16 @@ public class Parser {
         }
     }
 
-    ANTLRErrorCounter err;
-    public SimpParser p;
+    private ANTLRErrorCounter err;
+    SimpParser p;
     private boolean used;
 
-    public Parser() {
+    Parser() {
         err = new ANTLRErrorCounter();
         used = false;
     }
 
-    public SimpParser parseWithTrace(String input) {
+    SimpParser parseWithTrace(String input) {
         assert !used; // ensure never used twice
 
         SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
@@ -76,7 +76,7 @@ public class Parser {
         return p;
     }
 
-    public SimpParser parse(String input) {
+    SimpParser parse(String input) {
         assert !used; // ensure never used twice
 
         SimpLexer lexer = new SimpLexer(new ANTLRInputStream(input));
@@ -91,7 +91,7 @@ public class Parser {
         return p;
     }
 
-    public List<String> getErrors() {
+    List<String> getErrors() {
         return err.errors;
     }
 }

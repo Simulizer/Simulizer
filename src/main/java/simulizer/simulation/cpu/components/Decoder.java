@@ -91,8 +91,7 @@ public class Decoder {
             cpu.sendMessage(new DataMovementMessage(src2,Optional.empty()));
             return new RTypeInstruction(instruction, Optional.empty(), destinationRegister, src1, src2);
         }
-        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm
-                || instruction.getOperandFormat() == OperandFormat.destSrcImm) { //immediate arithmetic operations (signed and unsigned)
+        else if(instruction.getOperandFormat() == OperandFormat.destSrcImm) { //immediate arithmetic operations (signed or unsigned)
             assert (op1 != null) && (op2 != null) && (op3 != null);
 
             Register destinationRegister = op1.asRegisterOp().value;
@@ -134,7 +133,7 @@ public class Decoder {
 
             Word registerContents = this.decodeRegister(op1.asRegisterOp());//getting register contents
             cpu.sendMessage(new DataMovementMessage(Optional.of(registerContents),Optional.empty()));
-            Optional<Address> registerAddress = Optional.of(new Address((int)DataConverter.decodeAsUnsigned(registerContents.getWord())));//put into correct format
+            Optional<Address> registerAddress = Optional.of(new Address((int)DataConverter.decodeAsUnsigned(registerContents.getBytes())));//put into correct format
             return new JTypeInstruction(instruction,registerAddress,Optional.empty());
         }
         else if(instruction.getOperandFormat() == OperandFormat.cmpCmpLabel) {//for branch equal etc.
@@ -213,7 +212,7 @@ public class Decoder {
        }
        if(operand.register.isPresent()) {
            Register r = operand.register.get();
-           registerAddress = (int) DataConverter.decodeAsUnsigned(cpu.getRegisters()[r.getID()].getWord());
+           registerAddress = (int) DataConverter.decodeAsUnsigned(cpu.getRegister(r).getBytes());
        }
        return new Address(labelAddress + constantAddress + registerAddress);
    }
@@ -233,13 +232,13 @@ public class Decoder {
            return Word.ZERO;
        }
        else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.SRC_REGISTER)) {
-           return cpu.getRegisters()[operand.value.getID()];//return the word stored at that register
+           return cpu.getRegister(operand.value);//return the word stored at that register
        }
        else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.TARGET_REGISTER)) {
-           return this.cpu.getRegisters()[operand.value.getID()];//this is probably wrong for now
+           return this.cpu.getRegister(operand.value);//this is probably wrong for now
        }
        else if(operand.getOperandFormatType().equals(OperandFormat.OperandType.REGISTER)) {//standard register
-           return this.cpu.getRegisters()[operand.value.getID()];//return the word stored at that register
+           return this.cpu.getRegister(operand.value);//return the word stored at that register
        }
        else {
            throw new DecodeException("Error decoding Register.", operand);

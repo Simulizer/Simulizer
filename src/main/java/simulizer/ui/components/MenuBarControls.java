@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import simulizer.simulation.cpu.CPUChangedListener;
+import simulizer.simulation.cpu.components.Clock;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
 import simulizer.ui.WindowManager;
@@ -16,7 +17,7 @@ import simulizer.utils.FileUtils;
  * holds data for the buttons and other controls placed on the menu bar
  * @author mbway
  */
-public class MenuBarControls {
+class MenuBarControls {
 	private class ButtonCPUListener extends SimulationListener {
 		@Override public void processSimulationMessage(SimulationMessage m) {
 			switch(m.detail) {
@@ -64,14 +65,14 @@ public class MenuBarControls {
 
 	private final Slider clockSpeedSlider;
 	private final ChangeListener<Number> sliderListener;
-	private final int sliderMax = 500; // start from 0
+	private final static int sliderMax = 500; // start from 0
 	private final double lgClockSpeedMin = Math.log(0.05);
-	private final double lgClockSpeedMax = Math.log(2000);
+	private final double lgClockSpeedMax = Math.log(5000);
 	private long lastClockSpeedSetTime;
 	private final Label clockSpeedLabel;
 
 
-	public MenuBarControls(MainMenuBar menu, WindowManager wm) {
+	MenuBarControls(MainMenuBar menu, WindowManager wm) {
 		this.wm = wm;
 		cpu = wm.getCPU();
 		listener = new ButtonCPUListener();
@@ -210,9 +211,9 @@ public class MenuBarControls {
 	private void playClicked() {
 		if(cpu != null) {
 			if (cpu.isRunning()) {
-				if (!cpu.getClock().isRunning())
+				if (cpu.getClockState() == Clock.Status.PAUSED)
 					cpu.resume();
-				else if (cpu.getClock().isRunning())
+				else
 					cpu.pause();
 			} else {
 				AssemblingDialog.showAssemblingDialog(wm);
@@ -227,11 +228,8 @@ public class MenuBarControls {
 	}
 
 	private void stopClicked() {
-		if(cpu != null) {
-			if (cpu.isRunning()) {
-				cpu.stopRunning();
-			}
-		}
+		if(cpu != null && cpu.isRunning())
+            cpu.stopRunning();
 	}
 
 	/**
@@ -249,12 +247,16 @@ public class MenuBarControls {
 			lastClockSpeedSetTime = currentTime;
 		}
 	}
-	public void setSliderToMatch(double cyclesPerSecond) {
+	void setSliderToMatch(double cyclesPerSecond) {
 		double scale = (lgClockSpeedMax-lgClockSpeedMin) / sliderMax;
 		double sliderVal = (Math.log(cyclesPerSecond) - lgClockSpeedMin) / scale;
 		clockSpeedSlider.valueProperty().removeListener(sliderListener);
 		clockSpeedSlider.setValue(sliderVal);
 		clockSpeedSlider.valueProperty().addListener(sliderListener);
-		clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
+		if(cyclesPerSecond < 200) {
+			clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
+		} else {
+			clockSpeedLabel.setText(String.format("%.1f", cyclesPerSecond/1000) + " kHz");
+		}
 	}
 }

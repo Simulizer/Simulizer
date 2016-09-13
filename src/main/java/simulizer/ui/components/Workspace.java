@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -49,7 +50,7 @@ public class Workspace extends Observable implements Themeable {
 		private ScheduledFuture<?> longTask;
 		private int delay;
 
-		public ResizeListener(Workspace w, int delay) {
+		ResizeListener(Workspace w, int delay) {
 			this.w = w;
 			executor = Executors.newSingleThreadScheduledExecutor(new ThreadUtils.NamedThreadFactory("Window-Resizing"));
 			shortTask = null;
@@ -171,7 +172,7 @@ public class Workspace extends Observable implements Themeable {
 		return findInternalWindow(window) != null;
 	}
 
-	public Set<InternalWindow> getAllWindows() {
+	Set<InternalWindow> getAllWindows() {
 		return Collections.unmodifiableSet(openWindows);
 	}
 
@@ -192,7 +193,7 @@ public class Workspace extends Observable implements Themeable {
 		assert w2 != null;
 		w2.setWindowManager(wm);
 		wm.getLayouts().setWindowDimensions(w2);
-		Platform.runLater(() -> addWindows(w2));
+		Platform.runLater(() -> addWindow(w2));
 		return w2;
 	}
 
@@ -231,7 +232,7 @@ public class Workspace extends Observable implements Themeable {
 			e.setWindowManager(wm);
 			wm.getLayouts().setWindowDimensions(e);
 			// starts the page loading
-			addWindows(finalE);
+			addWindow(finalE);
 
 			// wait for the page to load (crucially: on a non JavaFX thread)
 			Thread waiting = new Thread(() -> {
@@ -253,38 +254,38 @@ public class Workspace extends Observable implements Themeable {
 	/**
 	 * Adds Internal Windows to the workspace (use openInternalWindow instead)
 	 *
-	 * @param windows
-	 *            List of windows to add to the workspace
+	 * @param window
+	 *            window to add to the workspace
 	 */
-	public void addWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			if (!openWindows.contains(window)) {
-				window.setOnCloseAction(e -> removeWindows(window));
-				openWindows.add(window);
-				window.setTheme(wm.getThemes().getTheme());
-				pane.getChildren().addAll(window);
-				window.setGridBounds(wm.getGridBounds());
-				window.ready();
-			} else {
-				UIUtils.showErrorDialog("Problem Opening Window", "Tried to add a window which already exists: " + window.getTitle());
-			}
+	void addWindow(InternalWindow window) {
+		synchronized (openWindows) {
+            if (!openWindows.contains(window)) {
+                window.setOnCloseAction(e -> removeWindow(window));
+                openWindows.add(window);
+                window.setTheme(wm.getThemes().getTheme());
+                pane.getChildren().addAll(window);
+                window.setGridBounds(wm.getGridBounds());
+                window.ready();
+            } else {
+                UIUtils.showErrorDialog("Problem Opening Window", "Tried to add a window which already exists: " + window.getTitle());
+            }
 		}
 	}
 
 	/**
 	 * Removes Internal Windows from the workspace
 	 *
-	 * @param windows
-	 *            List of Internal Windows to close
+	 * @param window
+	 *            the Internal Window to close
 	 */
-	private void removeWindows(InternalWindow... windows) {
-		for (InternalWindow window : windows) {
-			// to prevent close being called twice, once now, once (earlier) when the user clicked (X)
-			if (!window.isClosed())
-				window.close();
+	private void removeWindow(InternalWindow window) {
+		synchronized (openWindows) {
+            // to prevent close being called twice, once now, once (earlier) when the user clicked (X)
+            if (!window.isClosed())
+                window.close();
 
-			if (window.isClosed())
-				openWindows.remove(window);
+            if (window.isClosed())
+                openWindows.remove(window);
 		}
 	}
 
@@ -302,16 +303,16 @@ public class Workspace extends Observable implements Themeable {
 	 * @param theseWindows
 	 *            The Internal Windows to keep open
 	 */
-	public void closeAllExcept(InternalWindow[] theseWindows) {
-		List<InternalWindow> keepOpen = new ArrayList<>();
+	public synchronized void closeAllExcept(InternalWindow[] theseWindows) {
+		Set<InternalWindow> keepOpen = new HashSet<>();
 		Collections.addAll(keepOpen, theseWindows);
 
-		List<InternalWindow> close = new ArrayList<>();
-		for (InternalWindow window : openWindows)
-			if (!keepOpen.contains(window))
-				close.add(window);
-
-		close.forEach(this::removeWindows);
+		synchronized (openWindows) {
+			openWindows.stream()
+					.filter(window -> !keepOpen.contains(window))
+					.collect(Collectors.toList()) // need to make a copy since openWindows is modified
+                    .forEach(this::removeWindow);
+		}
 	}
 
 	/**

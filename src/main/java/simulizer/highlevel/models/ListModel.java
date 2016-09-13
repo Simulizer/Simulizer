@@ -15,6 +15,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
  * @author Michael
  *
  */
+@SuppressWarnings("WeakerAccess")
 public class ListModel extends DataStructureModel {
 	private long[] list;
 	private int size = 0;

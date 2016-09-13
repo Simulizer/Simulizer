@@ -3,7 +3,9 @@ package simulizer.utils;
 import simulizer.Simulizer;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * debugging tool to dump a string to a file
@@ -12,12 +14,10 @@ import java.io.PrintWriter;
  */
 public class DebugUtils {
 
-	public static void dumpToFile(String str, String filename) {
-		try {
-			PrintWriter out = new PrintWriter(filename);
-			out.print(str);
-			out.close();
-		} catch (FileNotFoundException e) {
+	private static void dumpToFile(String str, String filename) {
+		try (Writer w = FileUtils.getUTF8FileAppendWriter(filename)){
+			w.write(str);
+		} catch (IOException e) {
 			Simulizer.handleException(e);
 		}
 	}

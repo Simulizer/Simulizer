@@ -83,7 +83,7 @@ public class UISimulationListener extends SimulationListener {
 
 				System.out.println("Total annotations fired: " + count);
 				long duration = System.currentTimeMillis() - startTime;
-				long ticks = wm.getCPU().getClock().getTicks();
+				long ticks = wm.getCPU().getTicks();
 				System.out.println("Total time: " + (duration / 1000.0) + " seconds");
 				System.out.println("Total ticks: " + ticks);
 				if (ticks != 0) { // this is actually possible (.text;main:nop)

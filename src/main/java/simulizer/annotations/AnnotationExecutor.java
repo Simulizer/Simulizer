@@ -36,7 +36,7 @@ public class AnnotationExecutor {
 	private ScriptObjectMirror nhGlobals;
 
 
-	private class AnnotationClassFilter implements ClassFilter {
+	private static class AnnotationClassFilter implements ClassFilter {
 		boolean apiLoaded = false;
 
 		@Override public boolean exposeToScripts(String s) {
@@ -125,12 +125,8 @@ public class AnnotationExecutor {
 	 * Execute the javascript code found inside the annotation
 	 * @param annotation the annotation to execute
 	 * @return the result of evaulating the script (ie the script `var x = 14; x;` returns `Integer(14)`)
-	 * @throws ScriptException
-	 * @throws SecurityException
-	 * @throws AnnotationEarlyReturn
-	 * @throws AssertionError
 	 */
-	public Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn, AssertionError {
+	Object exec(Annotation annotation) throws ScriptException, SecurityException, AnnotationEarlyReturn, AssertionError {
 		@SuppressWarnings("UnusedAssignment") // this is actually necessary
 		Object res = null;
 

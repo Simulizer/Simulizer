@@ -114,14 +114,6 @@ public class ProgramExtractor extends SimpBaseListener {
         return (ctx != null) && (ctx.exception == null);
     }
 
-    /**
-     * whether a terminal node matches correctly
-     * @param n the terminal node to test validity
-     * @return whether the terminal node parsed correctly
-     */
-    private boolean goodMatch(TerminalNode n) {
-        return n != null && !(n instanceof ErrorNode);
-    }
 
 
 

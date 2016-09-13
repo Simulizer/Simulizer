@@ -3,15 +3,8 @@ package simulizer.utils;
 import simulizer.Simulizer;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Wrappers for accessing files including bundled resources
@@ -25,23 +18,59 @@ public class FileUtils {
 	 * @return the file contents (read as UTF-8)
 	 */
 	public static String getFileContent(String path) {
-		FileInputStream fis;
+		FileInputStream fis = null;
 		try {
 			File file = new File(path);
 			fis = new FileInputStream(file);
 			byte[] data = new byte[(int) file.length()];
 			//noinspection ResultOfMethodCallIgnored
 			fis.read(data);
-			fis.close();
 
 			return new String(data, "UTF-8");
 
 		} catch (IOException e) {
 			Simulizer.handleException(e);
+		} finally {
+			FileUtils.quietClose(fis);
 		}
 
 		return null;
 	}
+
+	public static Reader getUTF8FileReader(File f) throws FileNotFoundException {
+		return getUTF8FileReader(f.getAbsolutePath());
+	}
+	public static Reader getUTF8FileReader(String filename) throws FileNotFoundException {
+		return new InputStreamReader(new FileInputStream(filename), StandardCharsets.UTF_8);
+	}
+
+	public static Writer getUTF8FileWriter(File f) throws FileNotFoundException {
+		return getUTF8FileWriter(f.getAbsolutePath());
+	}
+	public static Writer getUTF8FileWriter(String filename) throws FileNotFoundException {
+		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
+	}
+	public static Writer getUTF8FileAppendWriter(String filename) throws FileNotFoundException {
+		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), StandardCharsets.UTF_8));
+	}
+
+	public static String[] splitIntoLines(String s) {
+		return s.split(System.getProperty("line.separator"));
+	}
+
+	/**
+     * used in finally blocks to close only if the Closable object was initialised
+	 */
+	public static void quietClose(Closeable c) {
+		try {
+			if(c != null) {
+				c.close();
+			}
+        } catch (IOException e) {
+            Simulizer.handleException(e);
+        }
+	}
+
 
 	/**
 	 * read the contents of a File object
@@ -55,12 +84,14 @@ public class FileUtils {
 	 * write to a file (as Java makes this overly bureaucratic)
 	 */
 	public static void writeToFile(File file, String content) {
+	    Writer fw = null;
 		try {
-			FileWriter fw = new FileWriter(file);
+			fw = getUTF8FileWriter(file);
 			fw.write(content);
-			fw.close();
 		} catch (IOException e) {
 		    Simulizer.handleException(e);
+		} finally {
+			quietClose(fw);
 		}
 	}
 
@@ -108,19 +139,15 @@ public class FileUtils {
 			InputStream in = FileUtils.class.getResourceAsStream(path);
 			if(in != null) {
 				br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+				for(int c = br.read(); c != -1; c = br.read())
+                    sb.append((char) c);
 			} else {
 				throw new FileNotFoundException(path);
 			}
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-		    Simulizer.handleException(e);
-		}
-
-		try {
-			assert br != null;
-			for (int c = br.read(); c != -1; c = br.read())
-				sb.append((char) c);
 		} catch (IOException e) {
-		    Simulizer.handleException(e);
+			Simulizer.handleException(e);
+		} finally {
+			quietClose(br);
 		}
 
 		return sb.toString();

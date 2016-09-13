@@ -112,8 +112,8 @@ public class SplashScreen {
 		stage.initStyle(StageStyle.UNDECORATED);
 		final Rectangle2D bounds = Screen.getPrimary().getBounds();
 		stage.setScene(splashScene);
-		stage.setX(bounds.getMinX() + bounds.getWidth() / 2 - width / 2);
-		stage.setY(bounds.getMinY() + bounds.getHeight() / 2 - height / 2);
+		stage.setX(bounds.getMinX() + (bounds.getWidth() / 2) - (width / 2.0));
+		stage.setY(bounds.getMinY() + (bounds.getHeight() / 2) - (height / 2.0));
 		stage.setWidth(width);
 		stage.setHeight(height);
 		stage.setAlwaysOnTop(true);

@@ -87,14 +87,14 @@ public class DecodeTest {
 		RTypeInstruction rtype= instr.asRType();
 		assertTrue(rtype.mode.equals(AddressMode.RTYPE));
 		assertTrue(rtype.getInstruction().equals(Instruction.add));
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[2]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[3]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[2]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[3]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[2]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[3]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[2]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[3]);
 		assertTrue(!rtype.getDest().isPresent());
 		assertTrue(rtype.getDestReg().equals(Register.t0));
 	}
@@ -126,14 +126,14 @@ public class DecodeTest {
 		RTypeInstruction rtype= instr.asRType();
 		assertTrue(rtype.mode.equals(AddressMode.RTYPE));
 		assertTrue(rtype.getInstruction().equals(Instruction.addi));
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[2]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[3]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[2]);
-		assertEquals(5,rtype.getSrc2().get().getWord()[3]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[2]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[3]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[2]);
+		assertEquals(5,rtype.getSrc2().get().getBytes()[3]);
 		assertTrue(!rtype.getDest().isPresent());
 		assertTrue(rtype.getDestReg().equals(Register.t0));
 	}
@@ -165,14 +165,14 @@ public class DecodeTest {
 		RTypeInstruction rtype= instr.asRType();
 		assertTrue(rtype.mode.equals(AddressMode.RTYPE));
 		assertTrue(rtype.getInstruction().equals(Instruction.addiu));
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[2]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[3]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc2().get().getWord()[2]);
-		assertEquals(5,rtype.getSrc2().get().getWord()[3]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[2]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[3]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc2().get().getBytes()[2]);
+		assertEquals(5,rtype.getSrc2().get().getBytes()[3]);
 		assertTrue(!rtype.getDest().isPresent());
 		assertTrue(rtype.getDestReg().equals(Register.t0));
 	}
@@ -202,10 +202,10 @@ public class DecodeTest {
 		RTypeInstruction rtype = instr.asRType();
 		assertTrue(rtype.mode.equals(AddressMode.RTYPE));
 		assertTrue(rtype.getInstruction().equals(Instruction.abs));
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[0]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[1]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[2]);
-		assertEquals(0x00,rtype.getSrc1().get().getWord()[3]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[0]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[1]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[2]);
+		assertEquals(0x00,rtype.getSrc1().get().getBytes()[3]);
 		assertTrue(!rtype.getSrc2().isPresent());
 		assertTrue(!rtype.getDest().isPresent());
 		assertTrue(rtype.getDestReg().equals(Register.t0));
@@ -236,10 +236,10 @@ public class DecodeTest {
 		LSInstruction lstype = instr.asLSType();
 		assertTrue(lstype.mode.equals(AddressMode.LSTYPE));
 		assertTrue(lstype.getInstruction().equals(Instruction.li));
-		assertEquals(0x00,lstype.getImmediate().get().getWord()[0]);
-		assertEquals(0x00,lstype.getImmediate().get().getWord()[1]);
-		assertEquals(0x00,lstype.getImmediate().get().getWord()[2]);
-		assertEquals(7,lstype.getImmediate().get().getWord()[3]);
+		assertEquals(0x00,lstype.getImmediate().get().getBytes()[0]);
+		assertEquals(0x00,lstype.getImmediate().get().getBytes()[1]);
+		assertEquals(0x00,lstype.getImmediate().get().getBytes()[2]);
+		assertEquals(7,lstype.getImmediate().get().getBytes()[3]);
 		assertTrue(!lstype.getMemAddress().isPresent());
 		assertTrue(!lstype.getRegister().isPresent());
 		assertTrue(lstype.getRegisterName().get().equals(Register.t0));
@@ -303,7 +303,7 @@ public class DecodeTest {
 		assertTrue(jtype.mode.equals(AddressMode.JTYPE));
 		assertTrue(jtype.getInstruction().equals(Instruction.j));
 		assertEquals(10,jtype.getJumpAddress().get().getValue());
-		assertEquals(15,DataConverter.decodeAsSigned(jtype.getCurrentAddress().get().getWord()));
+		assertEquals(15,DataConverter.decodeAsSigned(jtype.getCurrentAddress().get().getBytes()));
 	}
 	
 	/**will test the register operand format
@@ -370,14 +370,14 @@ public class DecodeTest {
 		ITypeInstruction itype = instr.asIType();
 		assertTrue(itype.mode.equals(AddressMode.ITYPE));
 		assertTrue(itype.getInstruction().equals(Instruction.beq));
-		assertEquals(0x00,itype.getCmp1().get().getWord()[0]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[1]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[2]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[3]);
-		assertEquals(0x00,itype.getCmp2().get().getWord()[0]);
-		assertEquals(0x00,itype.getCmp2().get().getWord()[1]);
-		assertEquals(0x00,itype.getCmp2().get().getWord()[2]);
-		assertEquals(0x00,itype.getCmp2().get().getWord()[3]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[0]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[1]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[2]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[3]);
+		assertEquals(0x00,itype.getCmp2().get().getBytes()[0]);
+		assertEquals(0x00,itype.getCmp2().get().getBytes()[1]);
+		assertEquals(0x00,itype.getCmp2().get().getBytes()[2]);
+		assertEquals(0x00,itype.getCmp2().get().getBytes()[3]);
 		assertEquals(17,itype.getBranchAddress().get().getValue());
 	}
 	
@@ -415,10 +415,10 @@ public class DecodeTest {
 		ITypeInstruction itype = instr.asIType();
 		assertTrue(itype.mode.equals(AddressMode.ITYPE));
 		assertTrue(itype.getInstruction().equals(Instruction.bltz));
-		assertEquals(0x00,itype.getCmp1().get().getWord()[0]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[1]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[2]);
-		assertEquals(0x00,itype.getCmp1().get().getWord()[3]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[0]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[1]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[2]);
+		assertEquals(0x00,itype.getCmp1().get().getBytes()[3]);
 		assertFalse(itype.getCmp2().isPresent());
 		assertEquals(25,itype.getBranchAddress().get().getValue());
 		
@@ -451,7 +451,7 @@ public class DecodeTest {
 		LSInstruction lstype = instr.asLSType();
 		assertTrue(lstype.mode.equals(AddressMode.LSTYPE));
 		assertTrue(lstype.getInstruction().equals(Instruction.sw));
-		assertEquals(0,DataConverter.decodeAsSigned(lstype.getRegister().get().getWord()));
+		assertEquals(0,DataConverter.decodeAsSigned(lstype.getRegister().get().getBytes()));
 		assertFalse(lstype.getRegisterName().isPresent());
 		assertFalse(lstype.getImmediate().isPresent());
 		assertEquals(18,lstype.getMemAddress().get().getValue());

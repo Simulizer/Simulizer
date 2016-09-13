@@ -9,6 +9,7 @@ import java.util.Set;
 import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.ui.components.Workspace;
+import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.interfaces.WindowEnum;
 
 /**
@@ -94,7 +95,7 @@ public class HLVisualManager extends Observable implements Observer {
 
 	@Override
 	public void update(Observable observable, Object obj) {
-		if (obj == null) {
+		if (obj == null && observable instanceof DataStructureModel) {
 			DataStructureModel model = (DataStructureModel) observable;
 			if (autoOpen && model.isVisible())
 				workspace.openInternalWindow(WindowEnum.HIGH_LEVEL_VISUALISATION);
@@ -108,6 +109,6 @@ public class HLVisualManager extends Observable implements Observer {
 	 *
 	 */
 	public enum Action {
-		CREATED, DELETED;
+		CREATED, DELETED
 	}
 }

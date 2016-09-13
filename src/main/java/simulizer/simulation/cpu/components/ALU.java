@@ -18,14 +18,7 @@ public class ALU {
 
     public static final byte[] branchTrue = new byte[]{0b1,0b1,0b1,0b1};//if branch returns true
     public static final byte[] branchFalse = new byte[]{0b0,0b0,0b0,0b0};//if branch returns false
-    public static boolean branchFlag = false;//flag to determine branching (true = successful branch has been executed)
-
-    /**empty constructor
-     *
-     */
-    public ALU() {
-
-    }
+    static boolean branchFlag = false;//flag to determine branching (true = successful branch has been executed)
 
     /**this method uses a switch statement to execute some operation on two words
      *
@@ -35,14 +28,14 @@ public class ALU {
      * @return the result of the operation on the two words
      * @throws InstructionException if unsupported instruction attempted
      */
-    public Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord) throws InstructionException
+    public static Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord) throws InstructionException
     {
         byte[] firstValue;
         byte[] secondValue;
 
         if(firstWord.isPresent())//if a value stored
         {
-            firstValue = firstWord.get().getWord();
+            firstValue = firstWord.get().getBytes();
         }
         else
         {
@@ -51,7 +44,7 @@ public class ALU {
 
         if(secondWord.isPresent())//if a value stored
         {
-            secondValue = secondWord.get().getWord();
+            secondValue = secondWord.get().getBytes();
         }
         else
         {

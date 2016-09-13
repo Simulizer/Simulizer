@@ -45,7 +45,13 @@ public class GuiMode {
 
 		@Override
 		public void init() {
-			GuiMode.settings = Settings.loadSettings(settingsFile);
+			try {
+                GuiMode.settings = Settings.loadSettings(settingsFile);
+            } catch (IOException ex) {
+                UIUtils.showErrorDialog("Failed To Launch", "Failed to launch: settings file: '" +
+                        settingsFile.getPath() + "' was missing");
+                throw new RuntimeException("missing settings file " + settingsFile.getPath());
+            }
 		}
 
 		@Override

@@ -73,7 +73,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			synchronized (changedRegisters) {
 				if (changedRegisters.size() == 0)
 					return;
-				changed = table.getItems().filtered(d -> changedRegisters.contains(d.id));
+				changed = table.getItems().filtered(d -> changedRegisters.contains(d.reg.getID()));
 				changedRegisters.clear();
 			}
 			changed.forEach(Data::refresh);
@@ -154,20 +154,21 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 * @author Michael
 	 *
 	 */
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	public class Data {
-		private final int id;
+		private final Register reg;
 		private byte[] contents;
 		private final String name;
 		private SimpleStringProperty value = new SimpleStringProperty();
 
 		public Data(int id, String name) {
-			this.id = id;
+			reg = Register.fromID(id);
 			this.name = name;
 			refresh();
 		}
 
 		public void refresh() {
-			contents = cpu.getRegisters()[id].getWord();
+			contents = cpu.getRegister(reg).getBytes();
 			value.set(getValue());
 		}
 
