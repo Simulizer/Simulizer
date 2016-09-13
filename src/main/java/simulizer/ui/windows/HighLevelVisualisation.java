@@ -81,7 +81,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
 		super.close();
 
 		// Close all tabs
@@ -97,7 +97,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param vis
 	 *            the visualisation to add
 	 */
-	public void addTab(DataStructureVisualiser vis) {
+	public synchronized void addTab(DataStructureVisualiser vis) {
 		Tab tab = new Tab(vis.getName());
 		tab.setContent(vis);
 
@@ -123,7 +123,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param model
 	 *            the model to remove
 	 */
-	private void removeTab(DataStructureModel model) {
+	private synchronized void removeTab(DataStructureModel model) {
 		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).forEach(t -> removeTab(t));
 	}
 
@@ -133,7 +133,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param vis
 	 *            the visualisation to remove
 	 */
-	public void removeTab(DataStructureVisualiser vis) {
+	public synchronized void removeTab(DataStructureVisualiser vis) {
 		tabs.getTabs().stream().filter(t -> t.getContent() == vis).forEach(this::removeTab);
 	}
 
@@ -143,7 +143,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 * @param tab
 	 *            the tab to remove
 	 */
-	private void removeTab(Tab tab) {
+	private synchronized void removeTab(Tab tab) {
 		((DataStructureVisualiser) tab.getContent()).close();
 		Platform.runLater(() -> tabs.getTabs().remove(tab));
 	}

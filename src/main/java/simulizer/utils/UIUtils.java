@@ -16,12 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
@@ -297,11 +293,22 @@ public class UIUtils {
 		return result.get() == ButtonType.OK;
 	}
 
+	// from http://stackoverflow.com/a/37610648
+	private static class FixedOrderButtonDialog extends DialogPane {
+		@Override
+		protected Node createButtonBar() {
+			ButtonBar node = (ButtonBar) super.createButtonBar();
+			node.setButtonOrder(ButtonBar.BUTTON_ORDER_NONE);
+			return node;
+		}
+	}
+
 	/**
 	 * show a dialog box which asks the user to confirm yes or no
 	 */
 	public static ButtonType confirmYesNoCancel(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setDialogPane(new FixedOrderButtonDialog());
 		alert.setResizable(true);
 		alert.initOwner(GuiMode.getPrimaryStage());
 		alert.setTitle("Confirmation");

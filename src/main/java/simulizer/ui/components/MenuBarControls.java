@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import simulizer.simulation.cpu.CPUChangedListener;
+import simulizer.simulation.cpu.components.Clock;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.simulation.messages.SimulationMessage;
 import simulizer.ui.WindowManager;
@@ -210,9 +211,9 @@ class MenuBarControls {
 	private void playClicked() {
 		if(cpu != null) {
 			if (cpu.isRunning()) {
-				if (!cpu.getClock().isRunning())
+				if (cpu.getClockState() == Clock.Status.PAUSED)
 					cpu.resume();
-				else if (cpu.getClock().isRunning())
+				else
 					cpu.pause();
 			} else {
 				AssemblingDialog.showAssemblingDialog(wm);
@@ -227,11 +228,8 @@ class MenuBarControls {
 	}
 
 	private void stopClicked() {
-		if(cpu != null) {
-			if (cpu.isRunning()) {
-				cpu.stopRunning();
-			}
-		}
+		if(cpu != null && cpu.isRunning())
+            cpu.stopRunning();
 	}
 
 	/**
