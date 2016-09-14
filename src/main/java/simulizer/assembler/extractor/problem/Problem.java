@@ -53,7 +53,8 @@ public class Problem {
      * mean to state the program has no associated line number, use:
      * new Problem("message", Problem.NO_LINE_NUM);
      */
-    private Problem(String message) { }
+    @SuppressWarnings("unused")
+	private Problem(String message) { }
 
     Problem(String message, int lineNum, Severity severity) {
         this.message = message;

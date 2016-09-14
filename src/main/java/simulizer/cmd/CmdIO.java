@@ -27,7 +27,8 @@ public class CmdIO implements IO {
      *
      * @param str the string to be printed
      */
-    public void printString(IOStream stream, String str)
+    @Override
+	public void printString(IOStream stream, String str)
     {
         switch(stream) {
             case STANDARD: System.out.print(str); break;
@@ -40,7 +41,8 @@ public class CmdIO implements IO {
      *
      * @param num the number to be printed
      */
-    public void printInt(IOStream stream, int num)
+    @Override
+	public void printInt(IOStream stream, int num)
     {
         printString(stream, Integer.toString(num));
     }
@@ -49,7 +51,8 @@ public class CmdIO implements IO {
      *
      * @param letter the character to be printed
      */
-    public void printChar(IOStream stream, char letter)
+    @Override
+	public void printChar(IOStream stream, char letter)
     {
         printString(stream, Character.toString(letter));
     }
@@ -58,7 +61,8 @@ public class CmdIO implements IO {
      *
      * @return the string read from the console
      */
-    public String readString(IOStream stream)
+    @Override
+	public String readString(IOStream stream)
     {
         return scan.nextLine();
     }
@@ -67,7 +71,8 @@ public class CmdIO implements IO {
      *
      * @return the integer read from the console
      */
-    public int readInt(IOStream stream)
+    @Override
+	public int readInt(IOStream stream)
     {
         return scan.nextInt();
     }
@@ -76,7 +81,8 @@ public class CmdIO implements IO {
      *
      * @return the character read from the console
      */
-    public char readChar(IOStream stream)
+    @Override
+	public char readChar(IOStream stream)
     {
         return StringUtils.nextChar(scan);
     }

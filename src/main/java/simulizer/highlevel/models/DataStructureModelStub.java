@@ -42,7 +42,7 @@ public class DataStructureModelStub extends DataStructureModel {
 
     // List Model
     public void setList(List<Long> list) { }
-    private boolean checkIndex(int index) { return false; }
+    //private boolean checkIndex(int index) { return false; }
     public void set(int i, Long item) { }
     public void swap(int i, int j) { }
     public void setMarkers(String markerName, int index) { }

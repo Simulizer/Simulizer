@@ -1,18 +1,18 @@
 package simulizer.simulation.mips_compliance;
 
-import category.UnitTests;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import category.UnitTests;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.ProblemCountLogger;
-import simulizer.assembler.extractor.problem.ProblemLogger;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.components.IOTest;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.user_interaction.BufferIO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by matthew on 07/09/16.

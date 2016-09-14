@@ -17,6 +17,7 @@ public class CmdSimulationListener extends SimulationListener {
 		this.a = a;
 	}
 
+	@Override
 	public void processAnnotationMessage(AnnotationMessage m) {
 		// the annotations should all be completed before moving on to the next cycle
 		if (a != null) {
@@ -25,6 +26,7 @@ public class CmdSimulationListener extends SimulationListener {
 		}
 	}
 
+	@Override
 	public void processProblemMessage(ProblemMessage m) {
 		System.err.print("problem: " + m.e.toString());
 	}

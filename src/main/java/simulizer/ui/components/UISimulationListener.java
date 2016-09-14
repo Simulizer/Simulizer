@@ -3,7 +3,7 @@ package simulizer.ui.components;
 import java.util.Map;
 
 import javafx.application.Platform;
-import simulizer.Simulizer;
+import simulizer.BuildInfo;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Program;
 import simulizer.simulation.cpu.components.CPU;
@@ -54,7 +54,7 @@ public class UISimulationListener extends SimulationListener {
 			case SIMULATION_STARTED: {
 				startTime = System.currentTimeMillis();
 
-				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION + " - Simulation Running"));
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Simulation Running"));
 
 				if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 					wm.getWorkspace().openEditorWithCallback((editor) -> {
@@ -76,7 +76,7 @@ public class UISimulationListener extends SimulationListener {
 				break;
 			case SIMULATION_STOPPED: {
 				System.out.println("Simulation Stopped");
-				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer v" + Simulizer.VERSION));
+				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")"));
 
 				// TODO: check if the application is closing because this sometimes causes "not a JavaFX thread" exception
 				wm.getAnnotationManager().onEndProgram();

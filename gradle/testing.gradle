@@ -1,0 +1,21 @@
+/////////////////////////////////////////////////
+//
+// Testing Configuration
+//
+/////////////////////////////////////////////////
+
+test {
+    useJUnit {
+        // uncomment if your system does not have Spim installed
+        //excludeCategories 'category.SpimTests'
+
+        // uncomment to exclude any slow tests
+        //excludeCategories 'category.SlowTests'
+
+        // uncomment to only run finished tests
+        //excludeCategories 'category.InProgressTests'
+    }
+    testLogging {
+        events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+    }
+}

@@ -8,7 +8,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import simulizer.assembler.representation.Register;
 import simulizer.ui.interfaces.InternalWindow;
-import simulizer.ui.windows.Registers;
 
 /**
  * Register Reference
@@ -21,7 +20,6 @@ public class RegisterReference extends InternalWindow {
 
 	// requirements for observable:
 	// class public. public 'get' methods corresponding to the value passed to the PropertyValueFactory
-	@SuppressWarnings("unused")
 	public static class Data {
 		private String mnemonic;
 		private String numeric;

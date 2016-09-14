@@ -25,6 +25,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @param str the string to be printed
 	 */
+	@Override
 	public void printString(IOStream stream, String str)
 	{
 		System.out.println(str);
@@ -34,6 +35,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @param num the number to be printed
 	 */
+	@Override
 	public void printInt(IOStream stream, int num)
 	{
 		System.out.println(num);
@@ -43,6 +45,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @param letter the character to be printed
 	 */
+	@Override
 	public void printChar(IOStream stream, char letter)
 	{
 		System.out.println(letter);
@@ -52,6 +55,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @return the string read from the console
 	 */
+	@Override
 	public String readString(IOStream stream)
 	{
 
@@ -62,6 +66,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @return the integer read from the console
 	 */
+	@Override
 	public int readInt(IOStream stream)
 	{
 		return scan.nextInt();
@@ -71,6 +76,7 @@ public class ConsoleIO implements IO
 	 *
 	 * @return the character read from the console
 	 */
+	@Override
 	public char readChar(IOStream stream)
 	{
 		return StringUtils.nextChar(scan);

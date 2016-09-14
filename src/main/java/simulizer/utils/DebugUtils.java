@@ -1,11 +1,9 @@
 package simulizer.utils;
 
-import simulizer.Simulizer;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
+
+import simulizer.Simulizer;
 
 /**
  * debugging tool to dump a string to a file

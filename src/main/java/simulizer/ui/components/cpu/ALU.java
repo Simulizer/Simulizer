@@ -56,7 +56,8 @@ public class ALU extends ComponentStackPane {
      * Gets the shape height
      * @return The height of the shape
      */
-    public double getShapeHeight(){
+    @Override
+	public double getShapeHeight(){
         double rightHeight = super.getShapeHeight() * 0.7;
         double rightSmallHeight = (super.getShapeHeight() - rightHeight) / 2;
         return (super.getShapeHeight() + (rightHeight + rightSmallHeight)) / 2;

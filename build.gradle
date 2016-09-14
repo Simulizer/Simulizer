@@ -49,73 +49,48 @@ Custom tasks:
 
 */
 
-
-
-
-
-/////////////////////////////////////////////////
-//
-// Dependencies for this script
-//
-/////////////////////////////////////////////////
-
 // from https://plugins.gradle.org/
 plugins {
-    // git dependencies
-        id 'org.ajoberstar.grgit' version '1.4.2'
+    id 'org.ajoberstar.grgit' version '1.4.2'   // git dependencies
+    id "de.undercouch.download" version "2.1.0" // HTTP download dependencies
 
-    // HTTP download dependencies
-        id "de.undercouch.download" version "2.1.0"
+    // able to compile java files
+    id 'java'
+
+    // able to create parsers from Antlr grammars.
+    // task compileJava automatically depends on generateGrammarSource
+    id 'antlr'
+
+    // able to create executables. Automatically includes the 'distribution' plugin
+    id 'application'
+
+    // able to create IntelliJ project files (not required for modern IntelliJ)
+    // to sync with gradle: gradle toolbar (default on the right) and press the
+    // refresh icon
+    id 'idea'
+
+    // able to create Eclipse project files
+    //
+    // to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
+    // will regenerate the project files, re-open eclipse.
+    //
+    // better option: use the Eclipse plugin: 'Buildship'
+    // http://projects.eclipse.org/projects/tools.buildship
+    id 'eclipse'
 }
 
-
 /////////////////////////////////////////////////
 //
-// Built-in Plugins
-//
-/////////////////////////////////////////////////
-
-// able to compile java files
-apply plugin: 'java'
-
-// able to create parsers from Antlr grammars.
-// task compileJava automatically depends on generateGrammarSource
-apply plugin: 'antlr'
-
-// able to create executables. Automatically includes the 'distribution' plugin
-apply plugin: 'application'
-
-// able to create IntelliJ project files (not required for modern IntelliJ)
-// to sync with gradle: gradle toolbar (default on the right) and press the
-// refresh icon
-apply plugin: 'idea'
-
-// able to create Eclipse project files
-//
-// to sync with gradle: close eclipse. Run `gradle cleanEclipse eclipse` which
-// will regenerate the project files, re-open eclipse.
-//
-// better option: use the Eclipse plugin: 'Buildship'
-// http://projects.eclipse.org/projects/tools.buildship
-apply plugin: 'eclipse'
-
-
-
-/////////////////////////////////////////////////
-//
-// Basic Build Properties
+// Gradle Scripts
 //
 /////////////////////////////////////////////////
 
-compileJava {
-    sourceCompatibility = 1.8   // JVM version to use when compiling
-    targetCompatibility = 1.8   // JVM version to build for
-    options.compilerArgs << '-Xlint:all' << '-Werror'
-}
-
-defaultTasks 'build', 'run'
-
-
+apply from: 'gradle/antlr.gradle'
+apply from: 'gradle/ace.gradle'
+apply from: 'gradle/build-metadata.gradle'
+apply from: 'gradle/dependencies.gradle'
+apply from: 'gradle/testing.gradle'
+apply from: 'gradle/deployment.gradle'
 
 /////////////////////////////////////////////////
 //
@@ -134,245 +109,17 @@ mainClassName = 'simulizer.Simulizer'
 
 run.workingDir = file('work')
 
+
 /////////////////////////////////////////////////
 //
-// Generated Source Configuration
+// Build Properties
 //
 /////////////////////////////////////////////////
 
-def generatedSrcDir = file('src/generated/')
-// extends the clean task
-clean {
-    delete generatedSrcDir
+compileJava {
+    sourceCompatibility = 1.8   // JVM version to use when compiling
+    targetCompatibility = 1.8   // JVM version to build for
+    options.compilerArgs << '-Xlint:all' << '-Werror'
 }
 
-// Antlr
-
-// where to place generated files such as Antlr parsers
-def antlrOutput     = "$generatedSrcDir/antlr/"
-
-sourceSets.main.java.srcDirs += antlrOutput
-
-// Antlr options
-generateGrammarSource {
-    outputDirectory = file(antlrOutput)
-
-    // by default only listeners are generated
-    arguments += ['-listener', '-visitor']
-}
-
-
-
-/////////////////////////////////////////////////
-//
-// Generated Resources Configuration
-//
-/////////////////////////////////////////////////
-
-def ExternalResDir = file("$projectDir/src/main/resources/external")
-
-clean {
-    delete ExternalResDir
-}
-
-/////////////////////////////////////////////////
-//
-// External Resources > Git Dependencies
-//
-/////////////////////////////////////////////////
-
-// Grgit API reference: http://ajoberstar.org/grgit/docs/groovydoc/index.html?org/ajoberstar/grgit/Grgit.html
-
-// Ace editor
-// where to clone the repository into
-def aceDLDir = file("$buildDir/ace")
-
-// clone the ace editor git repository
-// to refresh, download manually or execute `gradle clean build`
-task downloadAce << {
-    def ref  = 'v1.2.3' // the reference to checkout. Set to HEAD to use latest
-
-    if (!aceDLDir.exists()) {
-        println 'cloning ace editor git repo. May take a while...'
-        org.ajoberstar.grgit.Grgit.clone(
-            dir: aceDLDir,
-            uri: 'https://github.com/ajaxorg/ace-builds.git',
-            refToCheckout: ref
-        )
-    } else {
-        println 'ace repo already cloned'
-    }
-}
-
-// extract the required files to the resources path
-task copyAceFiles(dependsOn: downloadAce, type: Copy) {
-    mkdir ExternalResDir
-
-    from file("$aceDLDir/src-min-noconflict")
-    into ExternalResDir
-
-    // files to copy
-    include 'ace.js'
-    include 'theme-monokai.js'
-    include 'theme-ambiance.js'
-    include 'theme-chaos.js'
-    include 'theme-tomorrow_night_eighties.js'
-    include 'keybinding-vim.js'
-    include 'mode-javascript.js'
-}
-
-/////////////////////////////////////////////////
-//
-// Generated Resources > HTTP Dependencies
-//
-/////////////////////////////////////////////////
-
-
-// download web dependencies once. must clean to get new copies
-task downloadExternalDependencies << {
-    mkdir ExternalResDir
-    // dest can either be a directory or a filename
-
-    // not needed as Ace bundles with require.js already
-    // keeping here for reference if another dependency is required
-    /*
-    download {
-        src 'http://requirejs.org/docs/release/2.1.22/minified/require.js'
-        dest ExternalResDir
-        overwrite false
-    }
-    */
-
-}
-
-
-/////////////////////////////////////////////////
-//
-// Runtime dependencies
-//
-/////////////////////////////////////////////////
-
-task copySettings << {
-    if (!file('work/settings.json').exists())
-        copy {
-            from("src/main/resources/work_dir")
-            into(run.workingDir)
-            include("settings.json")
-        }
-}
-
-
-/////////////////////////////////////////////////
-//
-// Build Configuration
-//
-/////////////////////////////////////////////////
-
-repositories {
-    // not used
-    // jcenter()
-
-    // search for packages here: https://search.maven.org
-    mavenCentral()
-}
-
-
-dependencies {
-    // Antlr
-        // only needs antlr-runtime at runtime
-        compile 'org.antlr:antlr4-runtime:4.5'
-
-        // version for generating parsers during build
-        antlr   'org.antlr:antlr4:4.5'
-
-    // JFXtras (internal window only)
-        compile 'org.jfxtras:jfxtras-window:8.0-r4'
-
-    // GSON: JSON Parsing
-    	compile 'com.google.code.gson:gson:2.5'
-
-    // JCommander: Command line arguments parsing
-        compile group: 'com.beust', name: 'jcommander', version: '1.7'
-
-    // Testing
-        testCompile 'junit:junit:4.12'
-}
-
-// Ace Editor
-compileJava.dependsOn copyAceFiles
-compileJava.dependsOn downloadExternalDependencies
-
-
-/////////////////////////////////////////////////
-//
-// Testing Configuration
-//
-/////////////////////////////////////////////////
-
-test {
-    useJUnit {
-        // uncomment if your system does not have Spim installed
-        //excludeCategories 'category.SpimTests'
-
-        // uncomment to exclude any slow tests
-        //excludeCategories 'category.SlowTests'
-
-        // uncomment to only run finished tests
-        //excludeCategories 'category.InProgressTests'
-    }
-    testLogging {
-        events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
-    }
-}
-
-
-/////////////////////////////////////////////////
-//
-// Deployment Configuration
-//
-/////////////////////////////////////////////////
-
-run.dependsOn copySettings
-
-
-// a slim jar (does not contain dependencies)
-jar {
-    manifest {
-        attributes 'Implementation-Title':   name,
-                   'Implementation-Version': version,
-                   'Main-Class':             mainClassName
-    }
-}
-
-
-// bundle a jar with all dependencies
-// modified from:
-// http://www.mkyong.com/gradle/gradle-create-a-jar-file-with-dependencies/
-task deploymentJar(type: Jar) {
-    with jar
-    manifest.attributes = jar.manifest.attributes
-
-    baseName = project.name + '-bundled-depends'
-
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-}
-
-
-task deploy(type:Zip) {
-    destinationDir file("${buildDir}/distributions/")
-    extension "zip"
-
-    def depJar = "${deploymentJar.baseName}-${version}.jar"
-
-    into("$name/") {
-        from run.workingDir
-        exclude "*.log"
-        exclude "program-dump.txt"
-    }
-    into("$name/") {
-        from "$buildDir/libs/"
-        include depJar
-        rename(depJar, "Simulizer.jar")
-    }
-}
-deploy.dependsOn deploymentJar
+defaultTasks 'build', 'run'

@@ -5,8 +5,6 @@ import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 public class Simulizer {
-	public static final String VERSION = "0.4 (beta)";
-	public static final String REPO = "https://github.com/Simulizer/Simulizer";
 	private static Image icon = null;
 	public static CommandLineArguments.Mode mode; // CMD_MODE || GUI_MODE
 

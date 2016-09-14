@@ -10,7 +10,7 @@ import simulizer.ui.interfaces.WindowEnum;
  *
  * @author mbway
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings("WeakerAccess")
 public class VisualisationBridge {
 	// package-visible Attributes not visible from JavaScript
 	// set package-visible attributes using BridgeFactory

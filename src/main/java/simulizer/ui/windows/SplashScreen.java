@@ -17,8 +17,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import simulizer.BuildInfo;
 import simulizer.GuiMode;
-import simulizer.Simulizer;
 import simulizer.settings.Settings;
 import simulizer.utils.FileUtils;
 import simulizer.utils.ThreadUtils;
@@ -51,7 +51,7 @@ public class SplashScreen {
 		splash = new ImageView(new Image(image, width, height, true, true));
 
 		Label progressText = new Label("Authors: Charlie Street, Kelsey McKenna, Matthew Broadway, Michael Oultram, Theo Styles\n"
-			+ "Version: " + Simulizer.VERSION + "\n" + Simulizer.REPO);
+			+ "Version: " + BuildInfo.getInstance().VERSION_STRING + "\n" + BuildInfo.getInstance().REPO);
 
 		layout = new VBox();
 		layout.getChildren().addAll(splash, progressText);

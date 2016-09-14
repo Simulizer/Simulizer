@@ -23,7 +23,8 @@ public class CPUChangedListener implements simulizer.simulation.cpu.CPUChangedLi
      * Called when the cpu is changed
      * @param cpu The new cpu
      */
-    public void cpuChanged(CPU cpu){
+    @Override
+	public void cpuChanged(CPU cpu){
         vis.attachCPU(cpu);
     }
 

@@ -1,0 +1,89 @@
+/////////////////////////////////////////////////
+//
+// Generated Resources Configuration
+//
+/////////////////////////////////////////////////
+import org.ajoberstar.grgit.*
+buildscript {
+ repositories { mavenCentral() }
+ dependencies { classpath 'org.ajoberstar:gradle-git:1.4.2' }
+}
+def ExternalResDir = file("$projectDir/src/main/resources/external")
+
+clean {
+    delete ExternalResDir
+}
+
+/////////////////////////////////////////////////
+//
+// External Resources > Git Dependencies
+//
+/////////////////////////////////////////////////
+
+// Grgit API reference: http://ajoberstar.org/grgit/docs/groovydoc/index.html?org/ajoberstar/grgit/Grgit.html
+
+// Ace editor
+// where to clone the repository into
+def aceDLDir = file("$buildDir/ace")
+
+// clone the ace editor git repository
+// to refresh, download manually or execute `gradle clean build`
+task downloadAce << {
+    def ref  = 'v1.2.3' // the reference to checkout. Set to HEAD to use latest
+
+    if (!aceDLDir.exists()) {
+        println 'cloning ace editor git repo. May take a while...'
+        org.ajoberstar.grgit.Grgit.clone(
+            dir: aceDLDir,
+            uri: 'https://github.com/ajaxorg/ace-builds.git',
+            refToCheckout: ref
+        )
+    } else {
+        println 'ace repo already cloned'
+    }
+}
+
+// extract the required files to the resources path
+task copyAceFiles(dependsOn: downloadAce, type: Copy) {
+    mkdir ExternalResDir
+
+    from file("$aceDLDir/src-min-noconflict")
+    into ExternalResDir
+
+    // files to copy
+    include 'ace.js'
+    include 'theme-monokai.js'
+    include 'theme-ambiance.js'
+    include 'theme-chaos.js'
+    include 'theme-tomorrow_night_eighties.js'
+    include 'keybinding-vim.js'
+    include 'mode-javascript.js'
+}
+
+/////////////////////////////////////////////////
+//
+// Generated Resources > HTTP Dependencies
+//
+/////////////////////////////////////////////////
+
+
+// download web dependencies once. must clean to get new copies
+task downloadExternalDependencies << {
+    mkdir ExternalResDir
+    // dest can either be a directory or a filename
+
+    // not needed as Ace bundles with require.js already
+    // keeping here for reference if another dependency is required
+    /*
+    download {
+        src 'http://requirejs.org/docs/release/2.1.22/minified/require.js'
+        dest ExternalResDir
+        overwrite false
+    }
+    */
+
+}
+
+// Ace Editor
+compileJava.dependsOn copyAceFiles
+compileJava.dependsOn downloadExternalDependencies

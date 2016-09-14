@@ -110,7 +110,8 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 
 			@Override
 			public void run() {
-				if (runs++ == 10) t.cancel();
+				if (runs++ == 10)
+					t.cancel();
 				Platform.runLater(vis::repaint);
 			}
 		}, 0, 10);
@@ -126,9 +127,14 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the model to remove
 	 */
 	private synchronized void removeTab(DataStructureModel model) {
-		tabs.getTabs().stream()
-				.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model)
-				.collect(Collectors.toList()) // create copy since the list will be modified
+		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).collect(Collectors.toList()) // create
+																																			// copy
+																																			// since
+																																			// the
+																																			// list
+																																			// will
+																																			// be
+																																			// modified
 				.forEach(this::removeTab);
 	}
 
@@ -139,9 +145,8 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the visualisation to remove
 	 */
 	public synchronized void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream()
-				.filter(t -> t.getContent() == vis)
-				.collect(Collectors.toList()) // create copy since the list will be modified
+		tabs.getTabs().stream().filter(t -> t.getContent() == vis).collect(Collectors.toList()) // create copy since the list will be
+																								// modified
 				.forEach(this::removeTab);
 	}
 
@@ -209,8 +214,13 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 			case LIST:
 				vis = new ListVisualiser((ListModel) model, this);
 				break;
+
+			// Unsupported Visualisation
+			default:
+				break;
 		}
-		if (model.isVisible()) vis.show();
+		if (model.isVisible() && vis != null)
+			vis.show();
 	}
 
 }

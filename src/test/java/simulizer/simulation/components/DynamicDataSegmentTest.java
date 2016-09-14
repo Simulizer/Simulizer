@@ -1,14 +1,15 @@
 package simulizer.simulation.components;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import category.UnitTests;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
+import category.UnitTests;
 import simulizer.assembler.representation.Address;
 import simulizer.simulation.cpu.components.DynamicDataSegment;
 import simulizer.simulation.exceptions.HeapException;

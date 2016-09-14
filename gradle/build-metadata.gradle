@@ -1,0 +1,40 @@
+// Provides build.json so application knows build conditions
+import org.ajoberstar.grgit.*
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+buildscript {
+ repositories { mavenCentral() }
+ dependencies { classpath 'org.ajoberstar:gradle-git:1.4.2' }
+}
+
+class BuildInfo {
+    String repo
+    String branch
+    String commit
+    String version
+    boolean modified
+}
+
+def versionFile = file("$projectDir/VERSION")
+def metadataFile = file("$projectDir/src/main/resources/build.json")
+
+// clone the ace editor git repository
+// to refresh, download manually or execute `gradle clean build`
+task buildMetadata << {
+    def meta = new BuildInfo()
+
+    def git = Grgit.open(file('.'))
+    git.remote.list().each {
+      if (it.name == "origin") {meta.repo = it.url}
+    }
+    meta.branch   = git.branch.getCurrent().getName()
+    meta.commit   = git.head().id
+    meta.modified = !git.status().isClean()
+    meta.version  = versionFile.text
+
+    def json = JsonOutput.toJson(meta)
+    metadataFile.text =  JsonOutput.prettyPrint(json)
+}
+
+compileJava.dependsOn buildMetadata

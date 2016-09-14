@@ -13,8 +13,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import simulizer.BuildInfo;
 import simulizer.GuiMode;
-import simulizer.Simulizer;
 import simulizer.annotations.AnnotationManager;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.StoreProblemLogger;
@@ -82,7 +82,7 @@ public class WindowManager extends GridPane {
 		// Set up the Primary Stage
 		primaryStage.setWidth((int) settings.get("window.width"));
 		primaryStage.setHeight((int) settings.get("window.height"));
-		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION);
+		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
 		primaryStage.setOnHiding(e -> {
@@ -218,7 +218,7 @@ public class WindowManager extends GridPane {
 	 * Assembles the SIMP program and executes it
 	 */
 	public void assembleAndRun() {
-		primaryStage.setTitle("Simulizer v" + Simulizer.VERSION + " - Assembling Program");
+		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Assembling Program");
 
 		final String programText = Editor.getText();
 
@@ -245,7 +245,7 @@ public class WindowManager extends GridPane {
 					runProgram(p); // spawns another thread
 				}
 			} finally {
-				Platform.runLater(() -> primaryStage.setTitle("Simulizer v" + Simulizer.VERSION));
+				Platform.runLater(() -> primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")"));
 			}
 
 		} , "Assemble");
