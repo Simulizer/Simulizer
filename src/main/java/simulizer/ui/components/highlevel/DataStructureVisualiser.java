@@ -31,12 +31,12 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private AnimationTimer timer;
 
 	volatile double rate = 1;
-    private final CircularIntBuffer updateTimes;
+	private final CircularIntBuffer updateTimes;
 	private final CircularIntBuffer processTimes;
 	private long lastUpdate = -1;
 
 	private Thread updateThread;
-    private ThreadUtils.Blocker updatePaused;
+	private ThreadUtils.Blocker updatePaused;
 	private volatile boolean alive = false;
 
 	/**
@@ -50,7 +50,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		this.vis = vis;
 		updateTimes = new CircularIntBuffer(1);
 		processTimes = new CircularIntBuffer(1);
-        updatePaused = new ThreadUtils.Blocker();
+		updatePaused = new ThreadUtils.Blocker();
 		model.addObserver(this);
 
 		widthProperty().addListener(e -> repaint());
@@ -123,8 +123,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
 			long now = System.currentTimeMillis();
-			if(lastUpdate != -1)
-			    updateTimes.add((int) (now - lastUpdate));
+			if (lastUpdate != -1)
+				updateTimes.add((int) (now - lastUpdate));
 			lastUpdate = now;
 		}
 	}
@@ -154,14 +154,15 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 					if (alive && before != -1 && after != -1) {
 						// Add process time
-                        processTimes.add((int) (after - before));
+						processTimes.add((int) (after - before));
 
 						// Recalculate rate/skips
 						rateSkips();
 					}
-				} catch (InterruptedException ignored) { }
+				} catch (InterruptedException ignored) {
+				}
 			}
-		} , "DataStructure " + getName() + " Updates");
+		}, "DataStructure " + getName() + " Updates");
 		updateThread.setDaemon(true);
 		updateThread.start();
 
@@ -185,21 +186,19 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private synchronized void rateSkips() {
 		int avgUpdate = updateTimes.mean();
 		int avgProcess = processTimes.mean();
+		 System.out.println();
+		 System.out.println("avgUpdate: " + avgUpdate);
+		 System.out.println("avgProcess: " + avgProcess);
 		if (avgUpdate > 0 && avgProcess > 0) {
-			double newRate = rate - 1;
-			// Averages are roughly the same, do nothing
-			if (avgUpdate + 50 > avgProcess && avgUpdate < avgProcess + 50)
-				return;
+			 System.out.println("Changes: " + changes.size());
+			 System.out.println("rate: " + rate);
+			 System.out.println("Adjustment: " + 0.001 * (avgProcess * (Math.log(changes.size() + 1) + 1) - avgUpdate));
 
-			// Averages are too far apart, calculate a new rate
-			newRate += (avgProcess - avgUpdate) / (avgProcess * newRate);
+			double position = avgProcess * Math.log(changes.size() + 1) + 1; // Calculated Position
+			double target = avgUpdate; // Calculated Target
+			double error = position - target; // error = process - update
 
-			// Limit the rate between 1 and 20
-			if (newRate > 20)
-				newRate = 20;
-			else if (newRate < 1)
-				newRate = 1;
-			rate = newRate + 1;
+			rate += 0.0001 * error; // Adjust rate to scaled error
 		}
 	}
 
@@ -230,10 +229,10 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	 * @param paused
 	 *            whether updates should be paused
 	 */
-	 void setUpdatePaused(boolean paused) {
-         if(paused)
-			 updatePaused.pause();
-         else
-			 updatePaused.resume();
+	void setUpdatePaused(boolean paused) {
+		if (paused)
+			updatePaused.pause();
+		else
+			updatePaused.resume();
 	}
 }
