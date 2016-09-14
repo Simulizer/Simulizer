@@ -91,7 +91,8 @@ class Executor {
                 break;
             case JTYPE:
             	cpu.sendMessage(new InstructionTypeMessage(AddressMode.JTYPE));
-                if(instruction.getInstruction().equals(Instruction.jal)) {//making sure i put current address in ra
+                if(instruction.getInstruction().equals(Instruction.jal)
+						|| instruction.getInstruction().equals(Instruction.jalr)) {//making sure i put current address in ra
 					Word retAddress = instruction.asJType().getCurrentAddress().get();
                     cpu.setRegister(Register.ra, retAddress);
                     cpu.sendMessage(new DataMovementMessage(Optional.of(retAddress),Optional.empty()));

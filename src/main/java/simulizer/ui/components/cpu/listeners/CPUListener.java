@@ -203,6 +203,7 @@ public class CPUListener extends SimulationListener {
                 animationProcessor.addToPreviousList(instructionName);
             }   break;
             case jal:
+            case jalr:
             {
                 int speed = getInstructionFraction(5);
 

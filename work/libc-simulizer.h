@@ -28,8 +28,28 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 #define C(x) asm("# " x)
 
 // annotation
-// eg ANN("h.move(a, b);") ---> # @{ h.move(a, b); }@
-#define ANN(x) asm("# @{ " x " }@")
+// eg A("h.move(a, b);") ---> # @{ h.move(a, b); }@
+#define A(x) asm("# @{ " x " }@")
+
+// can refer to %0 inside the js text and gcc will replace with the appropriate register
+// eg: int a = 1;
+//     A_READ(a, "var jsA = %0.get()");
+#define A_READ(var, js)             \
+    asm("# @{ " js " }@"            \
+       :        /*output operands*/ \
+       : "r"(var)/*input operands*/ \
+       :               /*clobbers*/ \
+       )
+
+// can refer to %0 inside the js text and gcc will replace with the appropriate register
+// eg: int a = 1;
+//     A_WRITE(a, "%0.set(10)");
+#define A_WRITE(var, js)              \
+    asm("# @{ " js " }@"              \
+       : "=r"(var)/*output operands*/ \
+       :           /*input operands*/ \
+       :                 /*clobbers*/ \
+       )
 
 // syscall 1
 #define PRINT_INT(i)                \

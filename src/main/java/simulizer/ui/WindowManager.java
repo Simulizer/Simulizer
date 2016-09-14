@@ -125,7 +125,7 @@ public class WindowManager extends GridPane {
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus
 		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
-			if (e.isAltDown())
+			if(e.isAltDown())
 				e.consume();
 		});
 

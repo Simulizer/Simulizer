@@ -73,11 +73,19 @@ void offsetTest() {
     PRINT_CHAR(b);
 }
 
+void annotationTest() {
+    int a = 1;
+    A_READ(a, "print(%0.get())");
+    A_WRITE(a, "%0.set(10)");
+    PRINT_INT(a);
+}
+
 // main does not have its name mangled
 int main() {
     offsetTest();
 
-
+    addTwoIntsStatic(1, 3);
+    annotationTest();
 
     PRINT_STRING(input);
     int res;
@@ -87,7 +95,7 @@ int main() {
     int b = addTwo(res, globalA);
     PRINT_INT(b);
 
-    ANN("debug.alert('going to read a string!');");
+    A("debug.alert('going to read a string!');");
     READ_STRING(input, 5);
     PRINT_STRING(input);
 

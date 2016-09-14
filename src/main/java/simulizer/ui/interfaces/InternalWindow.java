@@ -377,7 +377,7 @@ public abstract class InternalWindow extends Window {
 			extractedStage.setHeight(getHeight());
 
 			// Create the scene
-			Scene scene = null;
+			Scene scene;
 			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
 				GridPane root = new GridPane();
 				scene = new Scene(root);

@@ -30,7 +30,7 @@ import simulizer.simulation.messages.StageEnterMessage.Stage;
  * @author Charlie Street
  *
  */
-public class Decoder {
+class Decoder {
 
 	private CPU cpu;
 	
@@ -39,7 +39,7 @@ public class Decoder {
 	 * it also needs to send decode related messages
 	 * @param cpu the cpu being used for instruction execution
 	 */
-	public Decoder(CPU cpu) {
+	Decoder(CPU cpu) {
 		this.cpu = cpu;
 	}
 	
@@ -134,7 +134,8 @@ public class Decoder {
             Word registerContents = this.decodeRegister(op1.asRegisterOp());//getting register contents
             cpu.sendMessage(new DataMovementMessage(Optional.of(registerContents),Optional.empty()));
             Optional<Address> registerAddress = Optional.of(new Address((int)DataConverter.decodeAsUnsigned(registerContents.getBytes())));//put into correct format
-            return new JTypeInstruction(instruction,registerAddress,Optional.empty());
+            Optional<Word> currentAddress = Optional.of(new Word(DataConverter.encodeAsSigned((long)this.cpu.getProgramCounter().getValue())));
+            return new JTypeInstruction(instruction,registerAddress,currentAddress);
         }
         else if(instruction.getOperandFormat() == OperandFormat.cmpCmpLabel) {//for branch equal etc.
             assert (op1 != null) && (op2 != null) && (op3 != null);

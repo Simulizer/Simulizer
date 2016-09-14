@@ -5,11 +5,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +39,7 @@ import category.UnitTests;
  * @author Charlie Street
  *
  */
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Category({UnitTests.class})
 public class DecodeTest {
 
@@ -51,7 +48,7 @@ public class DecodeTest {
 	@Before
 	public void setupCPU() {
 		cpu = new CPU(new ConsoleIO());
-		cpu.setCycleFreq(9999);
+		cpu.setCycleFreq(0); // infinitely fast
 	}
 
 	@After
@@ -62,12 +59,6 @@ public class DecodeTest {
 
 	/**tests the decoding of operand format dest src src
 	 * the arbitrary instruction used to test is add
-	 * @throws DecodeException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testDestSrcSrc() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -101,12 +92,6 @@ public class DecodeTest {
 	
 	/**method will test the dest src imm operand format in the decode
 	 * instruction used: addi
-	 * @throws DecodeException if an error in the decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testDestSrcImm() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -140,12 +125,6 @@ public class DecodeTest {
 	
 	/**tests the dest src imm u operand format
 	 * instruction used: addiu
-	 * @throws DecodeException if something goes wrong during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
     @Test
 	public void testDestSrcImmU() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -179,12 +158,6 @@ public class DecodeTest {
 	
 	/**test the dest src operand format
 	 * instruction used is abs
-	 * @throws DecodeException if error during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testDestSrc() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -213,12 +186,6 @@ public class DecodeTest {
 	
 	/**test the dest imm operand format
 	 * instruction used: li
-	 * @throws DecodeException id problem during decode
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
 	 */
 	@Test
 	public void testImm() throws DecodeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
@@ -247,12 +214,6 @@ public class DecodeTest {
 	
 	/**will test the no arguments operand format
 	 * instruction tested: syscall
-	 * @throws DecodeException if an error during the decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testNoArguments() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -269,13 +230,6 @@ public class DecodeTest {
 
 	/**will test the label operand format
 	 * instruction tested: j
-	 * @throws DecodeException
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testLabel() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException
@@ -308,41 +262,31 @@ public class DecodeTest {
 	
 	/**will test the register operand format
 	 * instruction tested: jr
-	 * @throws DecodeException if something goes wrong during decode
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
 	 */
 	@Test
-	public void testRegister() throws DecodeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
-	{
+	public void testRegister() throws DecodeException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, NoSuchFieldException {
 		Instruction instruction = Instruction.jr;
 		
 		RegisterOperand op1 = new RegisterOperand(Register.t0);
 		List<Operand> opList = new ArrayList<>();
 		opList.add(op1);
-		
+
 		Method decoder = cpu.getClass().getDeclaredMethod("decode", Instruction.class, List.class);
+		Field programCounter = cpu.getClass().getDeclaredField("programCounter");
 		decoder.setAccessible(true);
+        programCounter.setAccessible(true);
+		programCounter.set(cpu, new Address(100));
 		InstructionFormat instr = (InstructionFormat)decoder.invoke(cpu,instruction,opList);
 		JTypeInstruction jtype = instr.asJType();
-		assertTrue(jtype.mode.equals(AddressMode.JTYPE));
-		assertTrue(jtype.getInstruction().equals(Instruction.jr));
-		assertFalse(jtype.getCurrentAddress().isPresent());
+		assertEquals(AddressMode.JTYPE, jtype.mode);
+		assertEquals(Instruction.jr, jtype.getInstruction());
+		assertTrue(jtype.getCurrentAddress().isPresent());
 		assertEquals(0,jtype.getJumpAddress().get().getValue());
+		assertTrue(Arrays.equals(DataConverter.encodeAsUnsigned(100), jtype.getCurrentAddress().get().getBytes()));
 	}
 	
 	/**will test the cmp cmp label operand format
 	 * instruction used: beq
-	 * @throws DecodeException if error during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testCmpCmpLabel() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException
@@ -383,13 +327,6 @@ public class DecodeTest {
 	
 	/**will test the cmp label operand format
 	 * instruction used: bltz
-	 * @throws DecodeException if error during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
 	 */
 	@Test
 	public void testCmpLabel() throws DecodeException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
@@ -426,12 +363,6 @@ public class DecodeTest {
 	
 	/**will test the src addr operand format
 	 * instruction used: sw
-	 * @throws DecodeException if error during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testSrcAddr() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -460,12 +391,6 @@ public class DecodeTest {
 	
 	/**will test the dest addr operand format
 	 * instruction used: lw
-	 * @throws DecodeException if error during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
 	 */
 	@Test
 	public void testDestAddr() throws DecodeException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -496,9 +421,6 @@ public class DecodeTest {
 	 * this test will check that on a given operand format, if the wrong no. of operands are entered
 	 * an exception will be thrown
 	 * all decode cases have a variation of the same check, if one works, by default so will the rest
-	 * @throws DecodeException if problem during decode
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
 	 */
 	@Test
 	public void testBadOperands() throws DecodeException, NoSuchMethodException, SecurityException

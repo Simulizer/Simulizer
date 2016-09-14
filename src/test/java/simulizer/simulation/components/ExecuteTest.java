@@ -823,7 +823,26 @@ public class ExecuteTest {
 		assertEquals(7,accessRegisterSigned(cpu,Register.v1));
 		assertNotEquals(5,accessRegisterSigned(cpu,Register.v0));
 	}
-	
+
+	@Test
+	public void testJRegisterExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+	{
+		String myInstruction = "" +
+				"li $s0, 4;\n" +
+				"la $s0, TEST\n" +
+				"j $s0;\n" +
+				"li $v0, 5;\n" +
+				"TEST: li $v1, 7;\n";
+
+		CPU cpu = createCPU(myInstruction);
+
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		assertEquals(newPos.getValue(),testLabel.getValue() + 4);
+		assertEquals(7,accessRegisterSigned(cpu,Register.v1));
+		assertNotEquals(5,accessRegisterSigned(cpu,Register.v0));
+	}
+
 	/**method will test the execution of the jal instruction
 	 *
 	 */
@@ -845,7 +864,49 @@ public class ExecuteTest {
 		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
 		assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
 	}
-	
+
+	@Test
+	public void testJalRegisterExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		String myInstructions = "" +
+				"li $s0, 4;\n" +
+				"la $s0, TEST\n" +
+				"jal $s0;\n" +
+				"LINK: li $v0, 7;\n" +
+				"TEST: li $v1, 8;\n";
+
+		CPU cpu = createCPU(myInstructions);
+
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		Address linkLabel = this.getLabels(cpu).get("LINK");//what should be in $ra
+		assertEquals(newPos.getValue(),testLabel.getValue()+4);
+		assertEquals(linkLabel.getValue(),accessRegisterSigned(cpu,Register.ra));
+		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+		assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+	}
+
+	@Test
+	public void testJalrExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+	{
+		String myInstructions = "" +
+				"li $s0, 4;\n" +
+				"la $s0, TEST\n" +
+				"jalr $s0;\n" +
+				"LINK: li $v0, 7;\n" +
+				"TEST: li $v1, 8;\n";
+
+		CPU cpu = createCPU(myInstructions);
+
+		Address newPos = this.getProgramCounter(cpu);
+		Address testLabel = this.getLabels(cpu).get("TEST");
+		Address linkLabel = this.getLabels(cpu).get("LINK");//what should be in $ra
+		assertEquals(newPos.getValue(),testLabel.getValue()+4);
+		assertEquals(linkLabel.getValue(),accessRegisterSigned(cpu,Register.ra));
+		assertEquals(8,accessRegisterSigned(cpu,Register.v1));
+		assertNotEquals(7,accessRegisterSigned(cpu,Register.v0));
+	}
+
 	/**this method aims to test the execution of the jr instruction
 	 *
 	 */
