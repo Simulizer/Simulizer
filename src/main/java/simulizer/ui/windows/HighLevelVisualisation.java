@@ -127,15 +127,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the model to remove
 	 */
 	private synchronized void removeTab(DataStructureModel model) {
-		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).collect(Collectors.toList()) // create
-																																			// copy
-																																			// since
-																																			// the
-																																			// list
-																																			// will
-																																			// be
-																																			// modified
+		// @formatter:off
+		tabs.getTabs().stream()
+				.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model)
+				.collect(Collectors.toList()) // create copy since the list will be modified
 				.forEach(this::removeTab);
+		// @formatter:on
 	}
 
 	/**
@@ -145,9 +142,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the visualisation to remove
 	 */
 	public synchronized void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream().filter(t -> t.getContent() == vis).collect(Collectors.toList()) // create copy since the list will be
-																								// modified
+		// @formatter:off
+		tabs.getTabs().stream()
+				.filter(t -> t.getContent() == vis)
+				.collect(Collectors.toList()) // create copy since the list will be modified
 				.forEach(this::removeTab);
+		// @formatter:on
 	}
 
 	/**
