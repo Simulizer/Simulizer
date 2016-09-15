@@ -2,7 +2,6 @@ package simulizer.simulation.cpu.user_interaction;
 
 import java.util.Observable;
 
-import javafx.util.Pair;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.windows.Logger;
@@ -15,9 +14,14 @@ import simulizer.ui.windows.Logger;
  */
 public class LoggerIO extends Observable implements IO {
 	private final Workspace workspace;
+	private final StringBuilder[] logs; // the output streams
 
 	public LoggerIO(Workspace workspace) {
 		this.workspace = workspace;
+		logs = new StringBuilder[IOStream.values().length];
+		for (int i = 0; i < IOStream.values().length; i++)
+			logs[i] = new StringBuilder();
+
 	}
 
 	@Override
@@ -52,20 +56,23 @@ public class LoggerIO extends Observable implements IO {
 
 	@Override
 	public void printString(IOStream stream, String str) {
+		logs[stream.getID()].append(str);
 		setChanged();
-		notifyObservers(new Pair<>(stream, str));
+		notifyObservers(stream);
 	}
 
 	@Override
 	public void printInt(IOStream stream, int num) {
+		logs[stream.getID()].append(num);
 		setChanged();
-		notifyObservers(new Pair<>(stream, "" + num));
+		notifyObservers(stream);
 	}
 
 	@Override
 	public void printChar(IOStream stream, char letter) {
+		logs[stream.getID()].append(letter);
 		setChanged();
-		notifyObservers(new Pair<>(stream, "" + letter));
+		notifyObservers(stream);
 	}
 
 	/**
@@ -76,17 +83,42 @@ public class LoggerIO extends Observable implements IO {
 	 * @return the input message
 	 */
 	private String requestInput(IOStream stream) {
+		// Open the logger window
 		Logger logger = (Logger) workspace.openInternalWindow(WindowEnum.LOGGER);
-		return logger.nextMessage(stream);
+
+		// Get the input
+		String input = logger.nextMessage(stream);
+
+		// Notify observers of change
+		if (input != null) {
+			logs[stream.getID()].append(input + "\n");
+			setChanged();
+			notifyObservers(stream);
+		}
+
+		return input;
 	}
 
 	/**
 	 * Clears all the logs
 	 */
 	public void clear() {
-		Logger logger = (Logger) workspace.findInternalWindow(WindowEnum.LOGGER);
-		if (logger != null)
-			logger.clear();
+		for (IOStream i : IOStream.values()) {
+			logs[i.getID()] = new StringBuilder();
+			setChanged();
+			notifyObservers(i);
+		}
+	}
+
+	/**
+	 * Gets the contents of the log for an IOStream
+	 * 
+	 * @param stream
+	 *            the IOStream to get
+	 * @return the log history
+	 */
+	public String getLog(IOStream stream) {
+		return logs[stream.getID()].toString();
 	}
 
 }
