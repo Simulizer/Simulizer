@@ -1,6 +1,8 @@
 package simulizer.ui.interfaces;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -261,6 +264,30 @@ public abstract class InternalWindow extends Window {
 	 */
 	public final boolean isClosed() {
 		return isClosed;
+	}
+
+	public boolean hasFocus() {
+		Queue<Node> nodes = new LinkedList<Node>();
+		nodes.add(this);
+		while (!nodes.isEmpty()) {
+			// Get the node from the queue
+			Node n = nodes.poll();
+			
+			// If the node has focus, then we have focus
+			if (n.isFocused())
+				return true;
+			
+			// If node is a Parent
+			if (n instanceof javafx.scene.Parent) {
+				// Add all the children to the queue
+				Parent p = (Parent) n;
+				for (Node c : p.getChildrenUnmodifiable()) {
+					nodes.add(c);
+				}
+			}
+		}
+		// No node had focus
+		return false;
 	}
 
 	@Override
