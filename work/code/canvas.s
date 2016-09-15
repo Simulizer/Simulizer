@@ -2,6 +2,7 @@
 #
 
 # @{ var c = vis.load('canvas'); }@
+# @{ var g = c.ctx; }@
 
 .data
 

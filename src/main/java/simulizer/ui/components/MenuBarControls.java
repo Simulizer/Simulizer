@@ -247,13 +247,14 @@ class MenuBarControls {
 			lastClockSpeedSetTime = currentTime;
 		}
 	}
+
 	void setSliderToMatch(double cyclesPerSecond) {
 		double scale = (lgClockSpeedMax-lgClockSpeedMin) / sliderMax;
 		double sliderVal = (Math.log(cyclesPerSecond) - lgClockSpeedMin) / scale;
 		clockSpeedSlider.valueProperty().removeListener(sliderListener);
 		clockSpeedSlider.setValue(sliderVal);
 		clockSpeedSlider.valueProperty().addListener(sliderListener);
-		if(cyclesPerSecond < 200) {
+		if(cyclesPerSecond < 200 || Double.isInfinite(cyclesPerSecond)) {
 			clockSpeedLabel.setText(String.format("%.3f", cyclesPerSecond) + " Hz");
 		} else {
 			clockSpeedLabel.setText(String.format("%.1f", cyclesPerSecond/1000) + " kHz");

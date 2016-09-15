@@ -105,6 +105,12 @@ public class ThreadUtils {
 		t.start();
 	}
 
+	public static void sleepQuiet(long l) {
+		try {
+			Thread.sleep(l);
+		} catch (InterruptedException ignored) { }
+	}
+
 	/**
      * Given the name of the thread pool or other executor. This factory gives
      * descriptive names to the threads in that pool

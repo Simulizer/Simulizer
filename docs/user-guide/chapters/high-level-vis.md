@@ -25,7 +25,7 @@ To use the list visualisation, add the comment
 ```
 to the start of your program. To set the list, write
 ```
-# @{ l.setList(simulation.readUnsignedWordsFromMem(start, end)) }@
+# @{ l.setList(simulation.readUnsignedWordsFromMem(start, length)) }@
 ```
 To show the visualiser, write `#@{vis.show()}@`. To swap elements with indices $i$ and $j$, write `#@{l.swap(i,j)}@`. To emphasise the element as position $i$ write `#@{l.emph(i)}@`. To add a marker over the element at position $i$ write
 ```

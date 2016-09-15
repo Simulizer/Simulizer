@@ -9,6 +9,7 @@ import simulizer.simulation.exceptions.HeapException;
 import simulizer.simulation.exceptions.MemoryException;
 import simulizer.simulation.exceptions.StackException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,15 +58,32 @@ public class SimulationBridge {
 		cpu.setRegister(r, w);
 	}
 
-	public List<Long> readUnsignedWordsFromMem(int firstAddress, int lastAddress) throws MemoryException, HeapException, StackException {
+	public List<Long> readUnsignedWordsFromMem(int startAddress, int length) throws MemoryException, HeapException, StackException {
 		MainMemory mem = cpu.getMainMemory();
 		List<Long> words = new ArrayList<>();
 
-		assert (lastAddress > firstAddress) && ((lastAddress - firstAddress) % 4 == 0);
-		for(int i = firstAddress; i <= lastAddress; i+=4) {
+		assert (length > 0) && (length % 4 == 0);
+		int end = startAddress+length;
+		for(int i = startAddress; i <= end; i+=4) {
 			words.add(DataConverter.decodeAsUnsigned(mem.readFromMem(i, 4)));
 		}
 		return words;
 	}
-
+	public String readStringFromMem(int startAddress) throws MemoryException, HeapException, StackException {
+		MainMemory mem = cpu.getMainMemory();
+        byte[] data = mem.readUntilNull(startAddress);
+		return new String(data, StandardCharsets.UTF_8);
+	}
+	public byte[] readBytesFromMem(int startAddress, int length) throws MemoryException, HeapException, StackException {
+		MainMemory mem = cpu.getMainMemory();
+        return mem.readFromMem(startAddress, length);
+	}
+	public boolean[] readBoolsFromMem(int startAddress, int length) throws MemoryException, HeapException, StackException {
+		MainMemory mem = cpu.getMainMemory();
+		byte[] bytes = mem.readFromMem(startAddress, length);
+		boolean[] bools = new boolean[bytes.length];
+		for(int i = 0; i < bytes.length; ++i)
+			bools[i] = bytes[i] != 0;
+		return bools;
+	}
 }

@@ -28,7 +28,7 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 		super(model, vis);
 
 		this.model = model;
-		canvas = new Canvas(vis.getWindowWidth(), vis.getWindowHeight());
+		canvas = new Canvas();
 		model.canvas = canvas;
         model.ctx = canvas.getGraphicsContext2D();
 
@@ -92,8 +92,16 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 		double windowWidth = vis.getWindowWidth();
 		double windowHeight = getHeight(); // exclude the tab at the bottom
 
-        canvas.setWidth(windowWidth);
-        canvas.setHeight(windowHeight);
+		System.out.println("canvas dimensions: (" + windowWidth + ", " + windowHeight + ")");
+
+        if(model.squareShaped) {
+			double dimension = Math.min(windowWidth, windowHeight);
+			canvas.setWidth(dimension);
+			canvas.setHeight(dimension);
+		} else {
+			canvas.setWidth(windowWidth);
+			canvas.setHeight(windowHeight);
+		}
 	}
 
 	@Override

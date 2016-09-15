@@ -1,9 +1,13 @@
 package simulizer.highlevel.models;
 
+import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import simulizer.simulation.cpu.user_interaction.IO;
+import simulizer.utils.CircularIntBuffer;
 
 /**
  * Model for accessing a JavaFX canvas from annotations
@@ -14,10 +18,16 @@ import simulizer.simulation.cpu.user_interaction.IO;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CanvasModel extends DataStructureModel {
 
+	private CircularIntBuffer frameTimes = new CircularIntBuffer(3);
+	private long lastFrameMs = 0;
+
 	public Canvas canvas;
     public GraphicsContext ctx;
 	public Paint clearColor = getColor("black");
 	public Paint pixelColor = getColor("#4BE34B");
+	public Paint textColor  = getColor("#4BE34B");
+	public boolean squareShaped = false; // make sure canvas is always a square
+	public boolean showFPS = false; // show FPS when drawing pixels
 
     // cannot be static otherwise not accessible from javascript
 	public final int UP    = 1;
@@ -41,9 +51,6 @@ public class CanvasModel extends DataStructureModel {
 		ctx = null;
 	}
 
-	//TODO: get font
-	//TODO: set font rendering type
-
 	/**
      * get a javaFX Paint for a given string
 	 * accepts strings for a single color, and also linear and radial gradients (see Paint.valueOf)
@@ -59,6 +66,16 @@ public class CanvasModel extends DataStructureModel {
 		return Paint.valueOf(colorName);
 	}
 
+	public Font getFont(String family, double size) {
+		return Font.font(family, size);
+	}
+	public void setFont(String family, double size) {
+		ctx.setFont(Font.font(family, size));
+	}
+	public void setFont(Font f) {
+		ctx.setFont(f);
+	}
+
 	/**
 	 * clear the entire canvas with the clearColor
 	 */
@@ -67,16 +84,12 @@ public class CanvasModel extends DataStructureModel {
 		ctx.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
-	public void drawPixels(boolean[][] pixels) {
+	public void drawPixels(boolean[] pixels, int cols) {
+		assert(pixels.length > 0 && cols > 0 && pixels.length % cols == 0);
+
 		clear();
 
-		int rows = pixels.length;
-        if(rows == 0)
-        	return; // empty image
-
-		int cols = pixels[0].length;
-		if(cols == 0)
-			return; // empty image
+		int rows = pixels.length / cols;
 
 		int pixelWidth = (int) (canvas.getWidth() / cols);
 		int pixelHeight = (int) (canvas.getHeight() / rows);
@@ -84,11 +97,75 @@ public class CanvasModel extends DataStructureModel {
 		ctx.setFill(pixelColor);
 
 		for(int row = 0; row < rows; ++row) {
+            int rowOffset = row*cols;
 			for(int col = 0; col < cols; ++col) {
-                if(pixels[row][col]) // pixel is lit
+                if(pixels[rowOffset + col]) // pixel is lit
                     ctx.fillRect(col*pixelWidth, row*pixelHeight, pixelWidth, pixelHeight);
 			}
 		}
+
+		submitFrame();
+	}
+
+	/**
+     * like drawPixels but with a slight border between each pixel
+	 * @param margin the spacing around each pixel (eg 0.1 => border of 0.1*dimension between each pixel (each contributing half of the margin))
+	 */
+	public void drawTiles(boolean[] pixels, int cols, double margin) {
+		assert(pixels.length > 0 && cols > 0 && pixels.length % cols == 0 && 0 <= margin && margin <= 1);
+
+		clear();
+
+		int rows = pixels.length / cols;
+
+		int fullPixelWidth = (int) (canvas.getWidth() / cols);
+		int fullPixelHeight = (int) (canvas.getHeight() / rows);
+		margin /= 2; // to take into account each neighbouring pixel also has a border
+        int indentX = (int) (fullPixelWidth * margin);
+		int indentY = (int) (fullPixelHeight * margin);
+		int pixelWidth  = fullPixelWidth - 2*indentX;
+		int pixelHeight = fullPixelHeight - 2*indentY;
+
+		ctx.setFill(pixelColor);
+
+		for(int row = 0; row < rows; ++row) {
+			int rowOffset = row*cols;
+			for(int col = 0; col < cols; ++col) {
+				if(pixels[rowOffset + col]) // pixel is lit
+					ctx.fillRect(col*fullPixelWidth+indentX, row*fullPixelHeight+indentY, pixelWidth, pixelHeight);
+			}
+		}
+
+		submitFrame();
+	}
+
+
+	/**
+	 * used internally to keep track of frames and display an FPS counter if requested
+	 */
+	private void submitFrame() {
+		if(showFPS) {
+			long now = System.currentTimeMillis();
+			if(lastFrameMs != 0) {
+				frameTimes.add((int) (now - lastFrameMs));
+			}
+			lastFrameMs = now;
+
+			double fps = 1000.0/frameTimes.mean();
+
+			ctx.setFont(Font.font("monospace", 10));
+			ctx.setFill(textColor);
+			ctx.setTextAlign(TextAlignment.RIGHT);
+			ctx.setTextBaseline(VPos.TOP);
+			ctx.fillText(String.format("%.1f FPS", fps), canvas.getWidth(), 0);
+		}
+	}
+
+	public void centerText(String text) {
+		ctx.setFill(textColor);
+		ctx.setTextAlign(TextAlignment.CENTER);
+		ctx.setTextBaseline(VPos.CENTER);
+		ctx.fillText(text, canvas.getWidth()/2, canvas.getHeight()/2);
 	}
 
 	@Override

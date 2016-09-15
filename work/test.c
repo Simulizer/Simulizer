@@ -15,6 +15,11 @@
 char input[] = "Enter the number of items:";
 int globalA = 5;
 
+// assigning from other globals causes gcc to generate the function:
+// _Z41__static_initialization_and_destruction_0ii:
+// and
+// _GLOBAL__sub_I_input:
+int globalB = globalA;
 
 
 

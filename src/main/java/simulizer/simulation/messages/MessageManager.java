@@ -58,10 +58,12 @@ public class MessageManager {
 	}
 
 	public void shutdown() {
-		synchronized (executor) {
+		synchronized (this) {
 			threadFactory.killThreads();
 			messages.clear();
-			tasks.clear();
+			synchronized (tasks) {
+				tasks.clear();
+			}
 
 			executor.shutdown();
 			try {

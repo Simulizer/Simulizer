@@ -37,7 +37,7 @@ main:
 
  # @{ startAddress = $a0.get() }@
  # @{ if(startAddress == -1) ret() // no elements }@
- # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get())) }@
+ # @{ l.setList(simulation.readUnsignedWordsFromMem($a0.get(), $a1.get()-$a0.get())) }@
  # @{ l.show()     }@
  # @{ setSpeed(15) }@
 

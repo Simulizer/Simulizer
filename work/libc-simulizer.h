@@ -20,22 +20,35 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 "=" => _write_ only (old value discarded)
 "r" => compiler can place the operand in any register it wants
 "p" => pass as a register containing an address
+
+The volatile qualifier prevents the optimiser from re-ordering the asm chunk to
+somewhere else (eg outside a loop). This is especially important for annotations
+since the compiler sees them as comments. To avoid subtle issues in the future,
+all asm statements used with Simulizer should be qualified volatile just to be
+safe.
 */
+
+
+#define NO_INLINE __attribute__ ((noinline))
 
 
 // comment to be written to the asm output
 // eg C("doing thing..."); ---> # doing thing...
-#define C(x) asm("# " x)
+#define C(x) asm volatile ("# " x)
+
+#define NOP asm volatile ("nop")
 
 // annotation
 // eg A("h.move(a, b);") ---> # @{ h.move(a, b); }@
-#define A(x) asm("# @{ " x " }@")
+#define A(x) asm volatile ("nop # @{ " x " }@")
 
 // can refer to %0 inside the js text and gcc will replace with the appropriate register
 // eg: int a = 1;
 //     A_READ(a, "var jsA = %0.get()");
+// the nop is to ensure the annotation is bound to where you think it is (see A_WRITE)
 #define A_READ(var, js)             \
-    asm("# @{ " js " }@"            \
+    asm volatile                    \
+       ("nop # @{ " js " }@"        \
        :        /*output operands*/ \
        : "r"(var)/*input operands*/ \
        :               /*clobbers*/ \
@@ -44,8 +57,18 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 // can refer to %0 inside the js text and gcc will replace with the appropriate register
 // eg: int a = 1;
 //     A_WRITE(a, "%0.set(10)");
+//
+// the nop is to ensure the annotation is bound where you think it is. For
+// example this bug before the nop was added:
+// someFunction:
+// # @{ $s0.set(1); }@
+// sw $s0 10($sp) # this occurs if variable marked volatile in c
+// lw $s0 10($sp)
+// the annotation above actually runs _after_ the sw instruction and so after
+// the 3 lines the value of $s0 has not changed and will not be set to 1
 #define A_WRITE(var, js)              \
-    asm("# @{ " js " }@"              \
+    asm volatile                      \
+       ("nop # @{ " js " }@"          \
        : "=r"(var)/*output operands*/ \
        :           /*input operands*/ \
        :                 /*clobbers*/ \
@@ -53,7 +76,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 
 // syscall 1
 #define PRINT_INT(i)                \
-    asm ("li\t$v0, 1 # print int\n\t" \
+    asm volatile                    \
+        ("li\t$v0, 1 # print int\n\t" \
          "move\t$a0, %0\n\t"        \
          "syscall"                  \
         :       /*output operands*/ \
@@ -63,7 +87,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 
 // syscall 4
 #define PRINT_STRING(s)             \
-    asm ("li\t$v0, 4 # print string\n\t" \
+    asm volatile                    \
+        ("li\t$v0, 4 # print string\n\t" \
          "move\t$a0, %0\n\t"        \
          "syscall"                  \
         :       /*output operands*/ \
@@ -73,7 +98,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 
 // syscall 5
 #define READ_INT(i)                  \
-    asm ("li\t$v0, 5 # read int\n\t" \
+    asm volatile                     \
+        ("li\t$v0, 5 # read int\n\t" \
          "syscall\n\t"               \
          "move\t%0, $v0"             \
         : "=r"(i)/*output operands*/ \
@@ -83,7 +109,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 
 // syscall 8
 #define READ_STRING(buf, len)                  \
-    asm ("li\t$v0, 8 # read string\n\t"        \
+    asm volatile                               \
+        ("li\t$v0, 8 # read string\n\t"        \
          "move\t$a0, %0\n\t"                   \
          "move\t$a1, %1\n\t"                   \
          "syscall"                             \
@@ -95,7 +122,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 // syscall 9
 // res stores the address of the start of the newly allocated block (the old break)
 #define SBRK(num, res)                 \
-    asm ("li\t$v0, 9 # sbrk\n\t"       \
+    asm volatile                       \
+        ("li\t$v0, 9 # sbrk\n\t"       \
          "move\t$a0, %1\n\t"           \
          "syscall\n\t"                 \
          "move\t%0, $v0"               \
@@ -105,17 +133,19 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
         )
 
 // syscall 10
-#define EXIT()                \
-    asm ("li\t$v0, 10 # exit\n\t" \
-         "syscall"            \
-         :                    \
-         :                    \
-         : "$v0" /*clobbers*/ \
-         )
+#define EXIT()               \
+    asm volatile             \
+        ("li\t$v0, 10 # exit\n\t" \
+         "syscall"           \
+        :/*output operands*/ \
+        : /*input operands*/ \
+        : "$v0" /*clobbers*/ \
+        )
 
 // syscall 11
 #define PRINT_CHAR(c)               \
-    asm ("li\t$v0, 11 # print char\n\t" \
+    asm volatile                    \
+        ("li\t$v0, 11 # print char\n\t" \
          "move\t$a0, %0\n\t"        \
          "syscall"                  \
         :       /*output operands*/ \
@@ -125,7 +155,8 @@ see: http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html#ss6.1
 
 // syscall 12
 #define READ_CHAR(c)                 \
-    asm ("li\t$v0, 12 # read char\n\t" \
+    asm volatile                     \
+        ("li\t$v0, 12 # read char\n\t" \
          "syscall\n\t"               \
          "move\t%0, $v0"             \
         : "=r"(c)/*output operands*/ \
@@ -185,7 +216,7 @@ block_header *malloc_free_list = NULL;
 
 
 
-#ifndef NO_UTILS
+#ifndef NO_MEMSET
 
 void memset(void *ptr, unsigned char value, size_t num) {
     unsigned char *ptrc = (unsigned char*)ptr;
@@ -193,7 +224,6 @@ void memset(void *ptr, unsigned char value, size_t num) {
     while(ptrc != end)
         *ptrc++ = value;
 }
-
 
 #endif
 
