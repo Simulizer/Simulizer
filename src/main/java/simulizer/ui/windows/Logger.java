@@ -57,10 +57,7 @@ public class Logger extends InternalWindow implements Observer {
 		outputs = new TextArea[IOStream.values().length];
 		GridPane pane = new GridPane();
 
-		inputWait = new Semaphore(1);
-		try {
-			inputWait.acquire(); // so first read blocks
-		} catch (InterruptedException ignored) { }
+		inputWait = new Semaphore(0, true);
 
 		tabPane = new TabPane();
 		tabPane.setCursor(Cursor.DEFAULT);
@@ -231,7 +228,8 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public synchronized void cancelNextMessage() {
 		lastInputCancelled = true;
-        inputWait.release();
+		if (inputWait.hasQueuedThreads())
+			inputWait.release();
 	}
 
 	@Override
