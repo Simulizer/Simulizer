@@ -128,6 +128,28 @@ public class OperandExtractorTests {
         extractGoodInteger(Integer.MIN_VALUE+1, "-0x" + Integer.toString(-(Integer.MIN_VALUE+1), 16));
 
 
+        {
+            // MAX_VALUE+1 bad
+            String parseString = Long.toString(Integer.MAX_VALUE + (long) 1);
+            assertEquals(0, ex.extractInteger(parse(parseString).integer()));
+            expectValidParseButProblem("too large");
+
+            parseString = "0x" + Long.toString(Integer.MAX_VALUE + (long) 1, 16);
+            assertEquals(0, ex.extractInteger(parse(parseString).integer()));
+            expectValidParseButProblem("too large");
+
+
+            // MIN_VALUE bad
+            parseString = Long.toString(Integer.MIN_VALUE);
+            assertEquals(0, ex.extractInteger(parse(parseString).integer()));
+            expectValidParseButProblem("too large");
+
+            parseString = "-0x" + Long.toString(-((long) Integer.MIN_VALUE), 16);
+            assertEquals(0, ex.extractInteger(parse(parseString).integer()));
+            expectValidParseButProblem("too large");
+        }
+
+
         // 2^33: bad
         assertEquals(0, ex.extractInteger(parse("8589934592").integer()));
         expectValidParseButProblem("too large");

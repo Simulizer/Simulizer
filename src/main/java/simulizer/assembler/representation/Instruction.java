@@ -102,9 +102,10 @@ public enum Instruction {
     
 
 // Jump Instructions
-    j      (OperandFormat.labelOrReg,  "unconditional jump to label"),
-    jal    (OperandFormat.label,       "unconditional jump and link"),
+    j      (OperandFormat.labelOrReg,  "unconditional jump to label or address"),
     jr     (OperandFormat.register,    "unconditional jump using register value"),
+    jal    (OperandFormat.labelOrReg,  "unconditional jump and link"),
+    jalr   (OperandFormat.register,    "unconditional jump and link using register value"),
 
 // Trap Instructions: ignored
 

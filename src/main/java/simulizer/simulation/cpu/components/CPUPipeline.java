@@ -12,10 +12,7 @@ import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.*;
-import simulizer.simulation.instructions.AddressMode;
-import simulizer.simulation.instructions.InstructionFormat;
-import simulizer.simulation.instructions.JTypeInstruction;
-import simulizer.simulation.instructions.SpecialInstruction;
+import simulizer.simulation.instructions.*;
 import simulizer.simulation.messages.*;
 import simulizer.simulation.messages.PipelineHazardMessage.Hazard;
 
@@ -125,7 +122,8 @@ public class CPUPipeline extends CPU {
 				registers.add(instruction.asRType().getDestReg());
 				break;
 			case JTYPE://jal will write to the return address register
-				if(instruction.getInstruction().equals(Instruction.jal))
+				if(instruction.getInstruction().equals(Instruction.jal)
+						|| instruction.getInstruction().equals(Instruction.jalr))
 				{
 					registers.add(Register.ra);
 				}
@@ -303,19 +301,16 @@ public class CPUPipeline extends CPU {
 	}
 
 	/**overwriting instruction for pipeline due to problem with jal instruction getting incorrect program counter value
-	 * @throws StackException 
-	 * @throws HeapException 
-	 * @throws MemoryException 
-	 * @throws ExecuteException 
-	 * @throws InstructionException 
-	 * 
+	 *
 	 */
 	@Override
 	protected void execute(InstructionFormat instruction) throws InstructionException, ExecuteException, MemoryException, HeapException, StackException {
-		if(instruction.getInstruction().equals(Instruction.jal)) {//jal by default will take incorrect PC value, this needs to be dealt with
-			long newCurrentAddress = DataConverter.decodeAsUnsigned(instruction.asJType().getCurrentAddress().get().getBytes())-4;
-			Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
-			instruction = new JTypeInstruction(Instruction.jal,instruction.asJType().getJumpAddress(),trueCurrent);
+		if(instruction.getInstruction().equals(Instruction.jal)
+				|| instruction.getInstruction().equals(Instruction.jalr)) {//jal by default will take incorrect PC value, this needs to be dealt with
+			// regardless of whether a register or address is passed: will decode into a JType instruction
+            long newCurrentAddress = DataConverter.decodeAsUnsigned(instruction.asJType().getCurrentAddress().get().getBytes()) - 4;
+            Optional<Word> trueCurrent = Optional.of(new Word(DataConverter.encodeAsUnsigned(newCurrentAddress)));
+            instruction = new JTypeInstruction(instruction.getInstruction(),instruction.asJType().getJumpAddress(),trueCurrent);
 		}
 		
 		super.execute(instruction);

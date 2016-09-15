@@ -1,0 +1,25 @@
+todo
+- editor ask to save when closing: cancel doesn't work, still exits
+- editor doesn't ask to save when file>open
+- editor ask to save before running
+- check whether the file has changed out from under the editor since last saved and ask
+- editor autosave
+- after reload (and I assume regular load) errors in editor don't show up
+- when fullscreen: dialogs take you out of fullscreen
+    - maybe mininise the main screen and restore after dialog closes
+- windows don't receive resize events when popped out
+- note that Java probably needs more heap size given to it to utilise 1MiB of stack
+- how accurate are the #hazard comments
+- improve guide
+- change simulation bridge setSpeed to setCycleFreq to match cpu.setCycleFreq
+- UIUtils.exception dialog fall back to Simulizer.handleException if not in UI mode (if JavaFX not running)
+- model examples
+    - arithmetic
+    - calling conventions
+    - parameters and return values
+    - pointers
+    - annotations
+    - loops
+    - stack / heap / static
+
+

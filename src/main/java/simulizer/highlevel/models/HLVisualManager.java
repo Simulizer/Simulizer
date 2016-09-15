@@ -46,8 +46,8 @@ public class HLVisualManager extends Observable implements Observer {
 			case "list":
 				model = new ListModel(io);
 				break;
-			case "frame":
-				model = new FrameModel(io);
+			case "canvas":
+				model = new CanvasModel(io);
 				break;
 			default:
 				throw new IllegalArgumentException();

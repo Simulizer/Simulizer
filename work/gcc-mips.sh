@@ -17,6 +17,9 @@ export OPTIMISATION
 OUT="${FILE/%.*/.s}"
 export OUT
 
+# whether to alter the compiler output to make it work with Simulizer
+FILTER=true
+
 # to list flags
 # mips-linux-gnu-g++-5 --help=common
 # mips-linux-gnu-g++-5 --help=target
@@ -32,28 +35,33 @@ function compile {
         -fno-exceptions -mno-explicit-relocs \
         -march=r3000 -meb -mgp32 -mfp32 -msoft-float \
         -mno-llsc -fno-stack-protector -fno-delayed-branch \
-        -S "$1" -o "$OUT"
+        -I./ -S "$1" -o "$OUT"
     # -O0:           disable optimisations (to make output more readable)
     # -fno-exceptions: disabling exceptions removes some cruft added for bookkeeping
-    # -mno-explicit-relocs: disables use of %hi() and %lo() to load from the .data segment
+    # -mno-explicit-relocs: disables use of %hi() and %lo() to load from the
+    #                   .data segment
     # -march=r3000:  compile for the R3000 processor (which Simulizer emulates)
     # -meb:          big endian (which Simulizer is)
     # -mgp32:        32-bit general purpose registers (as opposed to 64-bit)
     # -mfp32:        32-bit floating point registers (as opposed to 64-bit).
-    #                  required for -march=r3000 however Simulizer currently has no FPU
+    #                   required for -march=r3000 however Simulizer currently
+    #                   has no FPU
     # -msoft-float:  don't use hardware float instructions. Use library calls
-    #                  instead (because Simulizer doesn't have a FPU)
-    # -mno-llsc:     don't use ll,sc and sync instructions (atomic instructions) because
-    #                   Simulizer does not support them
-    # -mno-stack-protector: don't write stack canaries or other protections to the stack
+    #                   instead (because Simulizer doesn't have a FPU)
+    # -mno-llsc:     don't use ll,sc and sync instructions (atomic instructions)
+    #                   because Simulizer does not support them
+    # -mno-stack-protector: don't write stack canaries or other protections to
+    #                   the stack
     # -fno-delayed-branch: don't exploit delayed branch slots because Simulizer
-    #                      does not have them
+    #                   does not have them
+    # -I./           include the current directory in the include path to search
+    #                   for headers
     # -S:            generate assembly output
 }
 
 
 # by wrapping everything in extern "C" disables name mangling for all functions
-TMP_FILE=$(mktemp gcc-mips.tmp.XXXXX.c)
+TMP_FILE=$(mktemp /tmp/gcc-mips.tmp.XXXXX.c)
 echo 'extern "C" {' > "$TMP_FILE"
 cat "$FILE" >> "$TMP_FILE"
 echo '}' >> "$TMP_FILE"
@@ -67,8 +75,9 @@ COMPILE_STATUS=$?
 rm "$TMP_FILE"
 
 if [ $COMPILE_STATUS -ne 0 ]; then
-    echo "\n\n"
-    echo "compilation failed"
+    RED='\033[1;31m'
+    NO_COLOR='\033[0m'
+    echo -e "\n\n${RED}Compilation Failed${NO_COLOR}\n"
     # compile the original file (will mangle function names)
     # to get better diagnostics (line numbers)
     compile "$FILE"
@@ -79,6 +88,12 @@ if [ $COMPILE_STATUS -ne 0 ]; then
     fi
 
     exit 1
+fi
+
+
+# no filtering
+if ! $FILTER; then
+    exit 0
 fi
 
 
@@ -98,14 +113,14 @@ KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 # remove # 0 "" 2 and # XX "input.c" 1 lines which surround asm() statements
 AWK_FILTER='
 /\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print}
-/\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
+/^\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
 /^\s*\./{next}  # unknown directives
 
-/\s*#nop$/{next}
+/^\s*#nop$/{print "\t# <hazard>"; next}
 /^\s*#(NO_)?APP$/{next}
-/ # 0 "" 2$/{next}
-/\s*# [0-9]+ "'"$TMP_FILE"'" 1/{next}
-/\s*# [0-9]+ "libc-simulizer.h" 1/{next}
+/^\s*# 0 "" 2$/{next}
+/^\s*# [0-9]+ "'"${TMP_FILE//\//\\/}"'" 1/{next} # need to escape / in file path
+/^\s*# [0-9]+ ".*libc-simulizer.h" 1/{next}
 
 {print}
 '
@@ -121,11 +136,11 @@ awk -i inplace "$AWK_FILTER" "$OUT"
 # loops Simulizer does not understand these as they are confusing as they look
 # like registers. (Note spim can handle these labels)
 # eg $L4 --> LBL_4
-sed --in-place='' 's/\$L\(\d*\)/LBL_\1/' "$OUT"
+sed --in-place='' 's/\(^[^#]*\)\$L\(\d*\)/\1LBL_\2/' "$OUT"
 
 # when optimising, gcc creates labels of the form: functionName.constprop.XXX
 # but Simulizer does not support . in label names
-sed --in-place='' 's/\([[:alpha:]]\+\)\./\1_/g' "$OUT"
+sed --in-place='' 's/\(^[^#]*[[:alpha:]]\+\)\./\1_/g' "$OUT"
 
 
 # substitute mnemonic register names (personal preference)
@@ -139,15 +154,20 @@ sed --in-place='' 's/\$31/$ra/' "$OUT"
 
 AWK_FIX_OVERLOADS='
 # match: "address as the second argument"
-/move[^,]*,[^#]*\(/{$1="\tlw"; print $0; next;}
+/^\s*move[^,]*,[^#]*\(/{$1="\tlw"; print $0; next;}
 
 # match "not a register as the third argument"
-/slt([^,]*,){2}[^\$]/{$1="\tslti"; print $0; next;}
+/^\s*slt([^,]*,){2}[^\$]/{$1="\tslti"; print $0; next;}
+
+# does not support mult which stores in mflo/mfhi so replace with mul $d $d $s
+/^\s*mult/{$1="\tmul"; r = gensub(/(\$[^,]*),(.*)/, "\\1,\\1,\\2", "g"); print r; next;}
+
+# just comment out instances of mflo and hope that the above substitution takes
+# care of it (should check by hand). Cannot do this with mfhi so just hope it is
+# never used
+/^\s*mflo/{$1="\t#mflo"; print $0; next;}
 
 {print}
 '
 awk -i inplace "$AWK_FIX_OVERLOADS" "$OUT"
-
-# missing instructions
-# jalr
 

@@ -31,16 +31,16 @@ main:
         j EXIT                  ; #exit the program
 
 
-#NEmpty: Function called if array isn't empty, will sort the non empty array and will then output the sorted array        
+#NEmpty: Function called if array isn't empty, will sort the non empty array and will then output the sorted array
 NEmpty: li $t0, 4               ; #setting t0 to 4, will let me go back to the start of the heap using back
         jal BACK                ; #will take heap pointer back to start of array
         la $s0, ($s1)           ; #storing the start of the heap into $s0
-        
+
         nop  # @{ startAddress = $s0.get() }@
-             # @{ l.setList(simulation.readUnsignedWordsFromMem($s0.get(), $s2.get())) }@
+             # @{ l.setList(simulation.readUnsignedWordsFromMem($s0.get(), $s2.get()-$s0.get())) }@
              # @{ l.show()     }@
              # @{ setSpeed(10) }@
-        
+
         jal QSORT               ; #jumping to the QSort subroutine which will sort the array
         jal PRINTARR            ; #printing out the sorted array
         j EXIT                  ; #will jump to the label which will cause the system to exit
@@ -68,44 +68,44 @@ BACK:   beq $t0, $s3, RETURN    ; #condition for exiting this sub routine
         addi $t0, $t0, 4        ; #incrementing t0
         la $s1, -4($s1)         ; #going back in sets of bytes
         j BACK                  ; #go round again
-      
-        
+
+
 #QSORT: Function carries out the quick sort algorithm
 		#$s0 stores the start address of the array
 		#$s1 will store the pivot address
 		#$s2 will store the address of the last item in the array
 		#$s3 will store the size of the array in bytes
 QSORT:  addi $sp, $sp, -20      ; #stack frame
-        sw $s0, 16($sp)         ; 
-        sw $s1, 12($sp)         ; 
-        sw $s2, 8($sp)          ; 
-        sw $s3, 4($sp)          ; 
+        sw $s0, 16($sp)         ;
+        sw $s1, 12($sp)         ;
+        sw $s2, 8($sp)          ;
+        sw $s3, 4($sp)          ;
         sw $ra, 0($sp)          ;
         li $t6, 4               ;
         sub $t0, $s3, $t6       ; #checking if left < right
-        blez $t0, RETURNQ       ; #return back to original program 
+        blez $t0, RETURNQ       ; #return back to original program
         move $a0, $s0           ; #storing start address in $a0
         move $a1, $s2           ; #storing end address in $a1
         move $a2, $s3           ; #storing current array size
         jal PARTITION           ; #call partition function
         sw $s1, 12($sp)         ; #will now store the partition address in $s1
-        sub $s3, $s1, $s0       ; #new size of array 
+        sub $s3, $s1, $s0       ; #new size of array
         addi $s2, $s1, -4       ; #right = pivot - 1 (in terms of items)
-        jal QSORT               ; 
-        lw $ra, 0($sp)          ; 
-        lw $s3, 4($sp)          ; 
-        lw $s2, 8($sp)          ; 
-        lw $s1, 12($sp)         ; 
+        jal QSORT               ;
+        lw $ra, 0($sp)          ;
+        lw $s3, 4($sp)          ;
+        lw $s2, 8($sp)          ;
+        lw $s1, 12($sp)         ;
         lw $s0, 16($sp)         ;
         addi $s0, $s1, 4        ; #set start of array as partition address + 1 (in terms of items)
         sub $s3, $s2, $s0       ; #new size of array
         addi $s3, $s3, 4        ;
-        jal QSORT               ; 
+        jal QSORT               ;
         lw $ra, 0($sp)          ; #restoring registers
-        lw $s3, 4($sp)          ; 
+        lw $s3, 4($sp)          ;
         lw $s2, 8($sp)          ;
-        lw $s1, 12($sp)         ; 
-        lw $s0, 16($sp)         ; 
+        lw $s1, 12($sp)         ;
+        lw $s0, 16($sp)         ;
         addi $sp, $sp, 20       ; #restoring stack pointer to original value
         j RETURN                ; #return from function
 
@@ -114,15 +114,15 @@ QSORT:  addi $sp, $sp, -20      ; #stack frame
 #RETURNQ: Like RETURN, only the stack pointer is increased before hand
 RETURNQ: addi $sp, $sp, 20      ;
          j RETURN               ;
-   
-   
-   
+
+
+
 #PARTITION: Method for partitioning the array for the quick sort algorithm
 			#$a0 stores start of array
 			#$a1 stores address of last array element
 			#$a2 stores size of array in bytes
 PARTITION: addi $sp, $sp, -16   ; #stack frame
-           sw $ra, 12($sp)      ; 
+           sw $ra, 12($sp)      ;
            sw $a2, 8($sp)       ;
            sw $a1, 4($sp)       ;
            sw $a0, 0($sp)       ;
@@ -142,7 +142,7 @@ PARTITION: addi $sp, $sp, -16   ; #stack frame
 PARTITR:   sub $t2, $t0, $t1    ; #while(lo <= hi)
            bgtz $t2, RETPART    ; #return from partition
 HIPIVOT:   lw $t3, ($t1)        ; #value at hi
-           ble $t3, $v0, LOPIVOT; #branch if A[hi] <= pivot 
+           ble $t3, $v0, LOPIVOT; #branch if A[hi] <= pivot
            addi $t1, $t1, -4    ; #hi = hi-1 (items wise again)
            j HIPIVOT            ; #iterate back round
 LOPIVOT:   bgt $t0, $t1, LOHIGH ; #if lo > hi dont loop
@@ -151,26 +151,26 @@ LOPIVOT:   bgt $t0, $t1, LOHIGH ; #if lo > hi dont loop
            addi $t0, $t0, 4     ; #lo = lo + 1 (items wise)
            j LOPIVOT            ; #loop back round
 LOHIGH:    bgt $t0, $t1, PARTITR; #loop back round master loop if lo > hi
-           lw $t3, ($t0)        ; #t3 = A[lo] 
+           lw $t3, ($t0)        ; #t3 = A[lo]
            lw $t4, ($t1)        ; #t4 = A[hi] @{ swapIfDifferent($t0.get(),$t1.get()) }@
            sw $t4, ($t0)        ; #doing a swap
-           sw $t3, ($t1)        ; #more swaps # 
+           sw $t3, ($t1)        ; #more swaps #
            addi $t0, $t0, 4     ; #lo = lo + 1 (items-wise)
            addi $t1, $t1, -4    ; #hi = hi - 1 (items-wise)
            j PARTITR            ; #go back round main loop
 RETPART:   lw $t3, ($a0)        ; #left item
            lw $t4, ($t1)        ; #hi item @{ swapIfDifferent($a0.get(),$t1.get()); setPivot($t1.get()) }@
            sw $t4, ($a0)        ; #doing a swap
-           sw $t3, ($t1)        ; #more swaps 
+           sw $t3, ($t1)        ; #more swaps
            move $s1, $t1        ; #s1 will store the mid point for QSORT
            j RETURN             ; #return from function
-           
-           
+
+
 
 #GETMID: Function gets the middle item of some sub-array, used as pivot item in PARTITION
 GETMID: beqz $a2, RETMID        ; #if a1 reduced to 0
         addi $a0, $a0, 4        ; #moving address along 4
-        addi $a2, $a2, -1       ; #decrementing a1, left to move 
+        addi $a2, $a2, -1       ; #decrementing a1, left to move
         j GETMID                ; #looping back around
 RETMID: lw $v0, ($a0)           ; #return the middle item
         move $v1, $a0           ; #store it's address in v1 @{setPivot($v1.get())}@

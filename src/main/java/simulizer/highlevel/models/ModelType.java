@@ -6,6 +6,7 @@ package simulizer.highlevel.models;
  * @author Michael
  *
  */
+@SuppressWarnings("WeakerAccess")
 public enum ModelType {
-	STUB, HANOI, LIST, FRAME
+	STUB, HANOI, LIST, CANVAS
 }

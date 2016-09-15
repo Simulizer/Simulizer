@@ -30,8 +30,6 @@ public class AnnotationManager {
 
 	boolean enableVisualisations;
 
-	HighLevelVisualisation vis = null;
-
 	public AnnotationManager(CPU cpu, IO io, boolean enableVisualisations) {
 		ex = null;
 		this.cpu = cpu;

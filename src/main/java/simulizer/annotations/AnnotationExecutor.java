@@ -51,7 +51,7 @@ public class AnnotationExecutor {
 	/**
 	 * create a new executor
 	 */
-	public AnnotationExecutor() {
+	AnnotationExecutor() {
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
 		AnnotationClassFilter filter = new AnnotationClassFilter();
 		engine = (NashornScriptEngine) factory.getScriptEngine(filter);
@@ -97,7 +97,8 @@ public class AnnotationExecutor {
 					.append(",setU:function(val){simulation.setRegisterU(this.id, val);}")
 					.append(",get:function(){return this.getS();}")
 					.append(",set:function(val){this.setS(val);}")
-				.append("};");
+				.append("};")
+                .append("$").append(r.getID()).append("=$").append(name).append(";");
 		}
 		exec(registerGlobals.toString());
 	}
@@ -107,7 +108,7 @@ public class AnnotationExecutor {
 	 * @param name the name to bind the object to
 	 * @param obj the object to bind
 	 */
-	public void bindGlobal(String name, Object obj) {
+	void bindGlobal(String name, Object obj) {
 		globals.put(name, obj);
 	}
 
@@ -117,7 +118,7 @@ public class AnnotationExecutor {
 	 * @param tClass the class of the object eg Boolean.class
 	 * @return the object, casted to the correct class
 	 */
-	public <T> T getGlobal(String name, Class<T> tClass) {
+	private <T> T getGlobal(String name, Class<T> tClass) {
 		return tClass.cast(globals.get(name));
 	}
 
@@ -162,8 +163,6 @@ public class AnnotationExecutor {
 	/**
 	 * Execute some javascript code
 	 * @param script the script to execute
-	 * @throws ScriptException
-	 * @throws SecurityException
 	 */
 	private void exec(String script) throws ScriptException, SecurityException {
 		engine.eval(script);

@@ -11,15 +11,16 @@ import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Pair;
 import simulizer.highlevel.models.DataStructureModel;
-import simulizer.highlevel.models.FrameModel;
+import simulizer.highlevel.models.CanvasModel;
 import simulizer.highlevel.models.HLVisualManager;
 import simulizer.highlevel.models.HLVisualManager.Action;
 import simulizer.highlevel.models.HanoiModel;
 import simulizer.highlevel.models.ListModel;
 import simulizer.ui.components.highlevel.DataStructureVisualiser;
-import simulizer.ui.components.highlevel.FrameVisualiser;
+import simulizer.ui.components.highlevel.CanvasVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
 import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
@@ -37,7 +38,7 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private double width = 400;
 	private double height = 300;
 
-	private TabPane tabs;
+	private final TabPane tabs;
 
 	public HighLevelVisualisation() {
 		// TODO remove this
@@ -126,15 +127,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the model to remove
 	 */
 	private synchronized void removeTab(DataStructureModel model) {
-		tabs.getTabs().stream().filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model).collect(Collectors.toList()) // create
-																																			// copy
-																																			// since
-																																			// the
-																																			// list
-																																			// will
-																																			// be
-																																			// modified
+		// @formatter:off
+		tabs.getTabs().stream()
+				.filter(t -> ((DataStructureVisualiser) t.getContent()).getModel() == model)
+				.collect(Collectors.toList()) // create copy since the list will be modified
 				.forEach(this::removeTab);
+		// @formatter:on
 	}
 
 	/**
@@ -144,9 +142,12 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	 *            the visualisation to remove
 	 */
 	public synchronized void removeTab(DataStructureVisualiser vis) {
-		tabs.getTabs().stream().filter(t -> t.getContent() == vis).collect(Collectors.toList()) // create copy since the list will be
-																								// modified
+		// @formatter:off
+		tabs.getTabs().stream()
+				.filter(t -> t.getContent() == vis)
+				.collect(Collectors.toList()) // create copy since the list will be modified
 				.forEach(this::removeTab);
+		// @formatter:on
 	}
 
 	/**
@@ -204,8 +205,8 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	private void addNewVisualisation(DataStructureModel model) {
 		DataStructureVisualiser vis = null;
 		switch (model.modelType()) {
-			case FRAME:
-				vis = new FrameVisualiser((FrameModel) model, this);
+			case CANVAS:
+				vis = new CanvasVisualiser((CanvasModel) model, this);
 				break;
 			case HANOI:
 				vis = new TowerOfHanoiVisualiser((HanoiModel) model, this);
