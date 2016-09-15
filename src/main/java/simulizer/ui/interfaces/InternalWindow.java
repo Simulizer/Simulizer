@@ -322,7 +322,7 @@ public abstract class InternalWindow extends Window {
 		return menuBar;
 	}
 
-	protected final EventManager getEventManager() {
+	public final EventManager getEventManager() {
 		return internalEventManager;
 	}
 

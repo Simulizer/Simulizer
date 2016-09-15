@@ -36,7 +36,7 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 
 		getChildren().add(canvas);
 
-		vis.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+		vis.getEventManager().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
 			switch(event.getCode()) {
 				case UP: case W:
 					setInputBit(model.UP, true); break;
@@ -58,7 +58,7 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 			event.consume();
 		});
 
-		vis.addEventFilter(KeyEvent.KEY_RELEASED, event -> {
+		vis.getEventManager().addEventFilter(KeyEvent.KEY_RELEASED, event -> {
 			switch(event.getCode()) {
 				case UP: case W:
 					setInputBit(model.UP, false); break;
