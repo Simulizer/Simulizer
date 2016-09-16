@@ -51,7 +51,6 @@ public class CTRL_TAB implements EventHandler<KeyEvent> {
 	private void setPrimary(InternalWindow w) {
 		w.toFront();
 		w.requestFocus();
-		w.emphasise();
 		selectedWindow = w;
 	}
 }
