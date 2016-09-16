@@ -16,6 +16,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -301,7 +302,8 @@ public abstract class InternalWindow extends Window {
 				return true;
 
 			// If node is a Parent
-			if (n instanceof javafx.scene.Parent) {
+			// Don't add children of TableView as they are always focused
+			if (n instanceof javafx.scene.Parent && !(n instanceof TableView)) {
 				// Add all the children to the queue
 				Parent p = (Parent) n;
 				for (Node c : p.getChildrenUnmodifiable()) {
