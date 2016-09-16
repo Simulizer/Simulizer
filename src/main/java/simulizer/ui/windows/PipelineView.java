@@ -42,6 +42,7 @@ import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * Visualises the instructions during each stage of the pipeline (fetch, decode, execute).
@@ -61,13 +62,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	// Graphical things
 	private Canvas canvas = new Canvas();
 	private Pane canvasPane = new Pane();
-	private BorderPane borderPane = new BorderPane();
 
-	private HBox controlBox = new HBox();
-	private VBox buttonBox = new VBox();
-	private Button leftButton = new Button("<");
-	private Button rightButton = new Button(">");
-	private Label cycleInputLabel = new Label("Go to:");
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
 
@@ -102,6 +97,11 @@ public class PipelineView extends InternalWindow implements Observer {
 
 	public PipelineView() {
 		setTitle("Pipeline");
+
+		Button leftButton = new Button("");
+		leftButton.setGraphic(UIUtils.getLeftArrow());
+		Button rightButton = new Button("");
+		rightButton.setGraphic(UIUtils.getRightArrow());
 
 		// Configure the components
 		followCheckBox.setSelected(true);
@@ -196,7 +196,9 @@ public class PipelineView extends InternalWindow implements Observer {
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
+		HBox controlBox = new HBox();
 		controlBox.setAlignment(Pos.CENTER_LEFT);
+		VBox buttonBox = new VBox();
 		buttonBox.setAlignment(Pos.CENTER_LEFT);
 
 		// Now add everything
@@ -205,10 +207,12 @@ public class PipelineView extends InternalWindow implements Observer {
 		topBox.setAlignment(Pos.CENTER);
 		bottomBox.setAlignment(Pos.CENTER);
 		topBox.getChildren().addAll(followCheckBox, leftButton, rightButton);
+		Label cycleInputLabel = new Label("Go to:");
 		bottomBox.getChildren().addAll(cycleInputLabel, cycleInput);
 		buttonBox.getChildren().addAll(topBox, bottomBox);
 		controlBox.getChildren().addAll(buttonBox, instructionInfoLabel);
 
+		BorderPane borderPane = new BorderPane();
 		borderPane.setCenter(canvasPane);
 		borderPane.setBottom(controlBox);
 

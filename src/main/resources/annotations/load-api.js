@@ -30,6 +30,8 @@ setSpeed = function(s){simulation.setSpeed(s);};
 
 // Utility functions
 ret = function(){throw new AnnotationEarlyReturn();};
+binString = function(n){return '0b'+(n>>>0).toString(2);}  // >>> to coerce to unsigned
+hexString = function(n){return '0x'+(n>>>0).toString(16).toUpperCase();} // >>> to coerce to unsigned
 
 // override globals (from debugger watch private attribute: engine.global for a full list)
 _internal.disabled = function(){print('disabled');};

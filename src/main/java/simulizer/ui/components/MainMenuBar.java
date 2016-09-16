@@ -81,7 +81,7 @@ public class MainMenuBar extends MenuBar {
 		newItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		newItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning())
-				wm.getWorkspace().openEditorWithCallback(Editor::newFile);
+			    CurrentFile.newFile();
 		});
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
@@ -92,7 +92,7 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning()) {
 				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
 				if (f != null)
-					wm.getWorkspace().openEditorWithCallback((ed) -> ed.loadFile(f));
+					CurrentFile.loadFile(f);
 			}
 		});
 		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
@@ -101,28 +101,28 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
-			if (!wm.getCPU().isRunning()) {
-				if (Editor.hasBackingFile())
-					ed.saveFile();
-				else
-					UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs);
-			}
+			if (!wm.getCPU().isRunning())
+                CurrentFile.promptSave();
 		}));
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setDisable(allowDisabling && wm.getCPU().isRunning());
-		saveAsItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> UIUtils.promptSaveAs(wm.getPrimaryStage(), ed::saveAs)));
+		saveAsItem.setOnAction(e -> {
+			if(!wm.getCPU().isRunning())
+				CurrentFile.promptSaveAs();
+        });
+
 
 		// | |-- Re-load
 		MenuItem reloadItem = new MenuItem("Reload");
 		reloadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		reloadItem.setOnAction(e -> {
-			if(!wm.getCPU().isRunning()) {
-                wm.getWorkspace().openEditorWithCallback(Editor::reloadFile);
-			}
+			if(!wm.getCPU().isRunning())
+			    CurrentFile.reloadFile();
 		});
+		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Options
 		MenuItem optionsItem = new MenuItem("Options");
@@ -468,7 +468,8 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-			Program p = Assembler.assemble(Editor.getText(), null, false);
+            String programText = CurrentFile.getCurrentText();
+			Program p = Assembler.assemble(programText, null, false);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
 				try (PrintWriter out = new PrintWriter(outputFilename)) {
@@ -484,7 +485,7 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem runSpim = new MenuItem("Run in SPIM");
 		runSpim.setOnAction(e -> {
-			String program = Editor.getText();
+			String program = CurrentFile.getCurrentText();
 			SpimRunner.runQtSpim(program);
 		});
 
@@ -509,7 +510,7 @@ public class MainMenuBar extends MenuBar {
 		return debugMenu;
 	}
 
-	public MenuBarControls getControls() {
+	MenuBarControls getControls() {
 		return controls;
 	}
 }

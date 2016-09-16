@@ -30,6 +30,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import simulizer.GuiMode;
@@ -62,6 +63,26 @@ public class UIUtils {
 	}
 
 	/**
+	 * path extracted by saving an SVG image (after Path>"Object to path" in Inkspace) and examining the path:d attribute
+	 * @return an SVG left arrow suitable for a button graphic
+	 */
+	public static SVGPath getLeftArrow() {
+		SVGPath left = new SVGPath();
+		left.setContent("m 32.779871,87.970679 8.179517,-3.271553 8.179518,-3.271553 0,6.543106 -10e-7,6.543108 -8.179517,-3.271554 z");
+		return left;
+	}
+
+	/**
+	 * path extracted by saving an SVG image (after Path>"Object to path" in Inkspace) and examining the path:d attribute
+	 * @return an SVG right arrow suitable for a button graphic
+	 */
+	public static SVGPath getRightArrow() {
+		SVGPath right = new SVGPath();
+		right.setContent("m 49.138906,87.970679 -8.179517,-3.271553 -8.179518,-3.271553 0,6.543106 10e-7,6.543108 8.179517,-3.271554 z");
+        return right;
+	}
+
+	/**
 	 * set the icon of a dialog box to the Simulizer logo
 	 * @param dialog the dialog box to set
 	 */
@@ -91,7 +112,10 @@ public class UIUtils {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.ERROR);
 			alert.setResizable(true);
-			alert.initOwner(GuiMode.getPrimaryStage());
+            Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+			if(parent != null && parent.getOwner() != null) {
+				alert.initOwner(parent.getOwner());
+			}
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -116,7 +140,10 @@ public class UIUtils {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setResizable(true);
-			alert.initOwner(GuiMode.getPrimaryStage());
+			Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+			if(parent != null && parent.getOwner() != null) {
+				alert.initOwner(parent.getOwner());
+			}
 			alert.setTitle(title);
 			setDialogBoxIcon(alert);
 			alert.setHeaderText(header);
@@ -190,7 +217,10 @@ public class UIUtils {
 
 					Alert alert = new Alert(Alert.AlertType.ERROR);
 					alert.setResizable(true);
-					alert.initOwner(GuiMode.getPrimaryStage());
+					Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+					if(parent != null && parent.getOwner() != null) {
+						alert.initOwner(parent.getOwner());
+					}
 					alert.setTitle("Exception");
 					setDialogBoxIcon(alert);
 					alert.setHeaderText("Something went wrong with Simulizer.");
@@ -236,7 +266,10 @@ public class UIUtils {
 	 */
 	public static void openTextInputDialog(String title, String header, String message, String defaultText, Consumer<String> callback) {
 		TextInputDialog dialog = new TextInputDialog(defaultText);
-		dialog.initOwner(GuiMode.getPrimaryStage());
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		if(parent != null && parent.getOwner() != null) {
+			dialog.initOwner(parent.getOwner());
+		}
 		setDialogBoxIcon(dialog);
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
@@ -250,7 +283,10 @@ public class UIUtils {
 	 */
 	public static void openIntInputDialog(String title, String header, String message, int defaultVal, Consumer<Integer> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
-		dialog.initOwner(GuiMode.getPrimaryStage());
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		if(parent != null && parent.getOwner() != null) {
+			dialog.initOwner(parent.getOwner());
+		}
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
@@ -271,7 +307,10 @@ public class UIUtils {
 	 */
 	public static void openDoubleInputDialog(String title, String header, String message, double defaultVal, Consumer<Double> callback) {
 		TextInputDialog dialog = new TextInputDialog(""+defaultVal);
-		dialog.initOwner(GuiMode.getPrimaryStage());
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		if(parent != null && parent.getOwner() != null) {
+			dialog.initOwner(parent.getOwner());
+		}
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.setContentText(message);
@@ -293,14 +332,17 @@ public class UIUtils {
 	public static boolean confirm(String header, String message) {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setResizable(true);
-		alert.initOwner(GuiMode.getPrimaryStage());
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		if(parent != null && parent.getOwner() != null) {
+			alert.initOwner(parent.getOwner());
+		}
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
 		alert.setContentText(message);
 
 		Optional<ButtonType> result = alert.showAndWait();
-		return result.get() == ButtonType.OK;
+		return result.isPresent() && result.get() == ButtonType.OK;
 	}
 
 	// from http://stackoverflow.com/a/37610648
@@ -320,7 +362,10 @@ public class UIUtils {
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 		alert.setDialogPane(new FixedOrderButtonDialog());
 		alert.setResizable(true);
-		alert.initOwner(GuiMode.getPrimaryStage());
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		if(parent != null && parent.getOwner() != null) {
+			alert.initOwner(parent.getOwner());
+		}
 		alert.setTitle("Confirmation");
 		setDialogBoxIcon(alert);
 		alert.setHeaderText(header);
@@ -359,18 +404,6 @@ public class UIUtils {
 		return fc.showOpenDialog(parent);
 	}
 
-	/**
-	 * show the save-as dialog
-	 */
-	public static void promptSaveAs(Stage parent, Consumer<File> callback) {
-		File file = saveFileSelector("Save an assembly file", parent, new File("code"), new FileChooser.ExtensionFilter("Assembly files *.s", "*.s"));
-		if(file != null) {
-			if (!file.getName().endsWith(".s"))
-				file = new File(file.getAbsolutePath() + ".s");
-
-			callback.accept(file);
-		}
-	}
 
 	/**
 	 * Attempt to open a URL in the browser

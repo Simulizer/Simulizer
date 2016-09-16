@@ -46,6 +46,10 @@ High-Level Visualiation
 The current data structures/graphics that can be visualised are:
 - Lists
 - Tower of Hanoi
+- Canvas (complete access to a JavaFX canvas)
+    - can be used to render a bitmap of memory locations
+    - can be used to draw any shapes
+    - can be used to create your own high level visualisations from Javascript!
 
 Meet the Team
 -------------

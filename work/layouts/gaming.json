@@ -2,13 +2,6 @@
   "name": "gaming.json",
   "windows": [
     {
-      "id": "EDITOR",
-      "x": 0.0,
-      "y": 0.0,
-      "width": 0.25439882697947214,
-      "height": 0.047752808988764044
-    },
-    {
       "id": "HIGH_LEVEL_VISUALISATION",
       "x": 0.2866568914956012,
       "y": 0.018258426966292134,

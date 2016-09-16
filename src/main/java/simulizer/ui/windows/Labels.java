@@ -1,6 +1,9 @@
 package simulizer.ui.windows;
 
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,41 +12,41 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.shape.SVGPath;
+import simulizer.ui.components.CurrentFile;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.TemporaryObserver;
+import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
  * Shows the current labels in the code editor along with their corresponding line numbers.
  *
  * @author Kelsey McKenna
+ * @author mbway
  *
  */
-public class Labels extends InternalWindow implements TemporaryObserver {
+public class Labels extends InternalWindow {
 	private TableView<Label> table = new TableView<>();
-	private Editor editor;
+    private volatile int programTextHash; // hash of the file content that the labels window refers to
+	private final ScheduledExecutorService programTextPolling;
 
 	public Labels() {
-		getContentPane().widthProperty().addListener((o, old, newValue) -> {
-			int numColumns = table.getColumns().size();
-			for (TableColumn<Label, ?> column : table.getColumns()) {
-				column.setPrefWidth(getContentPane().getWidth() / numColumns);
-			}
-		});
-
 		// Jump to the label on click
 		table.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
 			Label label = table.getSelectionModel().getSelectedItem();
 			if (label != null) {
-				refreshEditor();
+				Editor editor = Editor.getEditor();
 				if (editor != null) {
 					Platform.runLater(() -> {
 						editor.gotoLine(label.getLine() - 1);
@@ -55,17 +58,16 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 
 		// Fix table cursor
 		table.setCursor(Cursor.DEFAULT);
+
+		programTextPolling = Executors.newSingleThreadScheduledExecutor(
+				new ThreadUtils.NamedThreadFactory("Labels-Polling"));
+        programTextPolling.scheduleAtFixedRate(this::refreshData, 0, 1, TimeUnit.SECONDS);
 	}
 
-	/**
-	 * If the current editor is null, then it tries to get hold of the current editor, and then tries to
-	 * add this as an observer.
-	 */
-	private void refreshEditor() {
-		if (editor == null) {
-			editor = (Editor) getWindowManager().getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-			if (editor != null) editor.addObserver(this);
-		}
+	@Override
+	public void close() {
+		programTextPolling.shutdownNow();
+		super.close();
 	}
 
 	@Override
@@ -73,38 +75,26 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		setNormalisedDimentions(0.8, 0.5, 0.2, 0.5);
 	}
 
-	@Override
-	public void update() {
-		refreshData();
-	}
-
-	@Override
-	public void stopObserving() {
-		editor = null;
-		table.setItems(FXCollections.observableArrayList());
-	}
-
 	/**
 	 * Refreshes the data in the table
 	 */
-	public void refreshData() {
+	private void refreshData() {
 		ObservableList<Label> labels = FXCollections.observableArrayList();
 
-		refreshEditor();
-		if (editor != null) {
-			final String text = Editor.getText();
-			if (text == null) return;
+        final String text = CurrentFile.getCurrentText();
+        if (text == null || text.length() == 0) return;
 
-			Thread labelGetting = new Thread(() -> getLabels(labels, text));
+		int textHash = text.hashCode();
 
-			try {
-				labelGetting.start();
-				labelGetting.join();
-				Platform.runLater(() -> table.setItems(labels));
-			} catch (InterruptedException e) {
-				UIUtils.showExceptionDialog(e);
-			}
-		}
+		if(textHash == programTextHash)
+			return;
+
+		programTextHash = textHash;
+
+		System.out.println("updating labels " + System.currentTimeMillis());
+
+		getLabels(labels, text);
+        Platform.runLater(() -> table.setItems(labels));
 	}
 
 	/**
@@ -114,7 +104,7 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	 *            the text to analyse
 	 */
 	private static void getLabels(ObservableList<Label> answer, String text) {
-		Pattern r = Pattern.compile("\\s*\\b[a-zA-Z0-9_]*\\s*[:]");
+		Pattern r = Pattern.compile("^\\s*\\b[a-zA-Z0-9_]*\\s*[:]");
 
 		// For finding other occurrences of labels: [^#]*\bLABEL\b
 
@@ -152,14 +142,19 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 		refreshData();
 		table.getColumns().addAll(label, line);
 		table.setEditable(false);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // columns auto-fit
 
 		BorderPane pane = new BorderPane();
 		setContentPane(pane);
 		pane.setCenter(table);
 		pane.setCursor(Cursor.DEFAULT);
 
-		Button btnNext = new ActionButton("Next", Editor::findNextRegex);
-		Button btnPrevious = new ActionButton("Previous", Editor::findPreviousRegex);
+		Button btnNext = new ActionButton("", Editor::findNextRegex);
+		Button btnPrevious = new ActionButton("", Editor::findPreviousRegex);
+
+		btnPrevious.setGraphic(UIUtils.getLeftArrow());
+		btnNext.setGraphic(UIUtils.getRightArrow());
+
 		Button btnAll = new ActionButton("Select All", Editor::findAllRegex);
 
 		HBox buttonContainer = new HBox();
@@ -176,15 +171,14 @@ public class Labels extends InternalWindow implements TemporaryObserver {
 	 *
 	 */
 	private class ActionButton extends Button {
-		public ActionButton(String text, Action action) {
+		ActionButton(String text, Action action) {
 			super(text);
 
 			setMaxWidth(Double.MAX_VALUE);
 			HBox.setHgrow(this, Priority.ALWAYS);
 
 			setOnAction(e -> {
-				refreshEditor();
-
+                Editor editor = Editor.getEditor();
 				if (editor != null) {
 					Label selectedLabel = table.getSelectionModel().getSelectedItem();
 					if (selectedLabel != null) action.run(editor, "[^#]*\\b" + selectedLabel.getLabel() + "\\b");

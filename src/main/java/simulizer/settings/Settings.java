@@ -82,7 +82,7 @@ public class Settings {
 					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas", "monospace"))
 					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 20, 0, Integer.MAX_VALUE))
 					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
-					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed", 0.1, 0, Double.MAX_VALUE))
+					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed", 0.05, 0, Double.MAX_VALUE))
 					.add(new BooleanSetting("soft-tabs", "Soft tabs", "Soft tabs", true))
 					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme/) default, high-viz, monokai, ambiance, chaos, tomorrow_night_eighties, predawn, flatland", "/ace/theme/default"))
 					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program", false))
