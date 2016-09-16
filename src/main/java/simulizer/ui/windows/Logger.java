@@ -2,7 +2,10 @@ package simulizer.ui.windows;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.scene.Cursor;
@@ -18,7 +21,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
-import javafx.util.Pair;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.utils.FileUtils;
@@ -45,7 +47,6 @@ public class Logger extends InternalWindow implements Observer {
 
 	private TabPane tabPane;
 	private boolean[] ioChanged;
-	private final StringBuilder[] logs; // the output streams
 	private TextArea[] outputs;
 
 	private boolean emphasise = true;
@@ -53,14 +54,10 @@ public class Logger extends InternalWindow implements Observer {
 
 	public Logger() {
 		ioChanged = new boolean[IOStream.values().length];
-		logs = new StringBuilder[IOStream.values().length];
 		outputs = new TextArea[IOStream.values().length];
 		GridPane pane = new GridPane();
 
-		inputWait = new Semaphore(1);
-		try {
-			inputWait.acquire(); // so first read blocks
-		} catch (InterruptedException ignored) { }
+		inputWait = new Semaphore(0, true);
 
 		tabPane = new TabPane();
 		tabPane.setCursor(Cursor.DEFAULT);
@@ -77,7 +74,6 @@ public class Logger extends InternalWindow implements Observer {
 
 			ioChanged[i] = false;
 			outputs[i] = output;
-			logs[i] = new StringBuilder();
 
 			tabPane.getTabs().add(tab);
 		}
@@ -122,7 +118,7 @@ public class Logger extends InternalWindow implements Observer {
 			lastInput = input.getText();
 			if (!lastInput.equals("")) {
 				input.setText("");
-                inputWait.release();
+				inputWait.release();
 			}
 		} else {
 			// @formatter:off
@@ -151,20 +147,21 @@ public class Logger extends InternalWindow implements Observer {
 		flush.scheduleAtFixedRate(() -> {
 			if (callUpdate) {
 				Platform.runLater(() -> {
-					synchronized (logs) {
+					synchronized (ioChanged) {
 						callUpdate = false;
-						for (int i = 0; i < outputs.length; i++) {
-							Tab t = tabPane.getTabs().get(i);
-							if (!t.isSelected() && ioChanged[i])
+						for (IOStream i : IOStream.values()) {
+							String log = getWindowManager().getIO().getLog(i);
+							Tab t = tabPane.getTabs().get(i.getID());
+							if (!t.isSelected() && ioChanged[i.getID()] && !log.equals(""))
 								t.setGraphic(notifyIcon);
-							outputs[i].setText(logs[i].toString());
-							outputs[i].setFont(new Font(fontSize));
-							ioChanged[i] = false;
+							outputs[i.getID()].setText(log);
+							outputs[i.getID()].setFont(new Font(fontSize));
+							ioChanged[i.getID()] = false;
 						}
 					}
 				});
 			}
-		} , 0, BUFFER_TIME, TimeUnit.MILLISECONDS);
+		}, 0, BUFFER_TIME, TimeUnit.MILLISECONDS);
 
 		super.ready();
 	}
@@ -181,8 +178,6 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public void clear() {
 		lastInput = "";
-		for (StringBuilder log : logs)
-			log.setLength(0);
 		for (TextArea output : outputs)
 			output.setText("");
 		for (int i = 0; i < ioChanged.length; i++)
@@ -194,7 +189,7 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public String nextMessage(IOStream stream) {
 		try {
-			synchronized (logs) {
+			synchronized (ioChanged) {
 				ioChanged[stream.getID()] = true;
 			}
 			if (emphasise)
@@ -208,7 +203,7 @@ public class Logger extends InternalWindow implements Observer {
 					}
 				});
 			submit.setDisable(false);
-            lastInputCancelled = false;
+			lastInputCancelled = false;
 			inputWait.acquire(); // released once cancelled or text received
 			submit.setDisable(true);
 		} catch (InterruptedException e) {
@@ -218,10 +213,6 @@ public class Logger extends InternalWindow implements Observer {
 		if (lastInputCancelled) {
 			return null;
 		} else {
-			synchronized (logs) {
-				logs[stream.getID()].append(lastInput).append("\n");
-			}
-			callUpdate = true;
 			return lastInput;
 		}
 	}
@@ -231,18 +222,16 @@ public class Logger extends InternalWindow implements Observer {
 	 */
 	public synchronized void cancelNextMessage() {
 		lastInputCancelled = true;
-        inputWait.release();
+		if (inputWait.hasQueuedThreads())
+			inputWait.release();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void update(Observable o, Object message) {
-		synchronized (logs) {
+	public void update(Observable o, Object iostream) {
+		synchronized (ioChanged) {
 			if (!callUpdate)
 				callUpdate = true;
-			Pair<IOStream, String> pair = (Pair<IOStream, String>) message;
-			ioChanged[pair.getKey().getID()] = true;
-			logs[pair.getKey().getID()].append(pair.getValue());
+			ioChanged[((IOStream) iostream).getID()] = true;
 		}
 
 	}

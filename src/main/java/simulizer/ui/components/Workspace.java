@@ -1,8 +1,10 @@
 package simulizer.ui.components;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -16,6 +18,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import simulizer.settings.Settings;
@@ -37,7 +40,7 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Workspace extends Observable implements Themeable {
-	private final Set<InternalWindow> openWindows = new HashSet<>();
+	private final List<InternalWindow> openWindows = new ArrayList<>();
 	private final Pane pane = new Pane();
 	private WindowManager wm = null;
 
@@ -77,18 +80,21 @@ public class Workspace extends Observable implements Themeable {
 	public Workspace(WindowManager wm) {
 		this.wm = wm;
 		pane.getStyleClass().add("background");
+		Stage window = wm.getPrimaryStage();
 		if ((boolean) wm.getSettings().get("workspace.scale-ui.enabled")) {
 			int delay = (int) wm.getSettings().get("workspace.scale-ui.delay");
 			ResizeListener r = new ResizeListener(this, delay);
 
 			// Register event listeners
-			Stage window = wm.getPrimaryStage();
-
 			window.widthProperty().addListener(r);
 			window.heightProperty().addListener(r);
 			window.fullScreenProperty().addListener(r);
 			window.maximizedProperty().addListener(r);
 		}
+
+		// CTRL + TAB Event
+		if ((boolean) wm.getSettings().get("workspace.ctrl-tab"))
+			window.addEventHandler(KeyEvent.ANY, new CTRL_TAB(this));
 	}
 
 	/**
@@ -170,8 +176,8 @@ public class Workspace extends Observable implements Themeable {
 		return findInternalWindow(window) != null;
 	}
 
-	Set<InternalWindow> getAllWindows() {
-		return Collections.unmodifiableSet(openWindows);
+	List<InternalWindow> getAllWindows() {
+		return Collections.unmodifiableList(openWindows);
 	}
 
 	/**
@@ -257,16 +263,16 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	void addWindow(InternalWindow window) {
 		synchronized (openWindows) {
-            if (!openWindows.contains(window)) {
-                window.setOnCloseAction(e -> removeWindow(window));
-                openWindows.add(window);
-                window.setTheme(wm.getThemes().getTheme());
-                pane.getChildren().addAll(window);
-                window.setGridBounds(wm.getGridBounds());
-                window.ready();
-            } else {
-                UIUtils.showErrorDialog("Problem Opening Window", "Tried to add a window which already exists: " + window.getTitle());
-            }
+			if (!openWindows.contains(window)) {
+				window.setOnCloseAction(e -> removeWindow(window));
+				openWindows.add(window);
+				window.setTheme(wm.getThemes().getTheme());
+				pane.getChildren().addAll(window);
+				window.setGridBounds(wm.getGridBounds());
+				window.ready();
+			} else {
+				UIUtils.showErrorDialog("Problem Opening Window", "Tried to add a window which already exists: " + window.getTitle());
+			}
 		}
 	}
 
@@ -278,12 +284,12 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	private void removeWindow(InternalWindow window) {
 		synchronized (openWindows) {
-            // to prevent close being called twice, once now, once (earlier) when the user clicked (X)
-            if (!window.isClosed())
-                window.close();
+			// to prevent close being called twice, once now, once (earlier) when the user clicked (X)
+			if (!window.isClosed())
+				window.close();
 
-            if (window.isClosed())
-                openWindows.remove(window);
+			if (window.isClosed())
+				openWindows.remove(window);
 		}
 	}
 
@@ -306,10 +312,9 @@ public class Workspace extends Observable implements Themeable {
 		Collections.addAll(keepOpen, theseWindows);
 
 		synchronized (openWindows) {
-			openWindows.stream()
-					.filter(window -> !keepOpen.contains(window))
-					.collect(Collectors.toList()) // need to make a copy since openWindows is modified
-                    .forEach(this::removeWindow);
+			openWindows.stream().filter(window -> !keepOpen.contains(window)).collect(Collectors.toList()) // need to make a copy since
+																											// openWindows is modified
+					.forEach(this::removeWindow);
 		}
 	}
 

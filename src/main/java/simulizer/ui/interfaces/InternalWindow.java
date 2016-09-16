@@ -1,6 +1,9 @@
 package simulizer.ui.interfaces;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,9 +14,12 @@ import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -85,6 +91,7 @@ public abstract class InternalWindow extends Window {
 		setScaleY(0);
 		setMinWidth(0);
 		setMinHeight(0);
+
 	}
 
 	public void setToDefaultDimensions() {
@@ -133,6 +140,26 @@ public abstract class InternalWindow extends Window {
 			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
 				getRightIcons().add(new CustomExtractIcon(this));
 			getRightIcons().add(new CustomCloseIcon(this));
+
+			// Focus Event
+			// I don't know why jfxtras makes this so difficult...
+			wm.getScene().focusOwnerProperty().addListener(e -> {
+				// Try to find the titleBar
+				Object skin = getSkin();
+				for (Field field : skin.getClass().getDeclaredFields()) {
+					try {
+						if (field.getName().equals("titleBar")) {
+							field.setAccessible(true);
+							HBox titleBar = (HBox) field.get(skin);
+							// Set the focus pseudo class
+							titleBar.pseudoClassStateChanged(PseudoClass.getPseudoClass("focus"), hasFocus());
+							field.setAccessible(false);
+						}
+					} catch (IllegalArgumentException | IllegalAccessException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
 		}
 	}
 
@@ -263,6 +290,31 @@ public abstract class InternalWindow extends Window {
 		return isClosed;
 	}
 
+	public boolean hasFocus() {
+		Queue<Node> nodes = new LinkedList<Node>();
+		nodes.add(this);
+		while (!nodes.isEmpty()) {
+			// Get the node from the queue
+			Node n = nodes.poll();
+
+			// If the node has focus, then we have focus
+			if (n.isFocused())
+				return true;
+
+			// If node is a Parent
+			// Don't add children of TableView as they are always focused
+			if (n instanceof javafx.scene.Parent && !(n instanceof TableView)) {
+				// Add all the children to the queue
+				Parent p = (Parent) n;
+				for (Node c : p.getChildrenUnmodifiable()) {
+					nodes.add(c);
+				}
+			}
+		}
+		// No node had focus
+		return false;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof InternalWindow && WindowEnum.toEnum((InternalWindow) obj) == WindowEnum.toEnum(this);
@@ -322,7 +374,7 @@ public abstract class InternalWindow extends Window {
 		return menuBar;
 	}
 
-	protected final EventManager getEventManager() {
+	public final EventManager getEventManager() {
 		return internalEventManager;
 	}
 
