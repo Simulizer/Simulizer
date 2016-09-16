@@ -15,7 +15,7 @@
 
 .window-titlebar {
     -fx-opacity: 1;
-    -fx-background-color: #303030;
+    -fx-background-color: #707070;
     -fx-padding: 2px;
     -fx-font-size: 16px;
     -fx-font-family: "Lucida Console", Monaco, monospace;
@@ -23,6 +23,10 @@
     -fx-border-width: 1;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
+}
+
+.window-titlebar:focus {
+    -fx-background-color: #303030;
 }
 
 .custom-close-icon {
@@ -77,4 +81,3 @@
 .table-view {
     -fx-font-size: 11pt;
 }
-
