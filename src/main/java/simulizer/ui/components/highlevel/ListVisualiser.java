@@ -40,7 +40,8 @@ import simulizer.ui.windows.HighLevelVisualisation;
  * @author Kelsey McKenna
  *
  */
-public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchronization of this class (currently synchronizing on non-final fields)
+public class ListVisualiser extends DataStructureVisualiser { // TODO: fix synchronization of this class (currently synchronizing on
+																// non-final fields)
 	private Canvas canvas = new Canvas();
 	private long[] list;
 	private ListModel model;
@@ -99,7 +100,8 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 
 	@Override
 	public void repaint() {
-		if (model.size() == 0) return;
+		if (model.size() == 0)
+			return;
 
 		GraphicsContext gc = canvas.getGraphicsContext2D();
 		this.w = canvas.getWidth();
@@ -151,11 +153,13 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 		gc.setTextBaseline(VPos.CENTER);
 		synchronized (list) {
 			for (int i = 0; i < list.length; ++i) {
-				if (swapping && (i == animatedLeftIndex || i == animatedRightIndex)) continue;
+				if (swapping && (i == animatedLeftIndex || i == animatedRightIndex))
+					continue;
 				else if (emphasising && i == emphasiseIndex) {
 					Color blend = Color.SKYBLUE.interpolate(Color.RED, emphasiseProgress.doubleValue());
 					drawTextBox(gc, i, list[i] + "", blend);
-				} else drawTextBox(gc, i, list[i] + "");
+				} else
+					drawTextBox(gc, i, list[i] + "");
 			}
 		}
 	}
@@ -295,6 +299,7 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 		Timeline timeline = null;
 
 		if (action instanceof SwapAction) {
+			System.out.println("SWAP");
 			// Swap animation
 			SwapAction swap = (SwapAction) action;
 
@@ -347,6 +352,7 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 			// @formatter:on
 
 		} else if (action instanceof MarkerAction) {
+			System.out.println("MARKER");
 			// Marker action
 			MarkerAction marker = (MarkerAction) action;
 			synchronized (markers) {
@@ -356,8 +362,10 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 						// We need to add the marker
 						String name = marker.name.get();
 						String existing = markers.get(index);
-						if (existing != null) markers.put(index, existing + " " + name);
-						else markers.put(index, name);
+						if (existing != null)
+							markers.put(index, existing + " " + name);
+						else
+							markers.put(index, name);
 					} else {
 						// We need to clear the marker
 						markers.remove(index);
@@ -369,6 +377,7 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 				}
 			}
 		} else if (action instanceof EmphasiseAction) {
+			System.out.println("EMPHASISE");
 			// Emphasise an element
 			EmphasiseAction emphasise = (EmphasiseAction) action;
 			this.emphasiseIndex = emphasise.index;
@@ -390,17 +399,19 @@ public class ListVisualiser extends DataStructureVisualiser { //TODO: fix synchr
 			// @formatter:on
 
 		} else if (action instanceof HighlightAction) {
+			System.out.println("HIGHLIGHT");
 			// Highlight a marker
 			highlightedMarkers.add(((HighlightAction) action).index);
 
 		} else if (action instanceof ListAction) {
+			System.out.println("LIST");
 			// List changed
 			ListAction list = (ListAction) action;
 			synchronized (this.list) {
-				synchronized (markers) { // TODO: don't hold more than 1 lock (might deadlock)
-					this.list = list.structure;
-					markers.clear();
-				}
+				this.list = list.structure;
+			}
+			synchronized (markers) {
+				markers.clear();
 			}
 		}
 

@@ -121,8 +121,9 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 					hide();
 			}
 		} else if (arg instanceof ModelAction<?>) {
+			System.out.println("Updated: " + arg.getClass().getName());
 			changes.add((ModelAction<?>) arg);
-			long now = System.currentTimeMillis();
+			long now = System.nanoTime();
 			if (lastUpdate != -1)
 				updateTimes.add((int) (now - lastUpdate));
 			lastUpdate = now;
@@ -143,13 +144,13 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 					long before = -1, after = -1;
 					if (alive) {
 						ModelAction<?> change = changes.take();
-						before = System.currentTimeMillis();
+						before = System.nanoTime();
 						processChange(change);
 
 						// Wait if paused
 						updatePaused.waitIfPaused();
 
-						after = System.currentTimeMillis();
+						after = System.nanoTime();
 					}
 
 					if (alive && before != -1 && after != -1) {
@@ -186,19 +187,25 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	private synchronized void rateSkips() {
 		int avgUpdate = updateTimes.mean();
 		int avgProcess = processTimes.mean();
-		 System.out.println();
-		 System.out.println("avgUpdate: " + avgUpdate);
-		 System.out.println("avgProcess: " + avgProcess);
+		System.out.println(Thread.currentThread().getName());
+		System.out.println("avgUpdate: " + avgUpdate);
+		System.out.println("avgProcess: " + avgProcess);
 		if (avgUpdate > 0 && avgProcess > 0) {
-			 System.out.println("Changes: " + changes.size());
-			 System.out.println("rate: " + rate);
-			 System.out.println("Adjustment: " + 0.001 * (avgProcess * (Math.log(changes.size() + 1) + 1) - avgUpdate));
+			System.out.println("Changes: " + changes.size());
+			System.out.println("beforeRate: " + rate);
 
 			double position = avgProcess * Math.log(changes.size() + 1) + 1; // Calculated Position
 			double target = avgUpdate; // Calculated Target
 			double error = position - target; // error = process - update
 
-			rate += 0.0001 * error; // Adjust rate to scaled error
+			rate += 0.0000000001 * error; // Adjust rate to scaled error
+			// Slowest speed
+			if (rate < 0.001)
+				rate = 0.001;
+			
+			System.out.println("afterRate: " + rate);
+			System.out.println("Adjustment: " + 0.0000000001 * error);
+
 		}
 	}
 
