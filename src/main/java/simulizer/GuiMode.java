@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.CurrentFile;
 import simulizer.ui.windows.SplashScreen;
 import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
@@ -59,13 +60,16 @@ public class GuiMode {
 			GuiMode.primaryStage = primaryStage;
 			primaryStage.getIcons().add(GuiMode.getIcon());
 
+			// GUI needs to be active in order to display dialogs on failure
+			CurrentFile.loadInitialFile();
+
 			boolean showSplash = (boolean) settings.get("splash-screen.enabled");
 			if (args.noSplash) // takes precedence over settings file
 				showSplash = false;
 
 			if (showSplash) {
 				SplashScreen s = new SplashScreen(settings);
-				s.show(primaryStage);
+				s.show(primaryStage); // calls launchWindowManager after splash is done
 			} else {
 				GuiMode.launchWindowManager(primaryStage);
 				GuiMode.wm.show();

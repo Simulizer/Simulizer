@@ -58,12 +58,11 @@ public class UISimulationListener extends SimulationListener {
 
 				if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
 					wm.getWorkspace().openEditorWithCallback((editor) -> {
-						System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'" + (editor.hasOutstandingChanges() ? " with outstanding changes" : "") + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
-
+						System.out.println("Simulation Started - running '" + CurrentFile.getBackingFilename() + "'" + (editor.hasOutstandingChanges() ? " with outstanding changes" : "") + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 						editor.executeMode();
 					});
 				} else {
-					System.out.println("Simulation Started - running '" + Editor.getBackingFilename() + "'" + " with the editor closed" + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+					System.out.println("Simulation Started - running '" + CurrentFile.getBackingFilename() + "'" + " with the editor closed" + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 				}
 
 				// Clear the pipeline model when a new simulation starts

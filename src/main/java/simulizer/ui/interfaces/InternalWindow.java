@@ -146,17 +146,19 @@ public abstract class InternalWindow extends Window {
 			wm.getScene().focusOwnerProperty().addListener(e -> {
 				// Try to find the titleBar
 				Object skin = getSkin();
-				for (Field field : skin.getClass().getDeclaredFields()) {
-					try {
-						if (field.getName().equals("titleBar")) {
-							field.setAccessible(true);
-							HBox titleBar = (HBox) field.get(skin);
-							// Set the focus pseudo class
-							titleBar.pseudoClassStateChanged(PseudoClass.getPseudoClass("focus"), hasFocus());
-							field.setAccessible(false);
+				if (skin != null) {
+					for (Field field : skin.getClass().getDeclaredFields()) {
+						try {
+							if (field.getName().equals("titleBar")) {
+								field.setAccessible(true);
+								HBox titleBar = (HBox) field.get(skin);
+								// Set the focus pseudo class
+								titleBar.pseudoClassStateChanged(PseudoClass.getPseudoClass("focus"), hasFocus());
+								field.setAccessible(false);
+							}
+						} catch (IllegalArgumentException | IllegalAccessException e1) {
+							// Do nothing as this function is dodgy
 						}
-					} catch (IllegalArgumentException | IllegalAccessException e1) {
-						e1.printStackTrace();
 					}
 				}
 			});

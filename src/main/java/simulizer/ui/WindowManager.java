@@ -25,10 +25,7 @@ import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
-import simulizer.ui.components.AssemblingDialog;
-import simulizer.ui.components.MainMenuBar;
-import simulizer.ui.components.UISimulationListener;
-import simulizer.ui.components.Workspace;
+import simulizer.ui.components.*;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
@@ -112,7 +109,7 @@ public class WindowManager extends GridPane {
 
 		// @formatter:on Set the layout
 		layouts = new Layouts(workspace);
-		layouts.setDefaultLayout();
+		layouts.setDefaultLayout(); // opens internal windows
 
 		// MainMenuBar
 		menuBar = new MainMenuBar(this);
@@ -220,30 +217,38 @@ public class WindowManager extends GridPane {
 	public void assembleAndRun() {
 		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Assembling Program");
 
-		final String programText = Editor.getText();
+		final String programText = CurrentFile.getCurrentText();
 
 		// avoid lots of work on the JavaFX thread
 		Thread assembleThread = new Thread(() -> {
 			StoreProblemLogger log = new StoreProblemLogger();
 
 			try {
-				final Program p = Assembler.assemble(programText, log, false);
-				// doing as little as possible in the FX thread
-				if(getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
-					getWorkspace().openEditorWithCallback((editor2) -> {
-						// if no problems, has the effect of clearing
-						editor2.setProblems(log.getProblems());
-						if (p == null) {
-							int size = log.getProblems().size();
-							UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
-							AssemblingDialog.closeAssemblingDialog();
-						}
-					});
-				}
+				final Program cachedP = CurrentFile.getCachedAssembledProgram(programText);
 
-				if (p != null) {
-					runProgram(p); // spawns another thread
-				}
+                if(cachedP == null) { // no cached version available
+					final Program p = Assembler.assemble(programText, log, false);
+
+					// doing as little as possible in the FX thread
+					if (getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
+						getWorkspace().openEditorWithCallback((editor2) -> {
+							// if no problems, has the effect of clearing
+							editor2.setProblems(log.getProblems());
+							if (p == null) {
+								int size = log.getProblems().size();
+								UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
+								AssemblingDialog.closeAssemblingDialog();
+							}
+						});
+					}
+
+					if(p != null) {
+						CurrentFile.submitAssembledProgramToCache(programText, p);
+						runProgram(p); // spawns another thread
+					}
+				} else {
+                    runProgram(cachedP); // spawns another thread
+                }
 			} finally {
 				Platform.runLater(() -> primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")"));
 			}
@@ -259,7 +264,7 @@ public class WindowManager extends GridPane {
 	 * @param p
 	 *            the program to run
 	 */
-	public void runProgram(Program p) {
+	private void runProgram(Program p) {
 		if (p != null) {
 			stopSimulation();
 

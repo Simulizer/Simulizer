@@ -27,7 +27,7 @@ int globalB = globalA;
 // .text segment
 
 
-#define NO_MALLOC
+#define USE_MEMSET
 #include "libc-simulizer.h"
 
 

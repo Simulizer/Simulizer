@@ -35,7 +35,7 @@ function compile {
         -fno-exceptions -mno-explicit-relocs \
         -march=r3000 -meb -mgp32 -mfp32 -msoft-float \
         -mno-llsc -fno-stack-protector -fno-delayed-branch \
-        -I./ -S "$1" -o "$OUT"
+        -I./ -I"$(dirname "$OUT")" -S "$1" -o "$OUT"
     # -O0:           disable optimisations (to make output more readable)
     # -fno-exceptions: disabling exceptions removes some cruft added for bookkeeping
     # -mno-explicit-relocs: disables use of %hi() and %lo() to load from the
@@ -56,6 +56,7 @@ function compile {
     #                   does not have them
     # -I./           include the current directory in the include path to search
     #                   for headers
+    # -I$(...)       include the path that the input and output files reside in
     # -S:            generate assembly output
 }
 
@@ -96,9 +97,12 @@ if ! $FILTER; then
     exit 0
 fi
 
+HEADER="\t# compiled using GCC with optimisation level $OPTIMISATION\n"
+echo -e "$HEADER$(cat "$OUT")" > "$OUT"
 
 # remove assembler directives that Simulizer doesn't understand
 # .globl is understood, but ignored by Simulizer
+# .align is understood, but ignored by Simulizer
 # .rdata is not understood, but is useful to keep in so you can see where the
 #        read-only data segment is so you can move it to the .data segment
 # note that sometimes GCC places data in the .bss segment which is also not
@@ -112,8 +116,9 @@ KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 # remove #APP and #NO_APP messages which surround asm() statements
 # remove # 0 "" 2 and # XX "input.c" 1 lines which surround asm() statements
 AWK_FILTER='
-/\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print}
+/\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print; next;}
 /^\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
+/^\s*.section\s*\.text.startup/{$0="\t.text"; print} # .section .text.startup with .text
 /^\s*\./{next}  # unknown directives
 
 /^\s*#nop$/{print "\t# <hazard>"; next}
@@ -160,7 +165,7 @@ AWK_FIX_OVERLOADS='
 /^\s*slt([^,]*,){2}[^\$]/{$1="\tslti"; print $0; next;}
 
 # does not support mult which stores in mflo/mfhi so replace with mul $d $d $s
-/^\s*mult/{$1="\tmul"; r = gensub(/(\$[^,]*),(.*)/, "\\1,\\1,\\2", "g"); print r; next;}
+/^\s*mult\s+/{$1="\tmul"; r = gensub(/(\$[^,]*),(.*)/, "\\1,\\1,\\2", "g"); print r; next;}
 
 # just comment out instances of mflo and hope that the above substitution takes
 # care of it (should check by hand). Cannot do this with mfhi so just hope it is

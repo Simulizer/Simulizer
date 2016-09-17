@@ -43,8 +43,6 @@ unsigned int direction = 1; // currently moving direction
 
 
 
-#define NO_MEMSET
-#define NO_MALLOC
 #include "libc-simulizer.h"
 
 
