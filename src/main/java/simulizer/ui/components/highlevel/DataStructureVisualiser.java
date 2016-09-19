@@ -5,10 +5,11 @@ import java.util.Observer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javafx.animation.AnimationTimer;
 import javafx.scene.layout.Pane;
 import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.ModelAction;
+import simulizer.ui.interfaces.Repainter;
+import simulizer.ui.interfaces.Repainter.Repaintable;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.CircularIntBuffer;
 import simulizer.utils.ThreadUtils;
@@ -19,7 +20,7 @@ import simulizer.utils.ThreadUtils;
  * @author Michael
  *
  */
-public abstract class DataStructureVisualiser extends Pane implements Observer {
+public abstract class DataStructureVisualiser extends Pane implements Observer, Repaintable {
 	protected HighLevelVisualisation vis;
 	private DataStructureModel model;
 
@@ -27,16 +28,13 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 	private BlockingQueue<ModelAction<?>> changes = new LinkedBlockingQueue<>();
 
-	private int FRAME_RATE = 45;
-	private AnimationTimer timer;
-
 	volatile double rate = 1;
-    private final CircularIntBuffer updateTimes;
+	private final CircularIntBuffer updateTimes;
 	private final CircularIntBuffer processTimes;
 	private long lastUpdate = -1;
 
 	private Thread updateThread;
-    private ThreadUtils.Blocker updatePaused;
+	private ThreadUtils.Blocker updatePaused;
 	private volatile boolean alive = false;
 
 	/**
@@ -50,7 +48,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		this.vis = vis;
 		updateTimes = new CircularIntBuffer(1);
 		processTimes = new CircularIntBuffer(1);
-        updatePaused = new ThreadUtils.Blocker();
+		updatePaused = new ThreadUtils.Blocker();
 		model.addObserver(this);
 
 		widthProperty().addListener(e -> repaint());
@@ -89,6 +87,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	/**
 	 * Repaints the visualisation
 	 */
+	@Override
 	public abstract void repaint();
 
 	/**
@@ -123,8 +122,8 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		} else if (arg instanceof ModelAction<?>) {
 			changes.add((ModelAction<?>) arg);
 			long now = System.currentTimeMillis();
-			if(lastUpdate != -1)
-			    updateTimes.add((int) (now - lastUpdate));
+			if (lastUpdate != -1)
+				updateTimes.add((int) (now - lastUpdate));
 			lastUpdate = now;
 		}
 	}
@@ -154,29 +153,19 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 					if (alive && before != -1 && after != -1) {
 						// Add process time
-                        processTimes.add((int) (after - before));
+						processTimes.add((int) (after - before));
 
 						// Recalculate rate/skips
 						rateSkips();
 					}
-				} catch (InterruptedException ignored) { }
+				} catch (InterruptedException ignored) {
+				}
 			}
-		} , "DataStructure " + getName() + " Updates");
+		}, "DataStructure " + getName() + " Updates");
 		updateThread.setDaemon(true);
 		updateThread.start();
 
-		timer = new AnimationTimer() {
-			long lastTime = -1;
-
-			@Override
-			public void handle(long now) {
-				if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
-					lastTime = now;
-					repaint();
-				}
-			}
-		};
-		timer.start();
+		Repainter.add(this);
 	}
 
 	/**
@@ -212,7 +201,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		alive = false;
 		setUpdatePaused(false);
 		updateThread.interrupt();// In case of waiting on an empty list
-		timer.stop();
+		Repainter.remove(this);
 		updateTimes.clear();
 		processTimes.clear();
 	}
@@ -230,10 +219,10 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	 * @param paused
 	 *            whether updates should be paused
 	 */
-	 void setUpdatePaused(boolean paused) {
-         if(paused)
-			 updatePaused.pause();
-         else
-			 updatePaused.resume();
+	void setUpdatePaused(boolean paused) {
+		if (paused)
+			updatePaused.pause();
+		else
+			updatePaused.resume();
 	}
 }
