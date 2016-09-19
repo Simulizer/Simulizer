@@ -2,6 +2,7 @@ package simulizer.ui.components;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import simulizer.ui.windows.CPUVisualisation;
 
 /**
  * Represents a visualised CPU
+ * 
  * @author Theo Styles
  */
 public class CPU {
@@ -73,7 +75,9 @@ public class CPU {
 
 	/**
 	 * Sets up the CPU
-	 * @param vis The visualisation to use
+	 * 
+	 * @param vis
+	 *            The visualisation to use
 	 */
 	public CPU(CPUVisualisation vis) {
 		this.vis = vis;
@@ -82,18 +86,25 @@ public class CPU {
 
 	/**
 	 * Show a caption for a specified time
-	 * @param text The text to show
-	 * @param time How long the caption should be displayed
-     */
+	 * 
+	 * @param text
+	 *            The text to show
+	 * @param time
+	 *            How long the caption should be displayed
+	 */
 	public void showText(String text, double time) {
 		showText(text, time, true);
 	}
 
 	/**
 	 * Shows a caption for a specified time
-	 * @param text The text to show
-	 * @param time How long the caption should be displayed
-	 * @param fadeOut If the text should fade out or not
+	 * 
+	 * @param text
+	 *            The text to show
+	 * @param time
+	 *            How long the caption should be displayed
+	 * @param fadeOut
+	 *            If the text should fade out or not
 	 */
 	public void showText(String text, double time, boolean fadeOut) {
 		if (time < 250)
@@ -116,7 +127,11 @@ public class CPU {
 					fo.setCycleCount(1);
 
 					fo.play();
-					cancel();
+					try {
+						cancel();
+					} catch (IllegalStateException e) {
+						// Ignore already cancelled timer
+					}
 				}
 			}, (int) delayTime));
 		}
@@ -295,6 +310,10 @@ public class CPU {
 	 */
 	public void closeAllThreads() {
 		animationProcessor.shutdown();
-		t.cancel();
+		try {
+			t.cancel();
+		} catch (IllegalStateException e) {
+			// Ignore already cancelled timer
+		}
 	}
 }
