@@ -35,11 +35,17 @@ public class Settings {
 	 * @param json
 	 *            the json file to load/parse
 	 * @return the settings object representing the json file
+	 * @throws IOException
 	 */
 	public static Settings loadSettings(File json) throws IOException {
-		JsonParser parser = new JsonParser();
-		JsonElement jsonElement = parser.parse(FileUtils.getUTF8FileReader(json));
-		JsonObject jsonObject = jsonElement.getAsJsonObject();
+		JsonObject jsonObject = null;
+		if (json.exists()) {
+			JsonParser parser = new JsonParser();
+			JsonElement jsonElement = parser.parse(FileUtils.getUTF8FileReader(json));
+			jsonObject = jsonElement.getAsJsonObject();
+		} else {
+			json.createNewFile();
+		}		
 		return new Settings(json, jsonObject);
 	}
 
