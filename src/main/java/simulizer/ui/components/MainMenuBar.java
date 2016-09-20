@@ -40,7 +40,6 @@ public class MainMenuBar extends MenuBar {
 	private final WindowManager wm;
 	private final MenuBarControls controls;
 
-
 	/**
 	 * Creates a new MainMenuBar
 	 *
@@ -81,7 +80,7 @@ public class MainMenuBar extends MenuBar {
 		newItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		newItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning())
-			    CurrentFile.newFile();
+				CurrentFile.newFile();
 		});
 		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
 
@@ -102,7 +101,7 @@ public class MainMenuBar extends MenuBar {
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
 			if (!wm.getCPU().isRunning())
-                CurrentFile.promptSave();
+				CurrentFile.promptSave();
 		}));
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
@@ -110,17 +109,16 @@ public class MainMenuBar extends MenuBar {
 		MenuItem saveAsItem = new MenuItem("Save As...");
 		saveAsItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		saveAsItem.setOnAction(e -> {
-			if(!wm.getCPU().isRunning())
+			if (!wm.getCPU().isRunning())
 				CurrentFile.promptSaveAs();
-        });
-
+		});
 
 		// | |-- Re-load
 		MenuItem reloadItem = new MenuItem("Reload");
 		reloadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		reloadItem.setOnAction(e -> {
-			if(!wm.getCPU().isRunning())
-			    CurrentFile.reloadFile();
+			if (!wm.getCPU().isRunning())
+				CurrentFile.reloadFile();
 		});
 		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN));
 
@@ -135,7 +133,6 @@ public class MainMenuBar extends MenuBar {
 		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, reloadItem, optionsItem, exitItem);
 	}
 
-
 	private Menu editMenu() {
 		Menu editMenu = new Menu("Edit");
 		editMenu.setOnShowing((e) -> editMenuHelper(editMenu, true));
@@ -143,14 +140,13 @@ public class MainMenuBar extends MenuBar {
 		return editMenu;
 	}
 
-
 	private void passToEditor(KeyCode kc) {
 		Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-		if(e != null) {
-			e.handleKeyEvent(new KeyEvent(
-				KeyEvent.KEY_PRESSED, "", "", kc, false, true /*ctrl*/, false, false));
+		if (e != null) {
+			e.handleKeyEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", kc, false, true /* ctrl */, false, false));
 		}
 	}
+
 	/**
 	 * Generates the edit menu
 	 */
@@ -169,7 +165,6 @@ public class MainMenuBar extends MenuBar {
 		copy.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
 		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
 		copy.setOnAction((a) -> passToEditor(KeyCode.C));
-
 
 		MenuItem paste = new MenuItem("Paste");
 		paste.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
@@ -198,11 +193,11 @@ public class MainMenuBar extends MenuBar {
 		fontDec.setOnAction((a) -> passToEditor(KeyCode.MINUS));
 
 		CheckMenuItem wordWrap = new CheckMenuItem("Toggle Word Wrap");
-		wordWrap.setSelected(e!= null && e.getWrap());
+		wordWrap.setSelected(e != null && e.getWrap());
 		wordWrap.setOnAction((a) -> {
-			if(e != null) e.setWrap(!e.getWrap());
+			if (e != null)
+				e.setWrap(!e.getWrap());
 		});
-
 
 		editMenu.getItems().addAll(cut, copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
 	}
@@ -304,8 +299,8 @@ public class MainMenuBar extends MenuBar {
 	private Menu simulationMenu() {
 		Menu runMenu = new Menu("Simulation");
 		runMenu.setOnShowing(e -> simControlsMenu(runMenu, true));
-		runMenu.setOnHidden(e -> simControlsMenu(runMenu, false));
-		simControlsMenu(runMenu, false);
+		// Dummy used so setOnShowing event triggers
+		runMenu.getItems().add(new MenuItem("Dummy"));
 		return runMenu;
 	}
 
@@ -365,10 +360,14 @@ public class MainMenuBar extends MenuBar {
 				wm.stopSimulation();
 		});
 
-		CheckMenuItem togglePipeline = new CheckMenuItem("Toggle CPU Pipelining");
+		CheckMenuItem togglePipeline = new CheckMenuItem("Pipelined CPU?");
 		togglePipeline.setDisable(cpu.isRunning());
 		togglePipeline.setSelected(cpu.isPipelined());
 		togglePipeline.setOnAction(e -> wm.newCPU(togglePipeline.isSelected()));
+
+		CheckMenuItem toggleAnnotations = new CheckMenuItem("Annotations Enabled?");
+		toggleAnnotations.setSelected(wm.getAnnotationManager().isEnabled());
+		toggleAnnotations.setOnAction(e -> wm.getAnnotationManager().setEnabled(toggleAnnotations.isSelected()));
 
 		MenuItem setClockSpeed = new MenuItem("Set Clock Speed");
 		setClockSpeed.setOnAction(e -> {
@@ -382,7 +381,7 @@ public class MainMenuBar extends MenuBar {
 			});
 		});
 
-		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, setClockSpeed);
+		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, toggleAnnotations, setClockSpeed);
 	}
 
 	/**
@@ -468,7 +467,7 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem dumpProgram = new MenuItem("Dump Assembled Program");
 		dumpProgram.setOnAction(e -> {
-            String programText = CurrentFile.getCurrentText();
+			String programText = CurrentFile.getCurrentText();
 			Program p = Assembler.assemble(programText, null, false);
 			String outputFilename = "program-dump.txt";
 			if (p == null) {
@@ -498,7 +497,7 @@ public class MainMenuBar extends MenuBar {
 					wm.getAnnotationManager().newExecutor();
 				}
 				wm.getAnnotationManager().getExecutor().debugREPL(wm.getIO());
-			} , "JS-REPL-Thread");
+			}, "JS-REPL-Thread");
 			replThread.setDaemon(true);
 			replThread.start();
 		});

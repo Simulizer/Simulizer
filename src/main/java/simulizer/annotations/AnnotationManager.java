@@ -7,7 +7,6 @@ import simulizer.simulation.cpu.user_interaction.IO;
 import simulizer.simulation.cpu.user_interaction.IOStream;
 import simulizer.simulation.messages.AnnotationMessage;
 import simulizer.ui.WindowManager;
-import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.UIUtils;
 
 /**
@@ -19,6 +18,7 @@ import simulizer.utils.UIUtils;
 public class AnnotationManager {
 	private AnnotationExecutor ex;
 	private static final boolean giveDetailedInfo = false;
+	private boolean enabled = true;
 
 	private WindowManager wm = null;
 	private CPU cpu;
@@ -39,7 +39,7 @@ public class AnnotationManager {
 		simulationBridge = new SimulationBridge();
 
 		this.enableVisualisations = enableVisualisations;
-        if(enableVisualisations) {
+		if (enableVisualisations) {
 			visualisationBridge = new VisualisationBridge();
 		} else {
 			visualisationBridge = new VisualisationBridgeStub();
@@ -47,8 +47,9 @@ public class AnnotationManager {
 	}
 
 	public AnnotationManager(WindowManager wm) {
-		this(wm.getCPU(), wm.getIO(), true/*enable visualisations*/);
+		this(wm.getCPU(), wm.getIO(), true/* enable visualisations */);
 		this.wm = wm;
+		this.enabled = (boolean) wm.getSettings().get("simulation.annotations");
 	}
 
 	/**
@@ -105,14 +106,14 @@ public class AnnotationManager {
 		ex.bindGlobal("simulation", simulationBridge);
 		ex.bindGlobal("sim", simulationBridge);
 
-        ex.bindGlobal("visualisation", visualisationBridge);
-        ex.bindGlobal("vis", visualisationBridge);
+		ex.bindGlobal("visualisation", visualisationBridge);
+		ex.bindGlobal("vis", visualisationBridge);
 
 		setupBridges();
 	}
 
 	private String getAnnotationLineString(AnnotationMessage msg) {
-		if(msg.boundAddress != null) {
+		if (msg.boundAddress != null) {
 			int lineNum = cpu.getProgram().lineNumbers.get(msg.boundAddress);
 			return "the annotation bound to line: " + (lineNum + 1) + ".";
 		} else {
@@ -127,6 +128,8 @@ public class AnnotationManager {
 	 *            the message containing the annotation to run
 	 */
 	public synchronized void processAnnotationMessage(AnnotationMessage msg) {
+		if (!enabled)
+			return;
 		try {
 			ex.exec(msg.annotation);
 		} catch (AnnotationEarlyReturn ignored) {
@@ -140,5 +143,17 @@ public class AnnotationManager {
 			if (giveDetailedInfo)
 				UIUtils.showExceptionDialog(e);
 		}
+	}
+
+	public synchronized void setEnabled(boolean value) {
+		enabled = value;
+		if (wm != null) {
+			wm.getSettings().set("simulation.annotations", value);
+			wm.getSettings().save();
+		}
+	}
+
+	public boolean isEnabled() {
+		return enabled;
 	}
 }

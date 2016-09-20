@@ -6,10 +6,11 @@ import java.util.Observer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javafx.animation.AnimationTimer;
 import javafx.scene.layout.Pane;
 import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.ModelAction;
+import simulizer.ui.interfaces.Repainter;
+import simulizer.ui.interfaces.Repainter.Repaintable;
 import simulizer.ui.windows.HighLevelVisualisation;
 import simulizer.utils.CircularLongBuffer;
 import simulizer.utils.ThreadUtils;
@@ -20,7 +21,7 @@ import simulizer.utils.ThreadUtils;
  * @author Michael
  *
  */
-public abstract class DataStructureVisualiser extends Pane implements Observer {
+public abstract class DataStructureVisualiser extends Pane implements Observer, Repaintable {
 	protected HighLevelVisualisation vis;
 	private DataStructureModel model;
 
@@ -28,8 +29,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 
 	private BlockingQueue<ModelAction<?>> changes = new LinkedBlockingQueue<>();
 
-	private int FRAME_RATE = 45, BUFFER_SIZE = 1;
-	private AnimationTimer timer;
+	private int BUFFER_SIZE = 1;
 
 	volatile double rate = 1;
 	private final HashMap<String, CircularLongBuffer> updateTimes = new HashMap<String, CircularLongBuffer>();
@@ -89,6 +89,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 	/**
 	 * Repaints the visualisation
 	 */
+	@Override
 	public abstract void repaint();
 
 	/**
@@ -134,6 +135,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 			}
 
 			lastUpdates.put(className, now);
+
 		}
 	}
 
@@ -179,18 +181,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		updateThread.setDaemon(true);
 		updateThread.start();
 
-		timer = new AnimationTimer() {
-			long lastTime = -1;
-
-			@Override
-			public void handle(long now) {
-				if (lastTime == -1 || now - lastTime > 1e9 / FRAME_RATE) {
-					lastTime = now;
-					repaint();
-				}
-			}
-		};
-		timer.start();
+		Repainter.add(this);
 	}
 
 	/**
@@ -216,7 +207,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 				double position = avgProcess * Math.log(numChanges + 1) + 1; // Calculated Position
 				double target = avgUpdate; // Calculated Target
 				double error = position - target; // error = process - update
-				double change = 0.0000000001 * error; // Adjust rate to scaled error
+				double change = 0.000000001 * error; // Adjust rate to scaled error
 				System.out.println("rateChange: " + change);
 
 				// Find the highest change
@@ -261,7 +252,7 @@ public abstract class DataStructureVisualiser extends Pane implements Observer {
 		alive = false;
 		setUpdatePaused(false);
 		updateThread.interrupt();// In case of waiting on an empty list
-		timer.stop();
+		Repainter.remove(this);
 		updateTimes.clear();
 		processTimes.clear();
 		lastUpdates.clear();
