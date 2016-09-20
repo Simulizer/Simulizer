@@ -352,7 +352,6 @@ public class ListVisualiser extends DataStructureVisualiser { // TODO: fix synch
 			// @formatter:on
 
 		} else if (action instanceof MarkerAction) {
-			System.out.println("MARKER");
 			// Marker action
 			MarkerAction marker = (MarkerAction) action;
 			synchronized (markers) {
@@ -377,7 +376,6 @@ public class ListVisualiser extends DataStructureVisualiser { // TODO: fix synch
 				}
 			}
 		} else if (action instanceof EmphasiseAction) {
-			System.out.println("EMPHASISE");
 			// Emphasise an element
 			EmphasiseAction emphasise = (EmphasiseAction) action;
 			this.emphasiseIndex = emphasise.index;
@@ -399,12 +397,10 @@ public class ListVisualiser extends DataStructureVisualiser { // TODO: fix synch
 			// @formatter:on
 
 		} else if (action instanceof HighlightAction) {
-			System.out.println("HIGHLIGHT");
 			// Highlight a marker
 			highlightedMarkers.add(((HighlightAction) action).index);
 
 		} else if (action instanceof ListAction) {
-			System.out.println("LIST");
 			// List changed
 			ListAction list = (ListAction) action;
 			synchronized (this.list) {

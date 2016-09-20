@@ -7,7 +7,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import simulizer.simulation.cpu.user_interaction.IO;
-import simulizer.utils.CircularIntBuffer;
+import simulizer.utils.CircularLongBuffer;
 
 /**
  * Model for accessing a JavaFX canvas from annotations
@@ -18,7 +18,7 @@ import simulizer.utils.CircularIntBuffer;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CanvasModel extends DataStructureModel {
 
-	private CircularIntBuffer frameTimes = new CircularIntBuffer(3);
+	private CircularLongBuffer frameTimes = new CircularLongBuffer(3);
 	private long lastFrameMs = 0;
 
 	public Canvas canvas;
