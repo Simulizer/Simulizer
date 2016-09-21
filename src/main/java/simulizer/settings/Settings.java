@@ -75,7 +75,7 @@ public class Settings {
 					.add(new ObjectSetting("scale-ui", "Scale User Interface")
 							.add(new BooleanSetting("enabled", "Allow autosizing of Internal Windows", "Resize all Internal Windows when the main window resizes"))
 							.add(new IntegerSetting("delay", "Delay before resize", "How long to wait until the Internal Windows resize", 50)))
-					.add(new BooleanSetting("ctrl-tab", "CTRL + TAB", "Enables/Disable CTRL + TAB to switch between internal windows", true))
+					.add(new BooleanSetting("ctrl-tab", "Window Cycler", "Enables/Disable CTRL + TAB shortcut to switch between internal windows", true))
 					.add(new ObjectSetting("grid", "Grid Settings", "Configure when Internal Windows should snap to a grid")
 					  	.add(new BooleanSetting("enabled", "Allow grid snapping", "Enables/Disable snapping Internal Windows to a grid"))
 					  	.add(new IntegerSetting("horizontal", "Horizontal Lines", "Number of horizontal gridlines to snap to"))

@@ -23,6 +23,13 @@ public class StringControl extends GridPane {
 		title.getStyleClass().add("title");
 		add(title, 0, 0);
 
+		// Option Desc
+		Label desc = new Label(setting.getDescription());
+		GridPane.setHgrow(desc, Priority.SOMETIMES);
+		desc.getStyleClass().add("description");
+		desc.setWrapText(true);
+		add(desc, 0, 1);
+
 		// Option Value
 		TextField value = new TextField();
 		value.setText(setting.getValue());

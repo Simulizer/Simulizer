@@ -6,9 +6,11 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -36,27 +38,32 @@ import simulizer.utils.UIUtils;
  */
 public class Options extends InternalWindow {
 
-	private GridPane pane, values;
+	private BorderPane pane;
+	private GridPane values;
 	private TreeView<String> folders;
 	private String theme;
 
 	public Options() {
-		pane = new GridPane();
+		pane = new BorderPane();
 
 		folders = new TreeView<>();
 		GridPane.setVgrow(folders, Priority.ALWAYS);
-		GridPane.setHgrow(folders, Priority.SOMETIMES);
+		GridPane.setHgrow(folders, Priority.NEVER);
 		folders.getStyleClass().add("tree");
 		folders.setCursor(Cursor.DEFAULT);
-		pane.add(folders, 0, 0);
+		folders.minWidth(400);
+		pane.setLeft(folders);
 
 		values = new GridPane();
-		GridPane.setVgrow(values, Priority.ALWAYS);
-		GridPane.setHgrow(values, Priority.ALWAYS);
 		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
 		values.setPadding(new Insets(0, 10, 0, 10));
-		pane.add(values, 1, 0);
+
+		ScrollPane scroll = new ScrollPane();
+		scroll.setContent(values);
+		GridPane.setVgrow(scroll, Priority.ALWAYS);
+		GridPane.setHgrow(scroll, Priority.SOMETIMES);
+		pane.setCenter(scroll);
 
 		getContentPane().getChildren().add(pane);
 	}
@@ -185,7 +192,6 @@ public class Options extends InternalWindow {
 		this.theme = theme.getStyleSheet("options.css");
 		updateChildrenThemes(pane, this.theme);
 	}
-
 
 	private void updateChildrenThemes(Control pane, String stylesheet) {
 		if (pane != null) {
