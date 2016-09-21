@@ -89,7 +89,7 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 
 	@Override
 	public void repaint() {
-		double windowWidth = vis.getWindowWidth();
+		double windowWidth = getWidth();
 		double windowHeight = getHeight(); // exclude the tab at the bottom
 
 		//System.out.println("canvas dimensions: (" + windowWidth + ", " + windowHeight + ")");
