@@ -15,6 +15,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import simulizer.BuildInfo;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
@@ -432,6 +433,29 @@ public class MainMenuBar extends MenuBar {
 	private Menu helpMenu() {
 		Menu helpMenu = new Menu("Help");
 
+		MenuItem updates = new MenuItem("Check For Updates");
+		updates.setOnAction(e -> {
+			String url = "https://github.com/Simulizer/Simulizer/releases";
+			try {
+				if (BuildInfo.getInstance().checkForUpdate()) {
+					UIUtils.showInfoDialog("Check for Updates", "Update Available! Download it from " + url);
+					UIUtils.openURL(url);
+				} else {
+					UIUtils.showInfoDialog("Check for Updates", "No updates available");
+				}
+			} catch (IOException ex) {
+				UIUtils.showErrorDialog("Check for Updates", "Unable to check for updates. Are you connected to the internet?");
+			}
+
+		});
+
+		MenuItem issue = new MenuItem("Report an Issue");
+		issue.setOnAction(e -> {
+			String url = "https://github.com/Simulizer/Simulizer/issues";
+			if (!UIUtils.openURL(url))
+				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
+		});
+
 		MenuItem guide = new MenuItem("Guide");
 		guide.setOnAction(e -> FileUtils.openFile("guide.pdf"));
 
@@ -447,12 +471,11 @@ public class MainMenuBar extends MenuBar {
 		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
 		keyBinds.setOnAction(e -> {
 			String url = "https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts";
-			if (!UIUtils.openURL(url)) {
+			if (!UIUtils.openURL(url))
 				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
-			}
 		});
 
-		helpMenu.getItems().addAll(guide, syscall, instruction, register, new SeparatorMenuItem(), keyBinds);
+		helpMenu.getItems().addAll(updates, issue, new SeparatorMenuItem(), guide, syscall, instruction, register, new SeparatorMenuItem(), keyBinds);
 
 		return helpMenu;
 	}
