@@ -39,9 +39,12 @@ import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.messages.PipelineHazardMessage;
 import simulizer.ui.components.NumberTextField;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.ui.interfaces.Repainter;
+import simulizer.ui.interfaces.Repainter.Repaintable;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.utils.ColorUtils;
 import simulizer.utils.FileUtils;
+import simulizer.utils.UIUtils;
 
 /**
  * Visualises the instructions during each stage of the pipeline (fetch, decode, execute).
@@ -57,17 +60,11 @@ import simulizer.utils.FileUtils;
  * @author Kelsey McKenna
  *
  */
-public class PipelineView extends InternalWindow implements Observer {
+public class PipelineView extends InternalWindow implements Observer, Repaintable {
 	// Graphical things
 	private Canvas canvas = new Canvas();
 	private Pane canvasPane = new Pane();
-	private BorderPane borderPane = new BorderPane();
 
-	private HBox controlBox = new HBox();
-	private VBox buttonBox = new VBox();
-	private Button leftButton = new Button("<");
-	private Button rightButton = new Button(">");
-	private Label cycleInputLabel = new Label("Go to:");
 	private TextField cycleInput = new NumberTextField();
 	private CheckBox followCheckBox = new CheckBox("Follow");
 
@@ -81,7 +78,6 @@ public class PipelineView extends InternalWindow implements Observer {
 	// Canvas has a maximum size, so don't draw more than it!
 	private int numColumnsToDraw;
 	private int startCycle = 0;
-	private boolean snapToEnd;
 
 	private boolean isPipelined;
 	private boolean isRunning;
@@ -100,19 +96,28 @@ public class PipelineView extends InternalWindow implements Observer {
 	private double realW;
 	private double realH;
 
+	// Only repaint canvas
+	private volatile boolean hasChanged = false;
+
 	public PipelineView() {
 		setTitle("Pipeline");
 
+		Button leftButton = new Button("");
+		leftButton.setGraphic(UIUtils.getLeftArrow());
+		Button rightButton = new Button("");
+		rightButton.setGraphic(UIUtils.getRightArrow());
+
 		// Configure the components
 		followCheckBox.setSelected(true);
-		followCheckBox.setOnAction(e -> repaint());
 
 		leftButton.setOnAction(e -> {
 			setStartCycle(startCycle - 1);
+			followCheckBox.setSelected(model.size() - numColumnsToDraw <= startCycle); // follow if at or past end
 			repaint();
 		});
 		rightButton.setOnAction(e -> {
 			setStartCycle(startCycle + 1);
+			followCheckBox.setSelected(model.size() - numColumnsToDraw <= startCycle); // follow if at or past end
 			repaint();
 		});
 		leftButton.setCursor(Cursor.DEFAULT);
@@ -129,15 +134,18 @@ public class PipelineView extends InternalWindow implements Observer {
 		});
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
-			if (!isRunning || !isPipelined) return;
+			if (!isRunning || !isPipelined)
+				return;
 
 			Optional<Pair<Integer, Address>> cycleAndAddress = getAddressAtPoint(e.getX(), e.getY());
 			if (cycleAndAddress.isPresent()) {
 				Pair<Integer, Address> ca = cycleAndAddress.get();
 				Address addr = ca.getValue();
 				String name;
-				if (addr == null || (name = getShortName(addr)).equals(selectedAddress)) selectedAddress = null;
-				else selectedAddress = name;
+				if (addr == null || (name = getShortName(addr)).equals(selectedAddress))
+					selectedAddress = null;
+				else
+					selectedAddress = name;
 
 				int line = getWindowManager().getCPU().getProgram().lineNumbers.getOrDefault(ca.getValue(), -1);
 				if (line != -1) {
@@ -147,14 +155,16 @@ public class PipelineView extends InternalWindow implements Observer {
 					}
 				}
 
-			} else selectedAddress = null;
+			} else
+				selectedAddress = null;
 
 			repaint();
 
 			Platform.runLater(canvasPane::requestFocus);
 		});
 		canvasPane.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-			if (!isRunning || !isPipelined) return;
+			if (!isRunning || !isPipelined)
+				return;
 
 			KeyCode code = e.getCode();
 
@@ -174,7 +184,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		instructionInfoLabel.setPadding(new Insets(20, 0, 15, 20));
 
 		canvasPane.addEventFilter(MouseEvent.MOUSE_MOVED, e -> {
-			if (!isRunning) return;
+			if (!isRunning)
+				return;
 
 			String newText;
 
@@ -191,12 +202,15 @@ public class PipelineView extends InternalWindow implements Observer {
 					Address addr = ca.getValue();
 
 					newText = addr == null ? getHazardInfo(cycle) : getAddressInfo(addr);
-				} else newText = DEFAULT_INSTR;
+				} else
+					newText = DEFAULT_INSTR;
 			}
 			Platform.runLater(() -> instructionInfoLabel.setText(newText));
 		});
 
+		HBox controlBox = new HBox();
 		controlBox.setAlignment(Pos.CENTER_LEFT);
+		VBox buttonBox = new VBox();
 		buttonBox.setAlignment(Pos.CENTER_LEFT);
 
 		// Now add everything
@@ -205,10 +219,12 @@ public class PipelineView extends InternalWindow implements Observer {
 		topBox.setAlignment(Pos.CENTER);
 		bottomBox.setAlignment(Pos.CENTER);
 		topBox.getChildren().addAll(followCheckBox, leftButton, rightButton);
+		Label cycleInputLabel = new Label("Go to:");
 		bottomBox.getChildren().addAll(cycleInputLabel, cycleInput);
 		buttonBox.getChildren().addAll(topBox, bottomBox);
 		controlBox.getChildren().addAll(buttonBox, instructionInfoLabel);
 
+		BorderPane borderPane = new BorderPane();
 		borderPane.setCenter(canvasPane);
 		borderPane.setBottom(controlBox);
 
@@ -249,14 +265,17 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			double xLeft = x0 + (col + 0.5) * cycleWidth - rectWidth / 2;
 			// If the x coordinate isn't right, then skip to the next iteration
-			if (x < xLeft || x > xLeft + rectWidth) continue;
+			if (x < xLeft || x > xLeft + rectWidth)
+				continue;
 
 			double yTop = rectGap / 2;
 
 			List<Address> before = state.before;
 			for (Address addr : before) {
-				if (y >= yTop && y < yTop + rectWidth) return Optional.of(new Pair<>(cycle, addr));
-				else yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth)
+					return Optional.of(new Pair<>(cycle, addr));
+				else
+					yTop += rectGap + rectWidth;
 			}
 
 			yTop = rectGap / 2 + 3 * (rectGap + rectWidth);
@@ -265,15 +284,18 @@ public class PipelineView extends InternalWindow implements Observer {
 			for (Address stage : pipeline) {
 				if (y >= yTop && y < yTop + rectWidth) {
 					return Optional.of(new Pair<>(cycle, stage));
-				} else yTop += rectGap + rectWidth;
+				} else
+					yTop += rectGap + rectWidth;
 			}
 
 			yTop = rectGap / 2 + 6 * (rectGap + rectWidth);
 
 			List<Address> after = state.after;
 			for (Address addr : after) {
-				if (y >= yTop && y < yTop + rectWidth) return Optional.of(new Pair<>(cycle, addr));
-				else yTop += rectGap + rectWidth;
+				if (y >= yTop && y < yTop + rectWidth)
+					return Optional.of(new Pair<>(cycle, addr));
+				else
+					yTop += rectGap + rectWidth;
 			}
 		}
 
@@ -283,6 +305,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	@Override
 	public void close() {
 		model.removeObserver(this);
+		Repainter.remove(this);
 		super.close();
 	}
 
@@ -296,9 +319,12 @@ public class PipelineView extends InternalWindow implements Observer {
 	 *            the new value for start cycle
 	 */
 	private void setStartCycle(final int startCycle) {
-		if (startCycle <= 0) this.startCycle = 0;
-		else if (startCycle >= model.size()) this.startCycle = Math.max(0, model.size() - 1);
-		else this.startCycle = startCycle;
+		if (startCycle <= 0)
+			this.startCycle = 0;
+		else if (startCycle >= model.size())
+			this.startCycle = Math.max(0, model.size() - 1);
+		else
+			this.startCycle = startCycle;
 	}
 
 	/**
@@ -322,7 +348,8 @@ public class PipelineView extends InternalWindow implements Observer {
 		numColumnsToDraw = Math.max(0, numColumnsToDraw);
 		assert (numColumnsToDraw >= 0);
 
-		if (snapToEnd) setStartCycle(model.size() - numColumnsToDraw);
+		if (followCheckBox.isSelected())
+			setStartCycle(model.size() - numColumnsToDraw);
 	}
 
 	/**
@@ -392,12 +419,7 @@ public class PipelineView extends InternalWindow implements Observer {
 	public void update(Observable o, Object pipelineState) {
 		this.isPipelined = getWindowManager().getCPU().isPipelined();
 		this.isRunning = getWindowManager().getCPU().isRunning();
-
-		this.snapToEnd = followCheckBox.isSelected();
 		repaint();
-		// Should only snap to end when an update has been fire
-		// i.e. not when user is scrolling around
-		this.snapToEnd = false;
 	}
 
 	/**
@@ -458,7 +480,8 @@ public class PipelineView extends InternalWindow implements Observer {
 			for (int a = 0; a < 3; ++a) {
 				Color bg = ColorUtils.getColor(parts[a]);
 				gc.setFill(bg);
-				if (parts[a] == null) drawBorderedOval(gc, xLeft, yTracker, rectWidth, rectWidth);
+				if (parts[a] == null)
+					drawBorderedOval(gc, xLeft, yTracker, rectWidth, rectWidth);
 				else {
 					String name = getShortName(parts[a]);
 					drawBorderedRectangle(gc, xLeft, yTracker, rectWidth, rectWidth, name.equals(selectedAddress));
@@ -507,26 +530,30 @@ public class PipelineView extends InternalWindow implements Observer {
 		super.ready();
 		isPipelined = getWindowManager().getCPU().isPipelined();
 		isRunning = getWindowManager().getCPU().isRunning();
-		this.snapToEnd = true;
-		repaint();
-		this.snapToEnd = false;
+		Repainter.add(this);
 	}
 
+	@Override
 	public void repaint() {
-		GraphicsContext gc = canvas.getGraphicsContext2D();
-		this.realW = canvas.getWidth();
-		this.realH = canvas.getHeight();
-		gc.clearRect(0, 0, realW, realH);
+		if (Platform.isFxApplicationThread() && hasChanged) {
+			GraphicsContext gc = canvas.getGraphicsContext2D();
+			this.realW = canvas.getWidth();
+			this.realH = canvas.getHeight();
+			gc.clearRect(0, 0, realW, realH);
 
-		calculateParameters();
+			calculateParameters();
 
-		if (isRunning) {
-			drawDividers(gc);
-			drawExplainers(gc);
-			drawAddresses(gc);
-		} else {
-			gc.setFill(Color.BLACK);
-			drawText(gc, "Check the CPU is running to view this window", realW / 2, h / 2);
+			if (isRunning) {
+				drawDividers(gc);
+				drawExplainers(gc);
+				drawAddresses(gc);
+			} else {
+				gc.setFill(Color.BLACK);
+				drawText(gc, "Check the CPU is running to view this window", realW / 2, h / 2);
+			}
+		} else if (!Platform.isFxApplicationThread()) {
+			// If we are not on the FX thread, queue an update
+			hasChanged = true;
 		}
 	}
 
@@ -650,17 +677,19 @@ public class PipelineView extends InternalWindow implements Observer {
 
 			PipelineHazardMessage.Hazard h = hOpt.get();
 			return String.format("Hazard: %s%n %n%s%n ", h.toString(), fortune);
-		} else return String.format("Not a hazard%n %n %n ");
+		} else
+			return String.format("Not a hazard%n %n %n ");
 	}
 
 	private static List<String> fortunes = new ArrayList<>();
 
 	{
-        String fortunesContent = FileUtils.getResourceContent("/fortunes");
-        for(String line : FileUtils.splitIntoLines(fortunesContent))
-            if (!line.trim().isEmpty()) fortunes.add(line);
+		String fortunesContent = FileUtils.getResourceContent("/fortunes");
+		for (String line : FileUtils.splitIntoLines(fortunesContent))
+			if (!line.trim().isEmpty())
+				fortunes.add(line);
 
-        Collections.shuffle(fortunes);
+		Collections.shuffle(fortunes);
 	}
 
 	/**

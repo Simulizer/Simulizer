@@ -7,6 +7,9 @@
 
 */
 
+// #define USE_MEMSET before including this file to use memset
+// #define USE_MALLOC before including this file to use malloc and free
+
 
 /* note on the GCC asm statement
 
@@ -29,7 +32,16 @@ safe.
 */
 
 
-#define NO_INLINE __attribute__ ((noinline))
+// attach these to functions eg
+// NO_INLINE void f() { return; }
+#define NO_INLINE   __attribute__((noinline))
+#define NO_OPTIMIZE __attribute__((optimize("O0")))
+
+
+// TODO: helper macros for I, J and R type instructions
+//IR(var)
+//II()
+//IJ()
 
 
 // comment to be written to the asm output
@@ -175,7 +187,7 @@ safe.
 // .data segment
 
 
-#ifndef NO_MALLOC
+#ifdef USE_MALLOC
 
 // by default Simulizer allocates a maximum of 1MiB to the heap
 #define HEAP_SIZE (1024*1024)
@@ -216,7 +228,7 @@ block_header *malloc_free_list = NULL;
 
 
 
-#ifndef NO_MEMSET
+#ifdef USE_MEMSET
 
 void memset(void *ptr, unsigned char value, size_t num) {
     unsigned char *ptrc = (unsigned char*)ptr;
@@ -229,7 +241,7 @@ void memset(void *ptr, unsigned char value, size_t num) {
 
 
 
-#ifndef NO_MALLOC
+#ifdef USE_MALLOC
 
 // malloc / free implementation based on the K&R implementation
 // also referenced: https://www.cs.princeton.edu/courses/archive/fall06/cos217/lectures/14Memory-2x2.pdf

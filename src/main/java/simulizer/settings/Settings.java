@@ -35,11 +35,28 @@ public class Settings {
 	 * @param json
 	 *            the json file to load/parse
 	 * @return the settings object representing the json file
+	 * @throws IOException
 	 */
 	public static Settings loadSettings(File json) throws IOException {
-		JsonParser parser = new JsonParser();
-		JsonElement jsonElement = parser.parse(FileUtils.getUTF8FileReader(json));
-		JsonObject jsonObject = jsonElement.getAsJsonObject();
+		JsonObject jsonObject = null;
+		try {
+			if (json.exists()) {
+				JsonParser parser = new JsonParser();
+				JsonElement jsonElement = parser.parse(FileUtils.getUTF8FileReader(json));
+				jsonObject = jsonElement.getAsJsonObject();
+			}
+		} catch (IllegalStateException e) {
+			// Unreadable json
+			System.err.println("Unable to read settings.json, replacing with defaults.");
+		}
+
+		// Invalid or missing settings file
+		if (jsonObject == null) {
+			if (json.exists())
+				json.delete();
+			json.createNewFile();
+		}
+
 		return new Settings(json, jsonObject);
 	}
 
@@ -78,12 +95,13 @@ public class Settings {
 						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
 						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
 						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
+						.add(new BooleanSetting("annotations", "Run Annotations", "Sets whether to run annotations or not", true))
 					);
 		settings.add(new ObjectSetting("editor", "Editor")
 					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas", "monospace"))
 					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 20, 0, Integer.MAX_VALUE))
 					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
-					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed", 0.1, 0, Double.MAX_VALUE))
+					.add(new DoubleSetting("scroll-speed", "Scroll speed", "Scroll speed", 0.05, 0, Double.MAX_VALUE))
 					.add(new BooleanSetting("soft-tabs", "Soft tabs", "Soft tabs", true))
 					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme/) default, high-viz, monokai, ambiance, chaos, tomorrow_night_eighties, predawn, flatland", "/ace/theme/default"))
 					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program", false))
@@ -112,6 +130,8 @@ public class Settings {
 			for (SettingValue<?> setting : settings.getValue()) {
 				loadFromJson(jsonObject, setting);
 			}
+		else
+			save();
 	}
 
 	private void loadFromJson(JsonObject jsonObject, SettingValue<?> setting) {
@@ -165,6 +185,34 @@ public class Settings {
 	 * @return the requested setting
 	 */
 	public Object get(String settingPath) {
+		return find(settingPath).getValue();
+	}
+
+	/**
+	 * Sets a setting value
+	 * 
+	 * @param settingPath
+	 *            the setting path
+	 * @param value
+	 *            the value to setting
+	 * @warning you must call save() to actually write the change to the settings file
+	 * @warning value must be of the right type for the setting (or it'll be invalid)!
+	 */
+	@SuppressWarnings("unchecked")
+	public <E> boolean set(String settingPath, E value) {
+		try {
+			SettingValue<E> setting = (SettingValue<E>) find(settingPath);
+			if (setting.isValid(value)) {
+				setting.setValue(value);
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	private SettingValue<?> find(String settingPath) {
 		String[] path = settingPath.split("\\.");
 		SettingValue<?> setting = settings;
 		for (int i = 0; i < path.length; i++) {
@@ -172,7 +220,7 @@ public class Settings {
 			if (setting == null || (i + 1 < path.length && !(setting instanceof ObjectSetting)))
 				throw new IllegalArgumentException("Invalid Setting: " + settingPath);
 		}
-		return setting.getValue();
+		return setting;
 	}
 
 	/**

@@ -65,6 +65,12 @@ var Search;
 var pipelineHighlights = [-1, -1, -1]; // line numbers for pipeline highlights
 var userInControl; // whether the user is in control during execution of the program
 
+function onChange(e) {
+    bridge.onChange();// a java method
+    if(markers)
+        removeMarkers();
+}
+
 function init() {
     Range = ace.require("ace/range").Range;
     Search = ace.require("ace/search").Search;
@@ -89,13 +95,6 @@ function init() {
     });
     session.setUseWrapMode(false);
 
-    doc.on('change', function(e) {
-        bridge.onChange();// a java method
-        if(markers)
-            removeMarkers();
-    });
-
-
     // for disabling, then re-enabling selection when switching modes
     editor._backupPointerEvents = editor.container.style.pointerEvents;
 }
@@ -113,9 +112,11 @@ function changeFontSize(amount) {
 }
 
 function loadText(text) {
+    session.removeListener('change', onChange);
     var cursorPos = -1; // indicates the beginning
     session.setValue(text, cursorPos);
     session.setMode("ace/mode/simp");
+    session.on('change', onChange);
 }
 
 function getLine() {

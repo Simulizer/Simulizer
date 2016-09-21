@@ -92,7 +92,7 @@ public class CanvasVisualiser extends DataStructureVisualiser {
 		double windowWidth = vis.getWindowWidth();
 		double windowHeight = getHeight(); // exclude the tab at the bottom
 
-		System.out.println("canvas dimensions: (" + windowWidth + ", " + windowHeight + ")");
+		//System.out.println("canvas dimensions: (" + windowWidth + ", " + windowHeight + ")");
 
         if(model.squareShaped) {
 			double dimension = Math.min(windowWidth, windowHeight);

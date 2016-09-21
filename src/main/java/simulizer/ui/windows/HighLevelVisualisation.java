@@ -11,16 +11,15 @@ import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.KeyEvent;
 import javafx.util.Pair;
-import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.CanvasModel;
+import simulizer.highlevel.models.DataStructureModel;
 import simulizer.highlevel.models.HLVisualManager;
 import simulizer.highlevel.models.HLVisualManager.Action;
 import simulizer.highlevel.models.HanoiModel;
 import simulizer.highlevel.models.ListModel;
-import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.CanvasVisualiser;
+import simulizer.ui.components.highlevel.DataStructureVisualiser;
 import simulizer.ui.components.highlevel.ListVisualiser;
 import simulizer.ui.components.highlevel.TowerOfHanoiVisualiser;
 import simulizer.ui.interfaces.InternalWindow;
@@ -184,10 +183,6 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void update(Observable arg0, Object obj) {
-		if (obj == null) {
-			System.out.println("HLVisualisation Window upadate was null. If you see this message then tell Michael");
-			return;
-		}
 		Pair<Action, DataStructureModel> change = (Pair<Action, DataStructureModel>) obj;
 		if (change.getKey() == Action.CREATED) {
 			addNewVisualisation(change.getValue());

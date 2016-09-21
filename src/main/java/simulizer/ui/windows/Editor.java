@@ -1,24 +1,14 @@
 package simulizer.ui.windows;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import javafx.scene.CacheHint;
 import javafx.scene.text.FontSmoothingType;
 import org.w3c.dom.Document;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -29,20 +19,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import simulizer.GuiMode;
-import simulizer.assembler.Assembler;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
 import simulizer.ui.WindowManager;
+import simulizer.ui.components.CurrentFile;
 import simulizer.ui.interfaces.InternalWindow;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.theme.Theme;
 import simulizer.utils.FileUtils;
 import simulizer.utils.SafeJSObject;
-import simulizer.utils.TemporaryObserver;
-import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -51,17 +38,17 @@ import simulizer.utils.UIUtils;
  * @author mbway
  */
 @SuppressWarnings("WeakerAccess")
-public class Editor extends InternalWindow { //TODO: extract model from the view.
+public class Editor extends InternalWindow {
 
-	private static boolean initialLoad = true; // whether this is the first time the editor has been opened
-	private static File currentFile = null; // persists across instances of the window
+    // TODO: can treat just like other windows now that the CurrentFile is extracted
 	private static Editor editor; // only one instance
 
-	private boolean pageLoaded;
+	private volatile boolean pageLoaded;
 	private final WebEngine engine;
 
-	private boolean changedSinceLastSave;
-	private boolean changedSinceLastNotify;
+	private volatile boolean contentIsModified; // changes have been made in the editor since loading
+	//private boolean changedSinceLastSave;
+	//private boolean changedSinceLastNotify;
 
 	// handle key combos for copy and paste
 	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
@@ -90,22 +77,11 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 	public enum Mode { EDIT_MODE, EXECUTE_MODE }
 	private Mode mode;
 
-	private Set<TemporaryObserver> observers = new HashSet<>();
-	private final ScheduledExecutorService changeNotifier;
-	private final ScheduledFuture<?> notifyTask;
-
-	// to do with continuous assembling of
-	private boolean continuousAssemblyEnabled;
-	private int continuousAssemblyRefreshPeriod; // if changed, does not automatically change the running scheduler
-	private boolean continuousAssemblyInProgress; // used to set the window title
-	private final ScheduledExecutorService continuousAssembly;
-	private ScheduledFuture<?> assembleTask;
-	private int lastProgramHash; // used to avoid wasted effort if the file has not changed
 
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings("WeakerAccess")
+	@SuppressWarnings({"WeakerAccess", "unused"})
 	public static class Bridge {
 		private Editor editor;
 		public List<Problem> problems;
@@ -115,7 +91,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		}
 
 		public void onChange() {
-			if (!editor.changedSinceLastSave) {
+			if(!editor.contentIsModified) {
 				editor.setEdited(true);
 			}
 		}
@@ -123,10 +99,19 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 
 	private Bridge bridge;
 
+	/**
+	 * @return the editor instance (or null if not open)
+	 */
+	public static Editor getEditor() {
+		return editor;
+	}
+
 	public Editor() {
 		editor = this;
 		WebView view = new WebView();
 		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
+		view.setCache(true);
+		view.setCacheHint(CacheHint.SPEED);
 		pageLoaded = false;
 		bridge = new Bridge(this);
 
@@ -144,31 +129,6 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		// handle copy and paste manually
 		addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyEvent);
 
-		// other windows scan the contents of the editor continuously
-		changedSinceLastNotify = false;
-		changeNotifier = Executors.newSingleThreadScheduledExecutor(
-				new ThreadUtils.NamedThreadFactory("Editor-Change-Notifier"));
-		notifyTask = changeNotifier.scheduleAtFixedRate(() -> {
-			if(changedSinceLastNotify) {
-				changedSinceLastNotify = false;
-				Platform.runLater(this::updateObservers);
-			}
-
-			// a hack to make absolutely sure that the editor doesn't stay read only
-			// even if the simulation crashes
-			if(mode == Mode.EXECUTE_MODE && !getWindowManager().getCPU().isRunning())
-				editMode();
-
-		}, 0, 2, TimeUnit.SECONDS);
-
-
-		// continuous assembly
-		continuousAssembly = Executors.newSingleThreadScheduledExecutor(
-				new ThreadUtils.NamedThreadFactory("Continuous-Assembly"));
-		continuousAssemblyInProgress = false;
-		assembleTask = null;
-		lastProgramHash = 0;
-
 		getContentPane().getChildren().add(view);
 	}
 
@@ -185,6 +145,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 	}
 
 	public void handleKeyEvent(KeyEvent event) {
+		// TODO: refactor to check for fewer key combos during execute mode (if(execute mode) on the outside
 		if (C_c.match(event)) {
 			if (mode == Mode.EXECUTE_MODE)
 				return;
@@ -225,86 +186,6 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		} else if(C_minus.match(event) || C_subtract.match(event)) {
 			changeFontSize(-1);
 			event.consume();
-		} else {
-			if(mode == Mode.EXECUTE_MODE)
-				return;
-			changedSinceLastNotify = true;
-		}
-	}
-
-
-	/**
-	 * set continuous assembly 'on' for future file loads
-	 * also start continuous assembly now
-	 */
-	public void enableContinuousAssembly() {
-		continuousAssemblyEnabled = true;
-		startContinuousAssembly();
-	}
-
-	/**
-	 * set continuous assembly 'off' for future file loads
-	 * also stop continuous assembly now if it is running
-	 */
-	public void disableContinuousAssembly() {
-		continuousAssemblyEnabled = false;
-		stopContinuousAssembly();
-	}
-
-	public boolean isContinuousAssemblyEnabled() {
-		return continuousAssemblyEnabled;
-	}
-
-
-	private void startContinuousAssembly() {
-		if(assembleTask != null) {
-			assembleTask.cancel(false); // wait to finish
-		}
-		if(!continuousAssembly.isShutdown()) {
-			assembleTask = continuousAssembly.scheduleAtFixedRate(() -> {
-				if(!continuousAssemblyEnabled || mode == Mode.EXECUTE_MODE)
-					return;
-
-				try {
-					FutureTask<String> text = new FutureTask<>(() -> {
-						try {
-							return getText();
-						} catch(Exception e) {
-							return null;
-						}
-					});
-					Platform.runLater(text);
-
-					String program = text.get(100, TimeUnit.MILLISECONDS);
-					if(program == null) return;
-					int thisProgramHash = program.hashCode();
-
-					if (lastProgramHash != thisProgramHash) {
-						continuousAssemblyInProgress = true;
-						Platform.runLater(this::refreshTitle);
-
-						//DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
-						final List<Problem> problems = Assembler.checkForProblems(program);
-						Platform.runLater(() -> setProblems(problems));
-						lastProgramHash = thisProgramHash;
-						//t.stopAndPrint();
-					}
-				} catch(TimeoutException | InterruptedException ignored) {
-					// its fine, just don't compile
-				} catch (Exception e) {
-					UIUtils.showExceptionDialog(e);
-				} finally {
-					continuousAssemblyInProgress = false;
-					Platform.runLater(this::refreshTitle);
-				}
-			}, 0, continuousAssemblyRefreshPeriod, TimeUnit.MILLISECONDS);
-		}
-	}
-
-	public void stopContinuousAssembly() {
-		if(assembleTask != null) {
-			assembleTask.cancel(true);
-			assembleTask = null;
 		}
 	}
 
@@ -368,43 +249,13 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		boolean userInControl = (boolean) settings.get("editor.user-control-during-execution");
 		jsWindow.setMember("userInControl", userInControl);
 
-		continuousAssemblyEnabled = (boolean) settings.get("editor.continuous-assembly");
-		continuousAssemblyRefreshPeriod = (int) settings.get("editor.continuous-assembly-refresh-period");
-
-		if(initialLoad) {
-			String initialFilename;
-			if(!GuiMode.args.files.isEmpty())
-				initialFilename = GuiMode.args.files.get(0);
-            else
-                initialFilename = (String) settings.get("editor.initial-file");
-
-			if (initialFilename != null && !initialFilename.isEmpty()) {
-				File f = new File(initialFilename);
-				if (f.exists()) {
-					loadFile(f);
-				} else {
-					UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
-					newFile();
-				}
-			} else {
-				newFile();
-			}
-		} else {
-			if(currentFile != null) {
-				loadFile(currentFile);
-			} else {
-				newFile();
-			}
-		}
-
-
 		if(getWindowManager().getCPU().isRunning())
 			executeMode();
 
+		loadCurrentFile();
+
 		// signals that all the editor methods are now safe to call
 		pageLoaded = true;
-		// signals that whenever the editor is opened again, it is not for the first time
-		initialLoad = false;
 	}
 
 	private void loadPage(Settings settings) {
@@ -432,43 +283,18 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 
 		loadPage(wm.getSettings());
 
-		String[] observersToAdd = { Labels.class.getSimpleName() };
-
-		for (String className : observersToAdd) {
-			TemporaryObserver obs =
-				(TemporaryObserver) wm.getWorkspace().findInternalWindow(WindowEnum.ofString(className));
-			if (obs != null) addObserver(obs);
-		}
-
 		super.ready();
 	}
 
 	@Override
 	public void close() {
-		if (hasOutstandingChanges()) {
-			ButtonType save = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
+		boolean cancelled = CurrentFile.promptToSaveIfNecessary();
 
-			if (save == ButtonType.YES) {
-				saveFile();
-			} else if (save == ButtonType.NO) {
-				// fall through and call super.close()
-			} else {
-				// don't call super.close() => stays open
-				return;
-			}
+		if(!cancelled) {
+			editor = null;
+
+			super.close();
 		}
-
-		stopContinuousAssembly();
-		// shutdown the continuous assembly thread
-		continuousAssembly.shutdownNow();
-
-		notifyTask.cancel(true);
-		changeNotifier.shutdownNow();
-		detachObservers();
-
-		editor = null;
-
-		super.close();
 	}
 
 	@SuppressWarnings("unused")
@@ -522,119 +348,56 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 		jsWindow.call("refreshProblems");
 	}
 
+
 	/**
-	 * Adds an observer of this class.
-	 *
-	 * @param obs the observer to add
+	 * _Discard_ changes made in the editor and load from disk
 	 */
-	void addObserver(TemporaryObserver obs) {
-		observers.add(obs);
+	public void loadCurrentFile() {
+		contentIsModified = false; // to ensure getCurrentText doesn't take the editor's content
+		jsWindow.call("loadText", CurrentFile.getCurrentText());
+        refreshTitle();
 	}
 
 	/**
-	 * Calls the <code>update</code> method on all observers.
+	 * @warning must be called from a JavaFX thread
 	 */
-	private void updateObservers() {
-		observers.forEach(TemporaryObserver::update);
-	}
-
-	/**
-	 * Calls the <code>stopObserving</code> method on all observers and clears the list of observers.
-	 */
-	private void detachObservers() {
-		observers.forEach(TemporaryObserver::stopObserving);
-		observers.clear();
-	}
-
-
-	public static String getText() {
+	public String getEditorText() {
 		if (editor != null && editor.jsEditor != null)
 			return (String) editor.jsEditor.call("getValue");
-		else if(currentFile != null) {
-			return FileUtils.getFileContent(currentFile);
-		} else {
+		else
 			return "";
-		}
-	}
-
-	public int getLine() {
-		return (int) jsWindow.call("getLine");
-	}
-
-	public static boolean hasBackingFile() {
-		return currentFile != null;
-	}
-	public static String getBackingFilename() {
-		return currentFile == null ? "Untitled" : currentFile.getName();
 	}
 
 	/**
-	 * @note does not perform the write if no changes have been made
+	 * @warning must be called from a JavaFX thread
 	 */
-	public void saveFile() {
-		String currentText = getText();
-
-		if(hasBackingFile() && changedSinceLastSave) {
-			FileUtils.writeToFile(currentFile, currentText);
-			setEdited(false);
-			refreshTitle();
-		}
-	}
-
-	public void saveAs(File file) {
-		if(file == null) return;
-
-		FileUtils.writeToFile(file, getText());
-
-		currentFile = file;
-		setEdited(false);
-		refreshTitle();
-	}
-
-	public void loadFile(File file) {
-		currentFile = file;
-		jsWindow.call("loadText", FileUtils.getFileContent(file));
-		setEdited(false);
-		changedSinceLastNotify = true;
-
-		updateObservers();
-
-		if(continuousAssemblyEnabled)
-			startContinuousAssembly();
-	}
-	public void reloadFile() {
-		loadFile(currentFile);
-	}
-
-	public void newFile() {
-		currentFile = null;
-		jsWindow.call("loadText", "");
-		setEdited(false);
-		changedSinceLastNotify = true;
-
-		updateObservers();
-
-		if(continuousAssemblyEnabled)
-			startContinuousAssembly();
+	public int getLine() {
+		return (int) jsWindow.call("getLine");
 	}
 
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
 	private void setEdited(boolean edited) {
-		changedSinceLastSave = edited;
+		contentIsModified = edited;
 		refreshTitle();
 	}
 
 	public boolean hasOutstandingChanges() {
-		return changedSinceLastSave;
+		return contentIsModified;
 	}
 
-	private void refreshTitle() {
+	public void refreshTitle() {
+		// a hack to make absolutely sure that the editor doesn't stay read only
+		// even if the simulation crashes.
+		// note: refreshTitle is called by continuous checking every few seconds (if enabled)
+		if(mode == Mode.EXECUTE_MODE && !getWindowManager().getCPU().isRunning())
+			editMode();
+
 		String modeString = mode == Mode.EXECUTE_MODE ? " (Read Only)" : "";
-		String assembling = continuousAssemblyInProgress ? " ~ " : " - ";
-		String editedSymbol = changedSinceLastSave ? " *" : "";
-		setWindowTitle(WindowEnum.getName(this) + modeString + assembling + getBackingFilename() + editedSymbol);
+		String assembling = CurrentFile.checkIsInProgress() ? " ~ " : " - ";
+		String editedSymbol = contentIsModified ? " *" : "";
+		setWindowTitle(WindowEnum.getName(this) + modeString + assembling + CurrentFile.getBackingFilename() + editedSymbol);
 	}
 
 	/**
@@ -692,7 +455,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 			if (clip != null) {
 				jsEditor.call("insert", clip);
 			}
-			changedSinceLastNotify = true;
+            setEdited(true);
 		}
 	}
 
@@ -740,7 +503,7 @@ public class Editor extends InternalWindow { //TODO: extract model from the view
 	public void insertBreakpoint() {
 		if(mode == Mode.EDIT_MODE) {
 			jsWindow.call("insertBreakpoint");
-			changedSinceLastNotify = true;
+            setEdited(true);
 		}
 	}
 

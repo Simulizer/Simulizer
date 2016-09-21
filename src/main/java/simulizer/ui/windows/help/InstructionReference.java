@@ -8,6 +8,7 @@ import simulizer.assembler.representation.Instruction;
  * @author Michael
  *
  */
+@SuppressWarnings("unused")
 public class InstructionReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public InstructionReference() {
