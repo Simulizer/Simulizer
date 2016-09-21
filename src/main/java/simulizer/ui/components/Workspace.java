@@ -1,9 +1,9 @@
 package simulizer.ui.components;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -40,9 +40,10 @@ import simulizer.utils.UIUtils;
  *
  */
 public class Workspace extends Observable implements Themeable {
-	private final List<InternalWindow> openWindows = new ArrayList<>();
+	private final LinkedList<InternalWindow> openWindows = new LinkedList<>();
 	private final Pane pane = new Pane();
-	private WindowManager wm = null;
+	private final WindowCycler cycler;
+	private final WindowManager wm;
 
 	private static class ResizeListener implements ChangeListener<Object> {
 		private final Workspace w;
@@ -93,8 +94,13 @@ public class Workspace extends Observable implements Themeable {
 		}
 
 		// CTRL + TAB Event
-		if ((boolean) wm.getSettings().get("workspace.ctrl-tab"))
-			window.addEventHandler(KeyEvent.ANY, new CTRL_TAB(this));
+		if ((boolean) wm.getSettings().get("workspace.ctrl-tab")) {
+			cycler = new WindowCycler(this);
+			window.addEventHandler(KeyEvent.ANY, cycler);
+			wm.getScene().focusOwnerProperty().addListener(e -> focusedWindowChanged());
+		} else
+			cycler = null;
+
 	}
 
 	/**
@@ -288,8 +294,11 @@ public class Workspace extends Observable implements Themeable {
 			if (!window.isClosed())
 				window.close();
 
-			if (window.isClosed())
+			if (window.isClosed()) {
+				if (cycler != null)
+					cycler.removedIndex(openWindows.indexOf(window));
 				openWindows.remove(window);
+			}
 		}
 	}
 
@@ -368,6 +377,22 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	public boolean hasWindowsOpen() {
 		return !openWindows.isEmpty();
+	}
+
+	/**
+	 * Updates the cycle order when the focused InternalWindow has changed
+	 */
+	private void focusedWindowChanged() {
+		if (cycler == null)
+			return;
+		synchronized (openWindows) {
+			for (InternalWindow w : openWindows) {
+				if (w.hasFocus()) {
+					cycler.setWindowFocused(openWindows, w);
+					break;
+				}
+			}
+		}
 	}
 
 }
