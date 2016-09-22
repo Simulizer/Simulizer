@@ -19,10 +19,6 @@ public class ObjectSetting extends SettingValue<List<SettingValue<?>>> {
 		super(jsonName, humanName, "", new ArrayList<SettingValue<?>>());
 	}
 
-	public ObjectSetting(String jsonName, String humanName, String description) {
-		super(jsonName, humanName, description, new ArrayList<SettingValue<?>>());
-	}
-
 	@Override
 	public boolean isValid(List<SettingValue<?>> value) {
 		return true;

@@ -1,11 +1,9 @@
 package simulizer.ui.components.settings;
 
-import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import simulizer.settings.types.DoubleSetting;
 
 /**
@@ -14,29 +12,26 @@ import simulizer.settings.types.DoubleSetting;
  * @author Michael
  *
  */
-public class DoubleControl extends GridPane {
+public class DoubleControl extends VBox {
 
 	public DoubleControl(DoubleSetting setting) {
 		// Option Name
 		Label title = new Label(setting.getHumanName());
-		GridPane.setHgrow(title, Priority.SOMETIMES);
+		title.setFont(new Font(20));
 		title.getStyleClass().add("title");
-		add(title, 0, 0);
+		getChildren().add(title);
 
 		// Option Desc
 		Label desc = new Label(setting.getDescription());
-		GridPane.setHgrow(desc, Priority.SOMETIMES);
 		desc.getStyleClass().add("description");
+		desc.setFont(new Font(14));
 		desc.setWrapText(true);
-		add(desc, 0, 1);
+		getChildren().add(desc);
 
 		// Option Value
 		TextField value = new TextField();
 		value.setEditable(true);
 		value.setText("" + setting.getValue());
-		GridPane.setRowSpan(value, 2);
-		GridPane.setVgrow(value, Priority.SOMETIMES);
-		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
 		value.textProperty().addListener(e -> {
 			boolean valid = false;
@@ -53,11 +48,6 @@ public class DoubleControl extends GridPane {
 			else
 				value.setText("" + setting.getValue());
 		});
-		add(value, 1, 0);
-
-		// Tooltip
-		Tooltip tooltip = new Tooltip(setting.getDescription());
-		Tooltip.install(title, tooltip);
-		Tooltip.install(value, tooltip);
+		getChildren().add(value);
 	}
 }

@@ -4,6 +4,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
 import simulizer.settings.types.BooleanSetting;
 
 /**
@@ -23,9 +24,12 @@ public class BooleanControl extends GridPane {
 		add(checkBox, 0, 0);
 		
 		Label name = new Label(setting.getHumanName());
+		name.setFont(new Font(20));
 		add(name, 1, 0);
 		
 		Label desc = new Label(setting.getDescription());
+		desc.setWrapText(true);
+		desc.setFont(new Font(14));
 		add(desc, 1, 1);
 	}
 }

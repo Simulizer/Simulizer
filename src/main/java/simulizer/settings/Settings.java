@@ -63,20 +63,35 @@ public class Settings {
 	private Settings(File json, JsonObject jsonObject) {
 		this.json = json;
 		// Sets up the structure of the settings file
+		// Includes default settings
 		// @formatter:off
-		settings.add(new BooleanSetting("debug", "Debug Menu", "Show debug menu in the Menu Bar", false));
-		settings.add(new ObjectSetting("window", "Main Window")
+		
+		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
+				.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
+				.add(new IntegerSetting("delay", "Display Time (in ms)", "Minimum time the splash screen should be shown for", 750, 0, Integer.MAX_VALUE))
+				.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
+				.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
+				);
+		
+		settings.add(new ObjectSetting("window", "Window")
 				.add(new IntegerSetting("width", "Width", "Default window width", 1024, 300, Integer.MAX_VALUE))
 				.add(new IntegerSetting("height", "Height", "Default window height", 705, 300, Integer.MAX_VALUE))
+				.add(new BooleanSetting("fullscreen", "Fullscreen", "Start application in fullscreen mode", false))
+				.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default"))
 			);
+		
+		settings.add(new ObjectSetting("menubar", "Menu Bar")
+				.add(new BooleanSetting("debug", "Debug Menu", "Show debug options in the menu bar", false))
+				.add(new BooleanSetting("all-windows", "Include menu bar", "Include the menu bar on every window for easy access", false))
+				);
+		
 		settings.add(new ObjectSetting("workspace", "Workspace")
-					.add(new StringSetting("theme", "Default Theme", "The default theme to load", "default"))
-					.add(new StringSetting("layout", "Default Layout", "The default layout to load", "default.json"))
+					.add(new StringSetting("layout", "Default Layout", "The default layout to load (use filename inside the layouts folder)", "default.json"))
 					.add(new ObjectSetting("scale-ui", "Scale User Interface")
 							.add(new BooleanSetting("enabled", "Allow autosizing of Internal Windows", "Resize all Internal Windows when the main window resizes"))
 							.add(new IntegerSetting("delay", "Delay before resize", "How long to wait until the Internal Windows resize", 50)))
 					.add(new BooleanSetting("ctrl-tab", "Window Cycler", "Enables/Disable CTRL + TAB shortcut to switch between internal windows", true))
-					.add(new ObjectSetting("grid", "Grid Settings", "Configure when Internal Windows should snap to a grid")
+					.add(new ObjectSetting("grid", "Grid Settings")
 					  	.add(new BooleanSetting("enabled", "Allow grid snapping", "Enables/Disable snapping Internal Windows to a grid"))
 					  	.add(new IntegerSetting("horizontal", "Horizontal Lines", "Number of horizontal gridlines to snap to"))
 					  	.add(new IntegerSetting("vertical", "Vertical Lines", "Number of vertical gridlines to snap to"))
@@ -84,19 +99,18 @@ public class Settings {
 					  	.add(new IntegerSetting("delay", "Delay before snap", "How long to wait until the window snaps", 200, 0, Integer.MAX_VALUE))
 					  	)
 					);
+		
 		settings.add(new ObjectSetting("internal-window", "Internal Window")
-				.add(new BooleanSetting("mouse-borders", "Lock to main window", "Stop internal windows from being lost outside the Main Window", true))
-				.add(new ObjectSetting("extractable", "Extractable")
-					.add(new BooleanSetting("enabled", "Enable feature", "Allow for internal windows to be extracted from the main window", true))
-					.add(new BooleanSetting("menu-bar", "Include menu bar", "Include the main menu bar in each extracted window for easy access", false))
-					)
+				.add(new BooleanSetting("mouse-borders", "Lock to main window", "Stop internal windows from being lost outside the workspace", true))
+				.add(new BooleanSetting("extractable", "Extractable Windows", "Allow for internal windows to be extracted from the workspace", true))	
 			);
+		
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
 						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
-						.add(new BooleanSetting("zero-memory", "Zero Memory", "Sets whether memory should be zeroed"))
-						.add(new BooleanSetting("pipelined", "Use Pipelined CPU", "Sets whether to use the pipelined CPU or not", false))
+						.add(new BooleanSetting("pipelined", "Use pipelined CPU?", "Sets whether to use the pipelined CPU or not", false))
 						.add(new BooleanSetting("annotations", "Run Annotations", "Sets whether to run annotations or not", true))
 					);
+		
 		settings.add(new ObjectSetting("editor", "Editor")
 					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas", "monospace"))
 					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 20, 0, Integer.MAX_VALUE))
@@ -110,16 +124,12 @@ public class Settings {
 					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
 					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1500, 1, Integer.MAX_VALUE))
 					);
-		settings.add(new ObjectSetting("splash-screen", "Splash Screen")
-					.add(new BooleanSetting("enabled", "Show splash screen", "Toggles whether the splash screen is shown on launch", true))
-					.add(new IntegerSetting("delay", "Display Time (in ms)", "Minimum time the splash screen should be shown for", 750, 0, Integer.MAX_VALUE))
-					.add(new IntegerSetting("width", "Splash Screen Width", "Width of the splash screen", 676, 0, Integer.MAX_VALUE))
-					.add(new IntegerSetting("height", "Splash Screen Height", "Height of the splash screen", 235, 0, Integer.MAX_VALUE))
-					);	
+		
 		settings.add(new ObjectSetting("logger", "Logger")
 				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
 				.add(new IntegerSetting("font-size", "Font Size", "Font size for the Program I/O", 15))
 				);
+		
 		settings.add(new ObjectSetting("hlvis", "High Level Visualiser")
 				.add(new BooleanSetting("auto-open", "Automatically Open High Level Visualiser", "Automatically Open High Level Visualiser when a new visualisation is shown", true))
 				);

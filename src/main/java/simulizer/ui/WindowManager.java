@@ -25,12 +25,15 @@ import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
-import simulizer.ui.components.*;
+import simulizer.ui.components.AssemblingDialog;
+import simulizer.ui.components.CurrentFile;
+import simulizer.ui.components.MainMenuBar;
+import simulizer.ui.components.UISimulationListener;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
-import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
 /**
@@ -87,7 +90,7 @@ public class WindowManager extends GridPane {
 			shutdown();
 		});
 
-		if(GuiMode.args.fullscreen)
+		if(GuiMode.args.fullscreen || (boolean) settings.get("window.fullscreen"))
 			primaryStage.setFullScreen(true);
 
 
@@ -96,7 +99,7 @@ public class WindowManager extends GridPane {
 		newCPU(GuiMode.args.pipelined || (boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
-		themes = new Themes((String) settings.get("workspace.theme"));
+		themes = new Themes((String) settings.get("window.theme"));
 		themes.addThemeableElement(workspace);
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 

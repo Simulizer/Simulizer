@@ -53,7 +53,7 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), editMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
 
 		// Debug
-		if ((boolean) wm.getSettings().get("debug"))
+		if ((boolean) wm.getSettings().get("menubar.debug"))
 			getMenus().add(debugMenu());
 
 		// Extra controls

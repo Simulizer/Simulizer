@@ -1,11 +1,9 @@
 package simulizer.ui.windows;
 
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TreeItem;
@@ -14,7 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.layout.VBox;
 import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 import simulizer.settings.types.BooleanSetting;
@@ -39,7 +37,7 @@ import simulizer.utils.UIUtils;
 public class Options extends InternalWindow {
 
 	private BorderPane pane;
-	private GridPane values;
+	private VBox values;
 	private TreeView<String> folders;
 	private String theme;
 
@@ -54,15 +52,18 @@ public class Options extends InternalWindow {
 		folders.minWidth(400);
 		pane.setLeft(folders);
 
-		values = new GridPane();
+		values = new VBox(5);
 		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
 		values.setPadding(new Insets(0, 10, 0, 10));
 
 		ScrollPane scroll = new ScrollPane();
 		scroll.setContent(values);
+		scroll.setFitToWidth(true);
+
 		GridPane.setVgrow(scroll, Priority.ALWAYS);
 		GridPane.setHgrow(scroll, Priority.SOMETIMES);
+		GridPane.setFillWidth(scroll, true);
 		pane.setCenter(scroll);
 
 		getContentPane().getChildren().add(pane);
@@ -77,7 +78,7 @@ public class Options extends InternalWindow {
 		createTree(options, settings);
 
 		folders.setRoot(options);
-		folders.getSelectionModel().select(options);
+		folders.setShowRoot(false);
 		folders.getSelectionModel().selectedItemProperty().addListener((e) -> {
 			FolderItem item = (FolderItem) folders.getSelectionModel().getSelectedItem();
 			showComponents(item.getObjectSetting());
@@ -112,31 +113,13 @@ public class Options extends InternalWindow {
 	 *            the ObjectSettings to generate the inner elements for
 	 */
 	private void showComponents(ObjectSetting settings) {
+		if (getWindowManager().getSettings().getAllSettings() == settings)
+			return;
+
 		// Remove all existing components
 		values.getChildren().removeAll(values.getChildren());
-		int rowCount = 1;
 
-		// Folder Title
-		Label title = new Label(settings.getHumanName());
-		title.setTextAlignment(TextAlignment.CENTER);
-		GridPane.setHgrow(title, Priority.ALWAYS);
-		GridPane.setHalignment(title, HPos.CENTER);
-		title.getStyleClass().add("title");
-		values.add(title, 0, rowCount++);
-
-		// Folder description Tag
-		if (!settings.getDescription().equals("")) {
-			Label description = new Label(settings.getDescription());
-			GridPane.setHgrow(description, Priority.ALWAYS);
-			description.getStyleClass().add("description");
-			values.add(description, 0, rowCount++);
-		}
-
-		// Separator
-		Separator sep = new Separator();
-		GridPane.setHgrow(sep, Priority.ALWAYS);
-		values.add(sep, 0, rowCount++);
-
+		boolean first = true;
 		for (SettingValue<?> value : settings.getValue()) {
 			// Create appropriate control for the setting
 			Node control = null;
@@ -163,10 +146,15 @@ public class Options extends InternalWindow {
 
 			// Add control to panel
 			if (control != null) {
-				GridPane.setHgrow(control, Priority.ALWAYS);
+				// Separator
+				if (!first)
+					values.getChildren().add(new Separator());
+
 				control.getStyleClass().add("control");
-				values.add(control, 0, rowCount++);
+				values.getChildren().add(control);
 			}
+
+			first = false;
 		}
 
 		// Give the new components the theme
