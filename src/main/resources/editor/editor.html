@@ -16,6 +16,12 @@
    in the gutter) but leaving the tooltip */
 .ace_info { background-image: none !important; }
 
+.ace_breakpoint {
+    //border-radius: 100px;
+    background-color: #1196C2;
+    color: white;
+}
+
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -56,6 +62,8 @@
 <div id="editor"></div>
 <script type="text/javascript">
 
+// Note: use alert() to output to the console back in Java land
+
 var editor;
 var session;
 var doc;
@@ -69,6 +77,22 @@ function onChange(e) {
     bridge.onChange();// a java method
     if(markers)
         removeMarkers();
+}
+
+function onGutterPress(e) {
+    // getBreakpoints returns an array of booleans
+    var row = e.getDocumentPosition().row;
+    var breakpoints = session.getBreakpoints();
+
+    if(typeof breakpoints[row] === typeof undefined) {
+        session.setBreakpoint(row);
+        bridge.onBreakpoint(row, true);
+    } else {
+        session.clearBreakpoint(row);
+        bridge.onBreakpoint(row, false);
+    }
+
+    e.stop();
 }
 
 function init() {
@@ -97,6 +121,8 @@ function init() {
 
     // for disabling, then re-enabling selection when switching modes
     editor._backupPointerEvents = editor.container.style.pointerEvents;
+
+    editor.on("guttermousedown", onGutterPress);
 }
 
 function cut() {
