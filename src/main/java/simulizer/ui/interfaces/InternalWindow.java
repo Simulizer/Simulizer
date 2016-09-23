@@ -47,10 +47,9 @@ public abstract class InternalWindow extends Window {
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
 	private MainMenuBar menuBar;
-	private EventManager internalEventManager = new EventManager(this), externalEventManager;
+	private EventManager internalEventManager = new EventManager(getContentPane()), externalEventManager;
 
 	public InternalWindow() {
-
 		UIUtils.assertFXThread(); // needed to create a stage
 
 		// Using caching to smooth movement
@@ -180,7 +179,7 @@ public abstract class InternalWindow extends Window {
 	 */
 	protected final void emphasise(double sf) {
 		// Ignore if window is just being opened
-		if (getScaleX() == 1 && getScaleY() == 1) {
+		if (getScaleX() == 1 && getScaleY() == 1 && !isExtracted) {
 			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
 			sc.setToX(sf);
 			sc.setToY(sf);
@@ -190,6 +189,8 @@ public abstract class InternalWindow extends Window {
 			sc.setOnFinished((e) -> getStyleClass().remove("highlighting"));
 			sc.play();
 			toFront();
+		} else if (isExtracted) {
+			extractedStage.toFront();
 		}
 	}
 

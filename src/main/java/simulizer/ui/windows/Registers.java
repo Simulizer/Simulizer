@@ -43,10 +43,11 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private final Set<Integer> changedRegisters = new HashSet<>();
 
 	public Registers() {
-		getContentPane().widthProperty().addListener((o, old, newValue) -> {
+		getEventManager().addPropertyListener(widthProperty(), (o, old, newValue) -> {
 			int numColumns = table.getColumns().size();
+			double width = getContentPane().getWidth();
 			for (TableColumn<Data, ?> column : table.getColumns())
-				column.setPrefWidth(getContentPane().getWidth() / numColumns);
+				column.setPrefWidth(width / numColumns);
 		});
 		table.setCursor(Cursor.DEFAULT);
 	}
@@ -154,7 +155,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 * @author Michael
 	 *
 	 */
-	@SuppressWarnings({"WeakerAccess", "unused"})
+	@SuppressWarnings({ "WeakerAccess", "unused" })
 	public class Data {
 		private final Register reg;
 		private byte[] contents;

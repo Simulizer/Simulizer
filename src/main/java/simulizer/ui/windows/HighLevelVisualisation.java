@@ -52,13 +52,13 @@ public class HighLevelVisualisation extends InternalWindow implements Observer {
 		setMinWidth(width);
 		setMinHeight(200);
 
-		getContentPane().widthProperty().addListener((o, old, newValue) -> {
+		getEventManager().addPropertyListener(widthProperty(), (o, old, newValue) -> {
 			width = newValue.doubleValue();
 			for (Tab tab : tabs.getTabs())
 				((DataStructureVisualiser) tab.getContent()).repaint();
 		});
 
-		getContentPane().heightProperty().addListener((o, old, newValue) -> {
+		getEventManager().addPropertyListener(heightProperty(), (o, old, newValue) -> {
 			height = newValue.doubleValue();
 			for (Tab tab : tabs.getTabs())
 				((DataStructureVisualiser) tab.getContent()).repaint();
