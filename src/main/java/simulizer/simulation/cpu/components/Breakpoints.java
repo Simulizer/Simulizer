@@ -28,7 +28,10 @@ public class Breakpoints {
     }
 
     public static synchronized void removeBreakpointLine(int line) {
-        breakpointLineNumbers.remove(line);
+        // be careful: ArrayList.remove(int) removes by index but ArrayList.remove(Object) removes by equality
+        // so wrap in an Integer to get the desired effect
+        breakpointLineNumbers.remove(Integer.valueOf(line));
+
         // note: if the program has changed since the breakpoint was added then the address will be different
         // and so probably won't be removed
         breakpointAddresses.remove(getAddressOfLine(line));
