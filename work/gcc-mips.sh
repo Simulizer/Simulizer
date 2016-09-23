@@ -151,6 +151,9 @@ sed --in-place='' 's/\(^[^#]*[[:alpha:]]\+\)\./\1_/g' "$OUT"
 # substitute mnemonic register names (personal preference)
 sed --in-place='' 's/\$31/$ra/' "$OUT"
 
+# some versions of GCC seem to be placing literal null characters rather than \0
+sed --in-place='' 's/\x0/\\0/' "$OUT"
+
 
 # gcc uses these macros which simulizer does not understand for a particular
 # overloading, for example the 'move' instruction is used to move from memory to
