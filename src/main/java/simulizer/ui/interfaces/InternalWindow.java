@@ -292,6 +292,10 @@ public abstract class InternalWindow extends Window {
 	public final boolean isClosed() {
 		return isClosed;
 	}
+	
+	public boolean canClose() {
+		return true;
+	}
 
 	public boolean hasFocus() {
 		Queue<Node> nodes = new LinkedList<Node>();

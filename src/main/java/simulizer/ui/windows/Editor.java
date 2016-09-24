@@ -3,12 +3,11 @@ package simulizer.ui.windows;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.scene.CacheHint;
-import javafx.scene.text.FontSmoothingType;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.CacheHint;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -16,6 +15,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
@@ -311,6 +311,11 @@ public class Editor extends InternalWindow {
 
 			super.close();
 		}
+	}
+	
+	@Override
+	public boolean canClose() {
+		return !CurrentFile.promptToSaveIfNecessary();
 	}
 
 	@SuppressWarnings("unused")
