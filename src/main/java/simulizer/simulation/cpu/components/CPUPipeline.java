@@ -240,8 +240,7 @@ public class CPUPipeline extends CPU {
 		boolean jumped = oldIDToExecute.mode.equals(AddressMode.JTYPE) ||
 				(oldIDToExecute.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		
-		if(jumped)//flush pipeline and allow continuation of running
-		{
+		if(jumped) {//flush pipeline and allow continuation of running
 			sendMessage(new PipelineHazardMessage(Hazard.CONTROL));
 			this.isFinished = 0;//considering edge case where jump on last instruction
 			this.isRunning = true;//keep the program running
@@ -272,13 +271,14 @@ public class CPUPipeline extends CPU {
 			}
 		}
 		sendMessage(new PipelineStateMessage(fetchAddress, decodeAddress, executeAddress));
-		
-		this.nopCount = (this.nopCount==0) ? 0 : this.nopCount-1;//only decrementing if not 0
+
+		// decrement until 0 but no further
+		nopCount = (nopCount <= 0) ? 0 : nopCount-1;
 		
 		if(needToBubbleRAWReg) {//if raw hazard has happened in this cycle
-			this.nopCount = 1;
+			nopCount = 1;
 		} else if(jumped) {//if jump occurred in this cycle
-			this.nopCount = 2;
+			nopCount = 2;
 		}
 
 		waitForNextTick();

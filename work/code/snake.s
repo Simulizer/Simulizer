@@ -1,3 +1,4 @@
+    # compiled with -O3 (with hand-edited fixes involving mflo)
 	# @{ var c = vis.load('canvas'); }@
 	# @{ c.squareShaped = true;      }@
 	# @{ c.showFPS = true;           }@
