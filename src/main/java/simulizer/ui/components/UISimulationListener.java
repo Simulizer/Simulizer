@@ -27,7 +27,7 @@ import simulizer.ui.windows.PipelineView;
  */
 public class UISimulationListener extends SimulationListener {
 	public WindowManager wm;
-	long startTime;
+	private long startTime;
 
 	public UISimulationListener(WindowManager wm) {
 		this.wm = wm;
@@ -56,11 +56,10 @@ public class UISimulationListener extends SimulationListener {
 
 				Platform.runLater(() -> wm.getPrimaryStage().setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Simulation Running"));
 
-				if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
-					wm.getWorkspace().openEditorWithCallback((editor) -> {
-						System.out.println("Simulation Started - running '" + CurrentFile.getBackingFilename() + "'" + (editor.hasOutstandingChanges() ? " with outstanding changes" : "") + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
-						editor.executeMode();
-					});
+				final Editor editor = Editor.getEditor();
+				if(editor != null) {
+                    System.out.println("Simulation Started - running '" + CurrentFile.getBackingFilename() + "'" + (editor.hasOutstandingChanges() ? " with outstanding changes" : "") + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
+                    Platform.runLater(editor::executeMode);
 				} else {
 					System.out.println("Simulation Started - running '" + CurrentFile.getBackingFilename() + "'" + " with the editor closed" + (wm.getCPU().isPipelined() ? " (Pipelined CPU)" : " (Non-Pipelined CPU)"));
 				}
@@ -89,9 +88,9 @@ public class UISimulationListener extends SimulationListener {
 					System.out.println("Average time per tick: " + (duration / ticks) + " ms");
 				}
 
-				final Editor e = (Editor) wm.getWorkspace().findInternalWindow(WindowEnum.EDITOR);
-				if (e != null) {
-					Platform.runLater(e::editMode);
+				final Editor editor = Editor.getEditor();
+				if(editor != null) {
+					Platform.runLater(editor::editMode);
 				}
 			}
 				break;
@@ -100,7 +99,7 @@ public class UISimulationListener extends SimulationListener {
 		}
 	}
 
-	int count = 0;
+	private int count = 0;
 
 	@Override
 	public void processAnnotationMessage(AnnotationMessage m) {
@@ -110,7 +109,8 @@ public class UISimulationListener extends SimulationListener {
 	}
 
 	private void highlightAddresses(Address fetch, Address decode, Address execute) {
-		if (wm.getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
+		final Editor editor = Editor.getEditor();
+		if(editor != null) {
 			CPU cpu = wm.getCPU();
 
 			if (cpu != null) {
@@ -123,7 +123,7 @@ public class UISimulationListener extends SimulationListener {
 					int decodeL = lineNums.getOrDefault(decode, -1);
 					int executeL = lineNums.getOrDefault(execute, -1);
 
-					wm.getWorkspace().openEditorWithCallback((editor) -> editor.highlightPipeline(fetchL, decodeL, executeL));
+					Platform.runLater(() -> editor.highlightPipeline(fetchL, decodeL, executeL));
 				}
 			}
 		}

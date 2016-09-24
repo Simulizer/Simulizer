@@ -230,10 +230,12 @@ public class WindowManager extends GridPane {
 					final Program p = Assembler.assemble(programText, log, false);
 
 					// doing as little as possible in the FX thread
-					if (getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
-						getWorkspace().openEditorWithCallback((editor2) -> {
+					// open the editor and set problems if program has problems or if the editor is already open.
+					// Leave the editor closed if it is closed and there are no problems
+					if(p == null || Editor.getEditor() != null) {
+						getWorkspace().openEditorWithCallback((editor) -> {
 							// if no problems, has the effect of clearing
-							editor2.setProblems(log.getProblems());
+							editor.setProblems(log.getProblems());
 							if (p == null) {
 								int size = log.getProblems().size();
 								UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");

@@ -41,8 +41,7 @@ import simulizer.utils.UIUtils;
 @SuppressWarnings("WeakerAccess")
 public class Editor extends InternalWindow {
 
-    // TODO: can treat just like other windows now that the CurrentFile is extracted
-	private static Editor editor; // only one instance
+	private static volatile Editor editor; // only one instance
 
 	private volatile boolean pageLoaded;
 	private final WebEngine engine;
@@ -122,7 +121,6 @@ public class Editor extends InternalWindow {
 	}
 
 	public Editor() {
-		editor = this;
 		WebView view = new WebView();
 		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
 		view.setCache(true);
@@ -273,6 +271,7 @@ public class Editor extends InternalWindow {
 
 		// signals that all the editor methods are now safe to call
 		pageLoaded = true;
+        editor = this; // only set once ready to be used
 	}
 
 	private void loadPage(Settings settings) {
