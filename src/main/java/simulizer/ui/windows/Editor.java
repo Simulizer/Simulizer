@@ -315,7 +315,7 @@ public class Editor extends InternalWindow {
 			super.close();
 		}
 	}
-	
+
 	@Override
 	public boolean canClose() {
 		return !CurrentFile.promptToSaveIfNecessary();

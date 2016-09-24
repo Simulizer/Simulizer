@@ -80,6 +80,11 @@ public class GuiMode {
 	public static void start(String[] rawArgs, CommandLineArguments parsedArgs) {
 		Thread.setDefaultUncaughtExceptionHandler(UIUtils::showExceptionDialog);
 
+		// improves ugly font rendering
+		// see http://mail.openjdk.java.net/pipermail/openjfx-dev/2013-August/009959.html
+		System.setProperty("prism.lcdtext", "false");
+		System.setProperty("prism.text", "t2k");
+
 		settingsFile = new File(parsedArgs.guiMode.settingsPath);
 		args = parsedArgs.guiMode;
 

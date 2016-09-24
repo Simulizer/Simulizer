@@ -82,9 +82,11 @@ var SimpHighlightRules = function() {
     });
 
     var operandRules = everywhereRules; // no need to make a copy the second time. modify everywhereRules
+    // note about matching ^: Instructions match the word boundaries around them so for
+    // "syscall\nb:b b" to parse correctly, must match beginning of line as well as end
     operandRules.splice(0/*index*/, 0/*items to delete*/, {
         token: 'end',
-        regex: '($|;)',
+        regex: '($|^|;)',
         next: 'start'
     });
 
