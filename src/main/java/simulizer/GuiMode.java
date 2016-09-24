@@ -88,9 +88,6 @@ public class GuiMode {
 	}
 
 	public static void launchWindowManager(Stage primaryStage) {
-		// Close application
-		primaryStage.setOnCloseRequest((t) -> wm.getWorkspace().closeAll());
-
 		// Just show the main window for now
 		try {
 			wm = new WindowManager(app, primaryStage, settings);

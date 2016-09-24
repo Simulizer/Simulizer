@@ -51,7 +51,7 @@ safe.
 #define NOP asm volatile ("nop")
 
 // annotation
-// eg A("h.move(a, b);") ---> # @{ h.move(a, b); }@
+// eg A("h.move(a, b);") ---> nop # @{ h.move(a, b); }@
 #define A(x) asm volatile ("nop # @{ " x " }@")
 
 // can refer to %0 inside the js text and gcc will replace with the appropriate register

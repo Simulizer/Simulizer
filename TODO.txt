@@ -6,6 +6,10 @@ todo
 - note that Java probably needs more heap size given to it to utilise 1MiB of stack
 - improve guide
     - up to date annotations API
+- add randInt to the api
+- remove debug printing of
+    - updating labels
+    - canvas size on resize
 - change simulation bridge setSpeed to setCycleFreq to match cpu.setCycleFreq
 - UIUtils.exception dialog fall back to Simulizer.handleException if not in UI
   mode (if JavaFX not running)

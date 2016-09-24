@@ -30,10 +30,10 @@ import simulizer.ui.components.CurrentFile;
 import simulizer.ui.components.MainMenuBar;
 import simulizer.ui.components.UISimulationListener;
 import simulizer.ui.components.Workspace;
-import simulizer.ui.interfaces.WindowEnum;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
+import simulizer.ui.windows.Editor;
 import simulizer.utils.UIUtils;
 
 /**
@@ -85,14 +85,13 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
-		primaryStage.setOnHiding(e -> {
+		primaryStage.setOnCloseRequest(e -> {
 			e.consume();
 			shutdown();
 		});
 
 		if(GuiMode.args.fullscreen || (boolean) settings.get("window.fullscreen"))
 			primaryStage.setFullScreen(true);
-
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
@@ -125,7 +124,7 @@ public class WindowManager extends GridPane {
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus
 		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
-			if(e.isAltDown())
+			if (e.isAltDown())
 				e.consume();
 		});
 
@@ -150,7 +149,7 @@ public class WindowManager extends GridPane {
 				} catch (InterruptedException e1) {
 					UIUtils.showExceptionDialog(e1);
 				}
-			} , "Layout-Fix-Thread");
+			}, "Layout-Fix-Thread");
 			layoutFixThread.setDaemon(true);
 			layoutFixThread.start();
 		});
@@ -229,14 +228,16 @@ public class WindowManager extends GridPane {
 			try {
 				final Program cachedP = CurrentFile.getCachedAssembledProgram(programText);
 
-                if(cachedP == null) { // no cached version available
+				if (cachedP == null) { // no cached version available
 					final Program p = Assembler.assemble(programText, log, false);
 
 					// doing as little as possible in the FX thread
-					if (getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
-						getWorkspace().openEditorWithCallback((editor2) -> {
+					// open the editor and set problems if program has problems or if the editor is already open.
+					// Leave the editor closed if it is closed and there are no problems
+					if (p == null || Editor.getEditor() != null) {
+						getWorkspace().openEditorWithCallback((editor) -> {
 							// if no problems, has the effect of clearing
-							editor2.setProblems(log.getProblems());
+							editor.setProblems(log.getProblems());
 							if (p == null) {
 								int size = log.getProblems().size();
 								UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");
@@ -245,18 +246,18 @@ public class WindowManager extends GridPane {
 						});
 					}
 
-					if(p != null) {
+					if (p != null) {
 						CurrentFile.submitAssembledProgramToCache(programText, p);
 						runProgram(p); // spawns another thread
 					}
 				} else {
-                    runProgram(cachedP); // spawns another thread
-                }
+					runProgram(cachedP); // spawns another thread
+				}
 			} finally {
 				Platform.runLater(() -> primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")"));
 			}
 
-		} , "Assemble");
+		}, "Assemble");
 		assembleThread.setDaemon(true);
 		assembleThread.start();
 	}
@@ -384,8 +385,9 @@ public class WindowManager extends GridPane {
 	public void shutdown() {
 		cpu.shutdown();
 		workspace.closeAll();
-		if (!workspace.hasWindowsOpen())
+		if (!workspace.hasWindowsOpen()) {
 			primaryStage.close();
+		}
 	}
 
 	public HLVisualManager getHLVisualManager() {

@@ -191,30 +191,37 @@ public class CPUPipeline extends CPU {
 	protected void runSingleCycle() throws MemoryException, DecodeException, InstructionException,
 			ExecuteException, HeapException, StackException, EndedException {
 
-		Address thisInstruction = programCounter;
-		if(this.canFetch&&this.isFinished==0){
+		Address fetchAddress   = programCounter;
+		Address decodeAddress  = new Address(programCounter.getValue()-4);
+		Address executeAddress = new Address(programCounter.getValue()-8);
+
+		// only hit the breakpoint once, then allow progress to continue
+		if(Breakpoints.isBreakpoint(fetchAddress)) {
+			pause();
+		}
+
+		if(canFetch && isFinished==0) {
 			fetch();
-		} else if (!this.canFetch) {
-			this.canFetch = true;
-		} else if(this.isFinished==1||this.isFinished==2) {//getting closer to termination
-			this.isFinished++;
-		} else if(this.isFinished==3 && this.isRunning) { //ending termination
+		} else if (!canFetch) {
+			canFetch = true;
+		} else if(isFinished == 1 || isFinished == 2) {//getting closer to termination
+			isFinished++;
+		} else if(isFinished == 3 && isRunning) { //ending termination
 			//exiting cleanly but representing that in reality an error would be thrown
 			sendMessage(new ProblemMessage(
-					new MemoryException(
+					new MemoryException("" +
 							"Program tried to execute a program outside the text segment.\n" +
-									"  This could be because you forgot to exit cleanly.\n" +
-									"  To exit cleanly please call syscall with code 10.\n", programCounter)));
+                            "  This could be because you forgot to exit cleanly.\n" +
+                            "  To exit cleanly please call syscall with code 10.\n", fetchAddress)));
 			stopRunning();
 			return;
-
 		}
 		
-		if(this.programCounter.getValue() == this.lastAddress.getValue()+4 && this.isFinished == 0) {//if end of program reached
-			this.isFinished = 1;//stop fetching essentially and begin to terminate program
+		if(fetchAddress.getValue() == lastAddress.getValue()+4 && isFinished == 0) {//if end of program reached
+			isFinished = 1;//stop fetching essentially and begin to terminate program
         }
 		
-		boolean needToBubbleRAWReg = needToBubble(registersRead(IF),registersBeingWritten(ID));//detecting pipeline hazards
+		boolean needToBubbleRAWReg = needToBubble(registersRead(IF), registersBeingWritten(ID));//detecting pipeline hazards
 		
 		InstructionFormat oldIDToExecute = ID;//storing old value of ID before overwritten, this is what I should be executing
 		if (needToBubbleRAWReg) { //if we need to stall to prevent incorrect reads
@@ -230,7 +237,8 @@ public class CPUPipeline extends CPU {
 		execute(oldIDToExecute);
 	    
 		//jumped checks if either an unconditional jump is made or, a branch returning true
-		boolean jumped = oldIDToExecute.mode.equals(AddressMode.JTYPE) || (oldIDToExecute.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
+		boolean jumped = oldIDToExecute.mode.equals(AddressMode.JTYPE) ||
+				(oldIDToExecute.mode.equals(AddressMode.ITYPE) && ALU.branchFlag);
 		
 		if(jumped)//flush pipeline and allow continuation of running
 		{
@@ -241,33 +249,29 @@ public class CPUPipeline extends CPU {
 			ID = createNopInstruction();
 		}
 
-		Address executingAddress = new Address(thisInstruction.getValue()-8);//has to be -8 to counter pipeline (i.e back two steps of 4 bytes each)
-		if(annotations.containsKey(executingAddress)&&this.nopCount==0) {//checking for annotations (not when a fake nop is executed)
-			sendMessage(new AnnotationMessage(annotations.get(executingAddress), executingAddress));
+		if(annotations.containsKey(executeAddress) && nopCount==0) {//checking for annotations (not when a fake nop is executed)
+			sendMessage(new AnnotationMessage(annotations.get(executeAddress), executeAddress));
 		}
 		
 		//Dealing with pipeline state messages
-		Address decodeAddress = new Address(thisInstruction.getValue()-4);
-		
 		if(needToBubbleRAWReg) {//got bubbling slightly wrong with RAW, need to add this to fix
 			decodeAddress = null;
 			this.rawOccured = true;//need to treat raws differently to jump flushes
-			thisInstruction = new Address(thisInstruction.getValue()-4);
+			fetchAddress = new Address(fetchAddress.getValue()-4);
 		}
 		
-		Address executeAddress = executingAddress;
-		if(this.nopCount == 2) {
+		if(nopCount == 2) {
 			decodeAddress = null;
 		} 
-		if(this.nopCount >= 1) {
+		if(nopCount >= 1) {
 			executeAddress = null;
-			if(this.rawOccured) {//need to do some additional stuff if a raw has previously occurred
-				thisInstruction = new Address(thisInstruction.getValue()-4);
-				decodeAddress = new Address(thisInstruction.getValue()-4);
-				this.rawOccured = false;
+			if(rawOccured) {//need to do some additional stuff if a raw has previously occurred
+				fetchAddress = new Address(fetchAddress.getValue()-4);
+				decodeAddress = new Address(fetchAddress.getValue()-4);
+				rawOccured = false;
 			}
 		}
-		sendMessage(new PipelineStateMessage(thisInstruction, decodeAddress, executeAddress));
+		sendMessage(new PipelineStateMessage(fetchAddress, decodeAddress, executeAddress));
 		
 		this.nopCount = (this.nopCount==0) ? 0 : this.nopCount-1;//only decrementing if not 0
 		

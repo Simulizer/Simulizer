@@ -19,6 +19,7 @@ import simulizer.parser.SimpLexer;
 import simulizer.parser.SimpParser;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
+import simulizer.utils.DataUtils;
 
 /**
  * Assemble SIMP source code into a form that is consumable be the simulation.
@@ -88,8 +89,8 @@ public class Assembler {
             }
         }
 
-        Map<Integer, List<String>> reverseTextLabels = reverseMapping(extractor.textSegmentLabels);
-        Map<Integer, List<String>> reverseDataLabels = reverseMapping(extractor.dataSegmentLabels);
+        Map<Integer, List<String>> reverseTextLabels = DataUtils.reverseMapping(extractor.textSegmentLabels);
+        Map<Integer, List<String>> reverseDataLabels = DataUtils.reverseMapping(extractor.dataSegmentLabels);
 
         Program p = new Program();
 
@@ -169,22 +170,6 @@ public class Assembler {
         return p;
     }
 
-
-    private static <K, V> Map<V, List<K>> reverseMapping(Map<K, V> map) {
-        Map<V, List<K>> rev = new HashMap<>();
-
-        for(Map.Entry<K, V> e : map.entrySet()) {
-            V v = e.getValue();
-
-            if(!rev.containsKey(v)) {
-                rev.put(v, new ArrayList<>());
-            }
-
-            rev.get(v).add(e.getKey());
-        }
-
-        return rev;
-    }
 
     private static byte[] variableInitialBytes(Variable v) {
         Optional<Operand> operand = v.getInitialValue();

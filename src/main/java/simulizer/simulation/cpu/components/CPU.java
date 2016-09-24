@@ -263,6 +263,8 @@ public class CPU {
 		this.program = program;
 		this.instructionRegister = null;// nothing to put in yet so null
 
+		Breakpoints.specifyProgram(program);
+
 		this.clearRegisters();// reset the registers
 
 		// setting up memory
@@ -392,6 +394,11 @@ public class CPU {
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
 
+		// only hit the breakpoint once, then allow progress to continue
+		if(Breakpoints.isBreakpoint(thisInstruction)) {
+            pause();
+		}
+
 		fetch();
 		sendMessage(new PipelineStateMessage(thisInstruction, null, null));
 
@@ -498,7 +505,7 @@ public class CPU {
 		return memory;
 	}
 
-	public Address getProgramCounter() {
+	Address getProgramCounter() {
 		return programCounter;
 	}
 

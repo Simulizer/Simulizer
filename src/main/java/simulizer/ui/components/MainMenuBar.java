@@ -99,10 +99,10 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
-		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+		saveItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.promptSave();
-		}));
+		});
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
