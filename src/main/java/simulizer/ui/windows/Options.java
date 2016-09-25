@@ -104,6 +104,7 @@ public class Options extends InternalWindow {
 			innerItem.setExpanded(true);
 			root.getChildren().add(innerItem);
 		});
+		// Alphabetical order
 		root.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 

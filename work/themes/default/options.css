@@ -1,3 +1,10 @@
 .title {
   color: #0F0;
 }
+// Makes Checkboxes 25% smaller
+.check-box > .box {
+    -fx-padding: 0.12500025em 0.12500025em 0.1875em 0.1875em;
+}
+.check-box > .box > .mark {
+    -fx-padding: 0.31250025em 0.31250025em 0.375em 0.375em;
+}
