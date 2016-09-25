@@ -217,7 +217,7 @@ public class CPUPipeline extends CPU {
 			return;
 		}
 		
-		if(fetchAddress.getValue() == lastAddress.getValue()+4 && isFinished == 0) {//if end of program reached
+		if(fetchAddress.getValue() == lastAddress.getValue() && isFinished == 0) {//if end of program reached
 			isFinished = 1;//stop fetching essentially and begin to terminate program
         }
 		
