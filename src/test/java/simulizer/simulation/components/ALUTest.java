@@ -10,6 +10,7 @@ import org.junit.experimental.categories.Category;
 import category.UnitTests;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.ALU;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.InstructionException;
@@ -54,7 +55,7 @@ public class ALUTest {
 	 */
 	public long executeS(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2,Optional.empty()).getBytes());
+		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2,Optional.of(new CPU(null))).getBytes());
 	}
 	
 	/**executes a given alu operation with data passed in 
@@ -67,7 +68,7 @@ public class ALUTest {
 	 */
 	public long executeU(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2,Optional.empty()).getBytes());
+		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2,Optional.of(new CPU(null))).getBytes());
 	}
 	
 	/**testing all alu operations with 3 cases each
