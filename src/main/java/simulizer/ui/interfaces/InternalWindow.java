@@ -201,12 +201,16 @@ public abstract class InternalWindow extends Window {
 	 *            the theme to use
 	 */
 	public synchronized void setTheme(Theme theme) {
+		String classCss = theme.getStyleSheet(getClass().getSimpleName().toLowerCase() + ".css");
 		getStylesheets().clear();
+		getStylesheets().add(classCss);
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 		if (contentPane != null) {
 			contentPane.getStylesheets().clear();
+			contentPane.getStylesheets().add(classCss);
 			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
 		}
+		System.out.println(getClass().getSimpleName());
 	}
 
 	/**
@@ -292,7 +296,7 @@ public abstract class InternalWindow extends Window {
 	public final boolean isClosed() {
 		return isClosed;
 	}
-	
+
 	public boolean canClose() {
 		return true;
 	}
