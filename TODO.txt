@@ -1,5 +1,6 @@
 todo
 - editor not updating fast enough when line changes. Caching?
+- is zoom in and out in the guide?
 - when fullscreen: dialogs take you out of fullscreen
     - maybe mininise the main screen and restore after dialog closes
 - windows don't receive resize events when popped out
