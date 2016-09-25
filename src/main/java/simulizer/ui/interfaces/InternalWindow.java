@@ -137,7 +137,7 @@ public abstract class InternalWindow extends Window {
 			this.wm = wm;
 
 			// Add window icons
-			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
+			if ((boolean) wm.getSettings().get("internal-window.extractable"))
 				getRightIcons().add(new CustomExtractIcon(this));
 			getRightIcons().add(new CustomCloseIcon(this));
 
@@ -445,7 +445,7 @@ public abstract class InternalWindow extends Window {
 
 			// Create the scene
 			Scene scene;
-			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
+			if ((boolean) wm.getSettings().get("menubar.all-windows")) {
 				GridPane root = new GridPane();
 				scene = new Scene(root);
 

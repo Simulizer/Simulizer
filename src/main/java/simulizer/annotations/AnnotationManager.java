@@ -148,10 +148,6 @@ public class AnnotationManager {
 
 	public synchronized void setEnabled(boolean value) {
 		enabled = value;
-		if (wm != null) {
-			wm.getSettings().set("simulation.annotations", value);
-			wm.getSettings().save();
-		}
 	}
 
 	public boolean isEnabled() {

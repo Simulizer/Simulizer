@@ -1,18 +1,18 @@
 package simulizer.ui.windows;
 
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.layout.VBox;
 import simulizer.settings.SettingType;
 import simulizer.settings.SettingValue;
 import simulizer.settings.types.BooleanSetting;
@@ -36,27 +36,37 @@ import simulizer.utils.UIUtils;
  */
 public class Options extends InternalWindow {
 
-	private GridPane pane, values;
+	private BorderPane pane;
+	private VBox values;
 	private TreeView<String> folders;
 	private String theme;
+	private boolean madeChanges = false;
 
 	public Options() {
-		pane = new GridPane();
+		pane = new BorderPane();
 
 		folders = new TreeView<>();
 		GridPane.setVgrow(folders, Priority.ALWAYS);
-		GridPane.setHgrow(folders, Priority.SOMETIMES);
+		GridPane.setHgrow(folders, Priority.NEVER);
 		folders.getStyleClass().add("tree");
 		folders.setCursor(Cursor.DEFAULT);
-		pane.add(folders, 0, 0);
+		folders.minWidth(400);
+		pane.setLeft(folders);
 
-		values = new GridPane();
-		GridPane.setVgrow(values, Priority.ALWAYS);
-		GridPane.setHgrow(values, Priority.ALWAYS);
+		values = new VBox(5);
 		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
-		values.setPadding(new Insets(0, 10, 0, 10));
-		pane.add(values, 1, 0);
+		values.setPadding(new Insets(5, 10, 15, 10));
+		values.setMinWidth(400);
+
+		ScrollPane scroll = new ScrollPane();
+		scroll.setContent(values);
+		scroll.setFitToWidth(true);
+
+		GridPane.setVgrow(scroll, Priority.ALWAYS);
+		GridPane.setHgrow(scroll, Priority.SOMETIMES);
+		GridPane.setFillWidth(scroll, true);
+		pane.setCenter(scroll);
 
 		getContentPane().getChildren().add(pane);
 	}
@@ -70,15 +80,16 @@ public class Options extends InternalWindow {
 		createTree(options, settings);
 
 		folders.setRoot(options);
-		folders.getSelectionModel().select(options);
+		folders.setShowRoot(false);
 		folders.getSelectionModel().selectedItemProperty().addListener((e) -> {
 			FolderItem item = (FolderItem) folders.getSelectionModel().getSelectedItem();
 			showComponents(item.getObjectSetting());
 		});
 
-		showComponents(settings);
+		folders.getSelectionModel().select(0);
 		super.ready();
 	}
+
 
 	/**
 	 * Creates the options tree
@@ -95,6 +106,7 @@ public class Options extends InternalWindow {
 			innerItem.setExpanded(true);
 			root.getChildren().add(innerItem);
 		});
+		// Alphabetical order
 		root.getChildren().sort((a, b) -> a.getValue().compareTo(b.getValue()));
 	}
 
@@ -105,49 +117,31 @@ public class Options extends InternalWindow {
 	 *            the ObjectSettings to generate the inner elements for
 	 */
 	private void showComponents(ObjectSetting settings) {
+		if (getWindowManager().getSettings().getAllSettings() == settings)
+			return;
+
 		// Remove all existing components
-		values.getChildren().removeAll(values.getChildren());
-		int rowCount = 1;
+		values.getChildren().removeAll(values.getChildrenUnmodifiable());
 
-		// Folder Title
-		Label title = new Label(settings.getHumanName());
-		title.setTextAlignment(TextAlignment.CENTER);
-		GridPane.setHgrow(title, Priority.ALWAYS);
-		GridPane.setHalignment(title, HPos.CENTER);
-		title.getStyleClass().add("title");
-		values.add(title, 0, rowCount++);
-
-		// Folder description Tag
-		if (!settings.getDescription().equals("")) {
-			Label description = new Label(settings.getDescription());
-			GridPane.setHgrow(description, Priority.ALWAYS);
-			description.getStyleClass().add("description");
-			values.add(description, 0, rowCount++);
-		}
-
-		// Separator
-		Separator sep = new Separator();
-		GridPane.setHgrow(sep, Priority.ALWAYS);
-		values.add(sep, 0, rowCount++);
-
+		boolean first = true;
 		for (SettingValue<?> value : settings.getValue()) {
 			// Create appropriate control for the setting
 			Node control = null;
 			switch (value.getSettingType()) {
 				case BOOLEAN:
-					control = new BooleanControl((BooleanSetting) value);
+					control = new BooleanControl(this, (BooleanSetting) value);
 					break;
 
 				case DOUBLE:
-					control = new DoubleControl((DoubleSetting) value);
+					control = new DoubleControl(this, (DoubleSetting) value);
 					break;
 
 				case INTEGER:
-					control = new IntegerControl((IntegerSetting) value);
+					control = new IntegerControl(this, (IntegerSetting) value);
 					break;
 
 				case STRING:
-					control = new StringControl((StringSetting) value);
+					control = new StringControl(this, (StringSetting) value);
 					break;
 
 				default:
@@ -156,10 +150,15 @@ public class Options extends InternalWindow {
 
 			// Add control to panel
 			if (control != null) {
-				GridPane.setHgrow(control, Priority.ALWAYS);
+				// Separator
+				if (!first)
+					values.getChildren().add(new Separator());
+
 				control.getStyleClass().add("control");
-				values.add(control, 0, rowCount++);
+				values.getChildren().add(control);
 			}
+
+			first = false;
 		}
 
 		// Give the new components the theme
@@ -169,13 +168,11 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void close() {
-		getWindowManager().getSettings().save();
-		if (UIUtils.confirm("Restart Required", "To apply any changes the application must restart.\nRestart now?")) {
-			super.close();
-			getWindowManager().restart();
-		} else {
-			super.close();
+		if (madeChanges) {
+			getWindowManager().getSettings().save();
+			UIUtils.showInfoDialog("Restart Required", "To apply changes the application must restart");
 		}
+		super.close();
 	}
 
 	@Override
@@ -185,7 +182,6 @@ public class Options extends InternalWindow {
 		this.theme = theme.getStyleSheet("options.css");
 		updateChildrenThemes(pane, this.theme);
 	}
-
 
 	private void updateChildrenThemes(Control pane, String stylesheet) {
 		if (pane != null) {
@@ -222,5 +218,9 @@ public class Options extends InternalWindow {
 		public ObjectSetting getObjectSetting() {
 			return setting;
 		}
+	}
+
+	public void madeChanges() {
+		madeChanges = true;
 	}
 }

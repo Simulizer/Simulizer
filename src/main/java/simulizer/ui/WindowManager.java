@@ -45,7 +45,6 @@ import simulizer.utils.UIUtils;
 public class WindowManager extends GridPane {
 
 	private Stage primaryStage;
-	private boolean closing = false, restart = false;
 
 	private Workspace workspace;
 	private GridBounds grid;
@@ -91,7 +90,7 @@ public class WindowManager extends GridPane {
 			shutdown();
 		});
 
-		if (GuiMode.args.fullscreen)
+		if(GuiMode.args.fullscreen || (boolean) settings.get("window.fullscreen"))
 			primaryStage.setFullScreen(true);
 
 		// Creates CPU Simulation
@@ -99,7 +98,7 @@ public class WindowManager extends GridPane {
 		newCPU(GuiMode.args.pipelined || (boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
-		themes = new Themes((String) settings.get("workspace.theme"));
+		themes = new Themes((String) settings.get("window.theme"));
 		themes.addThemeableElement(workspace);
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
@@ -384,20 +383,11 @@ public class WindowManager extends GridPane {
 	 * Shutdown the application
 	 */
 	public void shutdown() {
-		closing = true;
 		cpu.shutdown();
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen()) {
 			primaryStage.close();
-			if (restart) {
-				try {
-					app.start(primaryStage);
-				} catch (Exception e) {
-					UIUtils.showExceptionDialog(e);
-				}
-			}
 		}
-		closing = false;
 	}
 
 	public HLVisualManager getHLVisualManager() {
@@ -446,14 +436,5 @@ public class WindowManager extends GridPane {
 			t.setDaemon(true);
 			t.start();
 		}
-	}
-
-	/**
-	 * Quick restarts the application (not as good as a clean restart, but good enough to apply setting changes)
-	 */
-	public void restart() {
-		restart = true;
-		if (!closing)
-			primaryStage.close();
 	}
 }
