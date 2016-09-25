@@ -1,4 +1,5 @@
 todo
+- editor css for breakpoint + FDE on same line
 - editor not updating fast enough when line changes. Caching?
 - is zoom in and out in the guide?
 - when fullscreen: dialogs take you out of fullscreen

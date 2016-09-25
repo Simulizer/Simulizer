@@ -59,6 +59,7 @@ public class CPU {
 	 */
 	boolean breakAfterCycle;
     private final Semaphore tickLock;
+	private long lastFXWait;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -95,6 +96,7 @@ public class CPU {
 		this.breakAfterCycle = false;
 		this.tickLock = new Semaphore(1); // used to ensure JavaFX tasks are done before the next tick
         this.tickLock.tryAcquire();
+		this.lastFXWait = 0;
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
@@ -211,14 +213,14 @@ public class CPU {
 	 * Wait for the Platform.runLater() tasks to finish
 	 */
 	private void waitForFX() {
-		if(Simulizer.hasGUI()) {
+		if(Simulizer.hasGUI() && System.currentTimeMillis() - 500 > lastFXWait) {
 			// hopefully runLater tasks run in a queue, so this occurs after all the
 			// outstanding JavaFX tasks have run
 			Platform.runLater(tickLock::release);
 			try {
 				tickLock.acquire();
-			} catch (InterruptedException ignored) {
-			}
+			} catch (InterruptedException ignored) { }
+            lastFXWait = System.currentTimeMillis();
 		}
 	}
 
@@ -233,8 +235,6 @@ public class CPU {
 			}
 
             messageManager.waitForAll();
-
-			waitForFX();
 
             // if the clock is stopped then it advances by 1 tick to unlock this thread
             clock.waitForNextTick();
@@ -504,6 +504,9 @@ public class CPU {
 				sendMessage(new ProblemMessage(e));
 				stopRunning();
 			}
+
+			// doesn't have to be done every tick or anything, just enough not to starve
+			waitForFX();
 
 			//long cycleDuration = System.nanoTime() - cycleStart;
 		}
