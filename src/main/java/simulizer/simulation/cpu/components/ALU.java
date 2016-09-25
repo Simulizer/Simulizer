@@ -80,18 +80,18 @@ public class ALU {
                 return encodeU(decodeU(firstValue) - decodeU(secondValue));
             case mul:
             	if(cpu.isPresent()) {
-            	
+            		byte[] result = DataConverter.encodeAsUnsignedLong(decodeS(firstValue) * decodeS(secondValue));
+            		cpu.get().setHi(new Word(new byte[]{result[0],result[1],result[2],result[3]}));
+            		cpu.get().setLo(new Word(new byte[]{result[4],result[5],result[6],result[7]}));
             		return cpu.get().getLo();
             	}
                 return null;
             case mult:
-            	if(cpu.isPresent()) {
-            		
-            	}
-            	return null;
             case multi:
             	if(cpu.isPresent()) {
-            		
+            		byte[] result = DataConverter.encodeAsUnsignedLong(decodeS(firstValue) * decodeS(secondValue));
+            		cpu.get().setHi(new Word(new byte[]{result[0],result[1],result[2],result[3]}));
+            		cpu.get().setLo(new Word(new byte[]{result[4],result[5],result[6],result[7]}));
             	}
             	return null;
             case mulo:

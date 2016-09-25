@@ -54,7 +54,7 @@ public class ALUTest {
 	 */
 	public long executeS(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2).getBytes());
+		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2,Optional.empty()).getBytes());
 	}
 	
 	/**executes a given alu operation with data passed in 
@@ -67,7 +67,7 @@ public class ALUTest {
 	 */
 	public long executeU(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2).getBytes());
+		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2,Optional.empty()).getBytes());
 	}
 	
 	/**testing all alu operations with 3 cases each

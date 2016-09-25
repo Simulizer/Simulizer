@@ -62,6 +62,7 @@ class Executor {
                 Word result = ALU.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2(),Optional.of(cpu));
                 cpu.sendMessage(new DataMovementMessage(instruction.asRType().getSrc1(),Optional.empty()));//moved into alu
                 cpu.sendMessage(new DataMovementMessage(instruction.asRType().getSrc2(),Optional.empty()));
+                
                 if(instruction.asRType().getDestReg() == null) {//mult, multi etc.
                 	cpu.sendMessage(new HiLoChangeMessage());
                 } else {
