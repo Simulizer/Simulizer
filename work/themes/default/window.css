@@ -3,6 +3,7 @@
 .window {
     -fx-background-color: linear-gradient(to bottom, #dddddd 0%,#aaaabb 100%);
     -fx-opacity: 0.95;
+    -fx-font-family: "Sans";
 }
 
 .window:external {
@@ -18,7 +19,7 @@
     -fx-background-color: #454545;
     -fx-padding: 2px;
     -fx-font-size: 16px;
-    -fx-font-family: "Lucida Console", Monaco, monospace;
+    -fx-font-family: "DejaVu Sans Mono";
     -fx-stroke-width: 0.2;
     -fx-border-width: 1;
     -fx-border-radius: 0;
