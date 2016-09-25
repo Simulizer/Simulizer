@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import simulizer.settings.types.IntegerSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a IntegerSetting
@@ -14,7 +15,7 @@ import simulizer.settings.types.IntegerSetting;
  */
 public class IntegerControl extends VBox {
 
-	public IntegerControl(IntegerSetting setting) {
+	public IntegerControl(Options o, IntegerSetting setting) {
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		title.getStyleClass().add("title");
@@ -43,9 +44,10 @@ public class IntegerControl extends VBox {
 				valid = false;
 			}
 
-			if (valid)
+			if (valid) {
+				o.madeChanges();
 				setting.setValue(newValue);
-			else
+			} else
 				value.setText("" + setting.getValue());
 		});
 		getChildren().add(value);

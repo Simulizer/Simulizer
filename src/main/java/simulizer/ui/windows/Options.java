@@ -40,6 +40,7 @@ public class Options extends InternalWindow {
 	private VBox values;
 	private TreeView<String> folders;
 	private String theme;
+	private boolean madeChanges = false;
 
 	public Options() {
 		pane = new BorderPane();
@@ -125,19 +126,19 @@ public class Options extends InternalWindow {
 			Node control = null;
 			switch (value.getSettingType()) {
 				case BOOLEAN:
-					control = new BooleanControl((BooleanSetting) value);
+					control = new BooleanControl(this, (BooleanSetting) value);
 					break;
 
 				case DOUBLE:
-					control = new DoubleControl((DoubleSetting) value);
+					control = new DoubleControl(this, (DoubleSetting) value);
 					break;
 
 				case INTEGER:
-					control = new IntegerControl((IntegerSetting) value);
+					control = new IntegerControl(this, (IntegerSetting) value);
 					break;
 
 				case STRING:
-					control = new StringControl((StringSetting) value);
+					control = new StringControl(this, (StringSetting) value);
 					break;
 
 				default:
@@ -164,13 +165,11 @@ public class Options extends InternalWindow {
 
 	@Override
 	public void close() {
-		getWindowManager().getSettings().save();
-		if (UIUtils.confirm("Restart Required", "To apply any changes the application must restart.\nRestart now?")) {
-			super.close();
-			getWindowManager().restart();
-		} else {
-			super.close();
+		if (madeChanges) {
+			getWindowManager().getSettings().save();
+			UIUtils.showInfoDialog("Restart Required", "To apply changes the application must restart");
 		}
+		super.close();
 	}
 
 	@Override
@@ -216,5 +215,9 @@ public class Options extends InternalWindow {
 		public ObjectSetting getObjectSetting() {
 			return setting;
 		}
+	}
+
+	public void madeChanges() {
+		madeChanges = true;
 	}
 }

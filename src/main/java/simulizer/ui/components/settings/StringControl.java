@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import simulizer.settings.types.StringSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a StringSetting
@@ -14,7 +15,7 @@ import simulizer.settings.types.StringSetting;
  */
 public class StringControl extends VBox {
 
-	public StringControl(StringSetting setting) {
+	public StringControl(Options o, StringSetting setting) {
 		setSpacing(3);
 		
 		// Option Name
@@ -38,6 +39,7 @@ public class StringControl extends VBox {
 		value.textProperty().addListener(e -> {
 			try {
 				setting.setValue(value.getText());
+				o.madeChanges();
 			} catch (IllegalArgumentException ex) {
 				// TODO: Notify user of invalid setting
 			}

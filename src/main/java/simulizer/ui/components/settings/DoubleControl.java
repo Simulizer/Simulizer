@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import simulizer.settings.types.DoubleSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a DoubleSetting
@@ -14,7 +15,7 @@ import simulizer.settings.types.DoubleSetting;
  */
 public class DoubleControl extends VBox {
 
-	public DoubleControl(DoubleSetting setting) {
+	public DoubleControl(Options o, DoubleSetting setting) {
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		title.setFont(new Font(20));
@@ -43,9 +44,10 @@ public class DoubleControl extends VBox {
 				valid = false;
 			}
 
-			if (valid)
+			if (valid) {
+				o.madeChanges();
 				setting.setValue(newValue);
-			else
+			} else
 				value.setText("" + setting.getValue());
 		});
 		getChildren().add(value);
