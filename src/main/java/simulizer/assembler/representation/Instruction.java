@@ -126,6 +126,13 @@ public enum Instruction {
     // ignoring conditional moves
     move   (OperandFormat.destSrc,    "dest <- src"),
 
+// Instructions involving lo and hi
+    mult   (OperandFormat.srcSrc, "multiply contents of two registers and store result in hi and lo respectively"),
+    multi  (OperandFormat.srcImm, "multiply contents of register with immediate and store result in hi and lo respectively"),
+    mflo   (OperandFormat.dest, "move contents of lo to destination register"),
+    mfhi   (OperandFormat.dest, "move contents of hi to destination register"),
+    mtlo   (OperandFormat.src, "move contents of register to lo"),
+    mthi   (OperandFormat.src, "move contents of register to hi"),
 
 // Misc instructions
     syscall (OperandFormat.noArguments, "make a system call"),

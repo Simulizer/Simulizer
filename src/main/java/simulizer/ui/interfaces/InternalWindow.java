@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -201,10 +202,17 @@ public abstract class InternalWindow extends Window {
 	 *            the theme to use
 	 */
 	public synchronized void setTheme(Theme theme) {
+		String classCss = theme.getStyleSheet(getClass().getSimpleName().toLowerCase() + ".css");
+		classCss = new File(classCss.replace("file:/", "")).isFile() ? classCss : "";
+
 		getStylesheets().clear();
+		if (!classCss.equals(""))
+			getStylesheets().add(classCss);
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 		if (contentPane != null) {
 			contentPane.getStylesheets().clear();
+			if (!classCss.equals(""))
+				contentPane.getStylesheets().add(classCss);
 			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
 		}
 	}
@@ -292,7 +300,7 @@ public abstract class InternalWindow extends Window {
 	public final boolean isClosed() {
 		return isClosed;
 	}
-	
+
 	public boolean canClose() {
 		return true;
 	}

@@ -10,6 +10,7 @@ import org.junit.experimental.categories.Category;
 import category.UnitTests;
 import simulizer.assembler.representation.Instruction;
 import simulizer.simulation.cpu.components.ALU;
+import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
 import simulizer.simulation.data.representation.Word;
 import simulizer.simulation.exceptions.InstructionException;
@@ -54,7 +55,7 @@ public class ALUTest {
 	 */
 	public long executeS(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2).getBytes());
+		return DataConverter.decodeAsSigned(ALU.execute(instruction, word1, word2,Optional.of(new CPU(null))).getBytes());
 	}
 	
 	/**executes a given alu operation with data passed in 
@@ -67,7 +68,7 @@ public class ALUTest {
 	 */
 	public long executeU(Instruction instruction, Optional<Word> word1, Optional<Word> word2) throws InstructionException
 	{
-		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2).getBytes());
+		return DataConverter.decodeAsUnsigned(ALU.execute(instruction, word1, word2,Optional.of(new CPU(null))).getBytes());
 	}
 	
 	/**testing all alu operations with 3 cases each
@@ -461,6 +462,28 @@ public class ALUTest {
 			assertEquals(6,executeU(Instruction.ror,unsignedW(48),unsignedW(3)));
 			assertEquals(2147483648L,executeU(Instruction.ror,unsignedW(1),unsignedW(1)));
 			assertEquals(2130706433,executeU(Instruction.ror,unsignedW(4261412866L),unsignedW(1)));
+		}
+		{//mult
+			CPU cpu = new CPU(null);
+			ALU.execute(Instruction.mult, signedW(4), signedW(3), Optional.of(cpu));
+			assertEquals(12,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+			
+			cpu = new CPU(null);
+			ALU.execute(Instruction.mult, signedW(0), signedW(1), Optional.of(cpu));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+		}
+		{//multi
+			CPU cpu = new CPU(null);
+			ALU.execute(Instruction.multi, signedW(4), signedW(3), Optional.of(cpu));
+			assertEquals(12,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+			
+			cpu = new CPU(null);
+			ALU.execute(Instruction.multi, signedW(0), signedW(1), Optional.of(cpu));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
 		}
 	}
 }

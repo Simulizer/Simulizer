@@ -29,6 +29,14 @@ public class CPUPipeline extends CPU {
 	private Statement IF;//used for storing between fetch and decode
 	private InstructionFormat ID;//user for storing between decode and execute
 	private boolean canFetch;//useful for pipeline stalling
+	/**
+	 * used to trigger the end of the program
+	 * 0   => running
+	 * 1,2 => preparing for shutdown
+	 * 3   => shutdown now
+	 *
+	 * once set to 1, each cycle the counter increases and at 3, the CPU terminates
+	 */
 	private int isFinished;//used for testing end of program
 	private int nopCount;//used to check for pipeline hazards when sending messages
 	private boolean rawOccured;//used to check if a raw hazard has just occured

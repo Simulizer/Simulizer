@@ -101,8 +101,8 @@ public class DataConverter {
      * @param numBytes the number of bytes to truncate to
      * @return the n least significant bytes
      */
-    public static byte[] truncate(long value, int numBytes) {
-        assert numBytes > 0 && numBytes < Long.BYTES;
+    private static byte[] truncate(long value, int numBytes) {
+        assert numBytes > 0 && numBytes <= Long.BYTES;
         assert Long.BYTES == 8;
         assert Byte.BYTES == 1;
 
@@ -123,7 +123,7 @@ public class DataConverter {
      * @param value the value to check for overflow
      * @return whether the value would overflow a word
      */
-    public static boolean hasOverflow(long value) {
+    static boolean hasOverflow(long value) {
         assert Long.BYTES == 8;
         assert Byte.BYTES == 1;
 
@@ -160,5 +160,13 @@ public class DataConverter {
         return truncate(value, 4);
     }
 
+    /**
+     * encode an integer value as 64 bits
+     * @param value the value to encode (can be negative)
+     * @return the 64 bit representation of the value
+     */
+    public static byte[] encodeAsUnsignedLong(long value) {
+        return truncate(value, 8);
+    }
 
 }

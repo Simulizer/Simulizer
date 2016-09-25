@@ -10,7 +10,7 @@ public class Clock {
         PAUSED
     }
     private long tickPeriod; // in ns (10^-9 seconds)
-    private Status status;
+    private volatile Status status;
 
     private long lastTickns;
     private long ticks;
@@ -39,11 +39,13 @@ public class Clock {
         return ticks;
     }
 
-    synchronized void waitForNextTick() throws InterruptedException {
+    void waitForNextTick() throws InterruptedException {
         while(status != Status.RUNNING) {
-            wait(400); // notified when status changes or reasonable timeout in-case already stopped but missed the notify
-            if(status == Status.STOPPED) {
+            if(status == Status.STOPPED)
                 return;
+            else if(status == Status.PAUSED) {
+                // doesn't matter if resuming isn't absolutely instant and not using notify/wait simplifies the logic
+                Thread.sleep(10);
             }
         }
 
@@ -56,7 +58,7 @@ public class Clock {
         for (; ; ) {
             tickDuration = System.nanoTime() - lastTickns;
 
-            if (tickDuration >= tickPeriod)
+            if (tickDuration >= tickPeriod || status == Status.STOPPED)
                 break;
             else if (tickPeriod - tickDuration > 10000) // >10ms left to wait
                 Thread.sleep(8);
@@ -67,30 +69,27 @@ public class Clock {
     }
 
 
-    synchronized void pause() {
+    void pause() {
         status = Status.PAUSED;
-        notify();
     }
-    synchronized void resume() {
+    void resume() {
         if(status == Status.STOPPED)
             throw new IllegalStateException("cannot resume stopped clock");
         status = Status.RUNNING;
-        notify();
     }
 
-    synchronized void stop() {
+    void stop() {
+        // OK to call even if already stopped
         status = Status.STOPPED;
-        notify();
     }
 
-    synchronized void start() {
-        lastTickns = 0;
+    void start() {
+        lastTickns = System.nanoTime();
         ticks = 0;
         status = Status.RUNNING;
-        notify();
     }
 
-    synchronized Status getStatus() {
+    Status getStatus() {
         return status;
     }
 }

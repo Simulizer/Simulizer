@@ -1,15 +1,22 @@
 todo
+- editor css for breakpoint + FDE on same line
 - editor not updating fast enough when line changes. Caching?
+- is zoom in and out in the guide?
 - when fullscreen: dialogs take you out of fullscreen
     - maybe mininise the main screen and restore after dialog closes
 - windows don't receive resize events when popped out
 - note that Java probably needs more heap size given to it to utilise 1MiB of stack
 - improve guide
     - up to date annotations API
+- note: getHi and getLo are added to the simulation bridge
 - add randInt to the api
 - remove debug printing of
     - updating labels
     - canvas size on resize
+- configurable UI font
+    - JavaFx CSS does not support listing fonts with commas like proper CSS
+    - could manually check if each family is available and set from Java
+    - should be "Segoe UI" on Windows and "Ubuntu Light" on Linux
 - change simulation bridge setSpeed to setCycleFreq to match cpu.setCycleFreq
 - UIUtils.exception dialog fall back to Simulizer.handleException if not in UI
   mode (if JavaFX not running)

@@ -86,4 +86,12 @@ public class SimulationBridge {
 			bools[i] = bytes[i] != 0;
 		return bools;
 	}
+	
+	public byte[] getLo() {
+		return cpu.getLo().getBytes();
+	}
+	
+	public byte[] getHi() {
+		return cpu.getHi().getBytes();
+	}
 }
