@@ -2,9 +2,9 @@
 	# @{ var c = vis.load('canvas'); }@
 	# @{ c.squareShaped = true;      }@
 	# @{ c.showFPS = true;           }@
-	# @{ c.maxFPS = 4;               }@
+	# @{ c.maxFPS = 10;              }@
 	# @{ var g = c.ctx;              }@
-	# @{ sim.setSpeed(8000); //Hz    }@
+	# @{ sim.setSpeed(0); //inf Hz   }@
 	#
 	# @{ function randInt(min, max) // result in [min, max) }@
 	# @{   { return Math.random()*(max-min)+min }           }@
@@ -305,10 +305,10 @@ main:
 	lw	$2,0($3)
 	# <hazard>
 	nop # @{ var cols = $2.get(); }@
-LBL_62:
 	nop # @{ c.setFont('Monospace', 24); }@
 	nop # @{ c.clear(); }@
 	nop # @{ c.centerText('Press Arrows To Move'); }@
+LBL_62:
 	nop # @{ $2.set(c.input); }@
 	beq	$2,$0,LBL_62
 	nop # @{ $2.set(randInt(0, rows)); }@
