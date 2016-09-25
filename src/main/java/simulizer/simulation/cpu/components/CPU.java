@@ -1,10 +1,11 @@
 package simulizer.simulation.cpu.components;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.Semaphore;
+
+import javafx.application.Platform;
+import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Instruction;
@@ -57,6 +58,7 @@ public class CPU {
 	 * used for resume for single cycle
 	 */
 	boolean breakAfterCycle;
+    private final Semaphore tickLock;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -91,6 +93,8 @@ public class CPU {
 		this.clock = new Clock();
 		this.cycles = 0;
 		this.breakAfterCycle = false;
+		this.tickLock = new Semaphore(1); // used to ensure JavaFX tasks are done before the next tick
+        this.tickLock.tryAcquire();
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
@@ -203,6 +207,21 @@ public class CPU {
 		}
 	}
 
+	/**
+	 * Wait for the Platform.runLater() tasks to finish
+	 */
+	private void waitForFX() {
+		if(Simulizer.hasGUI()) {
+			// hopefully runLater tasks run in a queue, so this occurs after all the
+			// outstanding JavaFX tasks have run
+			Platform.runLater(tickLock::release);
+			try {
+				tickLock.acquire();
+			} catch (InterruptedException ignored) {
+			}
+		}
+	}
+
 	/**method makes simulation wait for the next clock tick to take place
 	 * 
 	 * @throws EndedException If program ended
@@ -214,6 +233,8 @@ public class CPU {
 			}
 
             messageManager.waitForAll();
+
+			waitForFX();
 
             // if the clock is stopped then it advances by 1 tick to unlock this thread
             clock.waitForNextTick();
@@ -278,7 +299,9 @@ public class CPU {
 		Address dataSegmentStart = this.program.dataSegmentStart;
 		Address dynamicSegmentStart = this.program.dynamicSegmentStart;
 		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getBytes()));
-		byte[] staticDataSegment = this.program.dataSegment;
+        // copy the static data segment because the program's initial state should be preserved in case the cached
+		// program is run again
+		byte[] staticDataSegment = Arrays.copyOf(this.program.dataSegment, this.program.dataSegment.length);
 		Map<Address, Statement> textSegment = this.program.textSegment;
 		this.memory = new MainMemory(textSegment, staticDataSegment, dataSegmentStart, dynamicSegmentStart, stackPointer);
 
@@ -454,6 +477,8 @@ public class CPU {
 		cycles = 0;
 
 		messageManager.waitForAll();
+
+        waitForFX();
 
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
