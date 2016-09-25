@@ -84,7 +84,7 @@ public class Clock {
     }
 
     synchronized void start() {
-        lastTickns = 0;
+        lastTickns = System.nanoTime();
         ticks = 0;
         status = Status.RUNNING;
         notify();
