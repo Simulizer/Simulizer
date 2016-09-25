@@ -17,7 +17,7 @@ public class StringControl extends VBox {
 
 	public StringControl(Options o, StringSetting setting) {
 		setSpacing(3);
-		
+
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		title.getStyleClass().add("title");
@@ -25,11 +25,13 @@ public class StringControl extends VBox {
 		getChildren().add(title);
 
 		// Option Desc
-		Label desc = new Label(setting.getDescription());
-		desc.getStyleClass().add("description");
-		desc.setWrapText(true);
-		desc.setFont(new Font(14));
-		getChildren().add(desc);
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setWrapText(true);
+			desc.setFont(new Font(14));
+			getChildren().add(desc);
+		}
 
 		// Option Value
 		TextField value = new TextField();

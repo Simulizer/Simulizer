@@ -56,7 +56,8 @@ public class Options extends InternalWindow {
 		values = new VBox(5);
 		values.setCursor(Cursor.DEFAULT);
 		values.getStyleClass().add("options");
-		values.setPadding(new Insets(0, 10, 0, 10));
+		values.setPadding(new Insets(5, 10, 15, 10));
+		values.setMinWidth(400);
 
 		ScrollPane scroll = new ScrollPane();
 		scroll.setContent(values);
@@ -85,9 +86,10 @@ public class Options extends InternalWindow {
 			showComponents(item.getObjectSetting());
 		});
 
-		showComponents(settings);
+		folders.getSelectionModel().select(0);
 		super.ready();
 	}
+
 
 	/**
 	 * Creates the options tree
@@ -119,7 +121,7 @@ public class Options extends InternalWindow {
 			return;
 
 		// Remove all existing components
-		values.getChildren().removeAll(values.getChildren());
+		values.getChildren().removeAll(values.getChildrenUnmodifiable());
 
 		boolean first = true;
 		for (SettingValue<?> value : settings.getValue()) {

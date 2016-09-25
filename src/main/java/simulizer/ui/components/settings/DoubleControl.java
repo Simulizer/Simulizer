@@ -17,6 +17,8 @@ import simulizer.ui.windows.Options;
 public class DoubleControl extends VBox {
 
 	public DoubleControl(Options o, DoubleSetting setting) {
+		setSpacing(3);
+		
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		title.setFont(new Font(20));
@@ -24,11 +26,13 @@ public class DoubleControl extends VBox {
 		getChildren().add(title);
 
 		// Option Desc
-		Label desc = new Label(setting.getDescription());
-		desc.getStyleClass().add("description");
-		desc.setFont(new Font(14));
-		desc.setWrapText(true);
-		getChildren().add(desc);
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setFont(new Font(14));
+			desc.setWrapText(true);
+			getChildren().add(desc);
+		}
 
 		// Option Value
 		Spinner<Double> value = new Spinner<>();

@@ -17,6 +17,8 @@ import simulizer.ui.windows.Options;
 public class IntegerControl extends VBox {
 
 	public IntegerControl(Options o, IntegerSetting setting) {
+		setSpacing(3);
+		
 		// Option Name
 		Label title = new Label(setting.getHumanName());
 		title.getStyleClass().add("title");
@@ -24,11 +26,13 @@ public class IntegerControl extends VBox {
 		getChildren().add(title);
 
 		// Option Desc
-		Label desc = new Label(setting.getDescription());
-		desc.getStyleClass().add("description");
-		desc.setFont(new Font(14));
-		desc.setWrapText(true);
-		getChildren().add(desc);
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setFont(new Font(14));
+			desc.setWrapText(true);
+			getChildren().add(desc);
+		}
 
 		// Option Value
 		Spinner<Integer> value = new Spinner<>();

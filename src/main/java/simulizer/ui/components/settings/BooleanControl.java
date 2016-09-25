@@ -31,9 +31,11 @@ public class BooleanControl extends GridPane {
 		name.setFont(new Font(20));
 		add(name, 1, 0);
 
-		Label desc = new Label(setting.getDescription());
-		desc.setWrapText(true);
-		desc.setFont(new Font(14));
-		add(desc, 1, 1);
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.setWrapText(true);
+			desc.setFont(new Font(14));
+			add(desc, 1, 1);
+		}
 	}
 }
