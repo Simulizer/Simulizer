@@ -74,6 +74,10 @@ public class CPU {
 	Address lastAddress;// used to determine end of program
 
 	private IO io;
+	
+	//LO/HI Registers
+	private Word lo;
+	private Word hi;
 
 	/**
 	 * the constructor will set all the components up
@@ -91,6 +95,9 @@ public class CPU {
 		this.io = io;
 		this.decoder = new Decoder(this);
 		this.executor = new Executor(this);
+		this.lo = Word.ZERO;
+		this.hi = Word.ZERO;
+		
 	}
 
 	/**method stops sim, shuts down clock and message manager
@@ -507,6 +514,22 @@ public class CPU {
 
 	Address getProgramCounter() {
 		return programCounter;
+	}
+	
+	public Word getLo() {
+		return this.lo;
+	}
+	
+	public Word getHi() {
+		return this.hi;
+	}
+	
+	public void setLo(Word lo) {
+		this.lo = lo;
+	}
+	
+	public void setHi(Word hi) {
+		this.hi = hi;
 	}
 
 	public IO getIO() {

@@ -19,6 +19,7 @@ import simulizer.simulation.exceptions.StackException;
 import simulizer.simulation.instructions.AddressMode;
 import simulizer.simulation.instructions.InstructionFormat;
 import simulizer.simulation.messages.DataMovementMessage;
+import simulizer.simulation.messages.HiLoChangeMessage;
 import simulizer.simulation.messages.InstructionTypeMessage;
 import simulizer.simulation.messages.RegisterChangedMessage;
 import simulizer.simulation.messages.StageEnterMessage;
@@ -58,19 +59,27 @@ class Executor {
     	switch(instruction.mode) {//switch based on instruction format
             case RTYPE:
             	cpu.sendMessage(new InstructionTypeMessage(AddressMode.RTYPE));//send message giving idea of datapath selected
-                Word result = ALU.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2());
+                Word result = ALU.execute(instruction.getInstruction(), instruction.asRType().getSrc1(), instruction.asRType().getSrc2(),Optional.of(cpu));
                 cpu.sendMessage(new DataMovementMessage(instruction.asRType().getSrc1(),Optional.empty()));//moved into alu
                 cpu.sendMessage(new DataMovementMessage(instruction.asRType().getSrc2(),Optional.empty()));
-                Register dest = instruction.asRType().getDestReg();
-                cpu.setRegister(dest, result);
-                cpu.sendMessage(new DataMovementMessage(Optional.of(result),Optional.empty()));
-                cpu.sendMessage(new RegisterChangedMessage(instruction.asRType().getDestReg()));
+                if(instruction.asRType().getDestReg() == null) {//mult, multi etc.
+                	cpu.sendMessage(new HiLoChangeMessage());
+                } else {
+	                Register dest = instruction.asRType().getDestReg();
+	                cpu.setRegister(dest, result);
+	                cpu.sendMessage(new DataMovementMessage(Optional.of(result),Optional.empty()));
+	                cpu.sendMessage(new RegisterChangedMessage(instruction.asRType().getDestReg()));
+	                
+	                if(instruction.asRType().getInstruction().equals(Instruction.mul)) {
+	                	cpu.sendMessage(new HiLoChangeMessage());
+	                }
+                }
                 break;
             case ITYPE:
             	cpu.sendMessage(new InstructionTypeMessage(AddressMode.ITYPE));
             	cpu.sendMessage(new DataMovementMessage(instruction.asIType().getCmp1(),Optional.empty()));
             	cpu.sendMessage(new DataMovementMessage(instruction.asIType().getCmp2(),Optional.empty()));
-                Word branchTest = ALU.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2());//carrying out comparison
+                Word branchTest = ALU.execute(instruction.getInstruction(), instruction.asIType().getCmp1(), instruction.asIType().getCmp2(),Optional.of(cpu));//carrying out comparison
                 if(Arrays.equals(branchTest.getBytes(), ALU.branchTrue)) {
                     toReturn = instruction.asIType().getBranchAddress().get();//set the program counter
                     cpu.sendMessage(new DataMovementMessage(Optional.of(encodeU((long)toReturn.getValue())),Optional.empty()));
@@ -115,7 +124,26 @@ class Executor {
                   
                     cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegister(instruction.asLSType().getRegisterName().get())),Optional.empty()));
                     cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
-
+                    
+                } else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.dest)) {//mflo and mfhi
+                	cpu.sendMessage(new InstructionTypeMessage(AddressMode.LSTYPE));
+                	if(instruction.getInstruction().equals(Instruction.mflo)) {
+                		cpu.setRegister(instruction.asLSType().getRegisterName().get(),cpu.getLo());
+                	} else if(instruction.getInstruction().equals(Instruction.mfhi)) {
+                		cpu.setRegister(instruction.asLSType().getRegisterName().get(), cpu.getHi());
+                	}
+                	cpu.sendMessage(new DataMovementMessage(Optional.of(cpu.getRegister(instruction.asLSType().getRegisterName().get())),Optional.empty()));
+                	cpu.sendMessage(new RegisterChangedMessage(instruction.asLSType().getRegisterName().get()));
+                
+                } else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.src)) {
+                	cpu.sendMessage(new InstructionTypeMessage(AddressMode.LSTYPE));
+                	if(instruction.getInstruction().equals(Instruction.mtlo)) {
+                		cpu.setLo(instruction.asLSType().getRegister().get());
+                	} else if(instruction.getInstruction().equals(Instruction.mthi)) {
+                		cpu.setHi(instruction.asLSType().getRegister().get());
+                	}
+                	cpu.sendMessage(new HiLoChangeMessage());
+                	
                 } else if(instruction.getInstruction().getOperandFormat().equals(OperandFormat.destAddr)) {//load
                     int retrieveAddress = instruction.asLSType().getMemAddress().get().getValue();
 
