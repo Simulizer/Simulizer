@@ -50,6 +50,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 				column.setPrefWidth(width / numColumns);
 		});
 		table.setCursor(Cursor.DEFAULT);
+		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 	}
 
 	/**
@@ -94,8 +95,12 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		cpu.registerListener(listener);
 
 		// Create Register column
-		TableColumn<Data, String> register = new TableColumn<>("Register");
-		register.setCellValueFactory(new PropertyValueFactory<>("name"));
+		TableColumn<Data, String> registerID = new TableColumn<>("ID");
+		registerID.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+		// Create RegisterName column
+		TableColumn<Data, String> registerName = new TableColumn<>("Register");
+		registerName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		// Create value column
 		valueCol = new TableColumn<>(valueType.toString());
@@ -118,7 +123,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		valueCol.setContextMenu(menu);
 
 		refreshTable();
-		table.getColumns().addAll(register, valueCol);
+		table.getColumns().addAll(registerID, registerName, valueCol);
 		table.setEditable(false);
 
 		// Refresh registers regularly
@@ -158,11 +163,13 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	@SuppressWarnings({ "WeakerAccess", "unused" })
 	public class Data {
 		private final Register reg;
-		private byte[] contents;
+		private final int id;
 		private final String name;
+		private byte[] contents;
 		private SimpleStringProperty value = new SimpleStringProperty();
 
-		public Data(int id, String name) {
+		public Data(final int id, final String name) {
+			this.id = id;
 			reg = Register.fromID(id);
 			this.name = name;
 			refresh();
@@ -171,6 +178,13 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		public void refresh() {
 			contents = cpu.getRegister(reg).getBytes();
 			value.set(getValue());
+		}
+
+		/**
+		 * @return register id
+		 */
+		public int getId() {
+			return id;
 		}
 
 		/**
