@@ -7,6 +7,7 @@
 asm("# @{ var c = vis.load('canvas'); }@");
 asm("# @{ c.squareShaped = true;      }@");
 asm("# @{ c.showFPS = true;           }@");
+asm("# @{ c.maxFPS = 4;               }@");
 asm("# @{ var g = c.ctx;              }@");
 asm("# @{ sim.setSpeed(8000); //Hz    }@");
 asm("#");

@@ -2,6 +2,7 @@
 	# @{ var c = vis.load('canvas'); }@
 	# @{ c.squareShaped = true;      }@
 	# @{ c.showFPS = true;           }@
+	# @{ c.maxFPS = 4;               }@
 	# @{ var g = c.ctx;              }@
 	# @{ sim.setSpeed(7000); //Hz    }@
 	#

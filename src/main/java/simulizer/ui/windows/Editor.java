@@ -3,6 +3,7 @@ package simulizer.ui.windows;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.concurrent.Task;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
@@ -126,8 +127,8 @@ public class Editor extends InternalWindow {
 	public Editor() {
 		WebView view = new WebView();
 		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
-		view.setCache(true);
-		view.setCacheHint(CacheHint.SPEED);
+		view.setCache(false);
+		//view.setCacheHint(CacheHint.SPEED);
 		pageLoaded = false;
 		bridge = new Bridge(this);
 

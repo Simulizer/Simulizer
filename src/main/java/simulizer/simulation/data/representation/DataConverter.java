@@ -162,7 +162,6 @@ public class DataConverter {
 
     /**
      * encode an integer value as 64 bits
-     * It is allowed for the integer to overflow the representation.
      * @param value the value to encode (can be negative)
      * @return the 64 bit representation of the value
      */
