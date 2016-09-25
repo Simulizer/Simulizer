@@ -73,7 +73,7 @@ public class CPU {
 
 	protected Map<Address, Annotation> annotations;
 
-	boolean isRunning;// for program status
+	volatile boolean isRunning;// for program status
 	Address lastAddress;// used to determine end of program
 
 	private IO io;
@@ -211,9 +211,10 @@ public class CPU {
 
 	/**
 	 * Wait for the Platform.runLater() tasks to finish
+	 * @param interval the time to leave between JavaFX waiting. -1 to ensure waiting
 	 */
-	private void waitForFX() {
-		if(Simulizer.hasGUI() && System.currentTimeMillis() - 500 > lastFXWait) {
+	private void waitForFX(int interval) {
+		if(Simulizer.hasGUI() && System.currentTimeMillis() - interval > lastFXWait) {
 			// hopefully runLater tasks run in a queue, so this occurs after all the
 			// outstanding JavaFX tasks have run
 			Platform.runLater(tickLock::release);
@@ -478,8 +479,6 @@ public class CPU {
 
 		messageManager.waitForAll();
 
-        waitForFX();
-
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
 		// started below
@@ -487,11 +486,16 @@ public class CPU {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
+		// start the clock now for the listeners that check for it to see if the simulation is active
 		clock.start();
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
 		messageManager.waitForAll();
+
+		waitForFX(-1/*always wait*/); // helps with not freezing the UI during simulation startup
+
+		clock.start(); // restart the clock (was just started above) to correctly time the first tick
 
 		while (isRunning) {
 			//long cycleStart = System.nanoTime();
@@ -506,7 +510,7 @@ public class CPU {
 			}
 
 			// doesn't have to be done every tick or anything, just enough not to starve
-			waitForFX();
+			waitForFX(100/*ms between waiting*/);
 
 			//long cycleDuration = System.nanoTime() - cycleStart;
 		}
