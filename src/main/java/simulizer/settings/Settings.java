@@ -106,7 +106,7 @@ public class Settings {
 			);
 		
 		settings.add(new ObjectSetting("simulation", "CPU Simulation")
-						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0, Integer.MAX_VALUE))
+						.add(new DoubleSetting("default-CPU-frequency", "Default CPU cycle frequency", "Default number of cycles (runs of fetch+decode+execute) per second (Hz)", 4, 0.05, 5000))
 						.add(new BooleanSetting("pipelined", "Use pipelined CPU?", "Sets whether to use the pipelined CPU or not", false))
 						.add(new BooleanSetting("annotations", "Run Annotations", "Sets whether to run annotations or not", true))
 					);
@@ -127,7 +127,7 @@ public class Settings {
 		
 		settings.add(new ObjectSetting("logger", "Logger")
 				.add(new BooleanSetting("emphasise", "Emphasise Logger", "Toggles whether to emphasise logger when requesting input", true))
-				.add(new IntegerSetting("font-size", "Font Size", "Font size for the Program I/O", 15))
+				.add(new IntegerSetting("font-size", "Font Size", "Font size for the Program I/O", 15, 1, 100))
 				);
 		
 		settings.add(new ObjectSetting("hlvis", "High Level Visualiser")

@@ -1,7 +1,8 @@
 package simulizer.ui.components.settings;
 
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import simulizer.settings.types.DoubleSetting;
@@ -30,25 +31,23 @@ public class DoubleControl extends VBox {
 		getChildren().add(desc);
 
 		// Option Value
-		TextField value = new TextField();
+		Spinner<Double> value = new Spinner<>();
+		DoubleSpinnerValueFactory factory = new DoubleSpinnerValueFactory(0, 0);
+		factory.setMax(setting.getHighBound());
+		factory.setMin(setting.getLowBound());
+		factory.setValue(setting.getValue());
+		double step = (setting.getHighBound() - setting.getLowBound()) / 1000;
+		factory.setAmountToStepBy(step <= 20 ? step : 20);
+		value.setValueFactory(factory);
 		value.setEditable(true);
-		value.setText("" + setting.getValue());
 		value.getStyleClass().add("value");
-		value.textProperty().addListener(e -> {
-			boolean valid = false;
-			double newValue = Double.NaN;
-			try {
-				newValue = Double.parseDouble(value.getText());
-				valid = setting.isValid(newValue);
-			} catch (NumberFormatException ex) {
-				valid = false;
-			}
-
-			if (valid) {
+		value.setPrefWidth(Double.MAX_VALUE);
+		value.valueProperty().addListener(e -> {
+			if (setting.isValid(value.getValue())) {
 				o.madeChanges();
-				setting.setValue(newValue);
+				setting.setValue(value.getValue());
 			} else
-				value.setText("" + setting.getValue());
+				value.getValueFactory().setValue(setting.getValue());
 		});
 		getChildren().add(value);
 	}

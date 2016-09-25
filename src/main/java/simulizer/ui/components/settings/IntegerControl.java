@@ -1,7 +1,8 @@
 package simulizer.ui.components.settings;
 
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import simulizer.settings.types.IntegerSetting;
@@ -30,25 +31,21 @@ public class IntegerControl extends VBox {
 		getChildren().add(desc);
 
 		// Option Value
-		TextField value = new TextField();
+		Spinner<Integer> value = new Spinner<>();
+		IntegerSpinnerValueFactory factory = new IntegerSpinnerValueFactory(0, 0);
+		factory.setMax(setting.getHighBound());
+		factory.setMin(setting.getLowBound());
+		factory.setValue(setting.getValue());
+		value.setValueFactory(factory);
 		value.setEditable(true);
-		value.setText("" + setting.getValue());
 		value.getStyleClass().add("value");
-		value.textProperty().addListener(e -> {
-			boolean valid = false;
-			int newValue = 0;
-			try {
-				newValue = Integer.parseInt(value.getText());
-				valid = setting.isValid(newValue);
-			} catch (NumberFormatException ex) {
-				valid = false;
-			}
-
-			if (valid) {
+		value.setPrefWidth(Double.MAX_VALUE);
+		value.valueProperty().addListener(e -> {
+			if (setting.isValid(value.getValue())) {
 				o.madeChanges();
-				setting.setValue(newValue);
+				setting.setValue(value.getValue());
 			} else
-				value.setText("" + setting.getValue());
+				value.getValueFactory().setValue(setting.getValue());
 		});
 		getChildren().add(value);
 
