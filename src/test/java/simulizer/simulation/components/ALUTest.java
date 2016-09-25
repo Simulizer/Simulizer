@@ -463,5 +463,27 @@ public class ALUTest {
 			assertEquals(2147483648L,executeU(Instruction.ror,unsignedW(1),unsignedW(1)));
 			assertEquals(2130706433,executeU(Instruction.ror,unsignedW(4261412866L),unsignedW(1)));
 		}
+		{//mult
+			CPU cpu = new CPU(null);
+			ALU.execute(Instruction.mult, signedW(4), signedW(3), Optional.of(cpu));
+			assertEquals(12,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+			
+			cpu = new CPU(null);
+			ALU.execute(Instruction.mult, signedW(0), signedW(1), Optional.of(cpu));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+		}
+		{//multi
+			CPU cpu = new CPU(null);
+			ALU.execute(Instruction.multi, signedW(4), signedW(3), Optional.of(cpu));
+			assertEquals(12,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+			
+			cpu = new CPU(null);
+			ALU.execute(Instruction.multi, signedW(0), signedW(1), Optional.of(cpu));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+			assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+		}
 	}
 }
