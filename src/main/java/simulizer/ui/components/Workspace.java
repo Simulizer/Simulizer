@@ -148,8 +148,16 @@ public class Workspace extends Observable implements Themeable {
 
 			// Try and close all the windows
 			openWindows.removeIf(w -> {
+				// Remove close event since we are removing here
+				w.setOnCloseAction(e -> {
+				}); 
+				
 				if (!w.isClosed())
 					w.close();
+				
+				// Add close event back because it didn't close
+				if (!w.isClosed())
+					w.setOnCloseAction(e -> removeWindow(w)); 
 				return w.isClosed();
 			});
 		}
@@ -197,6 +205,7 @@ public class Workspace extends Observable implements Themeable {
 		assert w2 != null;
 		w2.setWindowManager(wm);
 		wm.getLayouts().setWindowDimensions(w2);
+		// TODO: wait for window to be added to openWindows else we may end up with two of them
 		Platform.runLater(() -> addWindow(w2));
 		return w2;
 	}
@@ -312,9 +321,7 @@ public class Workspace extends Observable implements Themeable {
 	public synchronized void closeAllExcept(Collection<InternalWindow> keepOpen) {
 		synchronized (openWindows) {
 			// need to make copies since openWindows is modified
-			openWindows.stream().filter(window -> !keepOpen.contains(window)).collect(Collectors.toList())
-					   .stream().filter(window -> window.canClose()).collect(Collectors.toList())
-					   .forEach(this::removeWindow);
+			openWindows.stream().filter(window -> !keepOpen.contains(window)).collect(Collectors.toList()).stream().filter(window -> window.canClose()).collect(Collectors.toList()).forEach(this::removeWindow);
 		}
 	}
 

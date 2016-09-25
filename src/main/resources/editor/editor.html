@@ -80,6 +80,11 @@ function onChange(e) {
 }
 
 function onGutterPress(e) {
+    // protect against the case where a folding marker is in the gutter and is being clicked
+    var target = e.domEvent.target;
+    if(target.className.indexOf("ace_gutter-cell") == -1)
+        return;
+
     // getBreakpoints returns an array of booleans
     var row = e.getDocumentPosition().row;
     var breakpoints = session.getBreakpoints();

@@ -45,6 +45,7 @@ import simulizer.utils.UIUtils;
 public class WindowManager extends GridPane {
 
 	private Stage primaryStage;
+	private boolean closing = false, restart = false;
 
 	private Workspace workspace;
 	private GridBounds grid;
@@ -383,11 +384,20 @@ public class WindowManager extends GridPane {
 	 * Shutdown the application
 	 */
 	public void shutdown() {
+		closing = true;
 		cpu.shutdown();
 		workspace.closeAll();
 		if (!workspace.hasWindowsOpen()) {
 			primaryStage.close();
+			if (restart) {
+				try {
+					app.start(primaryStage);
+				} catch (Exception e) {
+					UIUtils.showExceptionDialog(e);
+				}
+			}
 		}
+		closing = false;
 	}
 
 	public HLVisualManager getHLVisualManager() {
@@ -442,11 +452,8 @@ public class WindowManager extends GridPane {
 	 * Quick restarts the application (not as good as a clean restart, but good enough to apply setting changes)
 	 */
 	public void restart() {
-		try {
+		restart = true;
+		if (!closing)
 			primaryStage.close();
-			app.start(primaryStage);
-		} catch (Exception e) {
-			UIUtils.showExceptionDialog(e);
-		}
 	}
 }
