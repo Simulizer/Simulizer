@@ -537,7 +537,7 @@ public class CPU {
 		return memory;
 	}
 
-	Address getProgramCounter() {
+	public Address getProgramCounter() {
 		return programCounter;
 	}
 	

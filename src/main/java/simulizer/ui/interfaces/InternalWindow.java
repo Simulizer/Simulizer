@@ -210,7 +210,6 @@ public abstract class InternalWindow extends Window {
 			contentPane.getStylesheets().add(classCss);
 			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
 		}
-		System.out.println(getClass().getSimpleName());
 	}
 
 	/**
