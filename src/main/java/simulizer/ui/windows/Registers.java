@@ -191,9 +191,9 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			else if (id == 9997 && cpu.getProgramCounter() != null) { // pc Register
 				contents = ByteBuffer.allocate(4).putInt(cpu.getProgramCounter().getValue()).array();
 			} else if (id == 9998) // hi Register
-				contents = cpu.getLo().getBytes();
-			else if (id == 9999) // lo Register
 				contents = cpu.getHi().getBytes();
+			else if (id == 9999) // lo Register
+				contents = cpu.getLo().getBytes();
 
 			value.set(getValue());
 		}
