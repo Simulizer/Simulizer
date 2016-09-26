@@ -19,6 +19,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -83,6 +85,12 @@ public abstract class InternalWindow extends Window {
 						e.consume();
 		});
 		// @formatter:on
+
+		// Update layout on move/resize
+		addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+			if (e.isShortcutDown() && e.getCode() == KeyCode.W)
+				close();
+		});
 
 		// Pseudo Class
 		pseudoClassStateChanged(PseudoClass.getPseudoClass("internal"), true);

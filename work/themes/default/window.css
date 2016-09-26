@@ -69,8 +69,6 @@
     -fx-text-fill: black;
 }
 
-
-
 /* custom styles */
 .logger-input {
     -fx-font-size: 11pt;
@@ -81,4 +79,7 @@
 
 .table-view {
     -fx-font-size: 11pt;
+}
+:prompting {
+	-fx-text-inner-color: #888888;
 }
