@@ -114,6 +114,7 @@ public class AnnotationManager {
 
 	private String getAnnotationLineString(AnnotationMessage msg) {
 		if (msg.boundAddress != null) {
+			// TODO: in edge cases the simulation might have finished, creating a NullPointerException here. Maybe cache the program at the beginning to get around this?
 			int lineNum = cpu.getProgram().lineNumbers.get(msg.boundAddress);
 			return "the annotation bound to line: " + (lineNum + 1) + ".";
 		} else {
@@ -147,10 +148,6 @@ public class AnnotationManager {
 
 	public synchronized void setEnabled(boolean value) {
 		enabled = value;
-		if (wm != null) {
-			wm.getSettings().set("simulation.annotations", value);
-			wm.getSettings().save();
-		}
 	}
 
 	public boolean isEnabled() {

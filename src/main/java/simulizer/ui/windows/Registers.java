@@ -1,5 +1,6 @@
 package simulizer.ui.windows;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
@@ -20,6 +21,7 @@ import simulizer.assembler.representation.Register;
 import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.data.representation.DataConverter;
+import simulizer.simulation.messages.PipelineStateMessage;
 import simulizer.simulation.messages.RegisterChangedMessage;
 import simulizer.simulation.messages.SimulationListener;
 import simulizer.ui.interfaces.InternalWindow;
@@ -61,6 +63,10 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			ObservableList<Data> data = FXCollections.observableArrayList();
 			for (Register r : Register.values())
 				data.add(createData(r));
+			// Adding special registers
+			data.add(new Data(9997, "pc"));
+			data.add(new Data(9998, "hi"));
+			data.add(new Data(9999, "lo"));
 			try {
 				ThreadUtils.platformRunAndWait(() -> table.setItems(data));
 			} catch (Throwable e) {
@@ -75,7 +81,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			synchronized (changedRegisters) {
 				if (changedRegisters.size() == 0)
 					return;
-				changed = table.getItems().filtered(d -> changedRegisters.contains(d.reg.getID()));
+				changed = table.getItems().filtered(d -> changedRegisters.contains(d.id));
 				changedRegisters.clear();
 			}
 			changed.forEach(Data::refresh);
@@ -83,7 +89,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	}
 
 	private Data createData(Register r) {
-		return new Data(r.getID(), r.getName());
+		return new Data(r.getID(), "$" + r.getName());
 	}
 
 	@Override
@@ -94,13 +100,13 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		cpu = getWindowManager().getCPU();
 		cpu.registerListener(listener);
 
-		// Create Register column
+		// Create Name column
+		TableColumn<Data, String> registerName = new TableColumn<>("Name");
+		registerName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		
+		// Create Number column
 		TableColumn<Data, String> registerID = new TableColumn<>("ID");
 		registerID.setCellValueFactory(new PropertyValueFactory<>("id"));
-
-		// Create RegisterName column
-		TableColumn<Data, String> registerName = new TableColumn<>("Register");
-		registerName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		// Create value column
 		valueCol = new TableColumn<>(valueType.toString());
@@ -123,7 +129,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 		valueCol.setContextMenu(menu);
 
 		refreshTable();
-		table.getColumns().addAll(registerID, registerName, valueCol);
+		table.getColumns().addAll(registerName, registerID, valueCol);
 		table.setEditable(false);
 
 		// Refresh registers regularly
@@ -162,7 +168,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	 */
 	@SuppressWarnings({ "WeakerAccess", "unused" })
 	public class Data {
-		private final Register reg;
+		private Register reg;
 		private final int id;
 		private final String name;
 		private byte[] contents;
@@ -170,21 +176,36 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 
 		public Data(final int id, final String name) {
 			this.id = id;
-			reg = Register.fromID(id);
 			this.name = name;
+			try {
+				reg = Register.fromID(id);
+			} catch (Exception e) {
+				reg = null;
+			}
 			refresh();
 		}
 
 		public void refresh() {
-			contents = cpu.getRegister(reg).getBytes();
+			if (reg != null) // Normal Register
+				contents = cpu.getRegister(reg).getBytes();
+			else if (id == 9997 && cpu.getProgramCounter() != null) { // pc Register
+				contents = ByteBuffer.allocate(4).putInt(cpu.getProgramCounter().getValue()).array();
+			} else if (id == 9998) // hi Register
+				contents = cpu.getHi().getBytes();
+			else if (id == 9999) // lo Register
+				contents = cpu.getLo().getBytes();
+
 			value.set(getValue());
 		}
 
 		/**
 		 * @return register id
 		 */
-		public int getId() {
-			return id;
+		public String getId() {
+			if (id < 9000)
+				return "" + id;
+			else
+				return "";
 		}
 
 		/**
@@ -235,12 +256,21 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 	private class RegisterListener extends SimulationListener {
 		@Override
 		public void processRegisterChangedMessage(RegisterChangedMessage m) {
-			try {
-				synchronized (changedRegisters) {
+			synchronized (changedRegisters) {
+				if (m.registerChanged == null) {
+					// Updating hi/lo
+					changedRegisters.add(9998);
+					changedRegisters.add(9999);
+				} else
 					changedRegisters.add(m.registerChanged.getID());
-				}
-			} catch (Throwable e) {
-				UIUtils.showExceptionDialog(e);
+			}
+		}
+
+		@Override
+		public void processPipelineStateMessage(PipelineStateMessage m) {
+			synchronized (changedRegisters) {
+				// Updating pc
+				changedRegisters.add(9997);
 			}
 		}
 	}

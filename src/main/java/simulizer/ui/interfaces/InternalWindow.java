@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -136,7 +137,7 @@ public abstract class InternalWindow extends Window {
 			this.wm = wm;
 
 			// Add window icons
-			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
+			if ((boolean) wm.getSettings().get("internal-window.extractable"))
 				getRightIcons().add(new CustomExtractIcon(this));
 			getRightIcons().add(new CustomCloseIcon(this));
 
@@ -202,15 +203,18 @@ public abstract class InternalWindow extends Window {
 	 */
 	public synchronized void setTheme(Theme theme) {
 		String classCss = theme.getStyleSheet(getClass().getSimpleName().toLowerCase() + ".css");
+		classCss = new File(classCss.replace("file:/", "")).isFile() ? classCss : "";
+
 		getStylesheets().clear();
-		getStylesheets().add(classCss);
+		if (!classCss.equals(""))
+			getStylesheets().add(classCss);
 		getStylesheets().add(theme.getStyleSheet("window.css"));
 		if (contentPane != null) {
 			contentPane.getStylesheets().clear();
-			contentPane.getStylesheets().add(classCss);
+			if (!classCss.equals(""))
+				contentPane.getStylesheets().add(classCss);
 			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
 		}
-		System.out.println(getClass().getSimpleName());
 	}
 
 	/**
@@ -441,7 +445,7 @@ public abstract class InternalWindow extends Window {
 
 			// Create the scene
 			Scene scene;
-			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
+			if ((boolean) wm.getSettings().get("menubar.all-windows")) {
 				GridPane root = new GridPane();
 				scene = new Scene(root);
 

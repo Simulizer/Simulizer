@@ -59,6 +59,7 @@ public class CPU {
 	 */
 	boolean breakAfterCycle;
     private final Semaphore tickLock;
+	private long lastFXWait;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -72,7 +73,7 @@ public class CPU {
 
 	protected Map<Address, Annotation> annotations;
 
-	boolean isRunning;// for program status
+	volatile boolean isRunning;// for program status
 	Address lastAddress;// used to determine end of program
 
 	private IO io;
@@ -95,6 +96,7 @@ public class CPU {
 		this.breakAfterCycle = false;
 		this.tickLock = new Semaphore(1); // used to ensure JavaFX tasks are done before the next tick
         this.tickLock.tryAcquire();
+		this.lastFXWait = 0;
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
@@ -209,16 +211,17 @@ public class CPU {
 
 	/**
 	 * Wait for the Platform.runLater() tasks to finish
+	 * @param interval the time to leave between JavaFX waiting. -1 to ensure waiting
 	 */
-	private void waitForFX() {
-		if(Simulizer.hasGUI()) {
+	private void waitForFX(int interval) {
+		if(Simulizer.hasGUI() && System.currentTimeMillis() - interval > lastFXWait) {
 			// hopefully runLater tasks run in a queue, so this occurs after all the
 			// outstanding JavaFX tasks have run
 			Platform.runLater(tickLock::release);
 			try {
 				tickLock.acquire();
-			} catch (InterruptedException ignored) {
-			}
+			} catch (InterruptedException ignored) { }
+            lastFXWait = System.currentTimeMillis();
 		}
 	}
 
@@ -233,8 +236,6 @@ public class CPU {
 			}
 
             messageManager.waitForAll();
-
-			waitForFX();
 
             // if the clock is stopped then it advances by 1 tick to unlock this thread
             clock.waitForNextTick();
@@ -478,8 +479,6 @@ public class CPU {
 
 		messageManager.waitForAll();
 
-        waitForFX();
-
 		// used for setting up the annotation environment eg loading visualisations
 		// if clock speed set, then this applies on the first tick since the clock is
 		// started below
@@ -487,11 +486,16 @@ public class CPU {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
+		// start the clock now for the listeners that check for it to see if the simulation is active
 		clock.start();
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
 		messageManager.waitForAll();
+
+		waitForFX(-1/*always wait*/); // helps with not freezing the UI during simulation startup
+
+		clock.start(); // restart the clock (was just started above) to correctly time the first tick
 
 		while (isRunning) {
 			//long cycleStart = System.nanoTime();
@@ -504,6 +508,9 @@ public class CPU {
 				sendMessage(new ProblemMessage(e));
 				stopRunning();
 			}
+
+			// doesn't have to be done every tick or anything, just enough not to starve
+			waitForFX(100/*ms between waiting*/);
 
 			//long cycleDuration = System.nanoTime() - cycleStart;
 		}
@@ -537,7 +544,7 @@ public class CPU {
 		return memory;
 	}
 
-	Address getProgramCounter() {
+	public Address getProgramCounter() {
 		return programCounter;
 	}
 	

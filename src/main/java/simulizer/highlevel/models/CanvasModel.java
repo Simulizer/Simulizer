@@ -85,19 +85,6 @@ public class CanvasModel extends DataStructureModel {
 		ctx.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
 
-	private void enforceFPSLimit() {
-		if(lastFrameMs != 0 && !Double.isInfinite(maxFPS)) { // not the first frame
-			int currentMs = (int) (System.currentTimeMillis() - lastFrameMs); // current time for this frame
-			int desiredMs = (int) (1000.0/maxFPS);
-			int sleepTime = desiredMs - currentMs;
-			if(sleepTime > 0) {
-				try {
-					Thread.sleep(sleepTime);
-				} catch (InterruptedException ignored) {
-				}
-			}
-		}
-	}
 
 	public void drawPixels(boolean[] pixels, int cols) {
 		assert(pixels.length > 0 && cols > 0 && pixels.length % cols == 0);
@@ -155,11 +142,24 @@ public class CanvasModel extends DataStructureModel {
 	}
 
 
+	private void enforceFPSLimit() {
+		if(lastFrameMs != 0 && !Double.isInfinite(maxFPS)) { // not the first frame
+			int currentMs = (int) (System.currentTimeMillis() - lastFrameMs); // current time for this frame
+			int desiredMs = (int) (1000.0/maxFPS);
+			int sleepTime = desiredMs - currentMs;
+			if(sleepTime > 0) {
+				try {
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException ignored) {
+				}
+			}
+		}
+	}
+
 	/**
 	 * used internally to keep track of frames and display an FPS counter if requested
 	 */
 	private void submitFrame() {
-		enforceFPSLimit();
 		if(showFPS) {
 			long now = System.currentTimeMillis();
 			if(lastFrameMs != 0) {
@@ -175,6 +175,7 @@ public class CanvasModel extends DataStructureModel {
 			ctx.setTextBaseline(VPos.TOP);
 			ctx.fillText(String.format("%.1f FPS", fps), canvas.getWidth(), 0);
 		}
+		enforceFPSLimit();
 	}
 
 	public void centerText(String text) {
