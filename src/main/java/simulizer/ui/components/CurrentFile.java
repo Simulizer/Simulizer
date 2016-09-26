@@ -160,25 +160,26 @@ public class CurrentFile {
 				file = new File(file.getAbsolutePath() + ".s");
 
 			currentFile = file;
-			saveFile();
+			saveFileWithoutPrompt();
             return true;
 		}
 		return false;
 	}
-	static void promptSave() {
+
+	public static void promptSave() {
 		if(currentFile == null) {
 			promptSaveAs();
 		} else if(isChangedExternally()) {
 			ButtonType response = externalChangeDialog();
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
 			} else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			}
 			// cancel or [X]
 		} else {
-			saveFile();
+			saveFileWithoutPrompt();
 		}
 	}
 	/**
@@ -210,7 +211,7 @@ public class CurrentFile {
             ButtonType response = externalChangeDialog();
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
 			} else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			} else {
@@ -223,7 +224,7 @@ public class CurrentFile {
 			ButtonType response = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
             } else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			} else {
@@ -284,7 +285,7 @@ public class CurrentFile {
 	/**
 	 * just saves, no user interaction
 	 */
-	private static void saveFile() {
+	private static void saveFileWithoutPrompt() {
 		if (currentFile == null) {
 			UIUtils.showErrorDialog("Save Error", "cannot save because no file to save to");
 			return;

@@ -171,8 +171,7 @@ public class CPUPipeline extends CPU {
 	private <A> boolean needToBubble(List<A> reads, List<A> writes) {
 		for (A write : writes) {
 			for (A read : reads) {
-				System.out.println("read Null?: " + (read==null) + "write Null?:" + (write==null));
-				if (write.equals(read)) {
+				if (write != null && write.equals(read)) {
 					return true;
 				}
 			}

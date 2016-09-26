@@ -216,7 +216,6 @@ class MenuBarControls {
 				else
 					cpu.pause();
 			} else {
-				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		}

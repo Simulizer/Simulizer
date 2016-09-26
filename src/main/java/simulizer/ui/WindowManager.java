@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
 import javafx.scene.effect.MotionBlur;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -217,13 +218,27 @@ public class WindowManager extends GridPane {
 	 * Assembles the SIMP program and executes it
 	 */
 	public void assembleAndRun() {
+		// prompt to save if the setting is enabled
+		Editor editor = Editor.getEditor();
+		boolean askToSave = (boolean) settings.get("editor.save-before-run");
+		if(askToSave && editor != null && editor.hasOutstandingChanges()) {
+			ButtonType response = UIUtils.confirmYesNoCancel("Save Before Run?", "Would you like to save the file before running?\n('No' will still run the program)");
+			if(response == ButtonType.YES) {
+				CurrentFile.promptSave();
+			} else if(response == ButtonType.CANCEL) {
+				return; // don't run
+			}
+			// else No, in which case just carry on
+		}
+
+		AssemblingDialog.showAssemblingDialog(this);
 		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Assembling Program");
 
 		final String programText = CurrentFile.getCurrentText();
 
 		// avoid lots of work on the JavaFX thread
 		Thread assembleThread = new Thread(() -> {
-			StoreProblemLogger log = new StoreProblemLogger();
+			final StoreProblemLogger log = new StoreProblemLogger();
 
 			try {
 				final Program cachedP = CurrentFile.getCachedAssembledProgram(programText);
@@ -235,9 +250,9 @@ public class WindowManager extends GridPane {
 					// open the editor and set problems if program has problems or if the editor is already open.
 					// Leave the editor closed if it is closed and there are no problems
 					if (p == null || Editor.getEditor() != null) {
-						getWorkspace().openEditorWithCallback((editor) -> {
+						getWorkspace().openEditorWithCallback((editor2) -> {
 							// if no problems, has the effect of clearing
-							editor.setProblems(log.getProblems());
+							editor2.setProblems(log.getProblems());
 							if (p == null) {
 								int size = log.getProblems().size();
 								UIUtils.showErrorDialog("Could Not Run", "The Program Contains " + (size == 1 ? "An Error!" : size + " Errors!"), "You must fix them before you can\nexecute the program.");

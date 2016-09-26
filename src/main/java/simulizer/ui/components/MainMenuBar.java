@@ -322,7 +322,6 @@ public class MainMenuBar extends MenuBar {
 		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
 			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		});

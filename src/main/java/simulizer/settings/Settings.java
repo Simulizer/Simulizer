@@ -123,6 +123,7 @@ public class Settings {
 					.add(new BooleanSetting("wrap", "Wrap long lines", "", false))
 					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
 					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1500, 1, Integer.MAX_VALUE))
+                    .add(new BooleanSetting("save-before-run", "Save Before Run", "Ask to save before running the program. Useful in the rare event that Simulizer crashes.", true))
 					);
 		
 		settings.add(new ObjectSetting("logger", "Logger")
