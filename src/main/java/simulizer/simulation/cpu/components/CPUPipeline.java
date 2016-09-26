@@ -127,7 +127,10 @@ public class CPUPipeline extends CPU {
 		ArrayList<Register> registers = new ArrayList<>();
 		switch(instruction.mode) {
 			case RTYPE://all rtype instructions have a destination register
-				registers.add(instruction.asRType().getDestReg());
+				Register destRegR = instruction.asRType().getDestReg();
+				if(destRegR != null) {//instructions using lo and hi set the dest register to null hence this check
+					registers.add(destRegR);
+				}
 				break;
 			case JTYPE://jal will write to the return address register
 				if(instruction.getInstruction().equals(Instruction.jal)
@@ -168,6 +171,7 @@ public class CPUPipeline extends CPU {
 	private <A> boolean needToBubble(List<A> reads, List<A> writes) {
 		for (A write : writes) {
 			for (A read : reads) {
+				System.out.println("read Null?: " + (read==null) + "write Null?:" + (write==null));
 				if (write.equals(read)) {
 					return true;
 				}
