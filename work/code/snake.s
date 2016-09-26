@@ -1,8 +1,10 @@
+	# compiled using GCC with optimisation level 3
 	# @{ var c = vis.load('canvas'); }@
 	# @{ c.squareShaped = true;      }@
 	# @{ c.showFPS = true;           }@
+	# @{ c.maxFPS = 10;              }@
 	# @{ var g = c.ctx;              }@
-	# @{ sim.setSpeed(7000); //Hz    }@
+	# @{ sim.setSpeed(0); //inf Hz   }@
 	#
 	# @{ function randInt(min, max) // result in [min, max) }@
 	# @{   { return Math.random()*(max-min)+min }           }@
@@ -17,10 +19,10 @@ setPixel:
 	la	$2,cols
 	lw	$2,0($2)
 	la	$3,pixels
-	mul $2,$4,$2
+	mult	$4,$2
 	sw	$5,4($sp)
 	sw	$4,0($sp)
-	#mflo $2
+	mflo	$2
 	addu	$2,$3,$2
 	addu	$5,$2,$5
 	sb	$6,0($5)
@@ -33,9 +35,9 @@ placeFood:
 	la	$3,cols
 	lw	$3,0($3)
 	sw	$5,4($4)
-	mul $2,$3,$2
+	mult	$3,$2
 	la	$4,pixels
-	#mflo $2
+	mflo	$2
 	addu	$3,$4,$2
 	addu	$2,$3,$5
 	li	$3,1			# 0x1
@@ -47,11 +49,11 @@ removeTail:
 	lw	$3,0($2)
 	lw	$4,0($4)
 	lw	$5,4($2)
-	mul $3,$3,$4
+	mult	$3,$4
 	la	$4,headIndex
 	lw	$7,0($4)
 	la	$4,pixels
-	#mflo $3
+	mflo	$3
 	addu	$3,$4,$3
 	addu	$3,$3,$5
 	sb	$0,0($3)
@@ -137,9 +139,9 @@ LBL_39:
 	lw	$12,0($2)
 	lw	$2,0($8)
 	la	$10,pixels
-	mul $2,$12,$2
+	mult	$12,$2
 	lw	$3,4($8)
-	#mflo $2
+	mflo	$2
 	addu	$2,$10,$2
 	addu	$2,$2,$3
 	sb	$0,0($2)
@@ -157,11 +159,11 @@ LBL_44:
 	addiu	$2,$2,8
 	beq	$4,$0,LBL_44
 LBL_43:
-	mul $3,$11,$12
+	mult	$11,$12
 	addu	$2,$10,$13
 	sw	$11,0($9)
 	sw	$13,4($9)
-	#mflo $3
+	mflo	$3
 	addu	$10,$2,$3
 	li	$2,1			# 0x1
 	sb	$2,0($10)
@@ -239,9 +241,9 @@ LBL_40:
 	la	$5,cols
 	lw	$12,0($5)
 	sw	$4,4($2)
-	mul $2,$12,$3
+	mult	$12,$3
 	la	$3,pixels
-	#mflo $2
+	mflo	$2
 	addu	$2,$3,$2
 	addu	$2,$2,$4
 	li	$3,1			# 0x1
@@ -293,6 +295,7 @@ LBL_34:
 	b	LBL_33
 LBL_57:
 	j	$ra
+	.text
 main:
 	la	$2,rows
 	lw	$2,0($2)
@@ -302,10 +305,10 @@ main:
 	lw	$2,0($3)
 	# <hazard>
 	nop # @{ var cols = $2.get(); }@
-LBL_62:
 	nop # @{ c.setFont('Monospace', 24); }@
 	nop # @{ c.clear(); }@
 	nop # @{ c.centerText('Press Arrows To Move'); }@
+LBL_62:
 	nop # @{ $2.set(c.input); }@
 	beq	$2,$0,LBL_62
 	nop # @{ $2.set(randInt(0, rows)); }@
@@ -314,7 +317,7 @@ LBL_62:
 	nop # @{ $9.set(randInt(0, cols)); }@
 	lw	$3,0($3)
 	la	$15,pixels
-	mul $2,$3,$2
+	mult	$3,$2
 	li	$7,1			# 0x1
 	sll	$5,$3,3
 	sll	$6,$3,1
@@ -326,7 +329,7 @@ LBL_62:
 	addu	$6,$15,$6
 	lbu	$11,0($24)
 	li	$8,10			# 0xa
-	#mflo $2
+	mflo	$2
 	addu	$2,$15,$2
 	addu	$2,$2,$9
 	sb	$7,0($2)

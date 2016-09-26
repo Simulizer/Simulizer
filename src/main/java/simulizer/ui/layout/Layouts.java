@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
@@ -16,6 +18,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
+import javafx.util.Pair;
 import simulizer.GuiMode;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
@@ -61,7 +64,7 @@ public class Layouts implements Iterable<Layout> {
 
 		try {
 			String layoutName;
-			if(GuiMode.args.layout != null) {
+			if (GuiMode.args.layout != null) {
 				// eg "High Level" --> "high-level.json"
 				layoutName = GuiMode.args.layout.toLowerCase().replace(" ", "-") + ".json";
 			} else {
@@ -123,8 +126,7 @@ public class Layouts implements Iterable<Layout> {
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
-			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(StandardCharsets.UTF_8),
-					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			UIUtils.showErrorDialog("Error Saving Layout", "Unable to save the file");
 		}
@@ -139,23 +141,35 @@ public class Layouts implements Iterable<Layout> {
 	public void setLayout(Layout layout) {
 		this.layout = layout;
 
-		// For each new window
 		WindowLocation[] locations = layout.getWindowLocations();
-		InternalWindow[] newOpenWindows = new InternalWindow[locations.length];
-		for (int i = 0; i < locations.length; i++) {
-			// Open/Find the internal window
-			newOpenWindows[i] = workspace.openInternalWindow(locations[i].getWindowEnum());
+		List<InternalWindow> layoutWindows = new ArrayList<>();
+		List<WindowLocation> needToOpenWindows = new ArrayList<>();
 
-			// Ensure the window is not extracted
-			if (newOpenWindows[i].isExtracted())
-				newOpenWindows[i].toggleWindowExtracted();
-			
-			// Update internal window dimensions
-			setWindowDimensions(newOpenWindows[i]);
+		// Find out what is already open
+		for (int i = 0; i < locations.length; i++) {
+			InternalWindow window = workspace.findInternalWindow(locations[i].getWindowEnum());
+			if (window != null)
+				layoutWindows.add(window);
+			else
+				needToOpenWindows.add(locations[i]);
 		}
 
 		// Close any internal windows not in the layout
-		workspace.closeAllExcept(newOpenWindows);
+		workspace.closeAllExcept(layoutWindows);
+
+		// Open the rest of the layout windows
+		needToOpenWindows.forEach(l -> layoutWindows.add(workspace.openInternalWindow(l.getWindowEnum())));
+		needToOpenWindows.clear();
+
+		// Update all InternalWindow dimensions
+		layoutWindows.forEach(window -> {
+			// Ensure the window is not extracted
+			if (window.isExtracted())
+				window.toggleWindowExtracted();
+			
+			// Update internal window dimensions
+			setWindowDimensions(window);
+		});
 
 	}
 

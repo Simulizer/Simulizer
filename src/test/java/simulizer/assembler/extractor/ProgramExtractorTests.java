@@ -197,5 +197,33 @@ public class ProgramExtractorTests {
 			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
 			expectBadParse("Error node: \"\"\\hello\\\"\"");
 		}
+		{
+			// Like spim: cannot place multiple labels on a single line
+			String p = "" + ".data;.text; main:abc: nop;";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectBadParse("Error node: \":\"");
+		}
+		{
+			// Like spim: _can_ place multiple labels on a single line if separated by ;
+			String p = "" + ".data;.text; main:;abc: nop;";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+            expectGood();
+		}
+		{
+			// label names should be trimmed so these two are the same which should give an error
+			String p = "" + ".data;.text; main:; abc: nop; abc   : nop;";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectValidParseButProblem("the label name: \"abc\" is taken");
+		}
+		{
+			// duplicate labels which point to the same location should still raise errors
+			String p = "" + ".data;.text; main:; abc:; abc: nop;";
+			ex = new ProgramExtractor(log);
+			ParseTreeWalker.DEFAULT.walk(ex, parse(p).program());
+			expectValidParseButProblem("the label name: \"abc\" is taken");
+		}
 	}
 }

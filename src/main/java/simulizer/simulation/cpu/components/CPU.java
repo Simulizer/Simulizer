@@ -1,10 +1,11 @@
 package simulizer.simulation.cpu.components;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.Semaphore;
+
+import javafx.application.Platform;
+import simulizer.Simulizer;
 import simulizer.assembler.representation.Address;
 import simulizer.assembler.representation.Annotation;
 import simulizer.assembler.representation.Instruction;
@@ -57,6 +58,8 @@ public class CPU {
 	 * used for resume for single cycle
 	 */
 	boolean breakAfterCycle;
+    private final Semaphore tickLock;
+	private long lastFXWait;
 
 	private Word[] registers;
 	private MainMemory memory;
@@ -70,10 +73,14 @@ public class CPU {
 
 	protected Map<Address, Annotation> annotations;
 
-	boolean isRunning;// for program status
+	volatile boolean isRunning;// for program status
 	Address lastAddress;// used to determine end of program
 
 	private IO io;
+	
+	//LO/HI Registers
+	private Word lo;
+	private Word hi;
 
 	/**
 	 * the constructor will set all the components up
@@ -87,10 +94,16 @@ public class CPU {
 		this.clock = new Clock();
 		this.cycles = 0;
 		this.breakAfterCycle = false;
+		this.tickLock = new Semaphore(1); // used to ensure JavaFX tasks are done before the next tick
+        this.tickLock.tryAcquire();
+		this.lastFXWait = 0;
 		this.isRunning = false;
 		this.io = io;
 		this.decoder = new Decoder(this);
 		this.executor = new Executor(this);
+		this.lo = Word.ZERO;
+		this.hi = Word.ZERO;
+		
 	}
 
 	/**method stops sim, shuts down clock and message manager
@@ -196,6 +209,22 @@ public class CPU {
 		}
 	}
 
+	/**
+	 * Wait for the Platform.runLater() tasks to finish
+	 * @param interval the time to leave between JavaFX waiting. -1 to ensure waiting
+	 */
+	private void waitForFX(int interval) {
+		if(Simulizer.hasGUI() && System.currentTimeMillis() - interval > lastFXWait) {
+			// hopefully runLater tasks run in a queue, so this occurs after all the
+			// outstanding JavaFX tasks have run
+			Platform.runLater(tickLock::release);
+			try {
+				tickLock.acquire();
+			} catch (InterruptedException ignored) { }
+            lastFXWait = System.currentTimeMillis();
+		}
+	}
+
 	/**method makes simulation wait for the next clock tick to take place
 	 * 
 	 * @throws EndedException If program ended
@@ -263,13 +292,17 @@ public class CPU {
 		this.program = program;
 		this.instructionRegister = null;// nothing to put in yet so null
 
+		Breakpoints.specifyProgram(program);
+
 		this.clearRegisters();// reset the registers
 
 		// setting up memory
 		Address dataSegmentStart = this.program.dataSegmentStart;
 		Address dynamicSegmentStart = this.program.dynamicSegmentStart;
 		Address stackPointer = new Address((int) DataConverter.decodeAsSigned(this.program.initialSP.getBytes()));
-		byte[] staticDataSegment = this.program.dataSegment;
+        // copy the static data segment because the program's initial state should be preserved in case the cached
+		// program is run again
+		byte[] staticDataSegment = Arrays.copyOf(this.program.dataSegment, this.program.dataSegment.length);
 		Map<Address, Statement> textSegment = this.program.textSegment;
 		this.memory = new MainMemory(textSegment, staticDataSegment, dataSegmentStart, dynamicSegmentStart, stackPointer);
 
@@ -392,6 +425,11 @@ public class CPU {
 		// messages should be sent about this instruction instead
 		Address thisInstruction = programCounter;
 
+		// only hit the breakpoint once, then allow progress to continue
+		if(Breakpoints.isBreakpoint(thisInstruction)) {
+            pause();
+		}
+
 		fetch();
 		sendMessage(new PipelineStateMessage(thisInstruction, null, null));
 
@@ -405,7 +443,7 @@ public class CPU {
 		execute(instruction);
 		sendMessage(new PipelineStateMessage(null, null, thisInstruction));
 
-		if (annotations.containsKey(thisInstruction)) {
+		if (annotations.containsKey(thisInstruction) && this.isRunning) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
 
@@ -448,11 +486,16 @@ public class CPU {
 			sendMessage(new AnnotationMessage(program.initAnnotation, null));
 		}
 
+		// start the clock now for the listeners that check for it to see if the simulation is active
 		clock.start();
 
 		sendMessage(new SimulationMessage(SimulationMessage.Detail.SIMULATION_STARTED));
 
 		messageManager.waitForAll();
+
+		waitForFX(-1/*always wait*/); // helps with not freezing the UI during simulation startup
+
+		clock.start(); // restart the clock (was just started above) to correctly time the first tick
 
 		while (isRunning) {
 			//long cycleStart = System.nanoTime();
@@ -465,6 +508,9 @@ public class CPU {
 				sendMessage(new ProblemMessage(e));
 				stopRunning();
 			}
+
+			// doesn't have to be done every tick or anything, just enough not to starve
+			waitForFX(100/*ms between waiting*/);
 
 			//long cycleDuration = System.nanoTime() - cycleStart;
 		}
@@ -500,6 +546,22 @@ public class CPU {
 
 	public Address getProgramCounter() {
 		return programCounter;
+	}
+	
+	public Word getLo() {
+		return this.lo;
+	}
+	
+	public Word getHi() {
+		return this.hi;
+	}
+	
+	public void setLo(Word lo) {
+		this.lo = lo;
+	}
+	
+	public void setHi(Word hi) {
+		this.hi = hi;
 	}
 
 	public IO getIO() {

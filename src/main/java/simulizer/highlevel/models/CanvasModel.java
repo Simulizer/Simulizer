@@ -28,6 +28,7 @@ public class CanvasModel extends DataStructureModel {
 	public Paint textColor  = getColor("#4BE34B");
 	public boolean squareShaped = false; // make sure canvas is always a square
 	public boolean showFPS = false; // show FPS when drawing pixels
+    public double maxFPS = Double.POSITIVE_INFINITY;
 
     // cannot be static otherwise not accessible from javascript
 	public final int UP    = 1;
@@ -83,6 +84,7 @@ public class CanvasModel extends DataStructureModel {
 		ctx.setFill(clearColor);
 		ctx.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 	}
+
 
 	public void drawPixels(boolean[] pixels, int cols) {
 		assert(pixels.length > 0 && cols > 0 && pixels.length % cols == 0);
@@ -140,6 +142,20 @@ public class CanvasModel extends DataStructureModel {
 	}
 
 
+	private void enforceFPSLimit() {
+		if(lastFrameMs != 0 && !Double.isInfinite(maxFPS)) { // not the first frame
+			int currentMs = (int) (System.currentTimeMillis() - lastFrameMs); // current time for this frame
+			int desiredMs = (int) (1000.0/maxFPS);
+			int sleepTime = desiredMs - currentMs;
+			if(sleepTime > 0) {
+				try {
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException ignored) {
+				}
+			}
+		}
+	}
+
 	/**
 	 * used internally to keep track of frames and display an FPS counter if requested
 	 */
@@ -159,6 +175,7 @@ public class CanvasModel extends DataStructureModel {
 			ctx.setTextBaseline(VPos.TOP);
 			ctx.fillText(String.format("%.1f FPS", fps), canvas.getWidth(), 0);
 		}
+		enforceFPSLimit();
 	}
 
 	public void centerText(String text) {

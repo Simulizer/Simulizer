@@ -5,6 +5,7 @@ import java.util.Arrays;
 /**
  * specifies the type of operands that should be accepted for a particular instruction
  * @author mbway
+ * @author Charlie Street (see comments)
  */
 public class OperandFormat {
     public enum OperandType {
@@ -93,8 +94,21 @@ public class OperandFormat {
         .allowed2(OperandType.REGISTER)
         .allowed3(OperandType.LABEL);
 
+    //changes made by charlie on 25/09/2016 for inclusion of lo hi based instructions
+    public static final OperandFormat srcSrc = new OperandFormat()
+    		.allowed1(OperandType.SRC_REGISTER)
+    		.allowed2(OperandType.SRC_REGISTER);
+    
+    public static final OperandFormat dest = new OperandFormat()
+    		.allowed1(OperandType.DEST_REGISTER);
 
-
+    public static final OperandFormat src = new OperandFormat()
+    		.allowed1(OperandType.SRC_REGISTER);
+    
+    public static final OperandFormat srcImm = new OperandFormat()
+    		.allowed1(OperandType.SRC_REGISTER)
+    		.allowed2(OperandType.IMMEDIATE);
+    
     private OperandType[] allowedPos1;
     private OperandType[] allowedPos2;
     private OperandType[] allowedPos3;

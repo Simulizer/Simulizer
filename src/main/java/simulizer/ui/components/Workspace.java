@@ -1,12 +1,10 @@
 package simulizer.ui.components;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -144,14 +142,24 @@ public class Workspace extends Observable implements Themeable {
 	 */
 	public void closeAll() {
 		synchronized (openWindows) {
-			Iterator<InternalWindow> windows = openWindows.iterator();
-			while (windows.hasNext()) {
-				InternalWindow window = windows.next();
-				if (!window.isClosed())
-					window.close();
-				if (window.isClosed())
-					windows.remove();
-			}
+			// See if all windows are happy about closing
+			if (openWindows.stream().anyMatch(w -> !w.canClose()))
+				return;
+
+			// Try and close all the windows
+			openWindows.removeIf(w -> {
+				// Remove close event since we are removing here
+				w.setOnCloseAction(e -> {
+				}); 
+				
+				if (!w.isClosed())
+					w.close();
+				
+				// Add close event back because it didn't close
+				if (!w.isClosed())
+					w.setOnCloseAction(e -> removeWindow(w)); 
+				return w.isClosed();
+			});
 		}
 	}
 
@@ -197,6 +205,7 @@ public class Workspace extends Observable implements Themeable {
 		assert w2 != null;
 		w2.setWindowManager(wm);
 		wm.getLayouts().setWindowDimensions(w2);
+		// TODO: wait for window to be added to openWindows else we may end up with two of them
 		Platform.runLater(() -> addWindow(w2));
 		return w2;
 	}
@@ -278,6 +287,8 @@ public class Workspace extends Observable implements Themeable {
 
 	/**
 	 * Removes Internal Windows from the workspace
+	 * 
+	 * @warning Must perform window.canClose() test before running this method
 	 *
 	 * @param window
 	 *            the Internal Window to close
@@ -304,17 +315,13 @@ public class Workspace extends Observable implements Themeable {
 	/**
 	 * Closes all open Internal Windows except theseWindows
 	 *
-	 * @param theseWindows
+	 * @param keepOpen
 	 *            The Internal Windows to keep open
 	 */
-	public synchronized void closeAllExcept(InternalWindow[] theseWindows) {
-		Set<InternalWindow> keepOpen = new HashSet<>();
-		Collections.addAll(keepOpen, theseWindows);
-
+	public synchronized void closeAllExcept(Collection<InternalWindow> keepOpen) {
 		synchronized (openWindows) {
-			openWindows.stream().filter(window -> !keepOpen.contains(window)).collect(Collectors.toList()) // need to make a copy since
-																											// openWindows is modified
-					.forEach(this::removeWindow);
+			// need to make copies since openWindows is modified
+			openWindows.stream().filter(window -> !keepOpen.contains(window)).collect(Collectors.toList()).stream().filter(window -> window.canClose()).collect(Collectors.toList()).forEach(this::removeWindow);
 		}
 	}
 

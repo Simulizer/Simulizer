@@ -3,12 +3,12 @@ package simulizer.ui.windows;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.scene.CacheHint;
-import javafx.scene.text.FontSmoothingType;
+import javafx.concurrent.Task;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.CacheHint;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
@@ -23,6 +24,7 @@ import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
 import simulizer.settings.Settings;
+import simulizer.simulation.cpu.components.Breakpoints;
 import simulizer.ui.WindowManager;
 import simulizer.ui.components.CurrentFile;
 import simulizer.ui.interfaces.InternalWindow;
@@ -40,15 +42,12 @@ import simulizer.utils.UIUtils;
 @SuppressWarnings("WeakerAccess")
 public class Editor extends InternalWindow {
 
-    // TODO: can treat just like other windows now that the CurrentFile is extracted
-	private static Editor editor; // only one instance
+	private static volatile Editor editor; // only one instance
 
 	private volatile boolean pageLoaded;
 	private final WebEngine engine;
 
 	private volatile boolean contentIsModified; // changes have been made in the editor since loading
-	//private boolean changedSinceLastSave;
-	//private boolean changedSinceLastNotify;
 
 	// handle key combos for copy and paste
 	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
@@ -57,10 +56,13 @@ public class Editor extends InternalWindow {
 	final static private KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
 	final static private KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
 	final static private KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+
+	// for Ctrl plus with each different plus key on the keyboard
 	final static private KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
 	final static private KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN); // Caps lock + =
 	final static private KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN);
 	final static private KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
+	// for Ctrl minus with each different minus key on the keyboard
 	final static private KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
 	final static private KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
 
@@ -84,15 +86,29 @@ public class Editor extends InternalWindow {
 	@SuppressWarnings({"WeakerAccess", "unused"})
 	public static class Bridge {
 		private Editor editor;
+		private boolean hasBreakpointsSinceLastEdit;
 		public List<Problem> problems;
 
 		public Bridge(Editor editor) {
 			this.editor = editor;
+			this.hasBreakpointsSinceLastEdit = false;
 		}
 
 		public void onChange() {
 			if(!editor.contentIsModified) {
 				editor.setEdited(true);
+			}
+			if(hasBreakpointsSinceLastEdit) {
+				editor.clearBreakpoints();
+				hasBreakpointsSinceLastEdit = false;
+			}
+		}
+		public void onBreakpoint(int line, boolean set) {
+            if(set) {
+				Breakpoints.addBreakpointLine(line);
+                hasBreakpointsSinceLastEdit = true;
+			} else {
+				Breakpoints.removeBreakpointLine(line);
 			}
 		}
 	}
@@ -107,18 +123,21 @@ public class Editor extends InternalWindow {
 	}
 
 	public Editor() {
-		editor = this;
 		WebView view = new WebView();
 		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
-		view.setCache(true);
-		view.setCacheHint(CacheHint.SPEED);
+
+		// caching with SPEED hint is awful on Linux and or low power machines (see issue #24)
+		// caching with QUALITY hint is indistinguishable from no caching as far as I can tell
+		// to to remove potential problems it's probably not worth enabling caching at all
+		view.setCache(false);
+
 		pageLoaded = false;
 		bridge = new Bridge(this);
 
 		engine = view.getEngine();
 		engine.setJavaScriptEnabled(true);
 
-		// calling alert() from javascript outputs to the console
+		// making it so calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));
 
 		mode = Mode.EDIT_MODE;
@@ -254,8 +273,11 @@ public class Editor extends InternalWindow {
 
 		loadCurrentFile();
 
+        //enableFirebug();
+
 		// signals that all the editor methods are now safe to call
 		pageLoaded = true;
+        editor = this; // only set once ready to be used
 	}
 
 	private void loadPage(Settings settings) {
@@ -295,6 +317,11 @@ public class Editor extends InternalWindow {
 
 			super.close();
 		}
+	}
+
+	@Override
+	public boolean canClose() {
+		return !CurrentFile.promptToSaveIfNecessary();
 	}
 
 	@SuppressWarnings("unused")
@@ -398,6 +425,14 @@ public class Editor extends InternalWindow {
 		String assembling = CurrentFile.checkIsInProgress() ? " ~ " : " - ";
 		String editedSymbol = contentIsModified ? " *" : "";
 		setWindowTitle(WindowEnum.getName(this) + modeString + assembling + CurrentFile.getBackingFilename() + editedSymbol);
+	}
+
+	/**
+	 * @warning must be called from a JavaFX thread
+	 */
+	private void clearBreakpoints() {
+		jsSession.call("clearBreakpoints");
+		Breakpoints.clearBreakpoints();
 	}
 
 	/**

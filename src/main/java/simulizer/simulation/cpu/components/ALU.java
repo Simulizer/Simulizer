@@ -25,10 +25,11 @@ public class ALU {
      * @param instruction the precise instruction to execute
      * @param firstWord the first word to work on
      * @param secondWord the second word to work on
+     * @param cpu lets me access cpu lo and hi registers
      * @return the result of the operation on the two words
      * @throws InstructionException if unsupported instruction attempted
      */
-    public static Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord) throws InstructionException
+    public static Word execute(Instruction instruction, Optional<Word> firstWord, Optional<Word> secondWord, Optional<CPU> cpu) throws InstructionException
     {
         byte[] firstValue;
         byte[] secondValue;
@@ -78,7 +79,21 @@ public class ALU {
             case subiu:
                 return encodeU(decodeU(firstValue) - decodeU(secondValue));
             case mul:
-                return encodeS(decodeS(firstValue) * decodeS(secondValue));
+            	if(cpu.isPresent()) {
+            		byte[] result = DataConverter.encodeAsUnsignedLong(decodeS(firstValue) * decodeS(secondValue));
+            		cpu.get().setHi(new Word(new byte[]{result[0],result[1],result[2],result[3]}));
+            		cpu.get().setLo(new Word(new byte[]{result[4],result[5],result[6],result[7]}));
+            		return cpu.get().getLo();
+            	}
+                return null;
+            case mult:
+            case multi:
+            	if(cpu.isPresent()) {
+            		byte[] result = DataConverter.encodeAsUnsignedLong(decodeS(firstValue) * decodeS(secondValue));
+            		cpu.get().setHi(new Word(new byte[]{result[0],result[1],result[2],result[3]}));
+            		cpu.get().setLo(new Word(new byte[]{result[4],result[5],result[6],result[7]}));
+            	}
+            	return null;
             case mulo:
                 return encodeS(decodeS(firstValue) * decodeS(secondValue));//might have to take more into account with overflow
             case mulou:

@@ -39,7 +39,7 @@ public class AssemblingDialog extends Alert {
 	 * @param wm
 	 *            the window manager for the system
 	 */
-	static void showAssemblingDialog(WindowManager wm) {
+	public static void showAssemblingDialog(WindowManager wm) {
 		assemblingDialog = new AssemblingDialog(wm);
 	}
 

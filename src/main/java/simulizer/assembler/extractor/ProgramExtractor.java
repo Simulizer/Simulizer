@@ -233,9 +233,12 @@ public class ProgramExtractor extends SimpBaseListener {
             return;
         }
 
+        // the parser trims the label names already so '   abc   :' --> 'abc'
         String labelName = ctx.labelID().getText();
 
-        if(textSegmentLabels.containsKey(labelName) || dataSegmentLabels.containsKey(labelName)) {
+        if(textSegmentLabels.containsKey(labelName)
+                || dataSegmentLabels.containsKey(labelName)
+                || outstandingLabels.contains(labelName)) {
             log.logProblem("the label name: \"" + labelName + "\" is taken", ctx, Problem.Severity.CRITICAL);
         } else if(currentState != State.TEXT_SEGMENT && labelName.equals("main")) {
             log.logProblem("The 'main' label must be inside the .text segment", ctx, Problem.Severity.CRITICAL);
@@ -465,7 +468,7 @@ public class ProgramExtractor extends SimpBaseListener {
 		}
 	}
 
-    public void pushStatement(Statement s) {
+    private void pushStatement(Statement s) {
 		if(outstandingLabels.isEmpty()) {
 			// instruction # @{}@
 			// this_instruction
@@ -493,7 +496,7 @@ public class ProgramExtractor extends SimpBaseListener {
 		}
     }
 
-    public void pushVariable(Variable v) {
+    private void pushVariable(Variable v) {
         dataSegment.add(v);
 		if(!outstandingLabels.isEmpty()) {
 			int index = dataSegment.size() - 1;

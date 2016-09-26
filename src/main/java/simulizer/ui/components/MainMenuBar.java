@@ -54,7 +54,7 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), editMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
 
 		// Debug
-		if ((boolean) wm.getSettings().get("debug"))
+		if ((boolean) wm.getSettings().get("menubar.debug"))
 			getMenus().add(debugMenu());
 
 		// Extra controls
@@ -100,10 +100,10 @@ public class MainMenuBar extends MenuBar {
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
-		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+		saveItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.promptSave();
-		}));
+		});
 		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
 
 		// | |-- Save As
@@ -323,7 +323,6 @@ public class MainMenuBar extends MenuBar {
 		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
 			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		});
