@@ -256,7 +256,7 @@ public class CPUPipeline extends CPU {
 			ID = createNopInstruction();
 		}
 
-		if(annotations.containsKey(executeAddress) && nopCount==0) {//checking for annotations (not when a fake nop is executed)
+		if(annotations.containsKey(executeAddress) && nopCount==0 && this.isRunning) {//checking for annotations (not when a fake nop is executed)
 			sendMessage(new AnnotationMessage(annotations.get(executeAddress), executeAddress));
 		}
 		
