@@ -48,8 +48,6 @@ public class Editor extends InternalWindow {
 	private final WebEngine engine;
 
 	private volatile boolean contentIsModified; // changes have been made in the editor since loading
-	//private boolean changedSinceLastSave;
-	//private boolean changedSinceLastNotify;
 
 	// handle key combos for copy and paste
 	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
@@ -127,8 +125,12 @@ public class Editor extends InternalWindow {
 	public Editor() {
 		WebView view = new WebView();
 		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
+
+		// caching with SPEED hint is awful on Linux and or low power machines (see issue #24)
+		// caching with QUALITY hint is indistinguishable from no caching as far as I can tell
+		// to to remove potential problems it's probably not worth enabling caching at all
 		view.setCache(false);
-		//view.setCacheHint(CacheHint.SPEED);
+
 		pageLoaded = false;
 		bridge = new Bridge(this);
 
