@@ -13,10 +13,13 @@ public class SearchBox<T extends Searchable> extends TextField {
 	private final TableView<T> table;
 	private ObservableList<T> list = FXCollections.observableArrayList();
 
-	private static final String prompt = "Enter Search Query";
 	private boolean prompting = true;
 
-	public SearchBox(TableView<T> table) {
+	public SearchBox(final TableView<T> table) {
+		this(table, "Enter Search Query");
+	}
+
+	public SearchBox(final TableView<T> table, final String prompt) {
 		this.table = table;
 		setText(prompt);
 		pseudoClassStateChanged(PseudoClass.getPseudoClass("prompting"), prompting);
