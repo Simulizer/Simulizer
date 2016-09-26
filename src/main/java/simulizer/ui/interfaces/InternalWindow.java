@@ -12,6 +12,7 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -85,6 +86,9 @@ public abstract class InternalWindow extends Window {
 
 		// Pseudo Class
 		pseudoClassStateChanged(PseudoClass.getPseudoClass("internal"), true);
+
+		// Padding for easy resize
+		setPadding(new Insets(0, 2, 2, 2));
 
 		// For open animation
 		setScaleX(0);
@@ -206,15 +210,14 @@ public abstract class InternalWindow extends Window {
 		classCss = new File(classCss.replace("file:/", "")).isFile() ? classCss : "";
 
 		getStylesheets().clear();
-		if (!classCss.equals(""))
+		getContentPane().getStylesheets().clear();
+		if (!classCss.equals("")) {
 			getStylesheets().add(classCss);
-		getStylesheets().add(theme.getStyleSheet("window.css"));
-		if (contentPane != null) {
-			contentPane.getStylesheets().clear();
-			if (!classCss.equals(""))
-				contentPane.getStylesheets().add(classCss);
-			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
+			getContentPane().getStylesheets().add(classCss);
 		}
+		getStylesheets().add(theme.getStyleSheet("window.css"));
+		getContentPane().getStylesheets().add(theme.getStyleSheet("window.css"));
+
 	}
 
 	/**

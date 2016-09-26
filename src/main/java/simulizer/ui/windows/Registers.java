@@ -51,6 +51,7 @@ public class Registers extends InternalWindow implements CPUChangedListener {
 			for (TableColumn<Data, ?> column : table.getColumns())
 				column.setPrefWidth(width / numColumns);
 		});
+		table.setEditable(false);
 		table.setCursor(Cursor.DEFAULT);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 	}
