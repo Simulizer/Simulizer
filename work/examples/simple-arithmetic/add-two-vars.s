@@ -1,10 +1,10 @@
-	# compiled using GCC with optimisation level 1
+	# compiled using GCC with optimisation level s
 	.text
 main:
 	# assigning to a new local variable
 	la	$2,a
-	lw	$2,0($2)
 	la	$3,b
+	lw	$2,0($2)
 	lw	$3,0($3)
 	# <hazard>
 	addu	$5,$2,$3
@@ -19,7 +19,7 @@ main:
 	move	$a0, $3
 	syscall
 	# more than 2 operands
-	addiu	$5,$5,3
+	addiu	$5,$5,33
 	addu	$3,$5,$3
 	nop # @{ var l = $3.get(); }@
 	nop # @{ print('large = ' + l + ' = ' + binString(l) + ' = ' + hexString(l)); }@

@@ -16,7 +16,7 @@ char js[]  = "javascript fibonacci of ";
 char eq[]  = " = ";
 char nl = '\n';
 
-#include "../../libc-simulizer.h"
+#include "libc-simulizer.h"
 
 // .text segment
 
@@ -28,6 +28,8 @@ int fibRec(int x) {
 
     return fibRec(x-1) + fibRec(x-2);
 }
+
+// iterative implementation
 int fibIt(int x) {
     if(x <= 1)
         return x;

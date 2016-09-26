@@ -7,7 +7,7 @@ int b = 4;
 int multiplier = 13;
 
 
-#include "../../libc-simulizer.h"
+#include "libc-simulizer.h"
 
 // .text segment
 
