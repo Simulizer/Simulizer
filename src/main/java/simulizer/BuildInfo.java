@@ -1,5 +1,12 @@
 package simulizer;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -50,6 +57,33 @@ public class BuildInfo {
 			VERSION_STRING = "Unknown";
 			VERSION_NUMBER = Double.NaN;
 			this.MODIFIED = false;
+		}
+	}
+
+	public boolean checkForUpdate() throws IOException {
+		String webpage = "";
+
+		// Thanks to: http://stackoverflow.com/questions/238547/how-do-you-programmatically-download-a-webpage-in-java
+		try {
+			URL url = new URL("https://raw.githubusercontent.com/Simulizer/Simulizer/master/VERSION");
+			try (InputStream is = url.openStream()) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(is));
+				webpage = br.readLine();
+			} catch (IOException e) {
+				// Not connected to the Internet
+				throw e;
+			}
+		} catch (MalformedURLException e) {
+			// Impossible
+			return false;
+		}
+		try {
+			double latestVersion = Double.parseDouble(webpage.replaceAll("([a-zA-Z\\-])", ""));
+			return latestVersion > VERSION_NUMBER;
+		} catch (Exception e) {
+			// Something weird happened
+			System.err.println("Unable to check for updates");
+			return false;
 		}
 	}
 
