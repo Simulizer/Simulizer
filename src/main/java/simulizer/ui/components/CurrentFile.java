@@ -100,10 +100,18 @@ public class CurrentFile {
 	}
 
 
-	private static void tryGetEditor(Consumer<Editor> ifSuccessful) {
-		Editor editor = Editor.getEditor();
+	private static void tryGetEditor(Consumer<Editor> ifSuccessful, boolean wait) {
+		final  Editor editor = Editor.getEditor();
 		if(editor != null) {
-			ifSuccessful.accept(editor);
+			if(wait) {
+				try {
+					ThreadUtils.platformRunAndWait(() -> ifSuccessful.accept(editor));
+				} catch (Throwable throwable) {
+                    UIUtils.showExceptionDialog(throwable);
+				}
+			} else {
+				Platform.runLater(() -> ifSuccessful.accept(editor));
+			}
 		}
 	}
 
@@ -114,20 +122,18 @@ public class CurrentFile {
 
 
 	private static void updateCurrentTextFromEditor() {
-		Editor editor = Editor.getEditor();
-		if (editor != null && editor.hasOutstandingChanges()) {
-			try {
-				ThreadUtils.platformRunAndWait(() -> currentText = editor.getEditorText());
-			} catch (Throwable throwable) {
-                UIUtils.showExceptionDialog(throwable);
-			}
-		}
+		tryGetEditor((editor) -> {
+			if(editor.hasOutstandingChanges())
+				currentText = editor.getEditorText();
+		}, true);
 	}
 	public static String getCurrentText() {
+		// sync any changes from the editor
         updateCurrentTextFromEditor();
-		if(isChangedExternally()) {
-			// no changes in the editor but external changes
-			assert(currentText.hashCode() == onDiskHash); // should not have outstanding changes
+
+		// now synced with editor, if the current text has not changed since it was loaded
+		// and it appears that the file has changed externally, then load the external version
+		if(currentText.hashCode() == onDiskHash && isChangedExternally()) {
 			loadFileWithoutPrompt(currentFile);
 		}
 		return currentText;
@@ -279,7 +285,7 @@ public class CurrentFile {
 			currentText = FileUtils.getFileContent(file);
 			onDiskHash = currentText.hashCode();
 		}
-		tryGetEditor(Editor::loadCurrentFile);
+		tryGetEditor(Editor::loadCurrentFile, true);
 		checkedProgramHash = 0; // force re-check so any problems are again displayed in the editor
 	}
 	/**
@@ -295,7 +301,7 @@ public class CurrentFile {
 		FileUtils.writeToFile(currentFile, currentText);
 		onDiskHash = currentText.hashCode();
         // re-loading in case the on disk version was loaded and changes in the editor were discarded
-		tryGetEditor(Editor::loadCurrentFile);
+		tryGetEditor(Editor::loadCurrentFile, true);
 	}
 
 	static void loadFile(File file) {
@@ -344,11 +350,11 @@ public class CurrentFile {
 							return; // assembly already in progress on some other thread
 
                         try {
-							tryGetEditor((editor) -> Platform.runLater(editor::refreshTitle));
+							tryGetEditor(Editor::refreshTitle, false);
 
 							//DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
 							final List<Problem> problems = Assembler.checkForProblems(program);
-							tryGetEditor((editor) -> Platform.runLater(() -> editor.setProblems(problems)));
+							tryGetEditor((editor) -> editor.setProblems(problems), false);
                             checkedProgramHash = thisProgramHash;
 							//t.stopAndPrint();
 						} finally {
@@ -358,7 +364,7 @@ public class CurrentFile {
 				} catch (Exception e) {
 					UIUtils.showExceptionDialog(e);
 				} finally {
-					tryGetEditor((editor) -> Platform.runLater(editor::refreshTitle));
+					tryGetEditor(Editor::refreshTitle, false);
 				}
 			}, 0, continuousCheckingRefreshPeriod, TimeUnit.MILLISECONDS);
 		}

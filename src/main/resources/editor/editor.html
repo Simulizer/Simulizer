@@ -273,9 +273,9 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
 
     // automatically clears old annotations
     session.setAnnotations([
-        {row:fetchLine,column:0,text:'fetching',type:'info'},
-        {row:decodeLine,column:0,text:'decoding',type:'info'},
-        {row:executeLine,column:0,text:'executing',type:'info'}
+        {row:fetchLine,column:0,text:'fetch',type:'info'},
+        {row:decodeLine,column:0,text:'decode',type:'info'},
+        {row:executeLine,column:0,text:'execute',type:'info'}
     ]);
 
     if(!userInControl) {
