@@ -42,7 +42,7 @@ public class SearchBox<T extends Searchable> extends TextField {
 		ObservableList<T> filtered = FXCollections.observableArrayList();
 		filtered.addAll(list);
 		if (!getText().equals("") && !prompting) {
-			filtered.removeIf(e -> e.matchesSearchTerm(getText()) <= 0);
+			filtered.removeIf(e -> e.matchesSearchTerm(getText().toLowerCase()) <= 0);
 			Collections.sort(filtered, (a, b) -> Math.round(b.matchesSearchTerm(getText()) - a.matchesSearchTerm(getText())));
 		}
 		table.setItems(filtered);

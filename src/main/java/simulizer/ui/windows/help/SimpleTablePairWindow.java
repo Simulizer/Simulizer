@@ -83,8 +83,8 @@ class SimpleTablePairWindow extends InternalWindow {
 
 		@Override
 		public float matchesSearchTerm(String searchTerm) {
-			float col1Val = col1.contains(searchTerm) ? (float) searchTerm.length() / col1.length() : 0;
-			float col2Val = col2.contains(searchTerm) ? (float) searchTerm.length() / col2.length() : 0;
+			float col1Val = col1.toLowerCase().contains(searchTerm) ? (float) searchTerm.length() / col1.length() : 0;
+			float col2Val = col2.toLowerCase().contains(searchTerm) ? (float) searchTerm.length() / col2.length() : 0;
 			return 10 * col1Val + col2Val;
 		}
 	}
