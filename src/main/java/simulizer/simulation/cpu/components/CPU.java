@@ -443,7 +443,7 @@ public class CPU {
 		execute(instruction);
 		sendMessage(new PipelineStateMessage(null, null, thisInstruction));
 
-		if (annotations.containsKey(thisInstruction)) {
+		if (annotations.containsKey(thisInstruction) && this.isRunning) {
 			sendMessage(new AnnotationMessage(annotations.get(thisInstruction), thisInstruction));
 		}
 
