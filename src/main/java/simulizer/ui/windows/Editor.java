@@ -124,7 +124,7 @@ public class Editor extends InternalWindow {
 
 	public Editor() {
 		WebView view = new WebView();
-		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored blurring IMO
+		view.setFontSmoothingType(FontSmoothingType.GRAY); // looks better than colored (LCD) blurring IMO
 
 		// caching with SPEED hint is awful on Linux and or low power machines (see issue #24)
 		// caching with QUALITY hint is indistinguishable from no caching as far as I can tell
@@ -145,8 +145,8 @@ public class Editor extends InternalWindow {
 		// javascript does not have access to the outside clipboard
 		view.setContextMenuEnabled(false);
 
-		// handle copy and paste manually
-		addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyEvent);
+		// handle copy and paste and other key-combinations manually
+		getEventManager().addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyEvent);
 
 		getContentPane().getChildren().add(view);
 	}
