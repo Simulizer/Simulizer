@@ -6,6 +6,14 @@
 #
 # requires `g++-5-mips-linux-gnu` package
 
+which mips-linux-gnu-g++-5 > /dev/null
+if [ $? -ne 0 ]; then
+    echo "the cross-compiler is not installed."
+    echo "if you are on a Debian based Linux distro: Please install"
+    echo "the g++-5-mips-linux-gnu package. Otherwise you're on your own."
+    exit 1
+fi
+
 
 FILE="$1"
 
