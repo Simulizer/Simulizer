@@ -405,7 +405,7 @@ public class Editor extends InternalWindow {
 	/**
 	 * @warning must be called from a JavaFX thread
 	 */
-	private void setEdited(boolean edited) {
+	public void setEdited(boolean edited) {
 		contentIsModified = edited;
 		refreshTitle();
 	}

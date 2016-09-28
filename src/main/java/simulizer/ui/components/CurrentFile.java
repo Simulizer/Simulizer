@@ -134,7 +134,15 @@ public class CurrentFile {
 		// now synced with editor, if the current text has not changed since it was loaded
 		// and it appears that the file has changed externally, then load the external version
 		if(currentText.hashCode() == onDiskHash && isChangedExternally()) {
-			loadFileWithoutPrompt(currentFile);
+			if(currentFile.exists()) {
+                // the file content has changed
+				loadFileWithoutPrompt(currentFile);
+			} else {
+				// the file is now missing. In this case don't sync otherwise the user might loose their work
+				// already synced with editor so currentText is up to date
+				tryGetEditor((editor) -> editor.setEdited(true), false);
+				onDiskHash = 0;
+			}
 		}
 		return currentText;
 	}
@@ -157,9 +165,8 @@ public class CurrentFile {
 	 * @return whether a valid choice was made and the file was saved to
 	 */
 	static boolean promptSaveAs() {
+		// the dialog takes care of not allowing directories and asking to overwrite
 		File file = UIUtils.saveFileSelector("Save an assembly file", GuiMode.getPrimaryStage(), defaultDirectory, new FileChooser.ExtensionFilter("Assembly files *.s", "*.s"));
-		// TODO: does this dialog handle overwriting existing files?
-		// TODO: does this dialog handle overwriting a directory (should fail)?
 		if (file != null) {
 
 			if (!file.getName().endsWith(".s"))
@@ -282,7 +289,10 @@ public class CurrentFile {
 			onDiskHash  = 0;
 		} else {
 			currentFile = file;
-			currentText = FileUtils.getFileContent(file);
+			if(currentFile.exists() && currentFile.isFile())
+                currentText = FileUtils.getFileContent(file);
+            else
+            	currentText = "";
 			onDiskHash = currentText.hashCode();
 		}
 		tryGetEditor(Editor::loadCurrentFile, true);
