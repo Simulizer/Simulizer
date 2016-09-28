@@ -126,8 +126,8 @@ KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 # remove # 0 "" 2 and # XX "input.c" 1 lines which surround asm() statements
 AWK_FILTER='
 /\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print; next;}
-/^\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
-/^\s*.section\s*\.text.startup/{$0="\t.text"; print} # .section .text.startup with .text
+/^(\s*\.section)?\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
+/^\s*\.section\s*\.text\.startup/{$0="\t.text"; print} # .section .text.startup with .text
 /^\s*\./{next}  # unknown directives
 
 /^\s*#nop$/{print "\t# <hazard>"; next}

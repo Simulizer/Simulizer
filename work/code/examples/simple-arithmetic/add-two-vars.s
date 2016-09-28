@@ -34,5 +34,6 @@ b:
 	.word	4
 a:
 	.word	18
+	.data
 res:
 	.space	4

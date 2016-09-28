@@ -86,8 +86,6 @@ public class Labels extends InternalWindow {
 
 		programTextHash = textHash;
 
-		System.out.println("updating labels " + System.currentTimeMillis());
-
 		getLabels(labels, text);
         Platform.runLater(() -> table.setItems(labels));
 	}

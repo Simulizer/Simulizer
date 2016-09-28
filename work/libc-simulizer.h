@@ -197,9 +197,12 @@ safe.
 // In Simulizer, this isn't really a concern so only ensure that data is
 // word-aligned (4 bytes)
 #define MOST_RESTRICTIVE_TYPE int
+
+#ifndef MIN_ALLOC_SIZE // allow the user to specify by defining before include
 // allocate at least this amount when calling sbrk
 // a real implementation would allocate something like 1024 bytes at a time
 #define MIN_ALLOC_SIZE 64
+#endif
 
 
 // to simplify memory management:

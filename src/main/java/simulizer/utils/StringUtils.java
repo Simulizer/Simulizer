@@ -2,6 +2,8 @@ package simulizer.utils;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utilities for common string operations
@@ -39,6 +41,19 @@ public class StringUtils {
 			lastIndex = index;
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * from http://stackoverflow.com/a/537185
+	 * @param text the text to insert into
+	 * @param insert the text to insert into the first argument
+	 * @param period the number of characters between each insertion
+	 * @return 'text' with 'insert' inserted every 'period' characters
+	 */
+	public static String insert(String text, String insert, int period) {
+		Pattern p = Pattern.compile("(.{" + period + "})", Pattern.DOTALL);
+		Matcher m = p.matcher(text);
+		return m.replaceAll("$1" + insert);
 	}
 
 	/**

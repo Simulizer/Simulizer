@@ -36,6 +36,10 @@ public class SimulationBridge {
 		cpu.setCycleFreq(freq);
 	}
 
+	public boolean isPipelined() {
+		return cpu.isPipelined();
+	}
+
 	public Word[] getRegisters() {
 		if(cpu == null)
 			throw new IllegalStateException();

@@ -79,10 +79,12 @@ public class DynamicDataSegment
 		if(length <= 0) {
 			throw new HeapException("Invalid read on heap. (non-positive length)", heapBreak, heap.length);
 		} else if(relativeAddress + length > heapBreak) {
-			throw new HeapException("Invalid read on heap. (attempt to read above the break)", heapBreak, heap.length);
+			throw new HeapException("Invalid read on heap. (attempt to read above the break from " +
+					relativeAddress + " up to " + (relativeAddress+length-1) + ")", heapBreak, heap.length);
 
 		} else if(relativeAddress < 0) {
-			throw new HeapException("Invalid read on heap. (attempt to read below the heap)", heapBreak, heap.length);
+			throw new HeapException("Invalid read on heap. (attempt to read below the heap from " +
+					relativeAddress + " up to " + (relativeAddress+length-1) + ")", heapBreak, heap.length);
 		}
 
 		return Arrays.copyOfRange(heap, relativeAddress, relativeAddress+length);

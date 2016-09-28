@@ -13,6 +13,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import simulizer.Simulizer;
 import simulizer.utils.FileUtils;
+import simulizer.utils.StringUtils;
 
 /**
  * dump a program object to a string
@@ -140,7 +141,8 @@ public class ProgramStringBuilder {
             }
 
             sb.append("## Raw Data Segment (as hex) ##\n");
-            sb.append(DatatypeConverter.printHexBinary(p.dataSegment));
+            // split hex into words
+            sb.append(StringUtils.insert(DatatypeConverter.printHexBinary(p.dataSegment), " ", 4));
 
             sb.append("\n\n");
         }
