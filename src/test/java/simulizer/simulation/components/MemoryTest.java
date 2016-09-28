@@ -180,7 +180,7 @@ public class MemoryTest {
 				memory.readFromMem(dynamicSegStart.getValue()+7, 4);
 				fail();
 			} catch(HeapException e) {
-				assertTrue(e.getMessage().equals("Invalid read on heap. (attempt to read above the break)"));
+				assertTrue(e.getMessage().contains("Invalid read on heap. (attempt to read above the break"));
 			}
 		}
 		
@@ -189,7 +189,7 @@ public class MemoryTest {
 				memory.writeToMem(dynamicSegStart.getValue()+7, new byte[]{0x11,0x12,0x13,0x14});
 				fail();
 			} catch(HeapException e) {
-				assertTrue(e.getMessage().equals("Invalid write on heap. (attempt to write above the break)"));
+				assertTrue(e.getMessage().contains("Invalid write on heap. (attempt to write above the break"));
 			}
 		}
 		
