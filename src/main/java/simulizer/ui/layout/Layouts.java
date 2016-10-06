@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,10 +17,10 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 
-import javafx.util.Pair;
 import simulizer.GuiMode;
 import simulizer.ui.components.Workspace;
 import simulizer.ui.interfaces.InternalWindow;
+import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
 /**
@@ -32,7 +31,7 @@ import simulizer.utils.UIUtils;
  */
 public class Layouts implements Iterable<Layout> {
 
-	private final Path folder = Paths.get("layouts");
+	private final Path folder;
 	private List<Layout> layouts = new ArrayList<>();
 	private Layout layout, defaultLayout;
 	private Workspace workspace;
@@ -44,6 +43,8 @@ public class Layouts implements Iterable<Layout> {
 	 */
 	public Layouts(Workspace workspace) throws IOException {
 		this.workspace = workspace;
+
+		folder = FileUtils.getPath("layouts");
 
 		// Check layouts folder exists
 		if (!Files.exists(folder))
@@ -126,7 +127,7 @@ public class Layouts implements Iterable<Layout> {
 		Gson g = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			// Thanks to: http://stackoverflow.com/questions/7366266/best-way-to-write-string-to-file-using-java-nio#answer-21982658
-			Files.write(Paths.get(saveFile.toURI()), g.toJson(l).getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(FileUtils.getPath(saveFile.toString()), g.toJson(l).getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			UIUtils.showErrorDialog("Error Saving Layout", "Unable to save the file");
 		}

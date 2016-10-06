@@ -90,7 +90,7 @@ public class MainMenuBar extends MenuBar {
 		loadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		loadItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning()) {
-				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), CurrentFile.getDefaultDirectory(), new ExtensionFilter("Assembly files *.s", "*.s"));
 				if (f != null)
 					CurrentFile.loadFile(f);
 			}
@@ -234,7 +234,7 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), "layouts", new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
 				if (!saveFile.getName().endsWith(".json"))
 					saveFile = new File(saveFile.getAbsolutePath() + ".json");

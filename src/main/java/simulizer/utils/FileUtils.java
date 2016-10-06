@@ -4,13 +4,22 @@ import simulizer.Simulizer;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Wrappers for accessing files including bundled resources
  * @author mbway
  */
 public class FileUtils {
+
+
+	/**
+	 * current working directory. Can be changed if needed
+	 */
+	private static String cwd = ".";
 
 	/**
 	 * read the contents of the given file
@@ -20,7 +29,7 @@ public class FileUtils {
 	public static String getFileContent(String path) {
 		FileInputStream fis = null;
 		try {
-			File file = new File(path);
+			File file = getFile(path);
 			fis = new FileInputStream(file);
 			byte[] data = new byte[(int) file.length()];
 			//noinspection ResultOfMethodCallIgnored
@@ -38,20 +47,20 @@ public class FileUtils {
 	}
 
 	public static Reader getUTF8FileReader(File f) throws FileNotFoundException {
-		return getUTF8FileReader(f.getAbsolutePath());
+		return getUTF8FileReader(f.getPath());
 	}
-	public static Reader getUTF8FileReader(String filename) throws FileNotFoundException {
-		return new InputStreamReader(new FileInputStream(filename), StandardCharsets.UTF_8);
+	private static Reader getUTF8FileReader(String filename) throws FileNotFoundException {
+		return new InputStreamReader(new FileInputStream(getFile(filename)), StandardCharsets.UTF_8);
 	}
 
 	public static Writer getUTF8FileWriter(File f) throws FileNotFoundException {
-		return getUTF8FileWriter(f.getAbsolutePath());
+		return getUTF8FileWriter(f.getPath());
 	}
 	public static Writer getUTF8FileWriter(String filename) throws FileNotFoundException {
-		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
+		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getFile(filename)), StandardCharsets.UTF_8));
 	}
 	public static Writer getUTF8FileAppendWriter(String filename) throws FileNotFoundException {
-		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), StandardCharsets.UTF_8));
+		return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(getFile(filename), true), StandardCharsets.UTF_8));
 	}
 
 	public static String[] splitIntoLines(String s) {
@@ -153,6 +162,26 @@ public class FileUtils {
 		return sb.toString();
 	}
 
+	public static Path getJarPath() {
+        return Paths.get(Simulizer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+	}
+
+	public static void setCWD(String path) {
+		cwd = path;
+	}
+
+	public static Path getPath(String path) {
+		Path p = Paths.get(path);
+		if(p.isAbsolute())
+			return p;
+		else
+			// making this absolute protects against the CWD being added twice
+			return Paths.get(cwd, path).toAbsolutePath();
+	}
+	public static File getFile(String path) {
+		return getPath(path).toFile();
+	}
+
 	/**
 	 * Open a file in the default program for the filetype
 	 * @param path the file to open
@@ -161,7 +190,7 @@ public class FileUtils {
 		try {
 			Thread openFileThread = new Thread(() -> {
 				try {
-					Desktop.getDesktop().open(new File(path));
+					Desktop.getDesktop().open(getFile(path));
 				} catch (IOException ignored) {
 				}
 			}, "OpenFile-Thread");

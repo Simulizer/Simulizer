@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class CurrentFile {
     // TODO: option to have default directory = last save location
-	private static File defaultDirectory = new File("code/");
+	private static String defaultDirectory = "code";
 
 
 	/**
@@ -48,6 +48,10 @@ public class CurrentFile {
 	 */
 	private static String currentText = "";
 
+
+	public static String getDefaultDirectory() {
+		return defaultDirectory;
+	}
 
 	/**
 	 * Immutable structure to hold the results of continuous assembly.
@@ -258,7 +262,7 @@ public class CurrentFile {
 
 
 		if (initialFilename != null && !initialFilename.isEmpty()) {
-			File f = new File(initialFilename);
+			File f = FileUtils.getFile(initialFilename);
 			if (f.exists()) {
 				currentFile = f;
 				currentText = FileUtils.getFileContent(f);

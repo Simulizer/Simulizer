@@ -89,7 +89,7 @@ public class GuiMode {
 			System.setProperty("prism.text", "t2k");
 		}
 
-		settingsFile = new File(parsedArgs.guiMode.settingsPath);
+		settingsFile = FileUtils.getFile(parsedArgs.guiMode.settingsPath);
 		args = parsedArgs.guiMode;
 
 		app = new App();
