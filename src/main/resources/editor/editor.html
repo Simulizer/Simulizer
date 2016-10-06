@@ -200,6 +200,12 @@ function refreshProblems() {
     var errorList = [];
     markers = [];
 
+    if(ps === undefined) {
+        // should never be the case, but happened to Iain in issue #43
+        alert('editor bridge.problems === undefined');
+        return;
+    }
+
     var size = ps.size();
 
     for(var i = 0; i < size; i++) {

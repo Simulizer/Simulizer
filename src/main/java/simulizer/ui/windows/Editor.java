@@ -1,6 +1,7 @@
 package simulizer.ui.windows;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import javafx.concurrent.Task;
@@ -92,6 +93,7 @@ public class Editor extends InternalWindow {
 		public Bridge(Editor editor) {
 			this.editor = editor;
 			this.hasBreakpointsSinceLastEdit = false;
+			this.problems = new LinkedList<>();
 		}
 
 		public void onChange() {
