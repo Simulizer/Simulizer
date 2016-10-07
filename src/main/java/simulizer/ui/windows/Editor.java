@@ -88,12 +88,10 @@ public class Editor extends InternalWindow {
 	public static class Bridge {
 		private Editor editor;
 		private boolean hasBreakpointsSinceLastEdit;
-		public List<Problem> problems;
 
 		public Bridge(Editor editor) {
 			this.editor = editor;
 			this.hasBreakpointsSinceLastEdit = false;
-			this.problems = new LinkedList<>();
 		}
 
 		public void onChange() {
@@ -138,6 +136,8 @@ public class Editor extends InternalWindow {
 
 		engine = view.getEngine();
 		engine.setJavaScriptEnabled(true);
+
+		engine.setOnError((errorEvent) -> UIUtils.showErrorDialog("Editor JS Error", errorEvent.toString()));
 
 		// making it so calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));
@@ -226,7 +226,7 @@ public class Editor extends InternalWindow {
 		// only load the javascript for the theme that the user selected
 		// this is fine since the settings can't change at runtime (the app must be closed)
 		String userTheme = (String) settings.get("editor.theme");
-		userTheme = userTheme.substring(userTheme.lastIndexOf("/")+1); // eg "/ace/theme/THEME" --> "THEME"
+		userTheme = userTheme.substring(userTheme.lastIndexOf("/")+1); // eg "ace/theme/THEME" --> "THEME"
 		List<String> availableThemes = Arrays.asList(
 			"/editor/theme-high-viz.js",
 			"/external/theme-ambiance.js",
@@ -373,8 +373,7 @@ public class Editor extends InternalWindow {
 	}
 
 	public void setProblems(List<Problem> problems) {
-		bridge.problems = problems;
-		jsWindow.call("refreshProblems");
+		jsWindow.call("refreshProblems", problems);
 	}
 
 

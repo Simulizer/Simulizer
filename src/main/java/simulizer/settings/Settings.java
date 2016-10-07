@@ -117,12 +117,12 @@ public class Settings {
 					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
 					.add(new DoubleSetting("scroll-speed", "Scroll speed", "", 0.05, 0, 10))
 					.add(new BooleanSetting("soft-tabs", "Soft tabs", "", true))
-					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: /ace/theme/) default, high-viz, monokai, ambiance, chaos, tomorrow_night_eighties, predawn, flatland", "/ace/theme/default"))
+					.add(new StringSetting("theme", "Color theme", "Name of the color scheme to load. Supported: (prefix: ace/theme/) default, high-viz, monokai, ambiance, chaos, tomorrow_night_eighties, predawn, flatland", "ace/theme/monokai"))
 					.add(new BooleanSetting("user-control-during-execution", "User control during execution", "Whether the user is allowed to scroll freely during execution of a program", false))
 					.add(new BooleanSetting("vim-mode", "Vim mode", "Vim keybindings for the editor", false))
 					.add(new BooleanSetting("wrap", "Wrap long lines", "", false))
 					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
-					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1500, 1, Integer.MAX_VALUE))
+					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1000, 1, Integer.MAX_VALUE))
                     .add(new BooleanSetting("save-before-run", "Save Before Run", "Ask to save before running the program. Useful in the rare event that Simulizer crashes.", true))
 					);
 		
