@@ -4,6 +4,7 @@ import simulizer.Simulizer;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -162,8 +163,16 @@ public class FileUtils {
 		return sb.toString();
 	}
 
-	public static Path getJarPath() {
-        return Paths.get(Simulizer.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+	public static String getJarPath() {
+		try {
+			// the location is given as file:/some/place which is OK on *nix because
+			// that gets translated to /some/place which is what we want.
+			// but on Windows the location gets translated to /C:/some/place which is not
+			// correct. So use File, given the URL to convert from URL to OS specific path
+			return new File(Simulizer.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+		} catch (URISyntaxException e) {
+            return null;
+		}
 	}
 
 	public static void setCWD(String path) {

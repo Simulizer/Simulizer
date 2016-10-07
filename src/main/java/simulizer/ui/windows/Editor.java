@@ -137,7 +137,10 @@ public class Editor extends InternalWindow {
 		engine = view.getEngine();
 		engine.setJavaScriptEnabled(true);
 
-		engine.setOnError((errorEvent) -> UIUtils.showErrorDialog("Editor JS Error", errorEvent.toString()));
+		// these error messages seem useless because they only warn about re-using web cache directories
+		// which means that opening multiple instances of Simulizer gives error messages because both are trying to access
+		// ~/.simulizer.GuiMode$App and ~/.simulizer.Simulizer
+		//engine.setOnError((errorEvent) -> UIUtils.showErrorDialog("Editor JS Error", errorEvent.toString()));
 
 		// making it so calling alert() from javascript outputs to the console
 		engine.setOnAlert((event) -> System.out.println("javascript alert: " + event.getData()));

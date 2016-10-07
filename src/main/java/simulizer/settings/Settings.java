@@ -113,7 +113,7 @@ public class Settings {
 		
 		settings.add(new ObjectSetting("editor", "Editor")
 					.add(new StringSetting("font-family", "Font family", "Font family (optional). Supports all installed monospace fonts, use single quotes for names with spaces. Separate multiple choices with commas", "monospace"))
-					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 20, 0, Integer.MAX_VALUE))
+					.add(new IntegerSetting("font-size", "Font size", "Font size in px", 18, 0, Integer.MAX_VALUE))
 					.add(new StringSetting("initial-file", "Initial file", "Path to a file to load at startup (optional)"))
 					.add(new DoubleSetting("scroll-speed", "Scroll speed", "", 0.05, 0, 10))
 					.add(new BooleanSetting("soft-tabs", "Soft tabs", "", true))
