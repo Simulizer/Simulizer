@@ -83,7 +83,7 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.newFile();
 		});
-		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
+		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
@@ -95,7 +95,7 @@ public class MainMenuBar extends MenuBar {
 					CurrentFile.loadFile(f);
 			}
 		});
-		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
+		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
@@ -104,7 +104,7 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.promptSave();
 		});
-		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
@@ -121,7 +121,7 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.reloadFile();
 		});
-		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN));
+		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Options
 		MenuItem optionsItem = new MenuItem("Options");
@@ -159,38 +159,38 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem cut = new MenuItem("Cut");
 		cut.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		cut.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
+		cut.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
 		cut.setOnAction((a) -> passToEditor(KeyCode.X));
 
 		MenuItem copy = new MenuItem("Copy");
 		copy.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
 		copy.setOnAction((a) -> passToEditor(KeyCode.C));
 
 		MenuItem paste = new MenuItem("Paste");
 		paste.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		paste.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
+		paste.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
 		paste.setOnAction((a) -> passToEditor(KeyCode.V));
 
 		MenuItem find = new MenuItem("Find");
-		find.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN));
+		find.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN));
 		find.setOnAction((a) -> passToEditor(KeyCode.F));
 
 		MenuItem gotoL = new MenuItem("Go To Line");
-		gotoL.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
+		gotoL.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN));
 		gotoL.setOnAction((a) -> passToEditor(KeyCode.G));
 
 		MenuItem insertBreakpoint = new MenuItem("Insert Breakpoint");
 		insertBreakpoint.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		insertBreakpoint.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN));
+		insertBreakpoint.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
 		insertBreakpoint.setOnAction((a) -> passToEditor(KeyCode.B));
 
 		MenuItem fontInc = new MenuItem("Increase Font Size");
-		fontInc.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN));
+		fontInc.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN));
 		fontInc.setOnAction((a) -> passToEditor(KeyCode.PLUS));
 
 		MenuItem fontDec = new MenuItem("Decrease Font Size");
-		fontDec.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+		fontDec.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
 		fontDec.setOnAction((a) -> passToEditor(KeyCode.MINUS));
 
 		CheckMenuItem wordWrap = new CheckMenuItem("Toggle Word Wrap");
