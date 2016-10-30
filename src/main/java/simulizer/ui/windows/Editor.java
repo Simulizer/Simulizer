@@ -51,21 +51,21 @@ public class Editor extends InternalWindow {
 	private volatile boolean contentIsModified; // changes have been made in the editor since loading
 
 	// handle key combos for copy and paste
-	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_x = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_c = new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_x = new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_v = new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_b = new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_g = new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_f = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
 
 	// for Ctrl plus with each different plus key on the keyboard
-	final static private KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN); // Caps lock + =
-	final static private KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
+	final static private KeyCombination C_add = new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_plus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN); // Caps lock + =
+	final static private KeyCombination C_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_S_eq = new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
 	// for Ctrl minus with each different minus key on the keyboard
-	final static private KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
-	final static private KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+	final static private KeyCombination C_minus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN);
+	final static private KeyCombination C_subtract = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
 
 	// references to javascript objects
 	private SafeJSObject jsWindow;
