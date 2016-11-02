@@ -57,9 +57,21 @@ Meet the Team
 ---|---|---|---|---|
 [Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
 
+Running
+-------
+Package dependencies to *run* on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
+- `openjdk-8-jre`
+- `openjfx` (JavaFX for openJDK-8)
+- `libxslt1.1` (usually installed anyway)
+
+Windows
+- [Java 8 JRE](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
+    - also includes JavaFX
+
+
 Building
 --------
-Package dependencies to build on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
+Package dependencies to *build* on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
 - `openjdk-8-jdk`
 - `spim` (for compatiability tests)
 - `openjfx` (JavaFX for openJDK-8)
