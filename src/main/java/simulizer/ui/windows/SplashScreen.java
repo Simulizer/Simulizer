@@ -94,13 +94,20 @@ public class SplashScreen {
 		};
 
 		startupTask.stateProperty().addListener((observableValue, oldState, newState) -> {
+            // SUCCEEDED once finished, regardless of whether the task returned true or false
 			if (newState == Worker.State.SUCCEEDED) {
 				FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), layout);
 				fadeSplash.setFromValue(1.0);
 				fadeSplash.setToValue(0.0);
 				fadeSplash.setOnFinished(actionEvent -> stage.hide());
 
-				GuiMode.wm.show();
+                if(startupTask.getValue()) { // true if succeeded
+					GuiMode.wm.show();
+				} else {
+					UIUtils.showErrorDialog("Startup Error", "Since an exception was thrown during\nlaunchWindowManager, Simulizer cannot start. (CMD mode may still work)");
+				}
+
+				// remove the splash screen regardless of whether there was an exception
 				fadeSplash.play();
 			}
 		});

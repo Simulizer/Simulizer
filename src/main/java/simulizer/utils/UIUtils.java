@@ -202,6 +202,7 @@ public class UIUtils {
 				log.write(exceptionText + "\n\n\n");
 				log.flush();
 			} catch (IOException e1) {
+				System.err.println("Exception while trying to write to exceptions.log:");
 				e1.printStackTrace();
 			} finally {
                 FileUtils.quietClose(log);
