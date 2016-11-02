@@ -19,6 +19,19 @@ Features
 - Helpful messages and animations as the simulation is running to help the user understand how the CPU is operating.
 - High-level visualisation of annotated programs, see below.
 
+
+Running
+-------
+Package dependencies to *run* on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
+- `openjdk-8-jre`
+- `openjfx` (JavaFX for openJDK-8)
+- `libxslt1.1` (usually installed anyway)
+
+Windows
+- [Java 8 JRE](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
+    - also includes JavaFX
+
+
 Screenshots
 -----------
 
@@ -51,23 +64,14 @@ The current data structures/graphics that can be visualised are:
     - can be used to draw any shapes
     - can be used to create your own high level visualisations from Javascript!
 
-Meet the Team
--------------
-[![Charlie Street](https://avatars3.githubusercontent.com/u/11256801?v=3&s=150)](https://github.com/charlie1329) | [![Kelsey McKenna](https://avatars1.githubusercontent.com/u/3618330?v=3&s=150)](https://github.com/ToastNumber) | [![Matthew Broadway](https://avatars3.githubusercontent.com/u/4923501?v=3&s=150)](https://github.com/mbway) | [![Michael Oultram](https://avatars0.githubusercontent.com/u/9907700?v=3&s=150)](https://github.com/MichaelOultram) | [![Theo Styles](https://avatars2.githubusercontent.com/u/2779884?v=3&s=150)](https://github.com/ThusStyles)
----|---|---|---|---|
-[Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
+MIPS Cross Compiling C(++)
+----------------------
+It is possible to use a compiler to generate MIPS output which Simulizer can
+consume (with some automatic editing). See `work/gcc-mips.sh` for a script
+which uses `gcc` to cross compile for MIPS (the gcc cross compiler must be
+installed manually).
 
-Running
--------
-Package dependencies to *run* on a 64 bit Debian based GNU/Linux System (eg Ubuntu)
-- `openjdk-8-jre`
-- `openjfx` (JavaFX for openJDK-8)
-- `libxslt1.1` (usually installed anyway)
-
-Windows
-- [Java 8 JRE](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
-    - also includes JavaFX
-
+This is how some of the more elaborate examples (eg `snake.s`) were created.
 
 Building
 --------
@@ -82,12 +86,11 @@ Package dependencies to *build* on a 64 bit Debian based GNU/Linux System (eg Ub
 - gradle will handle the rest of the dependencies
 
 
-Compiler Compatability
-----------------------
-It is possible to use a compiler to generate MIPS output which Simulizer can
-consume (with some manual editing). See `work/gcc-mips.sh` for a script which
-uses gcc to cross compile for MIPS (the gcc cross compiler must be installed
-manually).
+Meet the Team
+-------------
+[![Charlie Street](https://avatars3.githubusercontent.com/u/11256801?v=3&s=150)](https://github.com/charlie1329) | [![Kelsey McKenna](https://avatars1.githubusercontent.com/u/3618330?v=3&s=150)](https://github.com/ToastNumber) | [![Matthew Broadway](https://avatars3.githubusercontent.com/u/4923501?v=3&s=150)](https://github.com/mbway) | [![Michael Oultram](https://avatars0.githubusercontent.com/u/9907700?v=3&s=150)](https://github.com/MichaelOultram) | [![Theo Styles](https://avatars2.githubusercontent.com/u/2779884?v=3&s=150)](https://github.com/ThusStyles)
+---|---|---|---|---|
+[Charlie Street](https://github.com/charlie1329) | [Kelsey McKenna](https://github.com/ToastNumber) | [Matthew Broadway](https://github.com/mbway) | [Michael Oultram](https://github.com/MichaelOultram) | [Theo Styles](https://github.com/ThusStyles)
 
 
 Licence
