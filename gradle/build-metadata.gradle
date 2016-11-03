@@ -31,7 +31,7 @@ task buildMetadata << {
     meta.branch   = git.branch.getCurrent().getName()
     meta.commit   = git.head().id
     meta.modified = !git.status().isClean()
-    meta.version  = versionFile.text
+    meta.version  = versionFile.text.replaceAll('\n','')
 
     def json = JsonOutput.toJson(meta)
     metadataFile.text =  JsonOutput.prettyPrint(json)
