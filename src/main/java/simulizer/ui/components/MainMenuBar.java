@@ -122,7 +122,7 @@ public class MainMenuBar extends MenuBar {
 				CurrentFile.reloadFile();
 		});
 		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
-
+		
 		// | |-- Options
 		MenuItem optionsItem = new MenuItem("Options");
 		optionsItem.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.OPTIONS));
@@ -131,7 +131,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
 
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, reloadItem, optionsItem, exitItem);
+		fileMenu.getItems().addAll(newItem, new SeparatorMenuItem(), loadItem, new SeparatorMenuItem(), saveItem, saveAsItem, reloadItem, new SeparatorMenuItem(), optionsItem, exitItem);
 	}
 
 	private Menu editMenu() {
@@ -200,7 +200,7 @@ public class MainMenuBar extends MenuBar {
 				e.setWrap(!e.getWrap());
 		});
 
-		editMenu.getItems().addAll(cut, copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
+		editMenu.getItems().addAll(cut, copy, paste, new SeparatorMenuItem(), find, gotoL, insertBreakpoint, new SeparatorMenuItem(), fontInc, fontDec, new SeparatorMenuItem(), wordWrap);
 	}
 
 	/**
@@ -300,8 +300,7 @@ public class MainMenuBar extends MenuBar {
 	private Menu simulationMenu() {
 		Menu runMenu = new Menu("Simulation");
 		runMenu.setOnShowing(e -> simControlsMenu(runMenu, true));
-		// Dummy used so setOnShowing event triggers
-		runMenu.getItems().add(new MenuItem("Dummy"));
+		runMenu.getItems().add(new MenuItem(""));
 		return runMenu;
 	}
 
@@ -381,7 +380,7 @@ public class MainMenuBar extends MenuBar {
 			});
 		});
 
-		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, toggleAnnotations, setClockSpeed);
+		runMenu.getItems().addAll(assembleAndRun, new SeparatorMenuItem(), pauseResume, singleStep, stop, new SeparatorMenuItem(), togglePipeline, toggleAnnotations, setClockSpeed);
 	}
 
 	/**
