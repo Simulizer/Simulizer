@@ -88,7 +88,7 @@ public class Settings {
 		settings.add(new ObjectSetting("workspace", "Workspace")
 					.add(new StringSetting("layout", "Default Layout", "The default layout to load (use filename inside the layouts folder)", "default.json"))
 					.add(new ObjectSetting("scale-ui", "Scale User Interface")
-							.add(new BooleanSetting("enabled", "Allow autosizing of Internal Windows", "Resize all Internal Windows when the main window resizes"))
+							.add(new BooleanSetting("enabled", "Allow autosizing of Internal Windows", "Resize all Internal Windows when the main window resizes", true))
 							.add(new IntegerSetting("delay", "Delay before resize", "How long to wait until the Internal Windows resize", 50)))
 					.add(new BooleanSetting("ctrl-tab", "Window Cycler", "Enables/Disable CTRL + TAB shortcut to switch between internal windows", true))
 					.add(new ObjectSetting("grid", "Grid Settings")
