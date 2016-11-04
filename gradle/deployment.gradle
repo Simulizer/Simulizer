@@ -32,14 +32,23 @@ task deploy(type:Zip) {
     destinationDir file("${buildDir}/distributions/")
     extension "zip"
 
+	def versionFile = file("$projectDir/VERSION")
+	version = versionFile.text.replaceAll('\n','')
+    
     def depJar = "${deploymentJar.baseName}-${version}.jar"
-
-    into("$name/") {
-        from run.workingDir
+	
+    into("/") {
+        from "${run.workingDir}"
+        include "README.md"
+    }
+    into("/") {
+        from "${run.workingDir}/work"
+        // should be using .gitignore
         exclude "*.log"
         exclude "program-dump.txt"
+        exclude "settings.json"
     }
-    into("$name/") {
+    into("/bin") {
         from "$buildDir/libs/"
         include depJar
         rename(depJar, "Simulizer.jar")

@@ -100,7 +100,8 @@ apply from: 'gradle/deployment.gradle'
 
 
 def name = rootProject.name // defined in settings.gradle
-version = '0.3'
+def versionFile = file("$projectDir/VERSION")
+version = versionFile.text.replaceAll('\n','')
 
 description = 'MIPS-like assembly language interpreter' +
         ' with CPU and high-level algorithm visualisations'
