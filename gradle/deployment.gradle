@@ -47,6 +47,7 @@ task deploy(type:Zip) {
         exclude "*.log"
         exclude "program-dump.txt"
         exclude "settings.json"
+        exclude "code/broken"
     }
     into("/bin") {
         from "$buildDir/libs/"
