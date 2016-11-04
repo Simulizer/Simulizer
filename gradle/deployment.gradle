@@ -53,5 +53,8 @@ task deploy(type:Zip) {
         include depJar
         rename(depJar, "Simulizer.jar")
     }
+    into("/bin") {
+        from "${run.workingDir}/gradle/launch_scripts"
+    }
 }
 deploy.dependsOn deploymentJar

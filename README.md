@@ -1,4 +1,4 @@
-![banner](misc/SimulizerLogo.png)
+![banner](https://github.com/Simulizer/Simulizer/raw/master/misc/SimulizerLogo.png)
 
 Simulizer allows you to write assembly code and run it on a simulated and visualised CPU. It has been designed to improve various features of [SPIM](http://spimsimulator.sourceforge.net).
 
@@ -8,7 +8,7 @@ Simulizer allows you to write assembly code and run it on a simulated and visual
 
 [User Guide](work/guide.pdf)
 
-[Final Report](https://github.com/mbway/Simulizer/raw/master/docs/Final-Report.pdf) (contains a more in depth description)
+[Final Report](https://github.com/Simulizer/Simulizer/raw/master/docs/Final-Report.pdf) (contains a more in depth description)
 
 Features
 --------
@@ -37,15 +37,15 @@ Screenshots
 
 Example Algorithm Visualisation:
 
-![](misc/screenshot1.png)
+![](https://github.com/Simulizer/Simulizer/raw/master/misc/screenshot1.png)
 
 Example Pipeline Visualisation:
 
-![](misc/screenshot2.png)
+![](https://github.com/Simulizer/Simulizer/raw/master/misc/screenshot2.png)
 
 Example CPU Visualisation:
 
-![](misc/screenshot3.png)
+![](https://github.com/Simulizer/Simulizer/raw/master/misc/screenshot3.png)
 
 Annotations
 -----------
