@@ -1,17 +1,20 @@
 todo
-- editor not updating fast enough when line changes. Caching?
-- when fullscreen: dialogs take you out of fullscreen
+- editor css for breakpoint + FDE on same line
+- is zoom in and out in the guide?
+- when fullscreen or maximised: dialogs take you out of fullscreen
     - maybe mininise the main screen and restore after dialog closes
-- windows don't receive resize events when popped out
 - note that Java probably needs more heap size given to it to utilise 1MiB of stack
 - improve guide
     - up to date annotations API
+    - note: getHi and getLo are added to the simulation bridge
+- add randInt to the annotations api
 - change simulation bridge setSpeed to setCycleFreq to match cpu.setCycleFreq
 - UIUtils.exception dialog fall back to Simulizer.handleException if not in UI
   mode (if JavaFX not running)
+- exception dialog requests that the user submit a bug report
+- debug bridge: print hex dump of array of bytes
 - model examples
     - arithmetic
-    - calling conventions
     - parameters and return values
     - pointers
     - annotations

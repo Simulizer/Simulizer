@@ -9,7 +9,7 @@ package simulizer.ui.windows.help;
 public class SyscallReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public SyscallReference() {
-		super("Syscall", "Action");
+		super("Syscall", "Action", 0.2);
 		setData(new String[][]{ 
 			{"1", "print int (in a0)"},
 			{"4", "print string (start address of null terminated string in a0)"},

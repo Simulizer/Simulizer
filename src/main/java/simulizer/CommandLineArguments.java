@@ -17,8 +17,13 @@ class CommandLineArguments {
 
     @Parameters(separators = "=", commandDescription = "Start Simulizer in Command Line mode")
     static class CmdModeArgs {
-        @Parameter(names = {"-i", "--interactive"})
-        public boolean interactive = false;
+
+        @Parameter(names = { "-h", "--help" }, description = "Display this message")
+        boolean help = false;
+
+        //TODO: implement
+        //@Parameter(names = {"-i", "--interactive"})
+        //public boolean interactive = false;
 
         @Parameter(names = {"-p", "--permissive"}, description = "configures the assembler to permit harmless problems (eg assembler directive in the wrong place)")
         boolean permissive = false;
@@ -46,6 +51,10 @@ class CommandLineArguments {
 
     @Parameters(separators = "=", commandDescription = "Start Simulizer in GUI mode")
     public static class GuiModeArgs {
+
+        @Parameter(names = { "-h", "--help" }, description = "Display this message")
+        boolean help = false;
+
         @Parameter(names = {"-s", "--settings"}, description = "Specify an alternative settings file")
         String settingsPath = "settings.json";
 
@@ -73,9 +82,6 @@ class CommandLineArguments {
     CmdModeArgs cmdMode;
     GuiModeArgs guiMode;
 
-    @Parameter(names = { "-h", "--help" }, description = "Display this message")
-    private boolean help = false;
-
 
     static CommandLineArguments parse(String[] args) {
         CommandLineArguments main = new CommandLineArguments();
@@ -89,6 +95,7 @@ class CommandLineArguments {
             main.guiMode = new GuiModeArgs();
             jc.addCommand("gui", main.guiMode);
         } else {
+            // parse options as if gui was specified
             main.guiMode = new GuiModeArgs();
             jc = new JCommander(main.guiMode);
         }
@@ -98,12 +105,15 @@ class CommandLineArguments {
             jc.parse(args);
         } catch(ParameterException e) {
             System.err.println("Invalid Arguments: " + e.getMessage() + "\n");
-            printUsage(jc);
+            printUsage();
             return null;
         }
 
-        if(main.help) {
-            printUsage(jc);
+        // help cannot be placed directly in main in-case no mode is specified in which case
+        // only the gui mode arguments are parsed
+        if((main.cmdMode != null && main.cmdMode.help) ||
+           (main.guiMode != null && main.guiMode.help)) {
+            printUsage();
             return null;
         }
 
@@ -112,14 +122,14 @@ class CommandLineArguments {
             main.mode = Mode.GUI_MODE;
             if(main.guiMode.files.size() > 1) {
                 System.err.println("Invalid File Arguments: " + Arrays.toString(main.guiMode.files.toArray()) + " must only specify one file to open");
-                printUsage(jc);
+                printUsage();
                 return null;
             }
         } else if(command.equals("cmd")) {
             main.mode = Mode.CMD_MODE;
             if(main.cmdMode.files.size() > 1) {
                 System.err.println("Invalid File Arguments: " + Arrays.toString(main.guiMode.files.toArray()) + " must only specify one file to open");
-                printUsage(jc);
+                printUsage();
                 return null;
             }
         } else {
@@ -138,8 +148,17 @@ class CommandLineArguments {
         return false;
     }
 
-    private static void printUsage(JCommander jc) {
+    private static void printUsage() {
         System.out.println("Example Usage: java -jar simulizer.jar gui --fullscreen --layout \"High Level\" --pipelined my_file.s\n");
+
+        CommandLineArguments args = new CommandLineArguments();
+        JCommander jc = new JCommander(args);
+        args.cmdMode = new CmdModeArgs();
+        jc.addCommand("cmd", args.cmdMode);
+
+        args.guiMode = new GuiModeArgs();
+        jc.addCommand("gui", args.guiMode);
+
         jc.usage();
         jc.usage("cmd");
         jc.usage("gui");

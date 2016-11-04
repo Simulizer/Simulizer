@@ -16,6 +16,12 @@
    in the gutter) but leaving the tooltip */
 .ace_info { background-image: none !important; }
 
+.ace_breakpoint {
+    //border-radius: 100px;
+    background-color: #1196C2;
+    color: white;
+}
+
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -56,6 +62,8 @@
 <div id="editor"></div>
 <script type="text/javascript">
 
+// Note: use alert() to output to the console back in Java land
+
 var editor;
 var session;
 var doc;
@@ -69,6 +77,27 @@ function onChange(e) {
     bridge.onChange();// a java method
     if(markers)
         removeMarkers();
+}
+
+function onGutterPress(e) {
+    // protect against the case where a folding marker is in the gutter and is being clicked
+    var target = e.domEvent.target;
+    if(target.className.indexOf("ace_gutter-cell") == -1)
+        return;
+
+    // getBreakpoints returns an array of booleans
+    var row = e.getDocumentPosition().row;
+    var breakpoints = session.getBreakpoints();
+
+    if(typeof breakpoints[row] === typeof undefined) {
+        session.setBreakpoint(row);
+        bridge.onBreakpoint(row, true);
+    } else {
+        session.clearBreakpoint(row);
+        bridge.onBreakpoint(row, false);
+    }
+
+    e.stop();
 }
 
 function init() {
@@ -97,6 +126,8 @@ function init() {
 
     // for disabling, then re-enabling selection when switching modes
     editor._backupPointerEvents = editor.container.style.pointerEvents;
+
+    editor.on("guttermousedown", onGutterPress);
 }
 
 function cut() {
@@ -160,19 +191,24 @@ function findAll(pattern, regex) {
 	editor.findAll(pattern, s, regex);
 }
 
-function refreshProblems() {
-    var ps = bridge.problems;
-
+function refreshProblems(problems) {
     removeMarkers();
     session.clearAnnotations();
+
+    if(problems === undefined) {
+        // should never be the case, but happened to Iain in issue #43
+        alert('editor problems === undefined');
+        return;
+    }
 
     var errorList = [];
     markers = [];
 
-    var size = ps.size();
+
+    var size = problems.size();
 
     for(var i = 0; i < size; i++) {
-        var p = ps.get(i);
+        var p = problems.get(i);
 
         // place all of the errors with no designated line on the first line
         // -1 because Antlr lines start from 1
@@ -242,9 +278,9 @@ function highlightPipeline(fetchLine, decodeLine, executeLine) {
 
     // automatically clears old annotations
     session.setAnnotations([
-        {row:fetchLine,column:0,text:'fetching',type:'info'},
-        {row:decodeLine,column:0,text:'decoding',type:'info'},
-        {row:executeLine,column:0,text:'executing',type:'info'}
+        {row:fetchLine,column:0,text:'fetch',type:'info'},
+        {row:decodeLine,column:0,text:'decode',type:'info'},
+        {row:executeLine,column:0,text:'execute',type:'info'}
     ]);
 
     if(!userInControl) {

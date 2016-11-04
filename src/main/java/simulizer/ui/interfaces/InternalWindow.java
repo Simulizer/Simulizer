@@ -1,5 +1,6 @@
 package simulizer.ui.interfaces;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,12 +12,15 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -47,10 +51,9 @@ public abstract class InternalWindow extends Window {
 	private Stage extractedStage = new Stage();
 	private StackPane contentPane;
 	private MainMenuBar menuBar;
-	private EventManager internalEventManager = new EventManager(this), externalEventManager;
+	private EventManager internalEventManager = new EventManager(getContentPane()), externalEventManager;
 
 	public InternalWindow() {
-
 		UIUtils.assertFXThread(); // needed to create a stage
 
 		// Using caching to smooth movement
@@ -83,8 +86,17 @@ public abstract class InternalWindow extends Window {
 		});
 		// @formatter:on
 
+		// Update layout on move/resize
+		addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+			if (e.isShortcutDown() && e.getCode() == KeyCode.W)
+				close();
+		});
+
 		// Pseudo Class
 		pseudoClassStateChanged(PseudoClass.getPseudoClass("internal"), true);
+
+		// Padding for easy resize
+		setPadding(new Insets(0, 2, 2, 2));
 
 		// For open animation
 		setScaleX(0);
@@ -137,7 +149,7 @@ public abstract class InternalWindow extends Window {
 			this.wm = wm;
 
 			// Add window icons
-			if ((boolean) wm.getSettings().get("internal-window.extractable.enabled"))
+			if ((boolean) wm.getSettings().get("internal-window.extractable"))
 				getRightIcons().add(new CustomExtractIcon(this));
 			getRightIcons().add(new CustomCloseIcon(this));
 
@@ -180,7 +192,7 @@ public abstract class InternalWindow extends Window {
 	 */
 	protected final void emphasise(double sf) {
 		// Ignore if window is just being opened
-		if (getScaleX() == 1 && getScaleY() == 1) {
+		if (getScaleX() == 1 && getScaleY() == 1 && !isExtracted) {
 			ScaleTransition sc = new ScaleTransition(Duration.millis(175), this);
 			sc.setToX(sf);
 			sc.setToY(sf);
@@ -190,6 +202,8 @@ public abstract class InternalWindow extends Window {
 			sc.setOnFinished((e) -> getStyleClass().remove("highlighting"));
 			sc.play();
 			toFront();
+		} else if (isExtracted) {
+			extractedStage.toFront();
 		}
 	}
 
@@ -200,12 +214,18 @@ public abstract class InternalWindow extends Window {
 	 *            the theme to use
 	 */
 	public synchronized void setTheme(Theme theme) {
+		String classCss = theme.getStyleSheet(getClass().getSimpleName().toLowerCase() + ".css");
+		classCss = new File(classCss.replace("file:/", "")).isFile() ? classCss : "";
+
 		getStylesheets().clear();
-		getStylesheets().add(theme.getStyleSheet("window.css"));
-		if (contentPane != null) {
-			contentPane.getStylesheets().clear();
-			contentPane.getStylesheets().add(theme.getStyleSheet("window.css"));
+		getContentPane().getStylesheets().clear();
+		if (!classCss.equals("")) {
+			getStylesheets().add(classCss);
+			getContentPane().getStylesheets().add(classCss);
 		}
+		getStylesheets().add(theme.getStyleSheet("window.css"));
+		getContentPane().getStylesheets().add(theme.getStyleSheet("window.css"));
+
 	}
 
 	/**
@@ -290,6 +310,10 @@ public abstract class InternalWindow extends Window {
 	 */
 	public final boolean isClosed() {
 		return isClosed;
+	}
+
+	public boolean canClose() {
+		return true;
 	}
 
 	public boolean hasFocus() {
@@ -432,7 +456,7 @@ public abstract class InternalWindow extends Window {
 
 			// Create the scene
 			Scene scene;
-			if ((boolean) wm.getSettings().get("internal-window.extractable.menu-bar")) {
+			if ((boolean) wm.getSettings().get("menubar.all-windows")) {
 				GridPane root = new GridPane();
 				scene = new Scene(root);
 

@@ -102,6 +102,7 @@ public class ExecuteTest {
 	{
 		CPU cpu = new CPU(io);
 		cpu.setCycleFreq(0); // as fast as possible
+		cpu.setHi(new Word(DataConverter.encodeAsSigned(1)));
 		cpu.loadProgram(this.createProgram(myInstructions));//loading program
 		cpu.runProgram();//execute the program
 		cpu.shutdown();
@@ -2123,4 +2124,134 @@ public class ExecuteTest {
 		assertEquals(2,accessRegisterSigned(cpu,Register.s1));
 		assertEquals(-14,accessRegisterSigned(cpu,Register.s2));
 	}
+	
+	/**tests the execution of mtlo
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testMtloExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+		
+		String myInstructions = "li $a0, 10;\n" + 
+								"mtlo $a0;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(10,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+	}
+	
+	/**tests the execution of mthi
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testMthiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+		
+		String myInstructions = "li $a0, 10;\n" + 
+								"mthi $a0;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(10,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+	}
+	
+	/**tests the execution of mflo
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testMfloExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		
+		String myInstructions ="li $a0, 10;\n" +
+							   "mult $a0, $a0; \n" + 
+							   "mflo $a0;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(100,accessRegisterSigned(cpu,Register.a0));
+	}
+	
+	/**tests the execution of mfhi
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * 
+	 */
+	@Test
+	public void testMfhiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		
+		String myInstructions = "mfhi $a0;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(1,accessRegisterSigned(cpu,Register.a0));
+	}
+	
+	/**method tests mult execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testMultExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+		String myInstructions = "li $a0, 5;\n" +
+							    "li $a1, 7;\n" +
+							    "mult $a0, $a1;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(35,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+		assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+	}
+	
+	/**method tests multi execution
+	 * @throws StackException 
+	 * @throws HeapException 
+	 * @throws ExecuteException 
+	 * @throws InstructionException 
+	 * @throws DecodeException 
+	 * @throws MemoryException 
+	 * 
+	 */
+	@Test
+	public void testMultiExecute() throws MemoryException, DecodeException, InstructionException, ExecuteException, HeapException, StackException {
+		String myInstructions = "li $a0, 5;\n" +
+							    "multi $a0, 7;\n";
+		
+		CPU cpu = createCPU(myInstructions);
+		
+		assertEquals(35,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+		assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
+	}
+	
 }

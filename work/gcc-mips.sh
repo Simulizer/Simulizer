@@ -6,6 +6,14 @@
 #
 # requires `g++-5-mips-linux-gnu` package
 
+which mips-linux-gnu-g++-5 > /dev/null
+if [ $? -ne 0 ]; then
+    echo "the cross-compiler is not installed."
+    echo "if you are on a Debian based Linux distro: Please install"
+    echo "the g++-5-mips-linux-gnu package. Otherwise you're on your own."
+    exit 1
+fi
+
 
 FILE="$1"
 
@@ -35,7 +43,7 @@ function compile {
         -fno-exceptions -mno-explicit-relocs \
         -march=r3000 -meb -mgp32 -mfp32 -msoft-float \
         -mno-llsc -fno-stack-protector -fno-delayed-branch \
-        -I./ -I"$(dirname "$OUT")" -S "$1" -o "$OUT"
+        -I./ -I"$(dirname "$0")" -I"$(dirname "$OUT")" -S "$1" -o "$OUT"
     # -O0:           disable optimisations (to make output more readable)
     # -fno-exceptions: disabling exceptions removes some cruft added for bookkeeping
     # -mno-explicit-relocs: disables use of %hi() and %lo() to load from the
@@ -56,6 +64,7 @@ function compile {
     #                   does not have them
     # -I./           include the current directory in the include path to search
     #                   for headers
+    # -I$($0)        include the path of this script
     # -I$(...)       include the path that the input and output files reside in
     # -S:            generate assembly output
 }
@@ -117,8 +126,8 @@ KNOWN_DIRECTIVES="(text|data|rdata|ascii|asciiz|byte|half|word|space)"
 # remove # 0 "" 2 and # XX "input.c" 1 lines which surround asm() statements
 AWK_FILTER='
 /\.'$KNOWN_DIRECTIVES'([^\w.]|$)/{print; next;}
-/^\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
-/^\s*.section\s*\.text.startup/{$0="\t.text"; print} # .section .text.startup with .text
+/^(\s*\.section)?\s*\.bss/{$0="\t.data"; print} # replace .bss with .data
+/^\s*\.section\s*\.text\.startup/{$0="\t.text"; print} # .section .text.startup with .text
 /^\s*\./{next}  # unknown directives
 
 /^\s*#nop$/{print "\t# <hazard>"; next}
@@ -151,6 +160,9 @@ sed --in-place='' 's/\(^[^#]*[[:alpha:]]\+\)\./\1_/g' "$OUT"
 # substitute mnemonic register names (personal preference)
 sed --in-place='' 's/\$31/$ra/' "$OUT"
 
+# some versions of GCC seem to be placing literal null characters rather than \0
+sed --in-place='' 's/\x0/\\0/' "$OUT"
+
 
 # gcc uses these macros which simulizer does not understand for a particular
 # overloading, for example the 'move' instruction is used to move from memory to
@@ -163,14 +175,6 @@ AWK_FIX_OVERLOADS='
 
 # match "not a register as the third argument"
 /^\s*slt([^,]*,){2}[^\$]/{$1="\tslti"; print $0; next;}
-
-# does not support mult which stores in mflo/mfhi so replace with mul $d $d $s
-/^\s*mult\s+/{$1="\tmul"; r = gensub(/(\$[^,]*),(.*)/, "\\1,\\1,\\2", "g"); print r; next;}
-
-# just comment out instances of mflo and hope that the above substitution takes
-# care of it (should check by hand). Cannot do this with mfhi so just hope it is
-# never used
-/^\s*mflo/{$1="\t#mflo"; print $0; next;}
 
 {print}
 '

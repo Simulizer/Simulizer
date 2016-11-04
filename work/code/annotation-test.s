@@ -1,3 +1,4 @@
+# detect whether annotations are enabled or disabled
 .data
 enabled:  .asciiz "Annotations Enabled"
 disabled: .asciiz "Annotations Disabled"

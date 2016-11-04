@@ -172,7 +172,7 @@ binary_search:
     li $t0, -1
     beq $a1, $t0 binary_search_NOT_FOUND
 
-nop 
+nop
     # @{ l.clearMarkers() }@
     # @{ l.setMarkers("Left", addressToIndex($a1.get())) }@
     # @{ l.setMarkers("Right", addressToIndex($a2.get())) }@
@@ -198,9 +198,9 @@ nop
     mul $t0, $t0, $t1  # half way distance in bytes
 
     add $t0, $t0, $a1  # the address of the half way element
-    
+
     # @{ l.emphasise(addressToIndex($t0.get())) }@
-    
+
     # $t0 now contains the adress of the middle element (floored)
     lw  $t1, ($t0)
 

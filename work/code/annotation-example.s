@@ -1,4 +1,6 @@
 # @{ log('setup code'); }@
+# @{ log('pipelining: ' + (sim.isPipelined() ? ' on' : ' off')); }@
+# @{ sim.setSpeed(4) // Hz }@
 # @{ print("this is run before the first instruction is run") }@
 
 .data
@@ -13,7 +15,7 @@ label:   # @{     if(i<=2){return 1;}               }@
 another: # @{     else{return fib(i-1) + fib(i-2);} }@
          # @{ }                                     }@
 
-    nop  # c: @{ var f = function() { return fib(10);} }@
+    nop  # c: @{ var f = function() { return fib(10); } }@
 
     nop  # 10:@{ debug.log(x*2) // automatic type conversion }@
     nop  # 14:@{ log('fib(10) = ' + f())     }@

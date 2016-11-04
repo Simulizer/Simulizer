@@ -1,12 +1,12 @@
 package simulizer.ui.components.settings;
 
-import javafx.geometry.VPos;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import simulizer.settings.types.IntegerSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a IntegerSetting
@@ -14,43 +14,48 @@ import simulizer.settings.types.IntegerSetting;
  * @author Michael
  *
  */
-public class IntegerControl extends GridPane {
+public class IntegerControl extends VBox {
 
-	public IntegerControl(IntegerSetting setting) {
+	public IntegerControl(Options o, IntegerSetting setting) {
+		setSpacing(3);
+		
 		// Option Name
 		Label title = new Label(setting.getHumanName());
-		GridPane.setHgrow(title, Priority.SOMETIMES);
 		title.getStyleClass().add("title");
-		add(title, 0, 0);
+		title.setFont(new Font(20));
+		getChildren().add(title);
+
+		// Option Desc
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setFont(new Font(14));
+			desc.setWrapText(true);
+			getChildren().add(desc);
+		}
 
 		// Option Value
-		TextField value = new TextField();
+		Spinner<Integer> value = new Spinner<>();
+		IntegerSpinnerValueFactory factory = new IntegerSpinnerValueFactory(0, 0);
+		factory.setMax(setting.getHighBound());
+		factory.setMin(setting.getLowBound());
+		factory.setValue(setting.getValue());
+		value.setValueFactory(factory);
 		value.setEditable(true);
-		value.setText("" + setting.getValue());
-		GridPane.setRowSpan(value, 2);
-		GridPane.setVgrow(value, Priority.SOMETIMES);
-		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.textProperty().addListener(e -> {
-			boolean valid = false;
-			int newValue = 0;
-			try {
-				newValue = Integer.parseInt(value.getText());
-				valid = setting.isValid(newValue);
-			} catch (NumberFormatException ex) {
-				valid = false;
-			}
-
-			if (valid)
-				setting.setValue(newValue);
-			else
-				value.setText("" + setting.getValue());
+		value.setPrefWidth(Double.MAX_VALUE);
+		value.valueProperty().addListener(e -> {
+			if (setting.isValid(value.getValue())) {
+				o.madeChanges();
+				setting.setValue(value.getValue());
+			} else
+				value.getValueFactory().setValue(setting.getValue());
 		});
-		add(value, 1, 0);
+		getChildren().add(value);
 
 		// Tooltip
-		Tooltip tooltip = new Tooltip(setting.getDescription());
-		Tooltip.install(title, tooltip);
-		Tooltip.install(value, tooltip);
+		// Tooltip tooltip = new Tooltip(setting.getDescription());
+		// Tooltip.install(title, tooltip);
+		// Tooltip.install(value, tooltip);
 	}
 }

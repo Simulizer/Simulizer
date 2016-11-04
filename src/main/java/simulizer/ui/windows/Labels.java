@@ -12,20 +12,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.shape.SVGPath;
 import simulizer.ui.components.CurrentFile;
 import simulizer.ui.interfaces.InternalWindow;
-import simulizer.ui.interfaces.WindowEnum;
-import simulizer.utils.TemporaryObserver;
 import simulizer.utils.ThreadUtils;
 import simulizer.utils.UIUtils;
 
@@ -90,8 +85,6 @@ public class Labels extends InternalWindow {
 			return;
 
 		programTextHash = textHash;
-
-		System.out.println("updating labels " + System.currentTimeMillis());
 
 		getLabels(labels, text);
         Platform.runLater(() -> table.setItems(labels));

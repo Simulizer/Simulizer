@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class CurrentFile {
     // TODO: option to have default directory = last save location
-	private static File defaultDirectory = new File("code/");
+	private static String defaultDirectory = "code";
 
 
 	/**
@@ -48,6 +48,10 @@ public class CurrentFile {
 	 */
 	private static String currentText = "";
 
+
+	public static String getDefaultDirectory() {
+		return defaultDirectory;
+	}
 
 	/**
 	 * Immutable structure to hold the results of continuous assembly.
@@ -100,10 +104,18 @@ public class CurrentFile {
 	}
 
 
-	private static void tryGetEditor(Consumer<Editor> ifSuccessful) {
-		Editor editor = Editor.getEditor();
+	private static void tryGetEditor(Consumer<Editor> ifSuccessful, boolean wait) {
+		final  Editor editor = Editor.getEditor();
 		if(editor != null) {
-			ifSuccessful.accept(editor);
+			if(wait) {
+				try {
+					ThreadUtils.platformRunAndWait(() -> ifSuccessful.accept(editor));
+				} catch (Throwable throwable) {
+                    UIUtils.showExceptionDialog(throwable);
+				}
+			} else {
+				Platform.runLater(() -> ifSuccessful.accept(editor));
+			}
 		}
 	}
 
@@ -114,21 +126,27 @@ public class CurrentFile {
 
 
 	private static void updateCurrentTextFromEditor() {
-		Editor editor = Editor.getEditor();
-		if (editor != null && editor.hasOutstandingChanges()) {
-			try {
-				ThreadUtils.platformRunAndWait(() -> currentText = editor.getEditorText());
-			} catch (Throwable throwable) {
-                UIUtils.showExceptionDialog(throwable);
-			}
-		}
+		tryGetEditor((editor) -> {
+			if(editor.hasOutstandingChanges())
+				currentText = editor.getEditorText();
+		}, true);
 	}
 	public static String getCurrentText() {
+		// sync any changes from the editor
         updateCurrentTextFromEditor();
-		if(isChangedExternally()) {
-			// no changes in the editor but external changes
-			assert(currentText.hashCode() == onDiskHash); // should not have outstanding changes
-			loadFileWithoutPrompt(currentFile);
+
+		// now synced with editor, if the current text has not changed since it was loaded
+		// and it appears that the file has changed externally, then load the external version
+		if(currentText.hashCode() == onDiskHash && isChangedExternally()) {
+			if(currentFile.exists()) {
+                // the file content has changed
+				loadFileWithoutPrompt(currentFile);
+			} else {
+				// the file is now missing. In this case don't sync otherwise the user might loose their work
+				// already synced with editor so currentText is up to date
+				tryGetEditor((editor) -> editor.setEdited(true), false);
+				onDiskHash = 0;
+			}
 		}
 		return currentText;
 	}
@@ -151,34 +169,34 @@ public class CurrentFile {
 	 * @return whether a valid choice was made and the file was saved to
 	 */
 	static boolean promptSaveAs() {
+		// the dialog takes care of not allowing directories and asking to overwrite
 		File file = UIUtils.saveFileSelector("Save an assembly file", GuiMode.getPrimaryStage(), defaultDirectory, new FileChooser.ExtensionFilter("Assembly files *.s", "*.s"));
-		// TODO: does this dialog handle overwriting existing files?
-		// TODO: does this dialog handle overwriting a directory (should fail)?
 		if (file != null) {
 
 			if (!file.getName().endsWith(".s"))
 				file = new File(file.getAbsolutePath() + ".s");
 
 			currentFile = file;
-			saveFile();
+			saveFileWithoutPrompt();
             return true;
 		}
 		return false;
 	}
-	static void promptSave() {
+
+	public static void promptSave() {
 		if(currentFile == null) {
 			promptSaveAs();
 		} else if(isChangedExternally()) {
 			ButtonType response = externalChangeDialog();
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
 			} else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			}
 			// cancel or [X]
 		} else {
-			saveFile();
+			saveFileWithoutPrompt();
 		}
 	}
 	/**
@@ -210,7 +228,7 @@ public class CurrentFile {
             ButtonType response = externalChangeDialog();
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
 			} else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			} else {
@@ -223,7 +241,7 @@ public class CurrentFile {
 			ButtonType response = UIUtils.confirmYesNoCancel("Save changes to \"" + getBackingFilename() + "\"", "");
 
 			if (response == ButtonType.YES) {
-				saveFile();
+				saveFileWithoutPrompt();
             } else if(response == ButtonType.NO) {
 				loadFileWithoutPrompt(currentFile);
 			} else {
@@ -244,7 +262,7 @@ public class CurrentFile {
 
 
 		if (initialFilename != null && !initialFilename.isEmpty()) {
-			File f = new File(initialFilename);
+			File f = FileUtils.getFile(initialFilename);
 			if (f.exists()) {
 				currentFile = f;
 				currentText = FileUtils.getFileContent(f);
@@ -275,16 +293,19 @@ public class CurrentFile {
 			onDiskHash  = 0;
 		} else {
 			currentFile = file;
-			currentText = FileUtils.getFileContent(file);
+			if(currentFile.exists() && currentFile.isFile())
+                currentText = FileUtils.getFileContent(file);
+            else
+            	currentText = "";
 			onDiskHash = currentText.hashCode();
 		}
-		tryGetEditor(Editor::loadCurrentFile);
+		tryGetEditor(Editor::loadCurrentFile, true);
 		checkedProgramHash = 0; // force re-check so any problems are again displayed in the editor
 	}
 	/**
 	 * just saves, no user interaction
 	 */
-	private static void saveFile() {
+	private static void saveFileWithoutPrompt() {
 		if (currentFile == null) {
 			UIUtils.showErrorDialog("Save Error", "cannot save because no file to save to");
 			return;
@@ -294,7 +315,7 @@ public class CurrentFile {
 		FileUtils.writeToFile(currentFile, currentText);
 		onDiskHash = currentText.hashCode();
         // re-loading in case the on disk version was loaded and changes in the editor were discarded
-		tryGetEditor(Editor::loadCurrentFile);
+		tryGetEditor(Editor::loadCurrentFile, true);
 	}
 
 	static void loadFile(File file) {
@@ -343,11 +364,11 @@ public class CurrentFile {
 							return; // assembly already in progress on some other thread
 
                         try {
-							tryGetEditor((editor) -> Platform.runLater(editor::refreshTitle));
+							tryGetEditor(Editor::refreshTitle, false);
 
 							//DebugUtils.Timer t = new DebugUtils.Timer("Continuous Assembly");
 							final List<Problem> problems = Assembler.checkForProblems(program);
-							tryGetEditor((editor) -> Platform.runLater(() -> editor.setProblems(problems)));
+							tryGetEditor((editor) -> editor.setProblems(problems), false);
                             checkedProgramHash = thisProgramHash;
 							//t.stopAndPrint();
 						} finally {
@@ -357,7 +378,7 @@ public class CurrentFile {
 				} catch (Exception e) {
 					UIUtils.showExceptionDialog(e);
 				} finally {
-					tryGetEditor((editor) -> Platform.runLater(editor::refreshTitle));
+					tryGetEditor(Editor::refreshTitle, false);
 				}
 			}, 0, continuousCheckingRefreshPeriod, TimeUnit.MILLISECONDS);
 		}

@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
 import javafx.scene.effect.MotionBlur;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -25,8 +26,11 @@ import simulizer.simulation.cpu.CPUChangedListener;
 import simulizer.simulation.cpu.components.CPU;
 import simulizer.simulation.cpu.components.CPUPipeline;
 import simulizer.simulation.cpu.user_interaction.LoggerIO;
-import simulizer.ui.components.*;
-import simulizer.ui.interfaces.WindowEnum;
+import simulizer.ui.components.AssemblingDialog;
+import simulizer.ui.components.CurrentFile;
+import simulizer.ui.components.MainMenuBar;
+import simulizer.ui.components.UISimulationListener;
+import simulizer.ui.components.Workspace;
 import simulizer.ui.layout.GridBounds;
 import simulizer.ui.layout.Layouts;
 import simulizer.ui.theme.Themes;
@@ -82,21 +86,20 @@ public class WindowManager extends GridPane {
 		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")");
 		primaryStage.setMinWidth(300);
 		primaryStage.setMinHeight(300);
-		primaryStage.setOnHiding(e -> {
+		primaryStage.setOnCloseRequest(e -> {
 			e.consume();
 			shutdown();
 		});
 
-		if(GuiMode.args.fullscreen)
+		if(GuiMode.args.fullscreen || (boolean) settings.get("window.fullscreen"))
 			primaryStage.setFullScreen(true);
-
 
 		// Creates CPU Simulation
 		io = new LoggerIO(workspace);
 		newCPU(GuiMode.args.pipelined || (boolean) settings.get("simulation.pipelined"));
 
 		// Set the theme
-		themes = new Themes((String) settings.get("workspace.theme"));
+		themes = new Themes((String) settings.get("window.theme"));
 		themes.addThemeableElement(workspace);
 		themes.setTheme(themes.getTheme()); // TODO: Remove hack
 
@@ -122,7 +125,7 @@ public class WindowManager extends GridPane {
 		// Disable ALT Key to prevent menu bar from stealing
 		// the editor's focus
 		addEventHandler(KeyEvent.KEY_PRESSED, (e) -> {
-			if(e.isAltDown())
+			if (e.isAltDown())
 				e.consume();
 		});
 
@@ -147,7 +150,7 @@ public class WindowManager extends GridPane {
 				} catch (InterruptedException e1) {
 					UIUtils.showExceptionDialog(e1);
 				}
-			} , "Layout-Fix-Thread");
+			}, "Layout-Fix-Thread");
 			layoutFixThread.setDaemon(true);
 			layoutFixThread.start();
 		});
@@ -215,22 +218,38 @@ public class WindowManager extends GridPane {
 	 * Assembles the SIMP program and executes it
 	 */
 	public void assembleAndRun() {
+		// prompt to save if the setting is enabled
+		Editor editor = Editor.getEditor();
+		boolean askToSave = (boolean) settings.get("editor.save-before-run");
+		if(askToSave && editor != null && editor.hasOutstandingChanges()) {
+			ButtonType response = UIUtils.confirmYesNoCancel("Save Before Run?", "Would you like to save the file before running?\n('No' will still run the program)");
+			if(response == ButtonType.YES) {
+				CurrentFile.promptSave();
+			} else if(response == ButtonType.CANCEL) {
+				return; // don't run
+			}
+			// else No, in which case just carry on
+		}
+
+		AssemblingDialog.showAssemblingDialog(this);
 		primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ") - Assembling Program");
 
 		final String programText = CurrentFile.getCurrentText();
 
 		// avoid lots of work on the JavaFX thread
 		Thread assembleThread = new Thread(() -> {
-			StoreProblemLogger log = new StoreProblemLogger();
+			final StoreProblemLogger log = new StoreProblemLogger();
 
 			try {
 				final Program cachedP = CurrentFile.getCachedAssembledProgram(programText);
 
-                if(cachedP == null) { // no cached version available
+				if (cachedP == null) { // no cached version available
 					final Program p = Assembler.assemble(programText, log, false);
 
 					// doing as little as possible in the FX thread
-					if (getWorkspace().windowIsOpen(WindowEnum.EDITOR)) {
+					// open the editor and set problems if program has problems or if the editor is already open.
+					// Leave the editor closed if it is closed and there are no problems
+					if (p == null || Editor.getEditor() != null) {
 						getWorkspace().openEditorWithCallback((editor2) -> {
 							// if no problems, has the effect of clearing
 							editor2.setProblems(log.getProblems());
@@ -242,18 +261,18 @@ public class WindowManager extends GridPane {
 						});
 					}
 
-					if(p != null) {
+					if (p != null) {
 						CurrentFile.submitAssembledProgramToCache(programText, p);
 						runProgram(p); // spawns another thread
 					}
 				} else {
-                    runProgram(cachedP); // spawns another thread
-                }
+					runProgram(cachedP); // spawns another thread
+				}
 			} finally {
 				Platform.runLater(() -> primaryStage.setTitle("Simulizer (" + BuildInfo.getInstance().VERSION_STRING + ")"));
 			}
 
-		} , "Assemble");
+		}, "Assemble");
 		assembleThread.setDaemon(true);
 		assembleThread.start();
 	}
@@ -381,8 +400,9 @@ public class WindowManager extends GridPane {
 	public void shutdown() {
 		cpu.shutdown();
 		workspace.closeAll();
-		if (!workspace.hasWindowsOpen())
+		if (!workspace.hasWindowsOpen()) {
 			primaryStage.close();
+		}
 	}
 
 	public HLVisualManager getHLVisualManager() {
@@ -430,18 +450,6 @@ public class WindowManager extends GridPane {
 			}, "Motion-Blur");
 			t.setDaemon(true);
 			t.start();
-		}
-	}
-
-	/**
-	 * Quick restarts the application (not as good as a clean restart, but good enough to apply setting changes)
-	 */
-	public void restart() {
-		try {
-			primaryStage.close();
-			app.start(primaryStage);
-		} catch (Exception e) {
-			UIUtils.showExceptionDialog(e);
 		}
 	}
 }

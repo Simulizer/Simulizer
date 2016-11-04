@@ -170,6 +170,31 @@ class Decoder {
             Optional<Address> toRetrieve = Optional.of(this.decodeAddressOperand(op2.asAddressOp()));
             return new LSInstruction(instruction,Optional.empty(),loadInto,toRetrieve,Optional.empty());
         }
+        else if(instruction.getOperandFormat() == OperandFormat.srcSrc) {
+        	assert (op1 != null) && (op2 != null) && (op3 == null);
+        	
+        	Optional<Word> srcOne = Optional.of(this.decodeRegister(op1.asRegisterOp()));
+        	Optional<Word> srcTwo = Optional.of(this.decodeRegister(op2.asRegisterOp()));
+        	return new RTypeInstruction(instruction,Optional.empty(),null,srcOne,srcTwo);
+
+        }
+        else if(instruction.getOperandFormat() == OperandFormat.dest) {
+        	assert (op1 != null) && (op2 == null) && (op3 == null);
+        	
+        	return new LSInstruction(instruction,Optional.empty(),Optional.of(op1.asRegisterOp().value),Optional.empty(),Optional.empty());
+        }
+        else if(instruction.getOperandFormat() == OperandFormat.src) {
+        	assert (op1 != null) && (op2 == null) && (op3 == null);
+        	
+        	return new LSInstruction(instruction,Optional.of(this.decodeRegister(op1.asRegisterOp())),Optional.empty(),Optional.empty(),Optional.empty());
+        }
+        else if(instruction.getOperandFormat() == OperandFormat.srcImm) {
+        	assert (op1 != null) && (op2 != null) && (op3 == null);
+        	
+        	Optional<Word> src = Optional.of(this.decodeRegister(op1.asRegisterOp()));
+        	Optional<Word> imm = Optional.of(this.decodeIntegerOperand(op2.asIntegerOp()));
+        	return new RTypeInstruction(instruction,Optional.empty(),null,src,imm);
+        }
         else {
             //invalid instruction format
             throw new DecodeException("Invalid instruction format.", op1);

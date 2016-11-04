@@ -15,6 +15,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import simulizer.BuildInfo;
 import simulizer.assembler.Assembler;
 import simulizer.assembler.representation.Program;
 import simulizer.assembler.representation.ProgramStringBuilder;
@@ -53,7 +54,7 @@ public class MainMenuBar extends MenuBar {
 		getMenus().addAll(fileMenu(), editMenu(), simulationMenu(), windowsMenu(), layoutsMenu(), helpMenu());
 
 		// Debug
-		if ((boolean) wm.getSettings().get("debug"))
+		if ((boolean) wm.getSettings().get("menubar.debug"))
 			getMenus().add(debugMenu());
 
 		// Extra controls
@@ -82,28 +83,28 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.newFile();
 		});
-		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
+		newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Open
 		MenuItem loadItem = new MenuItem("Open");
 		loadItem.setDisable(allowDisabling && wm.getCPU().isRunning());
 		loadItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning()) {
-				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), new File("code"), new ExtensionFilter("Assembly files *.s", "*.s"));
+				File f = UIUtils.openFileSelector("Open an assembly file", wm.getPrimaryStage(), CurrentFile.getDefaultDirectory(), new ExtensionFilter("Assembly files *.s", "*.s"));
 				if (f != null)
 					CurrentFile.loadFile(f);
 			}
 		});
-		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
+		loadItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Save
 		MenuItem saveItem = new MenuItem("Save");
 		saveItem.setDisable(allowDisabling && wm.getCPU().isRunning());
-		saveItem.setOnAction(e -> wm.getWorkspace().openEditorWithCallback((ed) -> {
+		saveItem.setOnAction(e -> {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.promptSave();
-		}));
-		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+		});
+		saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
 
 		// | |-- Save As
 		MenuItem saveAsItem = new MenuItem("Save As...");
@@ -120,8 +121,8 @@ public class MainMenuBar extends MenuBar {
 			if (!wm.getCPU().isRunning())
 				CurrentFile.reloadFile();
 		});
-		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN));
-
+		reloadItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
+		
 		// | |-- Options
 		MenuItem optionsItem = new MenuItem("Options");
 		optionsItem.setOnAction(e -> wm.getWorkspace().openInternalWindow(WindowEnum.OPTIONS));
@@ -130,7 +131,7 @@ public class MainMenuBar extends MenuBar {
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.setOnAction(e -> wm.shutdown());
 
-		fileMenu.getItems().addAll(newItem, loadItem, saveItem, saveAsItem, reloadItem, optionsItem, exitItem);
+		fileMenu.getItems().addAll(newItem, new SeparatorMenuItem(), loadItem, new SeparatorMenuItem(), saveItem, saveAsItem, reloadItem, new SeparatorMenuItem(), optionsItem, exitItem);
 	}
 
 	private Menu editMenu() {
@@ -158,38 +159,38 @@ public class MainMenuBar extends MenuBar {
 
 		MenuItem cut = new MenuItem("Cut");
 		cut.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		cut.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
+		cut.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
 		cut.setOnAction((a) -> passToEditor(KeyCode.X));
 
 		MenuItem copy = new MenuItem("Copy");
 		copy.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+		copy.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
 		copy.setOnAction((a) -> passToEditor(KeyCode.C));
 
 		MenuItem paste = new MenuItem("Paste");
 		paste.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		paste.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN));
+		paste.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
 		paste.setOnAction((a) -> passToEditor(KeyCode.V));
 
 		MenuItem find = new MenuItem("Find");
-		find.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN));
+		find.setAccelerator(new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN));
 		find.setOnAction((a) -> passToEditor(KeyCode.F));
 
 		MenuItem gotoL = new MenuItem("Go To Line");
-		gotoL.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
+		gotoL.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.SHORTCUT_DOWN));
 		gotoL.setOnAction((a) -> passToEditor(KeyCode.G));
 
 		MenuItem insertBreakpoint = new MenuItem("Insert Breakpoint");
 		insertBreakpoint.setDisable(allowDisabling && (e == null || e.getMode() == Editor.Mode.EXECUTE_MODE));
-		insertBreakpoint.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN));
+		insertBreakpoint.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
 		insertBreakpoint.setOnAction((a) -> passToEditor(KeyCode.B));
 
 		MenuItem fontInc = new MenuItem("Increase Font Size");
-		fontInc.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN));
+		fontInc.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN));
 		fontInc.setOnAction((a) -> passToEditor(KeyCode.PLUS));
 
 		MenuItem fontDec = new MenuItem("Decrease Font Size");
-		fontDec.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN));
+		fontDec.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
 		fontDec.setOnAction((a) -> passToEditor(KeyCode.MINUS));
 
 		CheckMenuItem wordWrap = new CheckMenuItem("Toggle Word Wrap");
@@ -199,7 +200,7 @@ public class MainMenuBar extends MenuBar {
 				e.setWrap(!e.getWrap());
 		});
 
-		editMenu.getItems().addAll(cut, copy, paste, find, gotoL, insertBreakpoint, fontInc, fontDec, wordWrap);
+		editMenu.getItems().addAll(cut, copy, paste, new SeparatorMenuItem(), find, gotoL, insertBreakpoint, new SeparatorMenuItem(), fontInc, fontDec, new SeparatorMenuItem(), wordWrap);
 	}
 
 	/**
@@ -233,7 +234,7 @@ public class MainMenuBar extends MenuBar {
 		// | | | -- Save Layout
 		MenuItem saveLayoutItem = new MenuItem("Save Current Layout");
 		saveLayoutItem.setOnAction(e -> {
-			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), new File("layouts"), new ExtensionFilter("JSON Files *.json", "*.json"));
+			File saveFile = UIUtils.saveFileSelector("Save layout", wm.getPrimaryStage(), "layouts", new ExtensionFilter("JSON Files *.json", "*.json"));
 			if (saveFile != null) {
 				if (!saveFile.getName().endsWith(".json"))
 					saveFile = new File(saveFile.getAbsolutePath() + ".json");
@@ -299,8 +300,7 @@ public class MainMenuBar extends MenuBar {
 	private Menu simulationMenu() {
 		Menu runMenu = new Menu("Simulation");
 		runMenu.setOnShowing(e -> simControlsMenu(runMenu, true));
-		// Dummy used so setOnShowing event triggers
-		runMenu.getItems().add(new MenuItem("Dummy"));
+		runMenu.getItems().add(new MenuItem(""));
 		return runMenu;
 	}
 
@@ -322,7 +322,6 @@ public class MainMenuBar extends MenuBar {
 		assembleAndRun.setDisable(allowDisabling && cpu.isRunning());
 		assembleAndRun.setOnAction(e -> {
 			if (!cpu.isRunning()) {
-				AssemblingDialog.showAssemblingDialog(wm);
 				wm.assembleAndRun();
 			}
 		});
@@ -381,7 +380,7 @@ public class MainMenuBar extends MenuBar {
 			});
 		});
 
-		runMenu.getItems().addAll(assembleAndRun, pauseResume, singleStep, stop, togglePipeline, toggleAnnotations, setClockSpeed);
+		runMenu.getItems().addAll(assembleAndRun, new SeparatorMenuItem(), pauseResume, singleStep, stop, new SeparatorMenuItem(), togglePipeline, toggleAnnotations, setClockSpeed);
 	}
 
 	/**
@@ -432,6 +431,29 @@ public class MainMenuBar extends MenuBar {
 	private Menu helpMenu() {
 		Menu helpMenu = new Menu("Help");
 
+		MenuItem updates = new MenuItem("Check For Updates");
+		updates.setOnAction(e -> {
+			String url = "https://github.com/Simulizer/Simulizer/releases";
+			try {
+				if (BuildInfo.getInstance().checkForUpdate()) {
+					UIUtils.showInfoDialog("Check for Updates", "Update Available! Download it from " + url);
+					UIUtils.openURL(url);
+				} else {
+					UIUtils.showInfoDialog("Check for Updates", "No updates available");
+				}
+			} catch (IOException ex) {
+				UIUtils.showErrorDialog("Check for Updates", "Unable to check for updates. Are you connected to the internet?");
+			}
+
+		});
+
+		MenuItem issue = new MenuItem("Report an Issue");
+		issue.setOnAction(e -> {
+			String url = "https://github.com/Simulizer/Simulizer/issues";
+			if (!UIUtils.openURL(url))
+				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
+		});
+
 		MenuItem guide = new MenuItem("Guide");
 		guide.setOnAction(e -> FileUtils.openFile("guide.pdf"));
 
@@ -447,12 +469,11 @@ public class MainMenuBar extends MenuBar {
 		MenuItem keyBinds = new MenuItem("Editor Shortcuts");
 		keyBinds.setOnAction(e -> {
 			String url = "https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts";
-			if (!UIUtils.openURL(url)) {
+			if (!UIUtils.openURL(url))
 				UIUtils.showErrorDialog("Could not open", "Could not open the url: " + url);
-			}
 		});
 
-		helpMenu.getItems().addAll(guide, syscall, instruction, register, new SeparatorMenuItem(), keyBinds);
+		helpMenu.getItems().addAll(updates, issue, new SeparatorMenuItem(), guide, syscall, instruction, register, new SeparatorMenuItem(), keyBinds);
 
 		return helpMenu;
 	}

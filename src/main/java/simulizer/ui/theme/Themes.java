@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -26,7 +25,7 @@ import simulizer.utils.UIUtils;
  */
 public class Themes implements Iterable<Theme> {
 	private final String defaultTheme;
-	private final Path folder = Paths.get("themes");
+	private final Path folder;
 	private SortedSet<Theme> themes = new TreeSet<>();
 	private Set<Themeable> themeables = new HashSet<>();
 	private Theme theme = null;
@@ -39,8 +38,10 @@ public class Themes implements Iterable<Theme> {
 	public Themes(String defaultTheme) throws IOException {
 		this.defaultTheme = defaultTheme;
 
-		// Check themes folder exists
-		if (!Files.exists(folder))
+		folder = FileUtils.getPath("themes");
+
+		// Check themes folder exists and is a directory
+		if (!Files.isDirectory(folder))
 			throw new IOException("themes folder is missing");
 
 		reload();

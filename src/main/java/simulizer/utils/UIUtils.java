@@ -202,6 +202,7 @@ public class UIUtils {
 				log.write(exceptionText + "\n\n\n");
 				log.flush();
 			} catch (IOException e1) {
+				System.err.println("Exception while trying to write to exceptions.log:");
 				e1.printStackTrace();
 			} finally {
                 FileUtils.quietClose(log);
@@ -384,9 +385,9 @@ public class UIUtils {
 	/**
 	 * show the save dialog box
 	 */
-	public static File saveFileSelector(String title, Stage parent, File directory, FileChooser.ExtensionFilter... filter) {
+	public static File saveFileSelector(String title, Stage parent, String directory, FileChooser.ExtensionFilter... filter) {
 		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(directory);
+		fc.setInitialDirectory(FileUtils.getFile(directory));
 		fc.setTitle(title);
 		fc.getExtensionFilters().addAll(filter);
 		return fc.showSaveDialog(parent);
@@ -395,10 +396,10 @@ public class UIUtils {
 	/**
 	 * show the load dialog box
 	 */
-	public static File openFileSelector(String title, Stage parent, File directory, FileChooser.ExtensionFilter... filter) {
+	public static File openFileSelector(String title, Stage parent, String directory, FileChooser.ExtensionFilter... filter) {
 		// Set the file chooser to open at the user's last directory
 		final FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(directory);
+		fc.setInitialDirectory(FileUtils.getFile(directory));
 		fc.setTitle(title);
 		fc.getExtensionFilters().addAll(filter);
 		return fc.showOpenDialog(parent);

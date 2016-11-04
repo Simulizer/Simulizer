@@ -1,12 +1,12 @@
 package simulizer.ui.components.settings;
 
-import javafx.geometry.VPos;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import simulizer.settings.types.DoubleSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a DoubleSetting
@@ -14,43 +14,45 @@ import simulizer.settings.types.DoubleSetting;
  * @author Michael
  *
  */
-public class DoubleControl extends GridPane {
+public class DoubleControl extends VBox {
 
-	public DoubleControl(DoubleSetting setting) {
+	public DoubleControl(Options o, DoubleSetting setting) {
+		setSpacing(3);
+		
 		// Option Name
 		Label title = new Label(setting.getHumanName());
-		GridPane.setHgrow(title, Priority.SOMETIMES);
+		title.setFont(new Font(20));
 		title.getStyleClass().add("title");
-		add(title, 0, 0);
+		getChildren().add(title);
+
+		// Option Desc
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setFont(new Font(14));
+			desc.setWrapText(true);
+			getChildren().add(desc);
+		}
 
 		// Option Value
-		TextField value = new TextField();
+		Spinner<Double> value = new Spinner<>();
+		DoubleSpinnerValueFactory factory = new DoubleSpinnerValueFactory(0, 0);
+		factory.setMax(setting.getHighBound());
+		factory.setMin(setting.getLowBound());
+		factory.setValue(setting.getValue());
+		double step = (setting.getHighBound() - setting.getLowBound()) / 1000;
+		factory.setAmountToStepBy(step <= 20 ? step : 20);
+		value.setValueFactory(factory);
 		value.setEditable(true);
-		value.setText("" + setting.getValue());
-		GridPane.setRowSpan(value, 2);
-		GridPane.setVgrow(value, Priority.SOMETIMES);
-		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
-		value.textProperty().addListener(e -> {
-			boolean valid = false;
-			double newValue = Double.NaN;
-			try {
-				newValue = Double.parseDouble(value.getText());
-				valid = setting.isValid(newValue);
-			} catch (NumberFormatException ex) {
-				valid = false;
-			}
-
-			if (valid)
-				setting.setValue(newValue);
-			else
-				value.setText("" + setting.getValue());
+		value.setPrefWidth(Double.MAX_VALUE);
+		value.valueProperty().addListener(e -> {
+			if (setting.isValid(value.getValue())) {
+				o.madeChanges();
+				setting.setValue(value.getValue());
+			} else
+				value.getValueFactory().setValue(setting.getValue());
 		});
-		add(value, 1, 0);
-
-		// Tooltip
-		Tooltip tooltip = new Tooltip(setting.getDescription());
-		Tooltip.install(title, tooltip);
-		Tooltip.install(value, tooltip);
+		getChildren().add(value);
 	}
 }

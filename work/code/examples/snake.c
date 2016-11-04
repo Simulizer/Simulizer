@@ -7,8 +7,9 @@
 asm("# @{ var c = vis.load('canvas'); }@");
 asm("# @{ c.squareShaped = true;      }@");
 asm("# @{ c.showFPS = true;           }@");
+asm("# @{ c.maxFPS = 10;              }@");
 asm("# @{ var g = c.ctx;              }@");
-asm("# @{ sim.setSpeed(8000); //Hz    }@");
+asm("# @{ sim.setSpeed(0); //inf Hz   }@");
 asm("#");
 asm("# @{ function randInt(min, max) // result in [min, max) }@");
 asm("# @{   { return Math.random()*(max-min)+min }           }@");
@@ -139,10 +140,10 @@ int main() {
 
     // wait for the user to press something
     int inputVec = 0;
+    A("c.setFont('Monospace', 24);");
+    A("c.clear();");
+    A("c.centerText('Press Arrows To Move');");
     while(!inputVec) {
-        A("c.setFont('Monospace', 24);");
-        A("c.clear();");
-        A("c.centerText('Press Arrows To Move');");
         A_WRITE(inputVec, "%0.set(c.input);"); // get the input bit vector
     }
 

@@ -4,12 +4,26 @@ import javafx.scene.image.Image;
 import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class Simulizer {
 	private static Image icon = null;
 	public static CommandLineArguments.Mode mode; // CMD_MODE || GUI_MODE
 
     public static void main(String[] args) {
-        CommandLineArguments parsedArgs = CommandLineArguments.parse(args);
+		String jarPath = FileUtils.getJarPath();
+		if(jarPath != null && jarPath.contains(".jar")) { // false if running from gradle or IDE
+			// should be /some/path/Simulizer/lib/Simulizer-VER.jar
+			//
+			// first parent() to get lib/, second to get Simulizer/
+			String simulizerRoot = Paths.get(jarPath).getParent().getParent().toString();
+			System.out.println("moving current working directory to " + simulizerRoot);
+			FileUtils.setCWD(simulizerRoot);
+		}
+
+
+		CommandLineArguments parsedArgs = CommandLineArguments.parse(args);
 
         if(parsedArgs == null) { // some error or user entered --help
             return;

@@ -12,7 +12,7 @@ import simulizer.assembler.representation.Instruction;
 public class InstructionReference extends SimpleTablePairWindow {
 	//@formatter:off
 	public InstructionReference() {
-		super("Instruction", "Action");
+		super("Instruction", "Action", 0.2);
 		String[][] data = new String[Instruction.values().length][];
 		for(int i = 0; i < Instruction.values().length; i++){
 			Instruction instruction = Instruction.values()[i];

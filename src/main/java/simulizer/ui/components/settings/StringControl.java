@@ -1,12 +1,11 @@
 package simulizer.ui.components.settings;
 
-import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import simulizer.settings.types.StringSetting;
+import simulizer.ui.windows.Options;
 
 /**
  * Component to edit a StringSetting
@@ -14,34 +13,39 @@ import simulizer.settings.types.StringSetting;
  * @author Michael
  *
  */
-public class StringControl extends GridPane {
+public class StringControl extends VBox {
 
-	public StringControl(StringSetting setting) {
+	public StringControl(Options o, StringSetting setting) {
+		setSpacing(3);
+
 		// Option Name
 		Label title = new Label(setting.getHumanName());
-		GridPane.setHgrow(title, Priority.SOMETIMES);
 		title.getStyleClass().add("title");
-		add(title, 0, 0);
+		title.setFont(new Font(20));
+		getChildren().add(title);
+
+		// Option Desc
+		if (!setting.getDescription().equals("")) {
+			Label desc = new Label(setting.getDescription());
+			desc.getStyleClass().add("description");
+			desc.setWrapText(true);
+			desc.setFont(new Font(14));
+			getChildren().add(desc);
+		}
 
 		// Option Value
 		TextField value = new TextField();
 		value.setText(setting.getValue());
-		GridPane.setRowSpan(value, 2);
-		GridPane.setVgrow(value, Priority.SOMETIMES);
-		GridPane.setValignment(value, VPos.CENTER);
 		value.getStyleClass().add("value");
+		value.setManaged(true);
 		value.textProperty().addListener(e -> {
 			try {
 				setting.setValue(value.getText());
+				o.madeChanges();
 			} catch (IllegalArgumentException ex) {
 				// TODO: Notify user of invalid setting
 			}
 		});
-		add(value, 1, 0);
-
-		// Tooltip
-		Tooltip tooltip = new Tooltip(setting.getDescription());
-		Tooltip.install(title, tooltip);
-		Tooltip.install(value, tooltip);
+		getChildren().add(value);
 	}
 }

@@ -11,6 +11,22 @@ reg = Register
 convert = Java.type('simulizer.simulation.data.representation.DataConverter');
 AnnotationEarlyReturn = Java.type('simulizer.annotations.AnnotationEarlyReturn');
 
+// Javascript Utilities
+function subSection(array, start, length) { // alternative to slice
+    return array.slice(start, start+length);
+}
+function split(array, loc) { // returns [first_bit, rest]
+    return [array.slice(0, loc), array.slice(loc)];
+}
+function randInt(a, b) { // gives result in [a, b)
+    return a + Math.floor(Math.random() * (b - a + 1)); // from Underscore.js
+}
+function toJS(thing) {
+    // converts from a Java array to a js one. Cannot call slice etc on a Java array
+    // see Nashorn documentation for details
+    return Java.from(thing);
+}
+
 
 // debug bridge
 log   = function(msg){debug.log(''+msg);};
