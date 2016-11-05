@@ -35,8 +35,8 @@ public enum Instruction {
     mulo   (OperandFormat.destSrcSrc, "multiplication (with overflow) store low 32 bits in destination"),
     mulou  (OperandFormat.destSrcSrc, "unsigned multiplication (with overflow) store low 32 bits in destination"),
 
-    div    (OperandFormat.destSrcSrc, "division (with overflow)"),
-    divu   (OperandFormat.destSrcSrc, "division (without overflow)"),
+    div    (OperandFormat.destSrcSrc, "division (with overflow); quotient stored in lo, remainder in hi"),
+    divu   (OperandFormat.destSrcSrc, "division (without overflow); quotient stored in lo, remainder in hi"),
 
     rem    (OperandFormat.destSrcSrc, "remainder of division"),
     remu   (OperandFormat.destSrcSrc, "remainder of division (unsigned)"),
