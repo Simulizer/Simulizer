@@ -99,9 +99,21 @@ public class ALU {
             case mulou:
                 return encodeU(decodeU(firstValue) * decodeU(secondValue));//might have to take more into account with overflow
             case div:
-                return encodeS(decodeS(firstValue) / decodeS(secondValue));
+            	Word quotient = encodeS(decodeS(firstValue) / decodeS(secondValue));
+            	if(cpu.isPresent()){
+            		Word rem = encodeU(decodeS(firstValue) % decodeS(secondValue));
+            		cpu.get().setHi(rem);
+            		cpu.get().setLo(quotient);
+            	}
+                return quotient;
             case divu:
-                return encodeU(decodeU(firstValue) / decodeU(secondValue));
+            	Word quotientu = encodeU(decodeU(firstValue) / decodeU(secondValue));
+            	if(cpu.isPresent()){
+            		Word remu = encodeU(decodeU(firstValue) % decodeU(secondValue));
+            		cpu.get().setHi(remu);
+            		cpu.get().setLo(quotientu);
+            	}
+                return quotientu;
             case rem:
             	return encodeS(decodeS(firstValue) % decodeS(secondValue));
             case remu:

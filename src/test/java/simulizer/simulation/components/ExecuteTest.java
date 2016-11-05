@@ -365,6 +365,8 @@ public class ExecuteTest {
 		assertEquals(45,accessRegisterSigned(cpu,Register.t5));
 		assertEquals(9,accessRegisterSigned(cpu,Register.t6));
 		assertEquals(5,accessRegisterSigned(cpu,Register.t7));
+		assertEquals(5,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+		assertEquals(0,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
 	}
 	
 	/**method will test the divu instruction execution
@@ -382,6 +384,8 @@ public class ExecuteTest {
 		assertEquals(123456789,accessRegisterUnsigned(cpu,Register.t5));
 		assertEquals(123456788,accessRegisterUnsigned(cpu,Register.t6));
 		assertEquals(1,accessRegisterUnsigned(cpu,Register.t7));
+		assertEquals(1,DataConverter.decodeAsSigned(cpu.getLo().getBytes()));
+		assertEquals(1,DataConverter.decodeAsSigned(cpu.getHi().getBytes()));
 	}
 	
 	/**method will test the neg instruction execution

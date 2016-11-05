@@ -71,7 +71,11 @@ class Executor {
 	                cpu.sendMessage(new DataMovementMessage(Optional.of(result),Optional.empty()));
 	                cpu.sendMessage(new RegisterChangedMessage(instruction.asRType().getDestReg()));
 	                
-	                if(instruction.asRType().getInstruction().equals(Instruction.mul)) {
+	                if(instruction.asRType().getInstruction().equals(Instruction.mul) ||
+	                	instruction.asRType().getInstruction().equals(Instruction.mult) ||
+	                	instruction.asRType().getInstruction().equals(Instruction.multi) ||
+	                	instruction.asRType().getInstruction().equals(Instruction.div) ||
+	                	instruction.asRType().getInstruction().equals(Instruction.divu)) {
 	                	cpu.sendMessage(new HiLoChangeMessage());
 	                }
                 }
