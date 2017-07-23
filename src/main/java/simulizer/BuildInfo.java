@@ -46,7 +46,7 @@ public class BuildInfo {
 			// Produce version string from metadata
 			this.MODIFIED = MODIFIED;
 			VERSION_NUMBER = Double.parseDouble(VERSION.replaceAll("([a-zA-Z\\-])", ""));
-			if (REPO.equals("https://github.com/Simulizer/Simulizer") && BRANCH.equals("master") && !MODIFIED)
+			if ((REPO.equals("https://github.com/Simulizer/Simulizer") || REPO.equals("git@github.com:Simulizer/Simulizer")) && BRANCH.equals("master") && !MODIFIED)
 				VERSION_STRING = VERSION;
 			else
 				VERSION_STRING = BRANCH + "@" + COMMIT.substring(0, 8) + (MODIFIED ? "-modified" : "");
