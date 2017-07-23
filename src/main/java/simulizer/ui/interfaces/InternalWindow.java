@@ -425,7 +425,10 @@ public abstract class InternalWindow extends Window {
 			// Transfer Events
 			externalEventManager.transferTo(internalEventManager);
 			externalEventManager = null;
-
+			
+			// Reset the theme because of java bugs
+			wm.getThemes().resetTheme();
+			
 			// Add internal window into the workspace
 			wm.getWorkspace().getPane().getChildren().add(this);
 			contentPane = null;

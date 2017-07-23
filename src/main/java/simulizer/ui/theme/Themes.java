@@ -150,4 +150,8 @@ public class Themes implements Iterable<Theme> {
 	public void removeThemeableElement(Themeable t) {
 		themeables.remove(t);
 	}
+	
+	public void resetTheme() {
+		setTheme(getTheme());
+	}
 }
