@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -383,6 +384,9 @@ public class ProgramExtractor extends SimpBaseListener {
             if(operands.size() != requiredNum) {
                 log.logProblem("Wrong number of operands for " +
                     instructionName + " instruction (" + requiredNum + " required)", ctx.statementOperandList(), Problem.Severity.CRITICAL);
+            } else if (operands.stream().anyMatch(Objects::isNull)) {
+                log.logProblem("Some operands were null for " +
+                        instructionName + " instruction (" + requiredNum + " required)", ctx.statementOperandList(), Problem.Severity.CRITICAL);
             } else {
                 OperandFormat.OperandType arg1 = operands.size() > 0 ?
                     operands.get(0).getOperandFormatType() : null;
