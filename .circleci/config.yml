@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    parallelism: 1
+    docker:
+      - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
+        command: /sbin/init
+        environment:
+          TERM: dumb
+    steps:
+      # Checkout our code
+      - checkout
+      # Remove .gitconfig so that gradle can clone ace correctly
+      - run: rm -f ~/.gitconfig
+      # Fetch dependencies and compile
+      - run: ./gradlew --info dependencies copyAceFiles compileJava
+      # Install spim (requirment for tests)
+      - run: sudo apt-get update && sudo apt-get install -y spim
+      # Run tests
+      - run: ./gradlew --info test
+      - store_test_results:
+          path: build/test-results
+      - store_test_results:
+          path: build/reports
+      # Create a zip with the build
+      - run: ./gradlew --info deploy
+      - store_artifacts:
+          path: build/distributions
+      # Install ghr from releases (as golang isn't working right)
+      - run: wget https://github.com/tcnksm/ghr/releases/download/v0.12.0/ghr_v0.12.0_linux_amd64.tar.gz
+      - run: tar -xvf ghr_v0.12.0_linux_amd64.tar.gz
+      - run: sudo mv ghr_v0.12.0_linux_amd64/ghr /usr/bin
+      # Run the release script (which checks whether to release or not)
+      - run: .circleci/release.sh
