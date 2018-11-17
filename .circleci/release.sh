@@ -7,7 +7,7 @@ if [[ "${CIRCLE_BRANCH}" != "master" ]]; then
     exit 0
 fi
 
-if [[ -z `git diff --name-only HEAD~ | grep ^VERSION$`]]; then 
+if [[ -z `git diff --name-only HEAD~ | grep ^VERSION$` ]]; then 
     echo "Skipping release as VERSION file has not changed"
     exit 0
 fi
