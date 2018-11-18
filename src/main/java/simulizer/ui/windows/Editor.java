@@ -1,15 +1,24 @@
 package simulizer.ui.windows;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import javafx.concurrent.Task;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.CacheHint;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -21,6 +30,7 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import simulizer.GuiMode;
 import simulizer.assembler.extractor.problem.Problem;
 import simulizer.assembler.representation.Instruction;
 import simulizer.assembler.representation.Register;
@@ -168,6 +178,64 @@ public class Editor extends InternalWindow {
 		getStylesheets().add(theme.getStyleSheet("editor.css"));
 	}
 
+	private void showFindDialog() {
+		Stage parent = GuiMode.getPrimaryStage(); // owner is null if JavaFX not fully loaded yet
+		final Stage dialog = new Stage();
+		dialog.initModality(Modality.NONE);
+		dialog.initOwner(parent.getOwner());
+		dialog.setTitle("Find");
+
+		final VBox dialogVbox = new VBox(20);
+		dialogVbox.setPadding(new Insets(10, 10, 10, 10));
+
+		final Text t = new Text("Please enter your search query:");
+		t.setStyle("-fx-font: 18 arial;");
+
+		dialogVbox.getChildren().add(t);
+		final TextField input = new TextField();
+		input.setStyle("-fx-font: 18 monospace;");
+		dialogVbox.getChildren().add(input);
+
+		final HBox hbox = new HBox();
+		hbox.setSpacing(5);
+		final CheckBox regexCheckBox = new CheckBox();
+		regexCheckBox.setText("Regex");
+		hbox.getChildren().add(regexCheckBox);
+
+		final Region spacer = new Region();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		hbox.getChildren().add(spacer);
+
+		final Button prev = new Button();
+		prev.setText("Preveous");
+		prev.setOnAction((e) -> {
+			String query = input.getText();
+			if(regexCheckBox.isSelected()) {
+				findPreviousRegex(query);
+			} else {
+				findPrevious(query);
+			}
+		});
+		hbox.getChildren().add(prev);
+
+		final Button next = new Button();
+		next.setText("Next");
+		next.setOnAction((e) -> {
+			String query = input.getText();
+			if(regexCheckBox.isSelected()) {
+				findNextRegex(query);
+			} else {
+				findNext(query);
+			}
+		});
+		hbox.getChildren().add(next);
+
+		dialogVbox.getChildren().add(hbox);
+		Scene dialogScene = new Scene(dialogVbox, 400, 150);
+		dialog.setScene(dialogScene);
+		dialog.show();
+	}
+
 	public void handleKeyEvent(KeyEvent event) {
 		// TODO: refactor to check for fewer key combos during execute mode (if(execute mode) on the outside
 		if (C_c.match(event)) {
@@ -201,8 +269,7 @@ public class Editor extends InternalWindow {
 					"Enter a line number:", 1, (l) -> gotoLine(l-1));
 			event.consume();
 		} else if (C_f.match(event)) {
-			UIUtils.openTextInputDialog("Find", "Find",
-					"Please enter your search query:", "", this::findNext);
+			showFindDialog();
 			event.consume();
 		} else if(C_plus.match(event) || C_add.match(event) || C_eq.match(event) || C_S_eq.match(event)) {
 			changeFontSize(1);
