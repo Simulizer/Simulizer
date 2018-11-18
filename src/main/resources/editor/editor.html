@@ -144,10 +144,12 @@ function changeFontSize(amount) {
 
 function loadText(text) {
     session.removeListener('change', onChange);
-    var cursorPos = -1; // indicates the beginning
-    session.setValue(text, cursorPos);
+    var cursorPos = editor.getCursorPosition();
+    session.setValue(text);
     session.setMode("ace/mode/simp");
     session.on('change', onChange);
+    // gotoLine is 1-based (line) but getCursorPosition is 0-based (row)
+    editor.gotoLine(cursorPos.row+1, cursorPos.column, false /*animate*/);
 }
 
 function getLine() {

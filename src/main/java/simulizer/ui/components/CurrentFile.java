@@ -271,7 +271,7 @@ public class CurrentFile {
                 // allow the primary stage to show, and place the dialog box above it
 				ThreadUtils.runLater(() -> {
                     ThreadUtils.sleepQuiet(3000);
-					UIUtils.showErrorDialog("Could Not Load", "Could not load file: \"" + initialFilename + "\"\nBecause it does not exist.");
+					UIUtils.showErrorDialog("Could Not Load", "Could not load initial file: \"" + initialFilename + "\"\nBecause it does not exist.");
 				});
 				currentFile = null;
 				currentText = "";
