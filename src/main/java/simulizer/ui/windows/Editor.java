@@ -3,6 +3,9 @@ package simulizer.ui.windows;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -15,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.w3c.dom.Document;
 
 import javafx.beans.value.ChangeListener;
@@ -57,6 +61,7 @@ public class Editor extends InternalWindow {
 
 	private volatile boolean pageLoaded;
 	private final WebEngine engine;
+	private Timeline autosave = null;
 
 	private volatile boolean contentIsModified; // changes have been made in the editor since loading
 
@@ -94,7 +99,7 @@ public class Editor extends InternalWindow {
 	/**
 	 * Communication between this class and the javascript running in the webview
 	 */
-	@SuppressWarnings({"WeakerAccess", "unused"})
+	@SuppressWarnings("unused")
 	public static class Bridge {
 		private Editor editor;
 		private boolean hasBreakpointsSinceLastEdit;
@@ -346,6 +351,31 @@ public class Editor extends InternalWindow {
 		loadCurrentFile();
 
         //enableFirebug();
+
+		boolean autosave_enabled = (boolean) settings.get("editor.autosave-enabled");
+		if(autosave != null) {
+			autosave.stop();
+		}
+		if(autosave_enabled) {
+			Double autosave_interval = (Double) settings.get("editor.autosave-interval");
+			autosave = new Timeline(new KeyFrame(Duration.seconds(autosave_interval), (action_event) -> {
+				// stop so that only one dialog box shows at a time. runLater because showAndWait can't be
+				// called from this callback
+				if(hasOutstandingChanges()) {
+					autosave.stop();
+					Platform.runLater(() -> {
+						CurrentFile.promptSave();
+						if (autosave != null) {
+							autosave.play();
+						}
+					});
+				}
+			}));
+			autosave.setCycleCount(Timeline.INDEFINITE);
+			autosave.play();
+		} else {
+			autosave = null;
+		}
 
 		// signals that all the editor methods are now safe to call
 		pageLoaded = true;

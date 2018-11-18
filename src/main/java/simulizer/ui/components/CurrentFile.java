@@ -314,6 +314,7 @@ public class CurrentFile {
 		// ok for file to not exist yet
 		FileUtils.writeToFile(currentFile, currentText);
 		onDiskHash = currentText.hashCode();
+		checkedProgramHash = 0; // force re-check so any problems are again displayed in the editor
         // re-loading in case the on disk version was loaded and changes in the editor were discarded
 		tryGetEditor(Editor::loadCurrentFile, true);
 	}

@@ -124,6 +124,8 @@ public class Settings {
 					.add(new BooleanSetting("continuous-assembly", "Continuous Assembly", "Repeatedly assemble the program behind the scenes as you type, and highlight problems in the editor", true))
 					.add(new IntegerSetting("continuous-assembly-refresh-period", "Continuous Assembly Period", "The time between refreshing the highlighted problems by assembling the program (milliseconds)", 1000, 1, Integer.MAX_VALUE))
                     .add(new BooleanSetting("save-before-run", "Save Before Run", "Ask to save before running the program. Useful in the rare event that Simulizer crashes.", true))
+					.add(new BooleanSetting("autosave-enabled", "Autosave Enabled", "Periodically save the current file. Useful in the rare event that Simulizer crashes.", true))
+					.add(new DoubleSetting("autosave-interval", "Autosave Interval", "Time between autosaves (seconds)", 5*60, 1, 60*60))
 					);
 		
 		settings.add(new ObjectSetting("logger", "Logger")
