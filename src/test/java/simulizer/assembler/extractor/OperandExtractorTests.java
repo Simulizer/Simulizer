@@ -914,6 +914,36 @@ public class OperandExtractorTests {
         assertTrue(ex.extractStatementOperands(parse("").statementOperandList()).isEmpty());
         expectBadParse("invalid parse");
 
+        {
+            List<Operand> ops = ex.extractStatementOperands(parse("()").statementOperandList());
+            assertEquals(ops.size(), 1);
+            assertNull(ops.get(0));
+            expectBadParse("invalid parse");
+            List<String> parserErrors = getParserErrors();
+            assertEquals(parserErrors.size(), 1);
+            assertTrue(parserErrors.get(0).matches("missing.*"));
+        }
+
+        {
+            List<Operand> ops = ex.extractStatementOperands(parse("(").statementOperandList());
+            assertTrue(ops.isEmpty());
+            expectBadParse("invalid parse");
+            List<String> parserErrors = getParserErrors();
+            assertEquals(parserErrors.size(), 1);
+            assertTrue(parserErrors.get(0).matches("mismatched input.*"));
+        }
+
+        {
+            List<Operand> ops = ex.extractStatementOperands(parse("($)").statementOperandList());
+            assertTrue(ops.isEmpty());
+            expectBadParse("invalid parse");
+            List<String> parserErrors = getParserErrors();
+            assertEquals(parserErrors.size(), 2);
+            assertTrue(parserErrors.get(0).matches("token recognition error.*"));
+            assertTrue(parserErrors.get(1).matches("mismatched input.*"));
+        }
+
+
         assertTrue(ex.extractStatementOperands((SimpParser.StatementOperandListContext)
             giveParseException(parse("123").statementOperandList()))
             .isEmpty());

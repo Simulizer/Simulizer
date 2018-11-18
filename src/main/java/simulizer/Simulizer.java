@@ -4,7 +4,6 @@ import javafx.scene.image.Image;
 import simulizer.utils.FileUtils;
 import simulizer.utils.UIUtils;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Simulizer {
@@ -50,7 +49,7 @@ public class Simulizer {
      * in UI-only areas of the code-base, just call UIUtils directly.
      */
     public static void handleException(Exception e) {
-		if(mode == CommandLineArguments.Mode.CMD_MODE) {
+		if(mode == null || mode == CommandLineArguments.Mode.CMD_MODE) {
 		    e.printStackTrace();
 		} else if(mode == CommandLineArguments.Mode.GUI_MODE) {
 			UIUtils.showExceptionDialog(e);
